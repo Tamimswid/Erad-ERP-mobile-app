@@ -123,7 +123,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
           child: Column(
             spacing: 16,
             children: [
-              SizedBox(height: 16),
+              // SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -228,10 +228,12 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                   return null;
                 },
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
+              // Row(
+              //   children: [
+            
+              //   ],
+              // ),
+                    TextFormField(
                       controller: _measurementController,
                       decoration: const InputDecoration(
                         labelText: 'حجم',
@@ -240,26 +242,21 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                       ),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),
-                  ),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: ProductUnitData.unitItems.first.value,
-                      decoration: const InputDecoration(
-                        labelText: 'القياس',
-                        prefixIcon: Icon(Icons.straighten),
-                      ),
-                      items: ProductUnitData.unitItems,
-                      onChanged: (value) {
-                        setState(() {
-                          _unitController.text =
-                              value ?? ProductUnitData.unitItems.first.value!;
-                        });
-                      },
+                  DropdownButtonFormField<String>(
+                    initialValue: ProductUnitData.unitItems.first.value,
+                    decoration: const InputDecoration(
+                      labelText: 'القياس',
+                      prefixIcon: Icon(Icons.straighten),
                     ),
+                    items: ProductUnitData.unitItems,
+                    onChanged: (value) {
+                      setState(() {
+                        _unitController.text =
+                            value ?? ProductUnitData.unitItems.first.value!;
+                      });
+                    },
                   ),
-                ],
-              ),
               //
               Row(
                 children: [

@@ -78,60 +78,27 @@ class _DashboardOverviewContent extends StatelessWidget {
           );
         }
 
-        return Container(
-          color: AppColors.background,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Stats Grid - 6 cards in a row
-                const StatsGrid(),
-                const SizedBox(height: 24),
-                // Middle Section: Chart + Date Filter + Customer Count
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Left: Financial Chart (larger)
-                    const Expanded(
-                      flex: 3,
-                      child: FinancialChartSection(),
-                    ),
-                    const SizedBox(width: 24),
-                    // Right: Date Filter and Customer Count
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          const DateFilterSection(),
-                          const SizedBox(height: 24),
-                          const CustomerCountCard(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Bottom Section: Product Sales + Low Stock
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Product Sales Section
-                    const Expanded(
-                      child: ProductSalesSection(),
-                    ),
-                    const SizedBox(width: 24),
-                    // Low Stock Section
-                    const Expanded(
-                      child: LowStockSection(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // Recent Invoices Section
-                const RecentInvoicesSection(),
-              ],
-            ),
+        return Padding(
+          padding: const EdgeInsets.all(AppConstants.spacingMd),
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(child: const DateFilterSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+              // Stats Grid - 6 cards in a GridView
+              const StatsGrid(),
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+              // Left: Financial Chart (larger)
+              SliverToBoxAdapter(child: const FinancialChartSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverToBoxAdapter(child: const CustomerCountCard()),
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverToBoxAdapter(child: const ProductSalesSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverToBoxAdapter(child: const LowStockSection()),
+              SliverToBoxAdapter(child: SizedBox(height: 24)),
+              SliverToBoxAdapter(child: const RecentInvoicesSection()),
+            ],
           ),
         );
       },

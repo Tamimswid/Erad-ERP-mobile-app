@@ -1,4 +1,3 @@
-import 'package:erad/features/customer_debts/data/models/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -29,16 +28,6 @@ class _InvoicesPageState extends State<InvoicesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-      // appBar: AppBar(
-      //   title: const Text(
-      //     AppStrings.invoices,
-      //     style: TextStyle(color: AppColors.text),
-      //   ),
-      //   backgroundColor: AppColors.surface,
-      //   foregroundColor: AppColors.surface,
-      //   surfaceTintColor: AppColors.surface,
-      //   elevation: 0,
-      // ),
       floatingActionButton: FloatingActionButton.extended(
         label: Text('إضافة فاتورة جديدة',style: TextStyle(color: AppColors.background),),
         backgroundColor: AppColors.primary,
@@ -105,7 +94,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
 
           if (state is InvoiceFiltered) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppConstants.spacingMd),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -167,10 +156,10 @@ class _InvoicesPageState extends State<InvoicesPage> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
+        crossAxisCount: 1,
         crossAxisSpacing: 20,
         mainAxisSpacing: 16,
-        childAspectRatio: 1.8,
+        childAspectRatio: 1.5,
       ),
       itemCount: allInvoices.length,
       itemBuilder: (context, index) {

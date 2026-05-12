@@ -17,14 +17,13 @@ class InvoiceStatsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 4,
-        crossAxisSpacing: 16,
-        childAspectRatio: 3,
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 1.6,
         children: [
           _buildStatCard(
             context,
@@ -60,8 +59,8 @@ class InvoiceStatsWidget extends StatelessWidget {
             isAmount: true,
           ),
         ],
-      ),
-    );
+      );
+    
   }
 
   Widget _buildStatCard(
@@ -85,41 +84,28 @@ class InvoiceStatsWidget extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: const Color(0xFF6B7280),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 10),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: const Color(0xFF111827),
                     fontWeight: FontWeight.bold,
-                    fontSize: isAmount ? 18 : 24,
+                    fontSize: isAmount ? 16 : 20,
                   ),
                 ),
               ],
             ),
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
-          ),
+          ),      
         ],
       ),
     );

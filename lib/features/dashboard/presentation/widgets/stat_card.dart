@@ -21,6 +21,8 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 200,
+      width: 200,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.surface,
@@ -46,16 +48,14 @@ class StatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Flexible(
-                child: Text(
-                  NumberFormatter.format(amount),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.text,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                NumberFormatter.format(amount),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.text,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(width: 4),
               Text(

@@ -55,19 +55,19 @@ class RecentInvoicesSection extends StatelessWidget {
                 ),
                 child: const Row(
                   children: [
+                    // Expanded(
+                    //   flex: 2,
+                    //   child: Text(
+                    //     'رقم الفاتورة',
+                    //     style: TextStyle(
+                    //       fontSize: 12,
+                    //       fontWeight: FontWeight.w600,
+                    //       color: AppColors.textSecondary,
+                    //     ),
+                    //   ),
+                    // ),
                     Expanded(
-                      flex: 2,
-                      child: Text(
-                        'رقم الفاتورة',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
+                      flex: 1,
                       child: Text(
                         'العميل',
                         style: TextStyle(
@@ -99,17 +99,17 @@ class RecentInvoicesSection extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Text(
-                        'الحالة',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
+                    // Expanded(
+                    //   flex: 1,
+                    //   child: Text(
+                    //     'الحالة',
+                    //     style: TextStyle(
+                    //       fontSize: 12,
+                    //       fontWeight: FontWeight.w600,
+                    //       color: AppColors.textSecondary,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -132,19 +132,19 @@ class RecentInvoicesSection extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
+                      // Expanded(
+                      //   flex: 2,
+                      //   child: Text(
+                      //     invoice['invoiceNumber'] as String,
+                      //     style: const TextStyle(
+                      //       fontSize: 13,
+                      //       fontWeight: FontWeight.w600,
+                      //       color: AppColors.text,
+                      //     ),
+                      //   ),
+                      // ),
                       Expanded(
-                        flex: 2,
-                        child: Text(
-                          invoice['invoiceNumber'] as String,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.text,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
+                        flex: 1,
                         child: Text(
                           invoice['customerName'] as String,
                           style: const TextStyle(
@@ -157,7 +157,7 @@ class RecentInvoicesSection extends StatelessWidget {
                       Expanded(
                         flex: 1,
                         child: Text(
-                          '${AppUtils.formatNumber((invoice['totalAmount'] as num).toDouble(), decimalDigits: 2)} ${NumberFormatter.getCurrencySymbol()}',
+                          '${NumberFormatter.formatShort(invoice['totalAmount'])} ${NumberFormatter.getCurrencySymbol()}',
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -175,7 +175,7 @@ class RecentInvoicesSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Expanded(flex: 1, child: _buildStatusBadge(status)),
+                      // Expanded(flex: 1, child: _buildStatusBadge(status)),
                     ],
                   ),
                 );

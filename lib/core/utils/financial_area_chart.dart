@@ -155,27 +155,45 @@ class _FinancialAreaChartState extends State<FinancialAreaChart> {
   }
 
   Widget _buildFilterButtons() {
-    return Container(
-      // decoration: BoxDecoration(
-      //   color: const Color(0xFFF5F5F5),
-      //   borderRadius: BorderRadius.circular(10),
-      // ),
-      padding: const EdgeInsets.all(4),
-      child: Row(
+    final allButtons = <Widget>[
+      _FilterButton(
+        label: 'الجميع',
+        isActive: _visibleCategories.length == widget.categories.length,
+        onTap: _showAll,
+      ),
+      ...widget.categories.map(
+        (c) => _FilterButton(
+          label: c.name,
+          isActive: _visibleCategories.contains(c.id),
+          color: _visibleCategories.contains(c.id) ? c.lineColor : null,
+          onTap: () => _toggleCategory(c.id),
+        ),
+      ),
+    ];
+
+    final midPoint = (allButtons.length / 2).ceil();
+    final firstRow = allButtons.take(midPoint).toList();
+    final secondRow = allButtons.skip(midPoint).toList();
+
+    return IntrinsicWidth(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          _FilterButton(
-            label: 'الجميع',
-            isActive: _visibleCategories.length == widget.categories.length,
-            onTap: _showAll,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: firstRow.map((button) => Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: button,
+            )).toList(),
           ),
-          ...widget.categories.map(
-            (c) => _FilterButton(
-              label: c.name,
-              isActive: _visibleCategories.contains(c.id),
-              color: _visibleCategories.contains(c.id) ? c.lineColor : null,
-              onTap: () => _toggleCategory(c.id),
-            ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: secondRow.map((button) => Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: button,
+            )).toList(),
           ),
         ],
       ),
@@ -234,15 +252,18 @@ class _FilterButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(left: 5),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isActive ? AppColors.accent : Colors.transparent,
-      
+          border: Border.all(
+            color: isActive ? AppColors.accent : const Color(0xFFE0E0E0),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
           label,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,

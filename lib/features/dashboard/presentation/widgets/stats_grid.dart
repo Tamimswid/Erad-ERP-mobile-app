@@ -1,3 +1,4 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/dashboard_cubit.dart';
@@ -14,68 +15,64 @@ class StatsGrid extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return Row(
-          children: [
+        return SliverGrid(
+          gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: AppConstants.spacing,
+            crossAxisSpacing: AppConstants.spacing,
+            childAspectRatio: 1.4,
+            // mainAxisExtent: 120,
+          ),
+          delegate: SliverChildListDelegate([
             // Total Sales Card
-            Expanded(
-              child: StatCard(
-                title: 'إجمالي مبيعات',
-                amount: state.totalSales,
-                icon: Icons.shopping_cart_outlined,
-                iconColor: const Color(0xFF3B82F6),
-              ),
+            StatCard(
+              title: 'إجمالي مبيعات',
+              amount: state.totalSales,
+              icon: Icons.shopping_cart_outlined,
+              iconColor: const Color(0xFF3B82F6),
             ),
-            const SizedBox(width: 16),
+            // const SizedBox(height: 16),
             // Total Purchases Card
-            Expanded(
-              child: StatCard(
-                title: 'إجمالي المشتريات',
-                amount: state.totalPurchases,
-                icon: Icons.inventory_2_outlined,
-                iconColor: const Color(0xFF10B981),
-              ),
+            StatCard(
+              title: 'إجمالي المشتريات',
+              amount: state.totalPurchases,
+              icon: Icons.inventory_2_outlined,
+              iconColor: const Color(0xFF10B981),
             ),
-            const SizedBox(width: 16),
+
+            // const SizedBox(width: 16),
             // Total Expenses Card
-            Expanded(
-              child: StatCard(
-                title: 'إجمالي المصروفات',
-                amount: state.totalExpenses,
-                icon: Icons.attach_money_outlined,
-                iconColor: const Color(0xFFEF4444),
-              ),
+            StatCard(
+              title: 'إجمالي المصروفات',
+              amount: state.totalExpenses,
+              icon: Icons.attach_money_outlined,
+              iconColor: const Color(0xFFEF4444),
             ),
-            const SizedBox(width: 16),
+            // const SizedBox(width: 16),
             // Total Withdrawals Card
-            Expanded(
-              child: StatCard(
-                title: 'إجمالي السحوبات',
-                amount: state.totalWithdrawals,
-                icon: Icons.account_balance_wallet_outlined,
-                iconColor: const Color(0xFFF59E0B),
-              ),
+            StatCard(
+              title: 'إجمالي السحوبات',
+              amount: state.totalWithdrawals,
+              icon: Icons.account_balance_wallet_outlined,
+              iconColor: const Color(0xFFF59E0B),
             ),
-            const SizedBox(width: 16),
+            // const SizedBox(width: 16),
             // Total Profit Card
-            Expanded(
-              child: StatCard(
-                title: 'إجمالي الأرباح',
-                amount: state.totalProfit,
-                icon: Icons.trending_up_outlined,
-                iconColor: const Color(0xFF6366F1),
-              ),
+            StatCard(
+              title: 'إجمالي الأرباح',
+              amount: state.totalProfit,
+              icon: Icons.trending_up_outlined,
+              iconColor: const Color(0xFF6366F1),
             ),
-            const SizedBox(width: 16),
+            // const SizedBox(width: 16),
             // Net Profit Card
-            Expanded(
-              child: StatCard(
-                title: 'صافي الربح',
-                amount: state.netProfit,
-                icon: Icons.savings_outlined,
-                iconColor: const Color(0xFF14B8A6),
-              ),
+            StatCard(
+              title: 'صافي الربح',
+              amount: state.netProfit,
+              icon: Icons.savings_outlined,
+              iconColor: const Color(0xFF14B8A6),
             ),
-          ],
+          ]),
         );
       },
     );

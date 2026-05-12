@@ -24,19 +24,7 @@ class DateFilterSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  const Text(
-                    'اختيار التاريخ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.text,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
+
               // Year Selection
               _buildYearDropdown(context, state),
               const SizedBox(height: 12),

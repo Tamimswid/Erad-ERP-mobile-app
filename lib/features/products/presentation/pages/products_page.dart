@@ -252,10 +252,10 @@ class _ProductsPageState extends State<ProductsPage>
       context: context,
       builder: (context) => Dialog(
         child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.4,
-          height: MediaQuery.of(context).size.height * 0.8,
+          // width: MediaQuery.of(context).size.width,
+          // height: MediaQuery.of(context).size.height * 0.7,
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(5.0),
             child: Column(
               children: [
                 Expanded(

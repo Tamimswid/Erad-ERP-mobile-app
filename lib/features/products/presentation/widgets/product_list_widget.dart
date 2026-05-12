@@ -98,10 +98,10 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
+                      crossAxisCount: 1,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
-                      childAspectRatio: 1.05,
+                      childAspectRatio: 0.8,
                     ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
@@ -153,10 +153,10 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                    crossAxisCount: 1,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
-                    childAspectRatio: 1.05,
+                    childAspectRatio: 0.8,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {

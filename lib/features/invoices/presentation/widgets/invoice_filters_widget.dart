@@ -68,17 +68,10 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
   }
 
   Widget _buildFirstRow() {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          flex: 2,
-          child: _buildTypeFilter(),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          flex: 3,
-          child: _buildSearchField(),
-        ),
+        _buildSearchField(),
+        const SizedBox(height: 16),
       ],
     );
   }
@@ -87,51 +80,40 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
     return Row(
       children: [
         Expanded(
-          child: _buildStatusFilter(),
+          child: _buildTypeFilter(),
         ),
         const SizedBox(width: 16),
-        _buildDateFilter(),
+        Expanded(
+          child: _buildStatusFilter(),
+        ),
       ],
     );
   }
 
   Widget _buildTypeFilter() {
-    return Row(
-      children: [
-        Text(
-          'ألنوع:',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: const Color(0xFF6B7280),
-            fontWeight: FontWeight.w500,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: widget.selectedType,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down),
+          items: const [
+            DropdownMenuItem(value: 'all', child: Text('الكل')),
+            DropdownMenuItem(value: 'sale', child: Text('بيع')),
+            DropdownMenuItem(value: 'purchase', child: Text('شراء')),
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              widget.onTypeChanged(value);
+            }
+          },
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Row(
-            children: [
-              _buildFilterButton(
-                'الكل',
-                widget.selectedType == 'all',
-                () => widget.onTypeChanged('all'),
-              ),
-              const SizedBox(width: 8),
-              _buildFilterButton(
-                'بيع',
-                widget.selectedType == 'sale',
-                () => widget.onTypeChanged('sale'),
-                icon: Icons.trending_up,
-              ),
-              const SizedBox(width: 8),
-              _buildFilterButton(
-                'شراء',
-                widget.selectedType == 'purchase',
-                () => widget.onTypeChanged('purchase'),
-                icon: Icons.trending_down,
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -159,55 +141,31 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
   }
 
   Widget _buildStatusFilter() {
-    return Row(
-      children: [
-        Text(
-          'الحالة:',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: const Color(0xFF6B7280),
-            fontWeight: FontWeight.w500,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: widget.selectedStatus,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down),
+          items: const [
+            DropdownMenuItem(value: 'all', child: Text('الكل')),
+            DropdownMenuItem(value: 'paid', child: Text('مدفوع')),
+            DropdownMenuItem(value: 'pending', child: Text('قيد الانتظار')),
+            DropdownMenuItem(value: 'draft', child: Text('مسودة')),
+            DropdownMenuItem(value: 'cancelled', child: Text('ملغي')),
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              widget.onStatusChanged(value);
+            }
+          },
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildFilterButton(
-                'الكل',
-                widget.selectedStatus == 'all',
-                () => widget.onStatusChanged('all'),
-              ),
-              _buildFilterButton(
-                'مدفوع',
-                widget.selectedStatus == 'paid',
-                () => widget.onStatusChanged('paid'),
-              ),
-              _buildFilterButton(
-                'قيد الانتظار',
-                widget.selectedStatus == 'pending',
-                () => widget.onStatusChanged('pending'),
-              ),
-              _buildFilterButton(
-                'مسودة',
-                widget.selectedStatus == 'draft',
-                () => widget.onStatusChanged('draft'),
-              ),
-              _buildFilterButton(
-                'متأخر',
-                widget.selectedStatus == 'overdue',
-                () => widget.onStatusChanged('overdue'),
-              ),
-              _buildFilterButton(
-                'ملغي',
-                widget.selectedStatus == 'cancelled',
-                () => widget.onStatusChanged('cancelled'),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -283,38 +241,7 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
     );
   }
 
-  Widget _buildFilterButton(String text, bool isActive, VoidCallback onPressed, {IconData? icon}) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        backgroundColor: isActive ? const Color(0xFFEFF6FF) : Colors.white,
-        foregroundColor: isActive ? const Color(0xFF1D4ED8) : const Color(0xFF4B5563),
-        side: BorderSide(
-          color: isActive ? const Color(0xFF2563EB) : const Color(0xFFE5E7EB),
-          width: 1.5,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        minimumSize: const Size(0, 32),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 14),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            text,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-    );
-  }
-
+  
   Future<void> _selectDateRange(BuildContext context) async {
     final DateTimeRange? initialRange = widget.dateFrom != null && widget.dateTo != null
         ? DateTimeRange(start: widget.dateFrom!, end: widget.dateTo!)
