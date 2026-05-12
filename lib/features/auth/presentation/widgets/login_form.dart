@@ -44,161 +44,147 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        return Container(
-
-          padding: EdgeInsets.all(20),
-          height: screenSize.height * 0.8,
-          width: screenSize.width * 0.3,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            color: AppColors.background,
-            boxShadow: [
-              BoxShadow(blurRadius: 30, color: Colors.black87.withValues(alpha: 0.2), spreadRadius: 4),
-            ],
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Logo and Title
-                Image.asset(AppAssets.logo, width: 60, height: 60),
-                const SizedBox(height: 10),
-                Text(
-                  'إراد',
-                  style:TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold
-                  ),
-                  textAlign: TextAlign.center,
+        return Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Logo and Title
+              Image.asset(AppAssets.logo, width: 60, height: 60),
+              const SizedBox(height: 10),
+              Text(
+                'إراد',
+                style:TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold
                 ),
-                const SizedBox(height: 10),
-
-                Text(
-                  'نظام المحاسبة والمخزون',
-                  style: Theme.of(context).textTheme.titleMedium,
-                  textAlign: TextAlign.center,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+        
+              Text(
+                'نظام المحاسبة والمخزون',
+                style: Theme.of(context).textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 100),
+        
+              // Email Field
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'البريد الإلكتروني',
+                  prefixIcon: Icon(Icons.email),
                 ),
-                const SizedBox(height: 48),
-
-                // Email Field
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'البريد الإلكتروني مطلوب';
+                  }
+                  if (!value.contains('@')) {
+                    return 'البريد الإلكتروني غير صحيح';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+        
+              // Business Name Field (only for registration)
+              if (!_isLogin) ...[
                 TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  controller: _businessNameController,
                   decoration: const InputDecoration(
-                    labelText: 'البريد الإلكتروني',
-                    prefixIcon: Icon(Icons.email),
+                    labelText: 'اسم الشركة',
+                    prefixIcon: Icon(Icons.business),
                   ),
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'البريد الإلكتروني مطلوب';
-                    }
-                    if (!value.contains('@')) {
-                      return 'البريد الإلكتروني غير صحيح';
+                    if (!_isLogin &&
+                        (value == null || value.trim().isEmpty)) {
+                      return 'اسم الشركة مطلوب';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Business Name Field (only for registration)
-                if (!_isLogin) ...[
-                  TextFormField(
-                    controller: _businessNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'اسم الشركة',
-                      prefixIcon: Icon(Icons.business),
+              ],
+        
+              // Password Field
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'كلمة المرور',
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
-                    validator: (value) {
-                      if (!_isLogin &&
-                          (value == null || value.trim().isEmpty)) {
-                        return 'اسم الشركة مطلوب';
-                      }
-                      return null;
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
                     },
                   ),
-                  const SizedBox(height: 16),
-                ],
-
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'كلمة المرور',
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                      onPressed: () {
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'كلمة المرور مطلوبة';
+                  }
+                  if (value.length < 8) {
+                    return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 24),
+        
+              // Submit Button
+              ElevatedButton(
+                onPressed: state is AuthLoading ? null : _submitForm,
+                child: state is AuthLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(_isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'),
+              ),
+              const SizedBox(height: 16),
+        
+              // Toggle Login/Register
+              TextButton(
+                onPressed: state is AuthLoading
+                    ? null
+                    : () {
                         setState(() {
-                          _obscurePassword = !_obscurePassword;
+                          _isLogin = !_isLogin;
                         });
                       },
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'كلمة المرور مطلوبة';
-                    }
-                    if (value.length < 8) {
-                      return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
-                    }
-                    return null;
-                  },
+                child: Text(
+                  _isLogin
+                      ? 'ليس لديك حساب؟ إنشاء حساب'
+                      : 'لديك حساب بالفعل؟ تسجيل الدخول',
                 ),
-                const SizedBox(height: 24),
-
-                // Submit Button
-                ElevatedButton(
-                  onPressed: state is AuthLoading ? null : _submitForm,
-                  child: state is AuthLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(_isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'),
-                ),
-                const SizedBox(height: 16),
-
-                // Toggle Login/Register
+              ),
+        
+              // Forgot Password (only for login)
+              if (_isLogin) ...[
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: state is AuthLoading
                       ? null
                       : () {
-                          setState(() {
-                            _isLogin = !_isLogin;
-                          });
+                          _showForgotPasswordDialog(context);
                         },
-                  child: Text(
-                    _isLogin
-                        ? 'ليس لديك حساب؟ إنشاء حساب'
-                        : 'لديك حساب بالفعل؟ تسجيل الدخول',
-                  ),
+                  child: const Text('نسيت كلمة المرور؟'),
                 ),
-
-                // Forgot Password (only for login)
-                if (_isLogin) ...[
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: state is AuthLoading
-                        ? null
-                        : () {
-                            _showForgotPasswordDialog(context);
-                          },
-                    child: const Text('نسيت كلمة المرور؟'),
-                  ),
-                ],
               ],
-            ),
+            ],
           ),
         );
       },

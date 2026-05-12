@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:equatable/equatable.dart';
 import 'package:erad/features/products/data/models/product.dart';
+import 'package:uuid/uuid.dart';
 
 class InvoiceItem extends Equatable {
   final String? id;
@@ -22,8 +25,8 @@ class InvoiceItem extends Equatable {
     required this.unitPrice,
     this.discountAmount = 0.0,
     required this.totalPrice,
-    this.unit = 'piece',
-    this.measurement = '0',
+   required this.unit ,
+    required this.measurement ,
     this.createdAt,
   });
 
@@ -58,7 +61,7 @@ class InvoiceItem extends Equatable {
     final totalPrice = unitPrice * quantity;
     
     return InvoiceItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      measurement: product.measurement,
       productId: product.id,
       productName: product.name,
       quantity: quantity,
@@ -69,6 +72,7 @@ class InvoiceItem extends Equatable {
   }
 
   factory InvoiceItem.fromJson(Map<String, dynamic> json) {
+    log(json.toString());
     return InvoiceItem(
       id: json['id'] as String,
       productId: json['product_id'] as String?,
@@ -77,8 +81,8 @@ class InvoiceItem extends Equatable {
       unitPrice: (json['unit_price'] as num).toDouble(),
       discountAmount: (json['discount_amount'] as num?)?.toDouble() ?? 0.0,
       totalPrice: (json['total_price'] as num).toDouble(),
-      unit: json['unit'] as String? ?? 'piece',
-      measurement: json['measurement'] as String? ?? '0',
+      unit: json['unit'] as String ,
+      measurement: json['measurement'] as String ,
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at'] as String) 
           : null,
@@ -98,6 +102,7 @@ class InvoiceItem extends Equatable {
       'measurement': measurement,
       'created_at': createdAt?.toIso8601String(),
     };
+    
   }
 
   @override
@@ -113,4 +118,6 @@ class InvoiceItem extends Equatable {
         measurement,
         createdAt,
       ];
+
+        String get nameWithMeasurementUnit => '$productName $measurement $unit';
 }

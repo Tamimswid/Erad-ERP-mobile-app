@@ -65,7 +65,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: AppColors.border.withValues(alpha: 0.3),
               borderRadius: const BorderRadius.only(
@@ -82,18 +82,18 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                     style: TextStyle(
                       fontWeight: AppFonts.fontWeightMedium,
                       color: AppColors.text,
-                      fontSize: AppFonts.fontSizeSmall,
+                      fontSize: 11,
                     ),
                   ),
                 ),
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: Text(
                     'الكمية',
                     style: TextStyle(
                       fontWeight: AppFonts.fontWeightMedium,
                       color: AppColors.text,
-                      fontSize: AppFonts.fontSizeSmall,
+                      fontSize: 11,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -105,7 +105,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                     style: TextStyle(
                       fontWeight: AppFonts.fontWeightMedium,
                       color: AppColors.text,
-                      fontSize: AppFonts.fontSizeSmall,
+                      fontSize: 11,
                     ),
                     textAlign: TextAlign.right,
                   ),
@@ -117,12 +117,12 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                     style: TextStyle(
                       fontWeight: AppFonts.fontWeightMedium,
                       color: AppColors.text,
-                      fontSize: AppFonts.fontSizeSmall,
+                      fontSize: 11,
                     ),
                     textAlign: TextAlign.right,
                   ),
                 ),
-                const SizedBox(width: 40),
+                const SizedBox(width: 30),
               ],
             ),
           ),
@@ -130,92 +130,99 @@ class _ProductListWidgetState extends State<ProductListWidget> {
           ...items.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: index % 2 == 0 ? AppColors.surface : AppColors.background,
-                border: index < items.length - 1 
-                    ? Border(
-                        bottom: BorderSide(
-                          color: AppColors.border.withValues(alpha: 0.5),
-                          width: 0.5,
-                        ),
-                      )
-                    : null,
+            return Dismissible(
+              key: Key('product_${item.productId}_$index'),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                color: AppColors.error,
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.productName,
-                          style: const TextStyle(
-                            fontWeight: AppFonts.fontWeightSemiBold,
-                            color: AppColors.text,
-                            fontSize: AppFonts.fontSizeSmall,
+              onDismissed: (direction) {
+                _removeItem(index);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: index % 2 == 0 ? AppColors.surface : AppColors.background,
+                  border: index < items.length - 1 
+                      ? Border(
+                          bottom: BorderSide(
+                            color: AppColors.border.withValues(alpha: 0.5),
+                            width: 0.5,
                           ),
-                        ),
-                        Text(
-                          item.unit,
-                          style: TextStyle(
-                            fontWeight: AppFonts.fontWeightMedium,
-                            color: AppColors.textSecondary,
-                            fontSize: 11,
+                        )
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.productName,
+                            style: const TextStyle(
+                              fontWeight: AppFonts.fontWeightSemiBold,
+                              color: AppColors.text,
+                              fontSize: 11,
+                            ),
                           ),
+                          Text(
+                            item.unit,
+                            style: TextStyle(
+                              fontWeight: AppFonts.fontWeightMedium,
+                              color: AppColors.textSecondary,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        '${item.quantity}',
+                        style: const TextStyle(
+                          fontWeight: AppFonts.fontWeightSemiBold,
+                          color: AppColors.primary,
+                          fontSize: 11,
                         ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Text(
-                      '${item.quantity}',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        color: AppColors.primary,
-                        fontSize: AppFonts.fontSizeSmall,
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      '${item.unitPrice.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightMedium,
-                        color: AppColors.text,
-                        fontSize: AppFonts.fontSizeSmall,
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        item.unitPrice.toStringAsFixed(0).toString()
+,                        style: const TextStyle(
+                          fontWeight: AppFonts.fontWeightMedium,
+                          color: AppColors.text,
+                          fontSize: 11,
+                        ),
+                        textAlign: TextAlign.right,
                       ),
-                      textAlign: TextAlign.right,
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      '${item.totalPrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightBold,
-                        color: AppColors.primary,
-                        fontSize: AppFonts.fontSizeSmall,
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        '${item.totalPrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
+                        style: const TextStyle(
+                          fontWeight: AppFonts.fontWeightBold,
+                          color: AppColors.primary,
+                          fontSize: 11,
+                        ),
+                        textAlign: TextAlign.right,
                       ),
-                      textAlign: TextAlign.right,
                     ),
-                  ),
-                  SizedBox(
-                    width: 40,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      onPressed: () => _removeItem(index),
-                      color: AppColors.error.withValues(alpha: 0.7),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }),

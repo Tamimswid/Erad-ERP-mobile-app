@@ -117,14 +117,14 @@ class _FinancialAreaChartState extends State<FinancialAreaChart> {
       children: [
         if (widget.title != null || widget.showFilterButtons)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
               children: [
                 if (widget.title != null)
                   Text(
                     widget.title!,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1a1a2e),
                     ),
@@ -135,19 +135,28 @@ class _FinancialAreaChartState extends State<FinancialAreaChart> {
               ],
             ),
           ),
-        Padding(
-          padding: widget.padding,
-          child: SizedBox(
-            height: widget.height,
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: _AreaChartPainter(categories: visible),
+        Flexible(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: widget.height,
+                minWidth: 600, // Minimum width for proper chart display
+              ),
+              child: SizedBox(
+                height: widget.height,
+                width: 600, // Fixed width for chart
+                child: CustomPaint(
+                  size: Size.infinite,
+                  painter: _AreaChartPainter(categories: visible),
+                ),
+              ),
             ),
           ),
         ),
         if (widget.showLegend && visible.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: _buildLegend(visible),
           ),
       ],
@@ -335,18 +344,18 @@ class _AreaChartPainter extends CustomPainter {
     }
 
     final months = [
-      'Ocak',
-      'Şubat',
-      'Mart',
-      'Nisan',
-      'Mayıs',
-      'Haziran',
-      'Temmuz',
-      'Ağustos',
-      'Eylül',
-      'Ekim',
-      'Kasım',
-      'Aralık',
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
     ];
     for (int i = 0; i < 12; i++) {
       final x = p.left + (i * cw / 11);

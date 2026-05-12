@@ -21,56 +21,54 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      padding: const EdgeInsets.all(12),
+      child: Column(
         children: [
-          // PDF Export Button
-          _buildActionButton(
-            icon: Icons.picture_as_pdf,
-            label: 'تصدير PDF',
-            onPressed: onExportPdf,
-            isSecondary: true,
+          // Primary Actions Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.edit,
+                  label: 'تحرير',
+                  onPressed: onEdit,
+                  isPrimary: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.picture_as_pdf,
+                  label: 'PDF',
+                  onPressed: onExportPdf,
+                  isSecondary: true,
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 8),
           
-          const SizedBox(width: 12),
-          
-          // Edit Button
-          _buildActionButton(
-            icon: Icons.edit,
-            label: 'تحرير',
-            onPressed: onEdit,
-            isPrimary: true,
-          ),
-
-          const SizedBox(width: 12),
-
-          // Update Invoice Status Button
-          _buildActionButton(
-            icon: Icons.receipt,
-            label: 'حالة الفاتورة',
-            onPressed: onUpdateInvoiceStatus,
-            isSecondary: true,
-          ),
-
-          const SizedBox(width: 12),
-
-          // Update Payment Status Button
-          _buildActionButton(
-            icon: Icons.payment,
-            label: 'حالة الدفع',
-            onPressed: onUpdatePaymentStatus,
-            isSecondary: true,
-          ),
-          
-          const SizedBox(width: 12),
-          
-          // Delete Button
-          _buildActionButton(
-            icon: Icons.delete,
-            label: 'حذف',
-            onPressed: onDelete,
-            isDanger: true,
+          // Secondary Actions Row
+          Row(
+            children: [
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.receipt,
+                  label: 'حالة الفاتورة',
+                  onPressed: onUpdateInvoiceStatus,
+                  isSecondary: true,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildActionButton(
+                  icon: Icons.delete,
+                  label: 'حذف',
+                  onPressed: onDelete,
+                  isDanger: true,
+                ),
+              ),
+            ],
           ),
         ],
       ),

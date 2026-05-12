@@ -75,6 +75,7 @@ class _DashboardPageState extends State<DashboardPage> {
           height: 70,
           overlayColor: WidgetStatePropertyAll<Color>(AppColors.primary.withValues(alpha: 0.5),),
           selectedIndex: _selectedIndex,
+          shadowColor: AppColors.textSecondary,
           onDestinationSelected: (index) {
             setState(() {
               _selectedIndex = index;

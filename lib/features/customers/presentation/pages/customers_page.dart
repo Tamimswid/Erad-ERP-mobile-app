@@ -25,7 +25,6 @@ class _CustomersPageState extends State<CustomersPage> {
   void initState() {
     super.initState();
     _customerCubit = sl<CustomerCubit>();
-    log('PAGE: Created CustomerCubit[${_customerCubit.hashCode}]');
     // Stream will auto-load data
   }
 
@@ -55,14 +54,11 @@ class _CustomersPageState extends State<CustomersPage> {
         body: BlocConsumer<CustomerCubit, CustomerState>(
           listener: (context, state) {
             final cubit = context.read<CustomerCubit>();
-            log('UI[${cubit.hashCode}]: Received state: ${state.runtimeType}');
             if (state is CustomerError) {
-              log('UI[${cubit.hashCode}]: CustomerError - ${state.message}');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.message)),
               );
             } else if (state is CustomerSuccess) {
-              log('UI[${cubit.hashCode}]: CustomerSuccess - ${state.message}');
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -111,8 +107,7 @@ class _CustomersPageState extends State<CustomersPage> {
       context: context,
       builder: (context) => Dialog(
         child: SizedBox(
-          width: 500,
-          height: MediaQuery.of(context).size.height * 0.45,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -152,44 +147,29 @@ class _CustomersPageState extends State<CustomersPage> {
         color: AppColors.surface,
         border: Border(bottom: BorderSide(color: AppColors.divider)),
       ),
-      child: Row(
-        children: [
-          const Text(
-            'العملاء',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: TextField(
+          controller: _searchController,
+          onChanged: (value) => _onSearchChanged(context, value),
+          decoration: InputDecoration(
+            hintText: 'بحث عن عميل...',
+            prefixIcon: const Icon(Icons.search, size: 20),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 10,
+            ),
+            hintStyle: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
             ),
           ),
-          const Spacer(),
-          // Minimalist search bar
-          Container(
-            height: 40,
-            width: 300,
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) => _onSearchChanged(context, value),
-              decoration: InputDecoration(
-                hintText: 'بحث عن عميل...',
-                prefixIcon: const Icon(Icons.search, size: 20),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
-                hintStyle: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

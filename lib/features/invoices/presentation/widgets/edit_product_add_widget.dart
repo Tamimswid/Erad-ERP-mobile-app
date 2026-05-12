@@ -115,13 +115,14 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
     }
 
     final invoiceItem = InvoiceItem(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    
       productId: existingProduct?.id ?? '',
       productName: name,
       quantity: quantity,
       unitPrice: existingProduct?.salePrice ?? 0,
       totalPrice: (existingProduct?.salePrice ?? 0) * quantity,
-      unit: existingProduct?.unit ?? 'piece',
+      unit: existingProduct!.unit ,
+      measurement: existingProduct.measurement,
       createdAt: DateTime.now(),
     );
 

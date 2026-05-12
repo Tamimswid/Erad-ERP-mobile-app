@@ -147,157 +147,67 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
     }
     
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
         color: AppColors.surface,
         border: Border.all(color: AppColors.border, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text(
-                      'حالة الفاتورة',
-                      style: TextStyle(
-                        fontSize: AppFonts.fontSizeMedium,
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        color: AppColors.text,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: DropdownButtonFormField<String>(
-                        value: _currentStatus,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.info_outline,
-                            color: AppColors.textSecondary,
-                            size: 18,
-                          ),
-                        ),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: _isSaving ? AppColors.textSecondary : AppColors.text,
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'draft',
-                            child: Text('مسودة'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'approved',
-                            child: Text('معتمدة'),
-                          ),
-
-                        ],
-                        onChanged: _isSaving ? null : _onStatusChanged,
-                      ),
-                    ),
-                  ],
+          // Status Dropdown
+          Container(
+            height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: DropdownButtonFormField<String>(
+              value: _currentStatus,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                prefixIcon: Icon(
+                  Icons.info_outline,
+                  color: AppColors.textSecondary,
+                  size: 18,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text(
-                      'نوع الدفع',
-                      style: TextStyle(
-                        fontSize: AppFonts.fontSizeMedium,
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        color: AppColors.text,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: DropdownButtonFormField<String>(
-                        value: _currentPaymentType,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
-                          prefixIcon: Icon(
-                            Icons.payment,
-                            color: AppColors.textSecondary,
-                            size: 18,
-                          ),
-                        ),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: _isSaving ? AppColors.textSecondary : AppColors.text,
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'debt',
-                            child: Text('مديون'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'cash',
-                            child: Text('نقداً'),
-                          ),
-                        ],
-                        onChanged: _isSaving ? null : _onPaymentTypeChanged,
-                      ),
-                    ),
-                  ],
-                ),
+              style: TextStyle(
+                fontSize: 13,
+                color: _isSaving ? AppColors.textSecondary : AppColors.text,
               ),
-            ],
+              items: const [
+                DropdownMenuItem(
+                  value: 'draft',
+                  child: Text('مسودة'),
+                ),
+                DropdownMenuItem(
+                  value: 'approved',
+                  child: Text('معتمدة'),
+                ),
+              ],
+              onChanged: _isSaving ? null : _onStatusChanged,
+            ),
           ),
+          const SizedBox(height: 12),
           
-          const SizedBox(height: 20),
-          
+          // Action Buttons
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
-                child: Container(
-                  height: 44,
-                  margin: const EdgeInsets.only(left: 10),
+                child: SizedBox(
+                  height: 48,
                   child: ElevatedButton.icon(
                     onPressed: _isSaving ? null : _saveInvoice,
                     icon: _isSaving 
                       ? const SizedBox(
-                          width: 18,
-                          height: 18,
+                          width: 16,
+                          height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -305,10 +215,10 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                         )
                       : const Icon(Icons.save, size: 18),
                     label: Text(
-                      _isSaving ? 'جاري الحفظ...' : 'حفظ الفاتورة',
+                      _isSaving ? 'جاري...' : 'حفظ',
                       style: const TextStyle(
                         fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -316,27 +226,24 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
+                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
                       ),
                     ),
                   ),
                 ),
               ),
-              
+              const SizedBox(width: 8),
               Expanded(
-                child: Container(
-                  height: 44,
-                  margin: const EdgeInsets.only(left: 10),
+                child: SizedBox(
+                  height: 48,
                   child: ElevatedButton.icon(
                     onPressed: _isSaving ? null : _deleteInvoice,
                     icon: const Icon(Icons.delete, size: 18),
-                    label: const Text(
+                    label: Text(
                       'حذف',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -344,26 +251,24 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
+                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
                       ),
                     ),
                   ),
                 ),
               ),
-              
+              const SizedBox(width: 8),
               Expanded(
                 child: SizedBox(
-                  height: 44,
+                  height: 48,
                   child: ElevatedButton.icon(
                     onPressed: _isSaving ? null : _exportToPDF,
                     icon: const Icon(Icons.picture_as_pdf, size: 18),
-                    label: const Text(
-                      'تصدير PDF',
-                      style: TextStyle(
+                    label: Text(
+                      'PDF',
+                      style: const TextStyle(
                         fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -371,9 +276,7 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
+                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
                       ),
                     ),
                   ),

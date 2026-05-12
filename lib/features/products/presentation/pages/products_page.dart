@@ -251,22 +251,18 @@ class _ProductsPageState extends State<ProductsPage>
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        child: SizedBox(
-          // width: MediaQuery.of(context).size.width,
-          // height: MediaQuery.of(context).size.height * 0.7,
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ProductFormWidget(
-                    product: product,
-                    onSubmit: (product) => onSubmit(product),
-                    categoryList: categoryList,
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            children: [
+              Expanded(
+                child: ProductFormWidget(
+                  product: product,
+                  onSubmit: (product) => onSubmit(product),
+                  categoryList: categoryList,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -279,7 +275,7 @@ class _ProductsPageState extends State<ProductsPage>
       builder: (context) => Dialog(
         child: SizedBox(
           width: 600,
-          height: 700,
+          height: 250,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

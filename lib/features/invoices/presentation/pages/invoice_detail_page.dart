@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/widgets/common_widgets.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -198,13 +199,11 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
   }
 
   Widget _buildNewInvoiceDetail() {
-    final paddingSize = MediaQuery.of(context).size.width > 1200
-        ? 150.0
-        : 50.0;
+
     final cubit = context.read<InvoiceCubit>();
 
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: paddingSize, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -213,19 +212,14 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
             invoiceNumber: _getInvoiceNumber(),
             onBackPressed: () => Navigator.pop(context),
           ),
-
-          const SizedBox(height: 20),
-
+          InvoiceStatusGridView(),
           // Info Card with Products
           InvoiceInfoCardWidget(
             invoiceDate: _formatDate(_getInvoiceDate()),
             customerName: _getCustomerOrSupplierName(),
-            status: _getInvoiceStatus(),        // Fatura durumu (InvoiceStatus)
-            paymentStatus: _getPaymentStatus(), // Ödeme durumu (PaymentStatus)
             products: _getProductsList(),
           ),
 
-          const SizedBox(height: 20),
 
           // Totals
           InvoiceTotalsWidget(
@@ -234,7 +228,6 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
             total: _getTotalAmount(),
           ),
 
-          const SizedBox(height: 20),
 
           // Action Buttons
           InvoiceActionButtonsWidget(
@@ -471,6 +464,8 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
     final items = _getItems();
     return items.map((item) {
       return InvoiceItem(
+        unit: item.unit,
+        measurement: item.measurement,
         productName: item.productName,
         quantity: item.quantity ?? 0,
         unitPrice: item.unitPrice ?? 0.0,
@@ -482,6 +477,192 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
     }).toList();
   }
 
+   Widget InvoiceStatusGridView() {
+    return CustomCard(
+padding: EdgeInsets.all(AppConstants.borderRadius),
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 2,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        childAspectRatio: 1.6,
+        children: [
+          // Date Info
+          _buildInfoItem(
+            icon: Icons.calendar_today,
+            label: 'تاريخ الفاتورة',
+            value: _formatDate(invoice.invoiceDate),
+          ),
+      
+          // Customer Info
+          _buildInfoItem(
+            icon: Icons.person,
+            label: 'اسم العميل',
+            value: invoice.customerName,
+          ),
+      
+          // Status Info
+          _buildStatusInfoItem(
+            icon: getStatusIcon( _getInvoiceStatus()),
+            label: 'الحالة',
+            status: _getInvoiceStatus(),
+            isPaymentStatus: false,
+          ),
+      
+          // Payment Status Info
+          _buildStatusInfoItem(
+            icon: getPaymentStatusIcon(_getPaymentStatus()),
+            label: 'حالة الدفع',
+            status: _getPaymentStatus(),
+            isPaymentStatus: true,
+          ),
+        ],
+      ),
+    );
+  }
+    Color getStatusColor(String status) {
+    return InvoiceStatus.fromString(status).getColor;
+  }
+
+  Color getPaymentStatusColor(String paymentStatus) {
+    return PaymentStatus.fromString(paymentStatus).getColor;
+  }
+
+  String getStatusText(String status) {
+    return InvoiceStatus.fromString(status).getArabicName;
+  }
+
+  String getPaymentStatusText(String paymentStatus) {
+    return PaymentStatus.fromString(paymentStatus).getArabicName;
+  }
+
+  IconData getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+      case 'draft':
+      case 'sent':
+        return Icons.access_time_outlined;
+      case 'paid':
+      case 'completed':
+        return Icons.check_circle_outline;
+      case 'cancelled':
+        return Icons.cancel_outlined;
+      case 'overdue':
+        return Icons.warning_outlined;
+      default:
+        return Icons.access_time_outlined;
+    }
+  }
+
+  IconData getPaymentStatusIcon(String paymentStatus) {
+    switch (paymentStatus.toLowerCase()) {
+      case 'debt':
+        return Icons.error_outline;
+      case 'paid':
+        return Icons.check_circle;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+    Widget _buildInfoItem({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(10),
+        // border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: AppFonts.fontSizeMedium,
+              fontWeight: AppFonts.fontWeightMedium,
+              color: AppColors.textSecondary,
+                      
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: AppFonts.fontSizeLarge,
+              fontWeight: AppFonts.fontWeightSemiBold,
+              color: AppColors.text,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildStatusInfoItem({
+    required IconData icon,
+    required String label,
+    required String status,
+    required bool isPaymentStatus,
+  }) {
+    final color = isPaymentStatus
+        ? getPaymentStatusColor(status)
+        : getStatusColor(status);
+    final text = isPaymentStatus
+        ? getPaymentStatusText(status)
+        : getStatusText(status);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: AppFonts.fontSizeMedium,
+              fontWeight: AppFonts.fontWeightMedium,
+              color: AppColors.textSecondary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 14, color: color),
+                const SizedBox(width: 6),
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightSemiBold,
+                    color: color,
+                    letterSpacing: 0.01,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   // Helper methods
   String _getInvoiceNumber() {
     if (invoice is SalesInvoice) {

@@ -72,15 +72,15 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
           ),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSectionTitle(Icons.receipt_long, 'ملخص الفاتورة'),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
@@ -91,9 +91,9 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
                   child: Column(
                     children: [
                       _buildSummaryRow('المجموع الفرعي', subtotal),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildDiscountRow(discountAmount, subtotal),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildSummaryRow(
                         'المجموع الكلي',
                         grandTotal,
@@ -102,10 +102,6 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 12),
-
-                _buildRemainingAmountRow(remainingAmount),
               ],
             ),
           ),
@@ -165,8 +161,8 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
   }
 
   Widget _buildDiscountRow(double discountAmount, double subtotal) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'الخصم (المبلغ)',
@@ -175,63 +171,64 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
             color: AppColors.textSecondary,
           ),
         ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 200,
-          child: TextField(
-            controller: _discountAmountController,
-            keyboardType: TextInputType.number,
-            // onChanged:
-            textInputAction: TextInputAction.done,
-            onSubmitted: (value) {
-              _onDiscountAmountChanged(value);
-              setState(() {});
-            },
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                borderSide: const BorderSide(
-                  color: AppColors.primary,
-                  width: 2,
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _discountAmountController,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (value) {
+                  _onDiscountAmountChanged(value);
+                  setState(() {});
+                },
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 2,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  isDense: true,
                 ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                ],
               ),
-              filled: true,
-              fillColor: AppColors.surface,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
-              isDense: true,
             ),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-            ],
-          ),
+            const SizedBox(width: 8),
+            MaterialButton(
+              onPressed: () {
+                final discountAmountValue = _discountAmountController.text;
+                _onDiscountAmountChanged(discountAmountValue);
+              },
+              color: AppColors.primary,
+              shape: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(5),
+                borderSide: BorderSide.none,
+              ),
+              elevation: 0,
+              child: Center(child: Text('طبق',style: TextStyle(color: AppColors.surface),)),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        MaterialButton(
-          onPressed: () {
-            final discountAmountValue = _discountAmountController.text;
-            _onDiscountAmountChanged(discountAmountValue);
-          },
-
-          color: AppColors.primary,
-          shape: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5),
-            borderSide: BorderSide.none,
-          ),
-          elevation: 0,
-          child: Center(child: Text('طبق',style: TextStyle(color: AppColors.surface),)),
-        ),
-        const Spacer(),
+        const SizedBox(height: 8),
         Text(
           '- ${AppUtils.formatNumber(discountAmount)} ${NumberFormatter.getCurrencySymbol()}',
           style: const TextStyle(
@@ -245,33 +242,4 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
     );
   }
 
-  Widget _buildRemainingAmountRow(double remainingAmount) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'المتبقي',
-            style: TextStyle(
-              fontSize: AppFonts.fontSizeSmall,
-              fontWeight: AppFonts.fontWeightSemiBold,
-              color: AppColors.text,
-            ),
-          ),
-          Text(
-            '${AppUtils.formatNumber(remainingAmount)} ${NumberFormatter.getCurrencySymbol()}',
-            style: const TextStyle(
-              fontSize: AppFonts.fontSizeSmall,
-              fontWeight: AppFonts.fontWeightSemiBold,
-              color: AppColors.primary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

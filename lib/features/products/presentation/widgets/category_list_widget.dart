@@ -48,10 +48,10 @@ class _CategoryListWidgetState extends State<CategoryListWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.category, size: 64, color: Colors.grey),
-                        const SizedBox(height: 16),
-                        const Text('لا يوجد فئات'),
-                        const SizedBox(height: 8),
-                        const Text('أضف فئة جديدة للبدء'),
+                         SizedBox(height: 16),
+                         Text('لا يوجد فئات'),
+                         SizedBox(height: 8),
+                         Text('أضف فئة جديدة للبدء'),
                       ],
                     ),
                   );

@@ -80,27 +80,21 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
             },
           ),
           const SizedBox(height: 16),
-          TextFormField(
-            controller: _descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'الوصف',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.description),
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              OutlinedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('إلغاء'),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('إلغاء'),
+                ),
               ),
-              const SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: _saveCategory,
-                child: Text(widget.category == null ? 'إضافة' : 'حفظ'),
+           SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _saveCategory,
+                  child: Text(widget.category == null ? 'إضافة' : 'حفظ'),
+                ),
               ),
             ],
           ),

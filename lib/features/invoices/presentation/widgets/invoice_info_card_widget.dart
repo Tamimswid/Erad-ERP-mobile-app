@@ -10,234 +10,27 @@ import 'package:erad/core/utils/number_formatter.dart';
 class InvoiceInfoCardWidget extends StatelessWidget {
   final String invoiceDate;
   final String customerName;
-  final String status;
-  final String paymentStatus;
   final List<InvoiceItem> products;
 
   const InvoiceInfoCardWidget({
     super.key,
     required this.invoiceDate,
     required this.customerName,
-    required this.status,
-    required this.paymentStatus,
     required this.products,
   });
 
-  Color getStatusColor(String status) {
-    return InvoiceStatus.fromString(status).getColor;
-  }
-
-  Color getPaymentStatusColor(String paymentStatus) {
-    return PaymentStatus.fromString(paymentStatus).getColor;
-  }
-
-  String getStatusText(String status) {
-    return InvoiceStatus.fromString(status).getArabicName;
-  }
-
-  String getPaymentStatusText(String paymentStatus) {
-    return PaymentStatus.fromString(paymentStatus).getArabicName;
-  }
-
-  IconData getStatusIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-      case 'draft':
-      case 'sent':
-        return Icons.access_time_outlined;
-      case 'paid':
-      case 'completed':
-        return Icons.check_circle_outline;
-      case 'cancelled':
-        return Icons.cancel_outlined;
-      case 'overdue':
-        return Icons.warning_outlined;
-      default:
-        return Icons.access_time_outlined;
-    }
-  }
-
-  IconData getPaymentStatusIcon(String paymentStatus) {
-    switch (paymentStatus.toLowerCase()) {
-      case 'debt':
-        return Icons.error_outline;
-      case 'paid':
-        return Icons.check_circle;
-      default:
-        return Icons.help_outline;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          // Info Grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 4,
-            mainAxisSpacing: 20,
-            crossAxisSpacing: 20,
-            childAspectRatio: 2.5,
-            children: [
-              // Date Info
-              _buildInfoItem(
-                icon: Icons.calendar_today,
-                label: 'تاريخ الفاتورة',
-                value: invoiceDate,
-              ),
-
-              // Customer Info
-              _buildInfoItem(
-                icon: Icons.person,
-                label: 'اسم العميل',
-                value: customerName,
-              ),
-
-              // Status Info
-              _buildStatusInfoItem(
-                icon: getStatusIcon(status),
-                label: 'الحالة',
-                status: status,
-                isPaymentStatus: false,
-              ),
-
-              // Payment Status Info
-              _buildStatusInfoItem(
-                icon: getPaymentStatusIcon(paymentStatus),
-                label: 'حالة الدفع',
-                status: paymentStatus,
-                isPaymentStatus: true,
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-          Divider(color: AppColors.secondary.withValues(alpha: 0.3), height: 1),
-          const SizedBox(height: 24),
-
-          // Products Section
-          _buildProductsSection(),
-        ],
-      ),
+      padding: const EdgeInsets.all(8),
+      child: _buildProductsSection(),
     );
   }
 
-  Widget _buildInfoItem({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(10),
-        // border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: AppColors.textSecondary),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: AppFonts.fontSizeLarge,
-                  fontWeight: AppFonts.fontWeightMedium,
-                  color: AppColors.textSecondary,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: AppFonts.fontSizeLarge,
-              fontWeight: AppFonts.fontWeightSemiBold,
-              color: AppColors.text,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildStatusInfoItem({
-    required IconData icon,
-    required String label,
-    required String status,
-    required bool isPaymentStatus,
-  }) {
-    final color = isPaymentStatus
-        ? getPaymentStatusColor(status)
-        : getStatusColor(status);
-    final text = isPaymentStatus
-        ? getPaymentStatusText(status)
-        : getStatusText(status);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(10),
-        // border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: AppColors.textSecondary),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: AppFonts.fontSizeLarge,
-                  fontWeight: AppFonts.fontWeightMedium,
-                  color: AppColors.textSecondary,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 14, color: color),
-                const SizedBox(width: 6),
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeSmall,
-                    fontWeight: AppFonts.fontWeightSemiBold,
-                    color: color,
-                    letterSpacing: 0.01,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildProductsSection() {
     return Column(
@@ -245,13 +38,11 @@ class InvoiceInfoCardWidget extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.inventory_2, size: 20, color: AppColors.textSecondary),
-            const SizedBox(width: 8),
             Text(
               'المنتجات',
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
-                fontWeight: AppFonts.fontWeightSemiBold,
+                fontWeight: AppFonts.fontWeightRegular,
                 color: AppColors.textSecondary,
                 letterSpacing: 0.5,
               ),
@@ -273,19 +64,11 @@ class InvoiceInfoCardWidget extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
 
         // Table Header
         Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
-            ),
-            // border: Border.all(color: AppColors.border),
-          ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppColors.background,
               borderRadius: const BorderRadius.only(
@@ -303,10 +86,10 @@ class InvoiceInfoCardWidget extends StatelessWidget {
                   child: Text(
                     'اسم المنتج',
                     style: TextStyle(
-                      fontSize: AppFonts.fontSizeMedium,
+                      fontSize: AppFonts.fontSizeSmall,
                       fontWeight: AppFonts.fontWeightSemiBold,
                       color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
@@ -315,22 +98,22 @@ class InvoiceInfoCardWidget extends StatelessWidget {
                     'الكمية',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: AppFonts.fontSizeMedium,
+                      fontSize: AppFonts.fontSizeSmall,
                       fontWeight: AppFonts.fontWeightSemiBold,
                       color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
                 Expanded(
                   child: Text(
-                    'سعر الوحدة',
+                    'السعر',
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: AppFonts.fontSizeMedium,
+                      fontSize: AppFonts.fontSizeSmall,
                       fontWeight: AppFonts.fontWeightSemiBold,
                       color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
@@ -339,17 +122,16 @@ class InvoiceInfoCardWidget extends StatelessWidget {
                     'الإجمالي',
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      fontSize: AppFonts.fontSizeMedium,
+                      fontSize: AppFonts.fontSizeSmall,
                       fontWeight: AppFonts.fontWeightSemiBold,
                       color: AppColors.textSecondary,
-                      letterSpacing: 0.5,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ),
 
         // Products List
         Container(
@@ -377,12 +159,12 @@ class InvoiceInfoCardWidget extends StatelessWidget {
   }
 
   Widget _buildProductRow(InvoiceItem product, int index) {
-    final name = product.productName;
+    final name = product.nameWithMeasurementUnit;
     final quantity = product.quantity;
     final unitPrice = product.unitPrice;
     final total = product.totalPrice;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -402,7 +184,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
             child: Text(
               name,
               style: TextStyle(
-                fontSize: AppFonts.fontSizeMedium,
+                fontSize: AppFonts.fontSizeSmall,
                 fontWeight: AppFonts.fontWeightMedium,
                 color: AppColors.text,
               ),
@@ -414,7 +196,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
               quantity.toString(),
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: AppFonts.fontSizeMedium,
+                fontSize: AppFonts.fontSizeSmall,
                 fontWeight: AppFonts.fontWeightMedium,
                 color: AppColors.textSecondary,
               ),
@@ -425,7 +207,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
               '${AppUtils.formatNumber(unitPrice)} ${NumberFormatter.getCurrencySymbol()}',
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: AppFonts.fontSizeMedium,
+                fontSize: AppFonts.fontSizeSmall,
                 color: AppColors.textSecondary,
               ),
             ),
@@ -435,7 +217,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
               '${AppUtils.formatNumber(total)} ${NumberFormatter.getCurrencySymbol()} ',
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: AppFonts.fontSizeMedium,
+                fontSize: AppFonts.fontSizeSmall,
                 fontWeight: AppFonts.fontWeightBold,
                 color: AppColors.primary,
               ),
@@ -445,4 +227,6 @@ class InvoiceInfoCardWidget extends StatelessWidget {
       ),
     );
   }
+
+ 
 }

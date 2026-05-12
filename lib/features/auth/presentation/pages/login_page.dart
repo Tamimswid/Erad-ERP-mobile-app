@@ -1,3 +1,4 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
 import 'package:erad/features/app_status/presentation/bloc/app_status_cubit.dart';
 import 'package:erad/features/app_status/presentation/pages/app_status_page.dart';
@@ -51,12 +52,10 @@ class LoginPage extends StatelessWidget {
               );
             }
           },
-          child: const SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(24.0),
-                child: LoginForm(),
-              ),
+          child:  Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(AppConstants.spacingMd),
+              child: LoginForm(),
             ),
           ),
         ),

@@ -1,11 +1,11 @@
 import 'package:erad/features/invoices/data/repositories/invoice_repository.dart';
+import 'package:erad/features/invoices/presentation/widgets/customer_supplier_search_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/invoice_cubit.dart';
-import '../widgets/invoice_type_selector_widget.dart';
-import '../widgets/customer_supplier_search_widget.dart';
+import '../widgets/combined_invoice_info_widget.dart';
 import '../widgets/invoice_dates_widget.dart';
 import '../widgets/product_add_widget.dart';
 import '../widgets/invoice_summary_widget.dart';
@@ -83,36 +83,14 @@ class _CreateInvoicePageContentState extends State<_CreateInvoicePageContent> {
           centerTitle: true,
         ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: paddingSize),
+          padding: EdgeInsets.symmetric(horizontal: AppConstants.spacingMd),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: const [
-                  Expanded(
-                    flex: 1,
-                    child: InvoiceTypeSelectorWidget(),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    flex: 1,
-                    child: InvoiceDatesWidget(),
-                  ),
-                ],
-              ),
+              CombinedInvoiceInfoWidget(),
               const SizedBox(height: 16),
-              BlocBuilder<InvoiceCubit, InvoiceState>(
-                buildWhen: (previous, current) {
-                  return current is InvoiceFormUpdated;
-                },
-                builder: (context, state) {
-                  // Get invoiceType directly from cubit property which is always up-to-date
-                  final invoiceType = context.read<InvoiceCubit>().invoiceType;
-                  return CustomerSupplierSearchWidget(
-                    key: ValueKey('customer-supplier-$invoiceType'),
-                  );
-                },
-              ),
+
+              InvoiceDatesWidget(),
               const SizedBox(height: 16),
               const ProductAddWidget(),
               const SizedBox(height: 16),

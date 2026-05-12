@@ -1,3 +1,4 @@
+import 'package:erad/core/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/models/supplier.dart';
@@ -32,8 +33,8 @@ class SupplierListWidget extends StatelessWidget {
           return GridView.builder(
             padding: const EdgeInsets.all(20),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 1.5,
+              crossAxisCount: 1,
+              childAspectRatio: 2,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
             ),
@@ -75,12 +76,10 @@ class SupplierCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      child: Container(
+    return CustomCard(
         padding: const EdgeInsets.all(16),
-        child: Column(
+
+    child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -170,7 +169,6 @@ class SupplierCard extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 

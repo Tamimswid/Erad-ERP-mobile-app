@@ -1,3 +1,4 @@
+import 'package:erad/core/widgets/common_widgets.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,9 +32,9 @@ class CustomerListWidget extends StatelessWidget {
 
           return GridView.builder(
             padding: const EdgeInsets.all(20),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              childAspectRatio: 1.5,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1,
+              childAspectRatio: 1.7,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
             ),
@@ -54,7 +55,7 @@ class CustomerListWidget extends StatelessWidget {
         } else if (state is CustomerInitial || state is CustomerLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         return const Center(child: Text('Unknown state'));
       },
     );
@@ -75,13 +76,10 @@ class CustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      child: Container(
-     
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return CustomCard(
+      padding: const EdgeInsets.all(16),
+
+    child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -210,7 +208,6 @@ class CustomerCard extends StatelessWidget {
             ],
           ],
         ),
-      ),
     );
   }
 

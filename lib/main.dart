@@ -35,7 +35,7 @@ class ERADApp extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: child!,
       ),
-      home: Scaffold(body: const DashboardPage()),
+      home: SafeArea(child: const MainWrapper())
     );
   }
 }
