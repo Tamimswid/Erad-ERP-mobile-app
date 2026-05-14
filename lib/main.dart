@@ -1,9 +1,20 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart' as sl;
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:erad/features/auth/presentation/pages/login_page.dart';
-import 'package:erad/features/dashboard/presentation/pages/dashboard_overview.dart';
+import 'package:erad/features/auth/presentation/pages/login_page.dart' hide AppStatusWrapper;
+
+import 'package:erad/features/customers/presentation/pages/customers_page.dart';
+import 'package:erad/features/customer_debts/presentation/pages/customer_debts_page.dart';
+import 'package:erad/features/app_status/presentation/pages/app_status_wrapper.dart';
 import 'package:erad/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:erad/features/expenses/presentation/pages/expenses_page.dart';
+import 'package:erad/features/invoices/presentation/bloc/invoice_cubit.dart';
+import 'package:erad/features/invoices/presentation/pages/invoices_page.dart';
+import 'package:erad/features/products/presentation/pages/products_page.dart';
+import 'package:erad/features/settings/presentation/pages/settings_page.dart';
+import 'package:erad/features/suppliers/presentation/pages/suppliers_page.dart';
+import 'package:erad/features/withdrawals/presentation/pages/withdrawals_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +28,12 @@ void main() async {
   await NumberFormatter.setArabicFormat(true);
   await initializeDateFormatting('en');
 
-  runApp(const ERADApp());
+  runApp(
+    BlocProvider(
+      create: (_) => sl.sl<AuthCubit>()..getCurrentUser(),
+      child: const ERADApp(),
+    ),
+  );
 }
 
 class ERADApp extends StatelessWidget {
@@ -35,8 +51,56 @@ class ERADApp extends StatelessWidget {
         textDirection: TextDirection.rtl,
         child: child!,
       ),
-      home: SafeArea(child: const MainWrapper())
+      home: SafeArea(child: const MainWrapper()),
+      onGenerateRoute: _generateRoute,
     );
+  }
+
+  Route<dynamic>? _generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case AppRoutes.products:
+        return MaterialPageRoute(
+          builder: (_) => const ProductsPage(),
+        );
+      case AppRoutes.customers:
+        return MaterialPageRoute(
+          builder: (_) => const CustomersPage(),
+        );
+      case AppRoutes.invoices:
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider(
+            create: (_) => sl.sl<InvoiceCubit>(),
+            child: const InvoicesPage(),
+          ),
+        );
+      case AppRoutes.suppliers:
+        return MaterialPageRoute(
+          builder: (_) => const SuppliersPage(),
+        );
+      case AppRoutes.expenses:
+        return MaterialPageRoute(
+          builder: (_) => const ExpensesPage(),
+        );
+      case AppRoutes.withdrawals:
+        return MaterialPageRoute(
+          builder: (_) => const WithdrawalsPage(),
+        );
+      case AppRoutes.settings:
+        return MaterialPageRoute(
+          builder: (context) => BlocProvider.value(
+            value: context.read<AuthCubit>(),
+            child: const SettingsPage(),
+          ),
+        );
+      case AppRoutes.customerDebts:
+        return MaterialPageRoute(
+          builder: (_) => const CustomerDebtsPage(),
+        );
+      default:
+        return MaterialPageRoute(
+          builder: (_) => const DashboardPage(),
+        );
+    }
   }
 }
 
@@ -45,23 +109,20 @@ class MainWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl.sl<AuthCubit>()..getCurrentUser(),
-      child: BlocBuilder<AuthCubit, AuthState>(
-        builder: (context, authState) {
-          if (authState is AuthLoading) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, authState) {
+        if (authState is AuthLoading) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-          if (authState is Authenticated) {
-            return AppStatusWrapper(user: authState.user);
-          }
+        if (authState is Authenticated) {
+          return AppStatusWrapper(user: authState.user);
+        }
 
-          return const LoginPage();
-        },
-      ),
+        return const LoginPage();
+      },
     );
   }
 }

@@ -1,8 +1,6 @@
-import 'dart:developer';
-
 import 'package:equatable/equatable.dart';
 import 'package:erad/features/products/data/models/product.dart';
-import 'package:uuid/uuid.dart';
+
 
 class InvoiceItem extends Equatable {
   final String? id;
@@ -72,7 +70,6 @@ class InvoiceItem extends Equatable {
   }
 
   factory InvoiceItem.fromJson(Map<String, dynamic> json) {
-    log(json.toString());
     return InvoiceItem(
       id: json['id'] as String,
       productId: json['product_id'] as String?,

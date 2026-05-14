@@ -12,12 +12,6 @@ class CategoryListWidget extends StatefulWidget {
 
 class _CategoryListWidgetState extends State<CategoryListWidget> {
   @override
-  void initState() {
-    super.initState();
-    context.read<ProductCubit>().getCategories();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocListener<ProductCubit, ProductState>(
       listener: (context, state) {
@@ -81,16 +75,16 @@ class CategoryCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor,
-          child: Text(
-            category.name.isNotEmpty ? category.name[0].toUpperCase() : 'C',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
+        // leading: CircleAvatar(
+        //   backgroundColor: Theme.of(context).primaryColor,
+        //   child: Text(
+        //     category.name.isNotEmpty ? category.name[0].toUpperCase() : 'C',
+        //     style: const TextStyle(
+        //       color: Colors.white,
+        //       fontWeight: FontWeight.bold,
+        //     ),
+        //   ),
+        // ),
         title: Text(
           category.name,
           style: const TextStyle(fontWeight: FontWeight.bold),

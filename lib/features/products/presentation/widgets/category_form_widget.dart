@@ -7,7 +7,7 @@ import '../bloc/product_cubit.dart';
 class CategoryFormWidget extends StatefulWidget {
   final ProductCategory? category;
 
-  const CategoryFormWidget({Key? key, this.category}) : super(key: key);
+  const CategoryFormWidget({super.key, this.category});
 
   @override
   State<CategoryFormWidget> createState() => _CategoryFormWidgetState();

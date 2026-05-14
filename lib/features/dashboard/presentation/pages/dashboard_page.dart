@@ -39,23 +39,10 @@ class _DashboardPageState extends State<DashboardPage> {
   final Map<int, bool> _loadedTabs = {};
 
   final List<MenuItem> _menuItems = [
-    const MenuItem(
-      icon: Iconsax.home,
-      title: 'لوحة التحكم',
-      index: 0,
-    ),
-    const MenuItem(
-      icon: Iconsax.box,
-      title: 'المنتجات',
-      index: 1,
-    ),
+    const MenuItem(icon: Iconsax.home, title: 'لوحة التحكم', index: 0),
+    const MenuItem(icon: Iconsax.box, title: 'المنتجات', index: 1),
     const MenuItem(icon: Iconsax.user, title: 'العملاء', index: 2),
-    const MenuItem(
-      icon: Iconsax.document,
-      title: 'الفواتير',
-      index: 3,
-
-    ),
+    const MenuItem(icon: Iconsax.document, title: 'الفواتير', index: 3),
     const MenuItem(icon: Iconsax.shop, title: 'الموردون', index: 4),
   ];
 
@@ -69,11 +56,15 @@ class _DashboardPageState extends State<DashboardPage> {
         BlocProvider(create: (context) => sl.sl<SupplierCubit>(), lazy: true),
       ],
       child: Scaffold(
+
+
         bottomNavigationBar: NavigationBar(
           backgroundColor: AppColors.background,
           indicatorColor: AppColors.primary.withValues(alpha: 0.3),
           height: 70,
-          overlayColor: WidgetStatePropertyAll<Color>(AppColors.primary.withValues(alpha: 0.5),),
+          overlayColor: WidgetStatePropertyAll<Color>(
+            AppColors.primary.withValues(alpha: 0.5),
+          ),
           selectedIndex: _selectedIndex,
           shadowColor: AppColors.textSecondary,
           onDestinationSelected: (index) {
@@ -81,13 +72,14 @@ class _DashboardPageState extends State<DashboardPage> {
               _selectedIndex = index;
             });
           },
-          destinations: _menuItems.map((item) => 
-            NavigationDestination(
-              
-              icon: Icon(item.icon),
-              label: item.title,
-            ),
-          ).toList(),
+          destinations: _menuItems
+              .map(
+                (item) => NavigationDestination(
+                  icon: Icon(item.icon),
+                  label: item.title,
+                ),
+              )
+              .toList(),
         ),
         body: _buildContent(),
       ),

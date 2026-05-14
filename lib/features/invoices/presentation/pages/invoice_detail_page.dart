@@ -137,15 +137,11 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                               (item) => {'item': item, 'product': null},
                             )
                             .toList();
-                        print(
-                          'Invoice loaded with ${products.length} products',
-                        );
+                   
                       });
                       for (var item in invoice.items) {
-                        print('Item productId: ${item.productId}');
                         if (item.productId != null &&
                             item.productId!.isNotEmpty) {
-                          print('Calling getProduct for ${item.productId}');
                           context.read<ProductCubit>().getProduct(
                             item.productId!,
                           );
@@ -470,13 +466,12 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
         quantity: item.quantity ?? 0,
         unitPrice: item.unitPrice ?? 0.0,
         totalPrice: (item.quantity ?? 0) * (item.unitPrice ?? 0.0),
-        // unit: item.unit,
-        discountAmount: 0,
-        // measurement: '0',
+        discountAmount: 0.0,
       );
     }).toList();
   }
 
+   // ignore: non_constant_identifier_names
    Widget InvoiceStatusGridView() {
     return CustomCard(
 padding: EdgeInsets.all(AppConstants.borderRadius),
@@ -499,7 +494,7 @@ padding: EdgeInsets.all(AppConstants.borderRadius),
           _buildInfoItem(
             icon: Icons.person,
             label: 'اسم العميل',
-            value: invoice.customerName,
+            value: _getCustomerOrSupplierName(),
           ),
       
           // Status Info

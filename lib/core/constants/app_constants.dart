@@ -153,6 +153,7 @@ class AppRoutes {
   static const String withdrawals = '/withdrawals';
   static const String settings = '/settings';
   static const String profile = '/profile';
+  static const String customerDebts = '/customer-debts';
 }
 
 class AppFonts {

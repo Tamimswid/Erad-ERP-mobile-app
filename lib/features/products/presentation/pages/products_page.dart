@@ -188,7 +188,7 @@ class _ProductsPageState extends State<ProductsPage>
   void _showCategoriesDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         child: SizedBox(
           width: 600,
           height: 500,
@@ -207,15 +207,15 @@ class _ProductsPageState extends State<ProductsPage>
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(dialogContext),
                       icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Expanded(
-                  child: BlocProvider(
-                    create: (context) => sl<ProductCubit>(),
+                  child: BlocProvider.value(
+                    value: _productCubit,
                     child: Column(
                       children: [
                         Padding(
@@ -223,7 +223,7 @@ class _ProductsPageState extends State<ProductsPage>
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: ElevatedButton.icon(
-                              onPressed: () => _showAddCategoryDialog(context),
+                              onPressed: () => _showAddCategoryDialog(dialogContext),
                               icon: const Icon(Icons.add),
                               label: const Text('إضافة فئة جديدة'),
                             ),
@@ -272,7 +272,7 @@ class _ProductsPageState extends State<ProductsPage>
   void _showAddCategoryDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         child: SizedBox(
           width: 600,
           height: 250,
@@ -291,7 +291,7 @@ class _ProductsPageState extends State<ProductsPage>
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(dialogContext),
                       icon: const Icon(Icons.close),
                     ),
                   ],
@@ -299,8 +299,8 @@ class _ProductsPageState extends State<ProductsPage>
                 const SizedBox(height: 16),
 
                 Expanded(
-                  child: BlocProvider(
-                    create: (context) => sl<ProductCubit>(),
+                  child: BlocProvider.value(
+                    value: _productCubit,
                     child: const CategoryFormWidget(),
                   ),
                 ),

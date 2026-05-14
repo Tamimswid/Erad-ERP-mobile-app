@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:erad/features/invoices/data/models/invoice_item.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -50,9 +51,8 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
       // التحقق من تسجيل دخول المستخدم
       final userId = await UserService.getUserId();
       if (userId == null) throw Exception('User not logged in');
-
       // جلب فواتير البيع مع بيانات العناصر
-final response = await _supabaseClient
+      final response = await _supabaseClient
           .from('sales_invoices')
           .select('*, customers!inner(name), sales_invoice_items(*)')
           .eq('user_id', userId)
@@ -84,8 +84,10 @@ final response = await _supabaseClient
           .order('created_at', ascending: false);
 
       log('DEBUG: Purchase invoices response count: ${response.length}');
-      
-      final invoices = response.map((json) => _mapJsonToPurchaseInvoice(json)).toList();
+
+      final invoices = response
+          .map((json) => _mapJsonToPurchaseInvoice(json))
+          .toList();
       log('DEBUG: Mapped purchase invoices count: ${invoices.length}');
       log(response.toString());
       return invoices;
@@ -135,7 +137,7 @@ final response = await _supabaseClient
       invoiceData.remove('updated_at');
       invoiceData.remove('customer_name');
       invoiceData.remove('items');
-      
+
       // إدخال الفاتورة الرئيسية
       final response = await _supabaseClient
           .from('sales_invoices')
@@ -145,20 +147,23 @@ final response = await _supabaseClient
 
       // إدخال عناصر الفاتورة إذا وجدت
       if (invoice.items.isNotEmpty) {
-        final itemsData = invoice.items.map((item) => {
-          'invoice_id': response['id'],
-          'product_id': item.productId,
-          'product_name': item.productName,
-          'quantity': item.quantity,
-          'unit_price': item.unitPrice,
-          'discount_amount': item.discountAmount,
-          'total_price': item.totalPrice,
-          'measurement' : item.measurement,
-        }).toList();
-        
-        log('Inserting ${itemsData.length} sales invoice items for invoice ${response['id']}');
+        final itemsData = invoice.items
+            .map(
+              (item) => {
+                'invoice_id': response['id'],
+                'product_id': item.productId,
+                'product_name': item.productName,
+                'quantity': item.quantity,
+                'unit_price': item.unitPrice,
+                'discount_amount': item.discountAmount,
+                'total_price': item.totalPrice,
+                'measurement': item.measurement,
+                'unit': item.unit,
+              },
+            )
+            .toList();
+
         await _supabaseClient.from('sales_invoice_items').insert(itemsData);
-        log('Sales invoice items inserted successfully');
       }
 
       // جلب الفاتورة الكاملة مع العناصر
@@ -174,6 +179,7 @@ final response = await _supabaseClient
       throw Exception('Failed to create sales invoice: $e');
     }
   }
+
   @override
   Future<PurchaseInvoice> createPurchaseInvoice(PurchaseInvoice invoice) async {
     try {
@@ -194,17 +200,24 @@ final response = await _supabaseClient
 
       // إدخال عناصر الفاتورة إذا وجدت
       if (invoice.items.isNotEmpty) {
-        final itemsData = invoice.items.map((item) => {
-          'invoice_id': response['id'],
-          'product_id': item.productId,
-          'product_name': item.productName,
-          'quantity': item.quantity,
-          'unit_price': item.unitPrice,
-          'total_price': item.totalPrice,
-          'measurement' : item.measurement,
-        }).toList();
-        
-        log('Inserting ${itemsData.length} purchase invoice items for invoice ${response['id']}');
+        final itemsData = invoice.items
+            .map(
+              (item) => {
+                'invoice_id': response['id'],
+                'product_id': item.productId,
+                'product_name': item.productName,
+                'quantity': item.quantity,
+                'unit_price': item.unitPrice,
+                'total_price': item.totalPrice,
+                'measurement': item.measurement,
+                'unit': item.unit,
+              },
+            )
+            .toList();
+
+        log(
+          'Inserting ${itemsData.length} purchase invoice items for invoice ${response['id']}',
+        );
         await _supabaseClient.from('purchase_invoice_items').insert(itemsData);
         log('Purchase invoice items inserted successfully');
       }
@@ -269,7 +282,10 @@ final response = await _supabaseClient
   Future<void> deleteSalesInvoice(String id) async {
     try {
       // حذف عناصر فاتورة البيع المرتبطة
-      await _supabaseClient.from('sales_invoice_items').delete().eq('invoice_id', id);
+      await _supabaseClient
+          .from('sales_invoice_items')
+          .delete()
+          .eq('invoice_id', id);
       // حذف فاتورة البيع
       await _supabaseClient.from('sales_invoices').delete().eq('id', id);
     } catch (e) {
@@ -281,7 +297,10 @@ final response = await _supabaseClient
   Future<void> deletePurchaseInvoice(String id) async {
     try {
       // حذف عناصر فاتورة الشراء المرتبطة
-      await _supabaseClient.from('purchase_invoice_items').delete().eq('invoice_id', id);
+      await _supabaseClient
+          .from('purchase_invoice_items')
+          .delete()
+          .eq('invoice_id', id);
       // حذف فاتورة الشراء
       await _supabaseClient.from('purchase_invoices').delete().eq('id', id);
     } catch (e) {
@@ -295,9 +314,7 @@ final response = await _supabaseClient
       // إنهاء فاتورة البيع - قاعدة البيانات ستتعامل مع الباقي تلقائياً
       await _supabaseClient
           .from('sales_invoices')
-          .update({
-            'is_finalized': true,
-          })
+          .update({'is_finalized': true})
           .eq('id', id);
     } catch (e) {
       throw Exception('Failed to finalize sales invoice: $e');
@@ -310,9 +327,7 @@ final response = await _supabaseClient
       // إنهاء فاتورة الشراء - قاعدة البيانات ستتعامل مع الباقي تلقائياً
       await _supabaseClient
           .from('purchase_invoices')
-          .update({
-            'is_finalized': true,
-          })
+          .update({'is_finalized': true})
           .eq('id', id);
     } catch (e) {
       throw Exception('Failed to finalize purchase invoice: $e');
@@ -324,16 +339,17 @@ final response = await _supabaseClient
     final userId = await UserService.getUserId();
     if (userId == null) throw Exception('User not logged in');
 
-    await for (final data in _supabaseClient
-        .from('sales_invoices')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId)
-        .order('created_at', ascending: false)) {
+    await for (final data
+        in _supabaseClient
+            .from('sales_invoices')
+            .stream(primaryKey: ['id'])
+            .eq('user_id', userId)
+            .order('created_at', ascending: false)) {
       // Fetch customer names and items for each invoice
       final invoices = await Future.wait(
         data.map((json) async {
           final invoiceJson = Map<String, dynamic>.from(json);
-          
+
           // Fetch customer name
           if (json['customer_id'] != null) {
             final customerResponse = await _supabaseClient
@@ -345,18 +361,18 @@ final response = await _supabaseClient
               invoiceJson['customer_name'] = customerResponse['name'];
             }
           }
-          
+
           // Fetch invoice items
           final itemsResponse = await _supabaseClient
               .from('sales_invoice_items')
               .select()
               .eq('invoice_id', json['id']);
           invoiceJson['items'] = itemsResponse;
-          
+
           return _mapJsonToSalesInvoice(invoiceJson);
         }),
       );
-      
+
       yield invoices;
     }
   }
@@ -366,16 +382,17 @@ final response = await _supabaseClient
     final userId = await UserService.getUserId();
     if (userId == null) throw Exception('User not logged in');
 
-    await for (final data in _supabaseClient
-        .from('purchase_invoices')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId)
-        .order('created_at', ascending: false)) {
+    await for (final data
+        in _supabaseClient
+            .from('purchase_invoices')
+            .stream(primaryKey: ['id'])
+            .eq('user_id', userId)
+            .order('created_at', ascending: false)) {
       // Fetch supplier names and items for each invoice
       final invoices = await Future.wait(
         data.map((json) async {
           final invoiceJson = Map<String, dynamic>.from(json);
-          
+
           // Fetch supplier name
           if (json['supplier_id'] != null) {
             final supplierResponse = await _supabaseClient
@@ -387,18 +404,18 @@ final response = await _supabaseClient
               invoiceJson['supplier_name'] = supplierResponse['name'];
             }
           }
-          
+
           // Fetch invoice items
           final itemsResponse = await _supabaseClient
               .from('purchase_invoice_items')
               .select()
               .eq('invoice_id', json['id']);
           invoiceJson['items'] = itemsResponse;
-          
+
           return _mapJsonToPurchaseInvoice(invoiceJson);
         }),
       );
-      
+
       yield invoices;
     }
   }
@@ -407,10 +424,10 @@ final response = await _supabaseClient
   Future<void> updateCustomerBalance(String customerId, double amount) async {
     try {
       // تحديث رصيد العميل باستخدام دالة قاعدة البيانات
-      await _supabaseClient.rpc('update_customer_balance', params: {
-        'p_customer_id': customerId,
-        'p_amount': amount,
-      });
+      await _supabaseClient.rpc(
+        'update_customer_balance',
+        params: {'p_customer_id': customerId, 'p_amount': amount},
+      );
     } catch (e) {
       throw Exception('Failed to update customer balance: $e');
     }
@@ -419,40 +436,40 @@ final response = await _supabaseClient
   // تحويل JSON إلى كائن فاتورة بيع
   SalesInvoice _mapJsonToSalesInvoice(Map<String, dynamic> json) {
     final invoiceJson = Map<String, dynamic>.from(json);
-    
+
     // استخراج اسم العميل
     if (json['customers'] != null) {
       invoiceJson['customer_name'] = json['customers']['name'];
     }
-    
+
     // استخراج عناصر الفاتورة
     if (json['sales_invoice_items'] != null) {
       invoiceJson['items'] = json['sales_invoice_items'];
     }
-    
+
     invoiceJson.remove('customers');
     invoiceJson.remove('sales_invoice_items');
-    
+
     return SalesInvoice.fromJson(invoiceJson);
   }
 
   // تحويل JSON إلى كائن فاتورة شراء
   PurchaseInvoice _mapJsonToPurchaseInvoice(Map<String, dynamic> json) {
     final invoiceJson = Map<String, dynamic>.from(json);
-    
+
     // استخراج اسم المورد
     if (json['suppliers'] != null) {
       invoiceJson['supplier_name'] = json['suppliers']['name'];
     }
-    
+
     // استخراج عناصر الفاتورة
     if (json['purchase_invoice_items'] != null) {
       invoiceJson['items'] = json['purchase_invoice_items'];
     }
-    
+
     invoiceJson.remove('suppliers');
     invoiceJson.remove('purchase_invoice_items');
-    
+
     return PurchaseInvoice.fromJson(invoiceJson);
   }
 }
