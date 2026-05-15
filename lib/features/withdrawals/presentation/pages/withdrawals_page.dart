@@ -31,7 +31,8 @@ class _WithdrawalsPageState extends State<WithdrawalsPage> {
       create: (context) => sl.sl<WithdrawalCubit>(),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: BlocConsumer<WithdrawalCubit, WithdrawalState>(
+        body: SafeArea(
+          child: BlocConsumer<WithdrawalCubit, WithdrawalState>(
           listener: (context, state) {
             if (state is WithdrawalError) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -148,6 +149,7 @@ class _WithdrawalsPageState extends State<WithdrawalsPage> {
               ),
             );
           },
+        ),
         ),
         floatingActionButton: Builder(
           builder: (context) {

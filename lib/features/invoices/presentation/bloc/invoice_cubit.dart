@@ -230,7 +230,10 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     final result = await _repository.deleteSalesInvoice(id);
     result.fold(
       (failure) => emit(InvoiceError(failure.message)),
-      (success) => getSalesInvoices(),
+      (success) {
+        emit(SalesInvoiceDeleted());
+        getSalesInvoices();
+      },
     );
   }
 
@@ -239,7 +242,10 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     final result = await _repository.deletePurchaseInvoice(id);
     result.fold(
       (failure) => emit(InvoiceError(failure.message)),
-      (success) => getPurchaseInvoices(),
+      (success) {
+        emit(PurchaseInvoiceDeleted());
+        getPurchaseInvoices();
+      },
     );
   }
 
@@ -340,31 +346,11 @@ class InvoiceCubit extends Cubit<InvoiceState> {
             case 'pending':
               statusMatch = invoice.status == InvoiceStatus.pending;
               break;
-            case 'overdue':
-              statusMatch = invoice.status == InvoiceStatus.overdue;
-              break;
             case 'cancelled':
               statusMatch = invoice.status == InvoiceStatus.cancelled;
               break;
           }
         }
-        // else if (invoice is PurchaseInvoice) {
-        //   switch (_selectedStatus) {
-        //     case 'paid':
-        //       statusMatch = invoice.paymentStatus == InvoiceStatus.paid;
-        //       break;
-        //     case 'pending':
-        //       statusMatch = invoice.paymentStatus == InvoiceStatus.pending;
-        //       break;
-        //     case 'overdue':
-        //       statusMatch = invoice.status == InvoiceStatus.overdue;
-        //       break;
-        //     case 'cancelled':
-        //       statusMatch = invoice.status == InvoiceStatus.cancelled;
-        //       break;
-        //   }
-        // }
-
         if (!statusMatch) return false;
       }
 

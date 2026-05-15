@@ -24,7 +24,7 @@ class ExpenseSummaryCardsWidget extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 14,
           crossAxisSpacing: 14,
-          childAspectRatio: 3,
+          childAspectRatio: 1,
           children: [
             _buildCard(
               title: 'إجمالي المصروفات',

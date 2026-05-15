@@ -35,12 +35,7 @@ class _DebtSearchWidgetState extends State<DebtSearchWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-      ),
+
       child: Row(
         children: [
           Expanded(

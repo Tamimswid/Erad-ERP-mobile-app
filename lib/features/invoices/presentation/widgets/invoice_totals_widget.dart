@@ -18,45 +18,25 @@ class InvoiceTotalsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       child: Column(
         children: [
           _buildTotalRow(
-            icon: Icons.receipt_long,
             label: 'المجموع الفرعي',
             value: subtotal,
             color: AppColors.textSecondary,
           ),
-          
-          const SizedBox(height: 6),
-          
+          const SizedBox(height: 8),
           _buildTotalRow(
-            icon: Icons.percent,
             label: 'الخصم',
             value: discount,
             color: AppColors.error,
             isDiscount: true,
           ),
-          
-          const SizedBox(height: 8),
-          
-          Container(
-            height: 2,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.withOpacity(0.3),
-                  AppColors.primary,
-                  AppColors.primary.withOpacity(0.3),
-                ],
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 8),
-          
+          const SizedBox(height: 12),
+          Container(height: 1, color: AppColors.divider),
+          const SizedBox(height: 12),
           _buildTotalRow(
-            icon: Icons.calculate,
             label: 'المجموع الإجمالي',
             value: total,
             color: AppColors.primary,
@@ -68,7 +48,6 @@ class InvoiceTotalsWidget extends StatelessWidget {
   }
 
   Widget _buildTotalRow({
-    required IconData icon,
     required String label,
     required double value,
     required Color color,

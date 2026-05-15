@@ -95,50 +95,7 @@ class DebtCardWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  debt.phone ?? '',
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeMedium,
-                    fontWeight: AppFonts.fontWeightSemiBold,
-                    color: AppColors.text,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 1,
-                child: ElevatedButton.icon(
-                  onPressed: onPaymentTap,
-                  icon: const Icon(Icons.add, size: 16),
-                  label: Text(
-                    'إضافة الدفع',
-                    style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      fontWeight: AppFonts.fontWeightMedium,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    foregroundColor: AppColors.primary,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConstants.borderRadius,
-                      ),
-                      side: BorderSide(
-                        color: AppColors.primary.withOpacity(0.2),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+    
             ],
           ),
         ),

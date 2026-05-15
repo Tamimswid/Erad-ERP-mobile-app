@@ -25,165 +25,99 @@ class ExpenseTableWidget extends StatelessWidget {
       return _buildEmptyState();
     }
 
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: expenses.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        final expense = expenses[index];
+        final category = categories.where((c) => c.id == expense.categoryId).firstOrNull;
+        return _buildCard(context, expense: expense, category: category);
+      },
+    );
+  }
+
+  Widget _buildCard(BuildContext context, {
+    required Expense expense,
+    required ExpenseCategory? category,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.divider),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          _buildHeader(),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: expenses.length,
-            separatorBuilder: (context, index) => const Divider(
-              height: 1,
-              color: AppColors.divider,
-            ),
-            itemBuilder: (context, index) {
-              final expense = expenses[index];
-              final category = categories.where((c) => c.id == expense.categoryId).firstOrNull;
-              return _buildRow(
-                expense: expense,
-                category: category,
-                index: index,
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        border: Border(
-          bottom: BorderSide(color: AppColors.divider),
-        ),
-      ),
-      child: const Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              'التاريخ',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              'الوصف',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'الفئة',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-              'المبلغ',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          SizedBox(width: 40),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRow({
-    required Expense expense,
-    required ExpenseCategory? category,
-    required int index,
-  }) {
-    return InkWell(
-      onTap: () => onTap(expense),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        decoration: BoxDecoration(
-          color: index % 2 == 0 ? AppColors.surface : AppColors.background.withValues(alpha: 0.5),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Text(
-                _formatDate(expense.expenseDate),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.text,
+      child: InkWell(
+        onTap: () => onTap(expense),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      expense.description ?? '-',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today,
+                          size: 11,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _formatDate(expense.expenseDate),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        if (category != null) ...[
+                          const SizedBox(width: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              category.name,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
-            Expanded(
-              flex: 3,
-              child: Text(
-                expense.description ?? '-',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.text,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                category?.name ?? '-',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppColors.text,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
+              const SizedBox(width: 8),
+              Text(
                 _formatCurrency(expense.amount),
                 style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
                   color: AppColors.error,
                 ),
               ),
-            ),
-            Builder(
-              builder: (context) => SizedBox(
-                width: 40,
+              SizedBox(
+                width: 36,
                 child: IconButton(
                   onPressed: () => _confirmDelete(context, expense),
                   icon: const Icon(
@@ -195,8 +129,8 @@ class ExpenseTableWidget extends StatelessWidget {
                   constraints: const BoxConstraints(),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

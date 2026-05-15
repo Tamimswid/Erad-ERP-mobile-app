@@ -1,10 +1,11 @@
+import 'package:erad/features/expenses/data/models/expense.dart';
+import 'package:erad/features/expenses/data/models/expense_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/services_locator.dart' as sl;
-import '../../../../core/utils/custom_date_range_picker.dart';
+import '../../../../core/widgets/date_filter_sheet.dart';
 import '../bloc/expense_cubit.dart';
-import '../widgets/expense_categories_dialog.dart';
 import '../widgets/expense_filters_widget.dart';
 import '../widgets/expense_form_dialog.dart';
 import '../widgets/expense_monthly_chart_widget.dart';
@@ -19,60 +20,113 @@ class ExpensesPage extends StatefulWidget {
 }
 
 class _ExpensesPageState extends State<ExpensesPage> {
-  late ExpenseCubit _expenseCubit;
   PeriodMode _periodMode = PeriodMode.year;
-  String? _selectedYear;
+  String? _selectedYear = DateTime.now().year.toString();
   DateTimeRange? _customDateRange;
 
   @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => sl.sl<ExpenseCubit>(),
+      child: _ExpensesPageBody(
+        periodMode: _periodMode,
+        selectedYear: _selectedYear,
+        customDateRange: _customDateRange,
+        onPeriodModeChanged: (mode) => setState(() => _periodMode = mode),
+        onYearChanged: (year) => setState(() => _selectedYear = year),
+        onCustomDateRangeChanged: (range) =>
+            setState(() => _customDateRange = range),
+        onClearCustomDateRange: () => setState(() => _customDateRange = null),
+        availableYears: [
+          DateTime.now().year.toString(),
+          (DateTime.now().year - 1).toString(),
+          (DateTime.now().year - 2).toString(),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExpensesPageBody extends StatefulWidget {
+  final PeriodMode periodMode;
+  final String? selectedYear;
+  final DateTimeRange? customDateRange;
+  final ValueChanged<PeriodMode> onPeriodModeChanged;
+  final ValueChanged<String?> onYearChanged;
+  final ValueChanged<DateTimeRange?> onCustomDateRangeChanged;
+  final VoidCallback onClearCustomDateRange;
+  final List<String> availableYears;
+
+  const _ExpensesPageBody({
+    required this.periodMode,
+    required this.selectedYear,
+    required this.customDateRange,
+    required this.onPeriodModeChanged,
+    required this.onYearChanged,
+    required this.onCustomDateRangeChanged,
+    required this.onClearCustomDateRange,
+    required this.availableYears,
+  });
+
+  @override
+  State<_ExpensesPageBody> createState() => _ExpensesPageBodyState();
+}
+
+class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
+  @override
   void initState() {
     super.initState();
-    _expenseCubit = sl.sl<ExpenseCubit>();
-    _selectedYear = DateTime.now().year.toString();
-    // Apply initial year filter after frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final year = int.tryParse(_selectedYear!) ?? DateTime.now().year;
-      _expenseCubit.filterByDateRange(
+      final year =
+          int.tryParse(widget.selectedYear ?? DateTime.now().year.toString()) ??
+          DateTime.now().year;
+      context.read<ExpenseCubit>().filterByDateRange(
         DateTime(year, 1, 1),
         DateTime(year, 12, 31),
       );
     });
   }
 
-  List<String> get _availableYears {
-    final currentYear = DateTime.now().year;
-    return [
-      currentYear.toString(),
-      (currentYear - 1).toString(),
-      (currentYear - 2).toString(),
-    ];
-  }
-
-  void _showCustomDateRangePicker() {
-    CustomDateRangePicker.showDateRangePicker(
-      context: context,
-      initialDateRange: _customDateRange,
-      onDateRangeChanged: (dateRange) {
-        setState(() {
-          _customDateRange = dateRange;
-        });
-        // Apply date filter to cubit
-        _expenseCubit.filterByDateRange(dateRange.start, dateRange.end);
-      },
-    );
-  }
-
-  int _getSelectedYear() {
-    return int.tryParse(_selectedYear ?? DateTime.now().year.toString()) ?? DateTime.now().year;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _expenseCubit,
-      child: Scaffold(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('المصروفات'),
         backgroundColor: AppColors.background,
-        body: BlocConsumer<ExpenseCubit, ExpenseState>(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: _ExpensesDateFilter(
+            selectedYear: widget.selectedYear,
+            customDateRange: widget.customDateRange,
+            onYearSelected: (year) {
+              widget.onYearChanged(year);
+              final yearInt = int.tryParse(year) ?? DateTime.now().year;
+              context.read<ExpenseCubit>().filterByDateRange(
+                DateTime(yearInt, 1, 1),
+                DateTime(yearInt, 12, 31),
+              );
+            },
+            onDateRangeSelected: (range) {
+              widget.onCustomDateRangeChanged(range);
+              context.read<ExpenseCubit>().filterByDateRange(range.start, range.end);
+            },
+            onClearFilter: () {
+              widget.onClearCustomDateRange();
+              widget.onPeriodModeChanged(PeriodMode.year);
+              final year = int.tryParse(widget.selectedYear ?? DateTime.now().year.toString()) ?? DateTime.now().year;
+              context.read<ExpenseCubit>().filterByDateRange(
+                DateTime(year, 1, 1),
+                DateTime(year, 12, 31),
+              );
+            },
+          ),
+          ),
+        ],
+      ),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: BlocConsumer<ExpenseCubit, ExpenseState>(
           listener: (context, state) {
             if (state is ExpenseSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -94,9 +148,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
           },
           builder: (context, state) {
             if (state is ExpenseInitial || state is ExpenseLoading) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
             return SingleChildScrollView(
               padding: const EdgeInsets.all(20),
@@ -104,30 +156,26 @@ class _ExpensesPageState extends State<ExpensesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (state is ExpensesLoaded) ...[
-                    // Filters
-                    _buildFilters(context, state),
-                    const SizedBox(height: 16),
-                    // Summary Cards
+
                     ExpenseSummaryCardsWidget(
                       totalAmount: state.totalAmount,
                       totalCount: state.totalCount,
                       averageAmount: state.averageAmount,
                     ),
                     const SizedBox(height: 16),
-                    // Monthly Chart - Show full year with Arabic month names
                     ExpenseMonthlyChartWidget(
                       expenses: state.expenses,
                       year: _getSelectedYear(),
                     ),
                     const SizedBox(height: 16),
-                    // Category Chips
                     _buildCategoryChips(context, state),
                     const SizedBox(height: 16),
-                    // Expenses Table
                     ExpenseTableWidget(
                       expenses: state.expenses,
                       categories: state.categories,
-                      onDelete: (expense) => _expenseCubit.deleteExpense(expense.id),
+                      onDelete: (expense) => context
+                          .read<ExpenseCubit>()
+                          .deleteExpense(expense.id),
                       onTap: (expense) {},
                     ),
                   ] else if (state is ExpenseLoading)
@@ -144,106 +192,32 @@ class _ExpensesPageState extends State<ExpensesPage> {
             );
           },
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showAddExpenseDialog(context),
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
+      ),
+      floatingActionButton: Builder(
+        builder: (context) {
+          final categories = context.watch<ExpenseCubit>().categories;
+          return FloatingActionButton.extended(
+            label: Text('مصروف',style: TextStyle(color: AppColors.surface),)  ,
+            onPressed: () => _showAddExpenseDialog(
+              context: context,
+              onTap: (expense) {
+                context.read<ExpenseCubit>().createExpense(expense);
+              },
+              categories: categories,
+            ),
+            backgroundColor: AppColors.primary,
+          
+          );
+        },
       ),
     );
   }
 
-  Widget _buildFilters(BuildContext context, ExpensesLoaded state) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ExpenseFiltersWidget(
-              periodMode: _periodMode,
-              onPeriodModeChanged: (mode) {
-                setState(() {
-                  _periodMode = mode;
-                });
-                if (mode == PeriodMode.year) {
-                  // Clear custom date range and apply year filter
-                  _customDateRange = null;
-                  final year = int.tryParse(_selectedYear ?? DateTime.now().year.toString()) ?? DateTime.now().year;
-                  _expenseCubit.filterByDateRange(
-                    DateTime(year, 1, 1),
-                    DateTime(year, 12, 31),
-                  );
-                } else {
-                  // Switch to custom mode - clear filters until user selects range
-                  _expenseCubit.clearFilters();
-                }
-              },
-              selectedYear: _selectedYear,
-              onYearChanged: (year) {
-                setState(() {
-                  _selectedYear = year;
-                });
-                if (_periodMode == PeriodMode.year && year != null) {
-                  final yearInt = int.tryParse(year) ?? DateTime.now().year;
-                  _expenseCubit.filterByDateRange(
-                    DateTime(yearInt, 1, 1),
-                    DateTime(yearInt, 12, 31),
-                  );
-                }
-              },
-              customDateRange: _customDateRange,
-              onDateRangeTap: _showCustomDateRangePicker,
-              availableYears: _availableYears,
-            ),
-          ),
-          const SizedBox(width: 16),
-          SizedBox(
-            width: 180,
-            child: _buildCategoriesButton(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoriesButton(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'الفئات',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: 6),
-          ElevatedButton.icon(
-            onPressed: () => _showCategoriesDialog(context),
-            icon: const Icon(Icons.category_outlined, size: 16),
-            label: const Text('إدارة الفئات', style: TextStyle(fontSize: 12)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 36),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-            ),
-          ),
-        ],
-      ),
-    );
+  int _getSelectedYear() {
+    return int.tryParse(
+          widget.selectedYear ?? DateTime.now().year.toString(),
+        ) ??
+        DateTime.now().year;
   }
 
   Widget _buildCategoryChips(BuildContext context, ExpensesLoaded state) {
@@ -256,14 +230,12 @@ class _ExpensesPageState extends State<ExpensesPage> {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          // All expenses chip
           _buildChip(
             label: 'الكل',
             isSelected: selectedCategory == null,
             onTap: () => cubit.setCategoryFilter(null),
           ),
           const SizedBox(width: 8),
-          // Category chips
           ...categories.map((category) {
             return Padding(
               padding: const EdgeInsets.only(right: 8),
@@ -311,39 +283,125 @@ class _ExpensesPageState extends State<ExpensesPage> {
     );
   }
 
-  void _showAddExpenseDialog(BuildContext context) {
-    final cubit = context.read<ExpenseCubit>();
-    final categories = cubit.categories;
-
+  void _showAddExpenseDialog({
+    required BuildContext context,
+    required Function(Expense expense) onTap,
+    required List<ExpenseCategory> categories,
+  }) {
     showDialog(
       context: context,
       builder: (dialogContext) => ExpenseFormDialog(
         categories: categories,
-        onSubmit: (expense) {
-          cubit.createExpense(expense);
-          Navigator.pop(dialogContext);
-        },
+        onSubmit: (expense) => onTap(expense),
       ),
     );
   }
 
-  void _showCategoriesDialog(BuildContext context) {
-    final cubit = context.read<ExpenseCubit>();
+}
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) => ExpenseCategoriesDialog(
-        categories: cubit.categories,
-        onAddCategory: (category) {
-          cubit.createExpenseCategory(category);
-        },
-        onUpdateCategory: (category) {
-          cubit.updateExpenseCategory(category);
-        },
-        onDeleteCategory: (id) {
-          cubit.deleteExpenseCategory(id);
-        },
+class _ExpensesDateFilter extends StatelessWidget {
+  final String? selectedYear;
+  final DateTimeRange? customDateRange;
+  final ValueChanged<String> onYearSelected;
+  final ValueChanged<DateTimeRange> onDateRangeSelected;
+  final VoidCallback onClearFilter;
+
+  const _ExpensesDateFilter({
+    required this.selectedYear,
+    required this.customDateRange,
+    required this.onYearSelected,
+    required this.onDateRangeSelected,
+    required this.onClearFilter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final label = customDateRange != null
+        ? '${customDateRange!.start.day}/${customDateRange!.start.month} - ${customDateRange!.end.day}/${customDateRange!.end.month}'
+        : (selectedYear ?? DateTime.now().year.toString());
+
+    return GestureDetector(
+      onTap: () => _showSheet(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.calendar_today,
+              size: 16,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void _showSheet(BuildContext context) {
+    final now = DateTime.now();
+    final availableYears = [
+      now.year.toString(),
+      (now.year - 1).toString(),
+      (now.year - 2).toString(),
+    ];
+
+    DateFilterSheet.show(
+      context: context,
+      selectedYear: selectedYear,
+      availableYears: availableYears,
+      customDateRange: customDateRange,
+      isCustomDateRange: customDateRange != null,
+      onYearSelected: onYearSelected,
+      onDateRangeSelected: onDateRangeSelected,
+      onClearFilter: onClearFilter,
+      onDateRangePickerTap: () => _pickDateRange(context),
+    );
+  }
+
+  Future<void> _pickDateRange(BuildContext context) async {
+    final initial = customDateRange ?? DateTimeRange(
+      start: DateTime.now().subtract(const Duration(days: 30)),
+      end: DateTime.now(),
+    );
+
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      initialDateRange: initial,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            appBarTheme: const AppBarTheme(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && context.mounted) {
+      onDateRangeSelected(picked);
+      Navigator.pop(context);
+    }
   }
 }

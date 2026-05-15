@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:erad/features/invoices/data/models/invoice_item.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -281,12 +280,35 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   @override
   Future<void> deleteSalesInvoice(String id) async {
     try {
-      // حذف عناصر فاتورة البيع المرتبطة
+      // 1. Stoku geri almak için önce fatura öğelerini al
+      final items = await _supabaseClient
+          .from('sales_invoice_items')
+          .select('product_id, quantity')
+          .eq('invoice_id', id);
+
+      // 2. Her ürünün stok miktarını geri ekle (satış iptal → stok +)
+      for (final item in items) {
+        if (item['product_id'] != null) {
+          final productId = item['product_id'] as String;
+          final quantity = item['quantity'] as int;
+          final product = await _supabaseClient
+              .from('products')
+              .select('current_stock')
+              .eq('id', productId)
+              .single();
+          final currentStock = product['current_stock'] as int;
+          await _supabaseClient
+              .from('products')
+              .update({'current_stock': currentStock + quantity})
+              .eq('id', productId);
+        }
+      }
+
+      // 3. Fatura öğelerini ve faturayı sil
       await _supabaseClient
           .from('sales_invoice_items')
           .delete()
           .eq('invoice_id', id);
-      // حذف فاتورة البيع
       await _supabaseClient.from('sales_invoices').delete().eq('id', id);
     } catch (e) {
       throw Exception('Failed to delete sales invoice: $e');
@@ -296,12 +318,35 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   @override
   Future<void> deletePurchaseInvoice(String id) async {
     try {
-      // حذف عناصر فاتورة الشراء المرتبطة
+      // 1. Stoku geri almak için önce fatura öğelerini al
+      final items = await _supabaseClient
+          .from('purchase_invoice_items')
+          .select('product_id, quantity')
+          .eq('invoice_id', id);
+
+      // 2. Her ürünün stok miktarını azalt (alış iptal → stok -)
+      for (final item in items) {
+        if (item['product_id'] != null) {
+          final productId = item['product_id'] as String;
+          final quantity = item['quantity'] as int;
+          final product = await _supabaseClient
+              .from('products')
+              .select('current_stock')
+              .eq('id', productId)
+              .single();
+          final currentStock = product['current_stock'] as int;
+          await _supabaseClient
+              .from('products')
+              .update({'current_stock': currentStock - quantity})
+              .eq('id', productId);
+        }
+      }
+
+      // 3. Fatura öğelerini ve faturayı sil
       await _supabaseClient
           .from('purchase_invoice_items')
           .delete()
           .eq('invoice_id', id);
-      // حذف فاتورة الشراء
       await _supabaseClient.from('purchase_invoices').delete().eq('id', id);
     } catch (e) {
       throw Exception('Failed to delete purchase invoice: $e');

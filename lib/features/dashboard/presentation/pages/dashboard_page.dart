@@ -1,16 +1,16 @@
 import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/features/customer_debts/presentation/pages/customer_debts_page.dart';
+import 'package:erad/features/dashboard/presentation/pages/more_page.dart';
+import 'package:erad/features/expenses/presentation/pages/expenses_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../customers/presentation/bloc/customer_cubit.dart';
-import '../../../customers/presentation/pages/customers_page.dart';
 import '../../../invoices/presentation/bloc/invoice_cubit.dart';
 import '../../../invoices/presentation/pages/invoices_page.dart';
 import '../../../products/presentation/bloc/product_cubit.dart';
-import '../../../products/presentation/pages/products_page.dart';
 import '../../../suppliers/presentation/bloc/supplier_cubit.dart';
-import '../../../suppliers/presentation/pages/suppliers_page.dart';
 import 'dashboard_overview.dart';
 
 class MenuItem {
@@ -36,14 +36,13 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
-  final Map<int, bool> _loadedTabs = {};
 
   final List<MenuItem> _menuItems = [
     const MenuItem(icon: Iconsax.home, title: 'لوحة التحكم', index: 0),
-    const MenuItem(icon: Iconsax.box, title: 'المنتجات', index: 1),
-    const MenuItem(icon: Iconsax.user, title: 'العملاء', index: 2),
-    const MenuItem(icon: Iconsax.document, title: 'الفواتير', index: 3),
-    const MenuItem(icon: Iconsax.shop, title: 'الموردون', index: 4),
+    const MenuItem(icon: Iconsax.document, title: 'الفواتير', index: 1),
+    const MenuItem(icon: Iconsax.wallet, title: 'الديون', index: 2),
+    const MenuItem(icon: Iconsax.money_forbidden, title: 'المصاريف', index: 3),
+    const MenuItem(icon: Iconsax.more, title: 'المزيد', index: 4),
   ];
 
   @override
@@ -91,37 +90,13 @@ class _DashboardPageState extends State<DashboardPage> {
       case 0:
         return const DashboardOverview();
       case 1:
-        return Builder(
-          builder: (ctx) {
-            if (_loadedTabs[1] != true) {
-              _loadedTabs[1] = true;
-              ctx.read<ProductCubit>().getProducts();
-            }
-            return const ProductsPage();
-          },
-        );
+       return const InvoicesPage();
       case 2:
-        return Builder(
-          builder: (ctx) {
-            if (_loadedTabs[2] != true) {
-              _loadedTabs[2] = true;
-              ctx.read<CustomerCubit>().getCustomers();
-            }
-            return const CustomersPage();
-          },
-        );
+         return const CustomerDebtsPage();
       case 3:
-        return const InvoicesPage();
+        return const ExpensesPage();
       case 4:
-        return Builder(
-          builder: (ctx) {
-            if (_loadedTabs[4] != true) {
-              _loadedTabs[4] = true;
-              ctx.read<SupplierCubit>().getSuppliers();
-            }
-            return const SuppliersPage();
-          },
-        );
+        return MorePage();
       default:
         return const DashboardOverview();
     }

@@ -75,76 +75,78 @@ class _ProductsPageState extends State<ProductsPage>
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _productCubit,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: BlocConsumer<ProductCubit, ProductState>(
-          listener: (context, state) {
-            if (state is CategoriesLoaded) {
-              setState(() {
-                _categories = state.categories;
-                _isLoading = false;
-              });
-            } else if (state is ProductError) {
-              // Show error for real-time updates
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            } else if (state is ProductSuccess) {
-              // Show success for CRUD operations
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            }
-          },
-          builder: (context, state) {
-            return Column(
-              children: [
-                // Header with search, categories and category chips
-                _buildHeader(context, state),
-                // Products list
-                Expanded(
-                  child: Container(
-                    color: AppColors.background,
-                    child: ProductListWidget(
-                      onDelete: (productId) => _showDeleteConfirmationDialog(
-                        onDelete: (productId) =>
-                            _productCubit.deleteProduct(productId),
-                        productId: productId,
-                      ),
-                      onEdit: (product) => _showAddProductDialog(
-                        product: product,
-                        context: context,
-                        onSubmit: (product) => _productCubit.updateProduct(product),
-                        categoryList: _categories,
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: BlocConsumer<ProductCubit, ProductState>(
+            listener: (context, state) {
+              if (state is CategoriesLoaded) {
+                setState(() {
+                  _categories = state.categories;
+                  _isLoading = false;
+                });
+              } else if (state is ProductError) {
+                // Show error for real-time updates
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              } else if (state is ProductSuccess) {
+                // Show success for CRUD operations
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return Column(
+                children: [
+                  // Header with search, categories and category chips
+                  _buildHeader(context, state),
+                  // Products list
+                  Expanded(
+                    child: Container(
+                      color: AppColors.background,
+                      child: ProductListWidget(
+                        onDelete: (productId) => _showDeleteConfirmationDialog(
+                          onDelete: (productId) =>
+                              _productCubit.deleteProduct(productId),
+                          productId: productId,
+                        ),
+                        onEdit: (product) => _showAddProductDialog(
+                          product: product,
+                          context: context,
+                          onSubmit: (product) => _productCubit.updateProduct(product),
+                          categoryList: _categories,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          label: Text(
-            'إنشاء المنتج',
-            style: TextStyle(color: AppColors.background),
+                ],
+              );
+            },
           ),
-          backgroundColor: AppColors.primary,
-          onPressed: () {
-            _showAddProductDialog(
-              context: context,
-              onSubmit: (product) => _productCubit.createProduct(product),
-              categoryList: _categories,
-            );
-          },
+          floatingActionButton: FloatingActionButton.extended(
+            label: Text(
+              'إنشاء المنتج',
+              style: TextStyle(color: AppColors.background),
+            ),
+            backgroundColor: AppColors.primary,
+            onPressed: () {
+              _showAddProductDialog(
+                context: context,
+                onSubmit: (product) => _productCubit.createProduct(product),
+                categoryList: _categories,
+              );
+            },
+          ),
         ),
       ),
     );

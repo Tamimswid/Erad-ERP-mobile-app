@@ -21,7 +21,7 @@ class DebtTableHeaderWidget extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'اسم العميل',
+              'الاسم',
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
                 fontWeight: AppFonts.fontWeightSemiBold,
@@ -33,7 +33,7 @@ class DebtTableHeaderWidget extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'إجمالي الدين',
+              'إجمالي',
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
                 fontWeight: AppFonts.fontWeightSemiBold,
@@ -45,7 +45,7 @@ class DebtTableHeaderWidget extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'المبلغ المدفوع',
+              'المدفوع',
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
                 fontWeight: AppFonts.fontWeightSemiBold,
@@ -57,7 +57,7 @@ class DebtTableHeaderWidget extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              'الدين المتبقي',
+              'المتبقي',
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
                 fontWeight: AppFonts.fontWeightSemiBold,
@@ -65,30 +65,7 @@ class DebtTableHeaderWidget extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 1,
-            child: Text(
-              'رقم الهاتف',
-              style: TextStyle(
-                fontSize: AppFonts.fontSizeMedium,
-                fontWeight: AppFonts.fontWeightSemiBold,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            flex: 1,
-            child: Text(
-              'الإجراءات',
-              style: TextStyle(
-                fontSize: AppFonts.fontSizeMedium,
-                fontWeight: AppFonts.fontWeightSemiBold,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
+
         ],
       ),
     );

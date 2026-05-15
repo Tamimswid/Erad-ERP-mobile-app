@@ -52,7 +52,8 @@ class _SuppliersPageState extends State<SuppliersPage> {
       create: (context) => _supplierCubit,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: BlocConsumer<SupplierCubit, SupplierState>(
+        body: SafeArea(
+          child: BlocConsumer<SupplierCubit, SupplierState>(
           listener: (context, state) {
             if (state is SupplierError) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -82,6 +83,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
               ],
             );
           },
+        ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {

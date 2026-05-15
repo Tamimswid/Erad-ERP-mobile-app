@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
 import 'package:erad/features/customer_debts/data/models/customer_debt_model.dart';
 import 'package:erad/features/customer_debts/presentation/bloc/customer_debt_cubit.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/debt_stats_widget.dart';
-import 'package:erad/features/customer_debts/presentation/widgets/debt_search_widget.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/debt_card_widget.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/debt_table_header_widget.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/payment_dialog_widget.dart';
@@ -12,21 +10,8 @@ import 'package:erad/features/customer_debts/presentation/pages/customer_detail_
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CustomerDebtsPage extends StatefulWidget {
+class CustomerDebtsPage extends StatelessWidget {
   const CustomerDebtsPage({super.key});
-
-  @override
-  State<CustomerDebtsPage> createState() => _CustomerDebtsPageState();
-}
-
-class _CustomerDebtsPageState extends State<CustomerDebtsPage> {
-  Timer? _debounceTimer;
-
-  @override
-  void dispose() {
-    _debounceTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,22 +99,6 @@ class _CustomerDebtsPageState extends State<CustomerDebtsPage> {
 
                     const SizedBox(height: 24),
 
-                    // Search Widget
-                    DebtSearchWidget(
-                      onSearchChanged: (query) {
-                        _debounceTimer?.cancel();
-                        _debounceTimer = Timer(
-                          const Duration(milliseconds: 500),
-                          () {
-                            context
-                                .read<CustomerDebtCubit>()
-                                .searchCustomerDebts(query);
-                          },
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
 
                     // Debt Cards List
                     if (debts.isEmpty)

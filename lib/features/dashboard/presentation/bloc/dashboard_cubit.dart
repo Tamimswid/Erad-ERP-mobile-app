@@ -150,7 +150,7 @@ class DashboardCubit extends Cubit<DashboardState> {
           .map((p) => {
                 'name': '${p.name} (${p.measurement}${p.unit})',
                 'stock': p.currentStock,
-                'unit': p.unit,
+                'unit': '',
               })
           .take(7)
           .toList();

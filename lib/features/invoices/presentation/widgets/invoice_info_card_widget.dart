@@ -1,7 +1,5 @@
 import 'package:erad/core/utils/app_utils.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
-import 'package:erad/features/invoices/data/models/invoice_status.dart';
-import 'package:erad/features/invoices/data/models/payment_status.dart';
 import 'package:flutter/material.dart';
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/widgets/common_widgets.dart';
@@ -23,136 +21,135 @@ class InvoiceInfoCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomCard(
-      padding: const EdgeInsets.all(8),
-      child: _buildProductsSection(),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(),
+          _buildProductsSection(),
+        ],
+      ),
     );
   }
 
-
-
-
-
-  Widget _buildProductsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              'المنتجات',
-              style: TextStyle(
-                fontSize: AppFonts.fontSizeMedium,
-                fontWeight: AppFonts.fontWeightRegular,
-                color: AppColors.textSecondary,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.textSecondary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Text(
-                '${products.length}',
-                style: TextStyle(
-                  fontSize: AppFonts.fontSizeSmall,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-
-        // Table Header
-        Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(6),
-                topRight: Radius.circular(6),
-              ),
-              // border: Border(
-              //   bottom: BorderSide(color: AppColors.primary, width: 2),
-              // ),
-            ),
-            child: Row(
+  Widget _buildHeader() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'اسم المنتج',
-                    style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      fontWeight: AppFonts.fontWeightSemiBold,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.3,
-                    ),
+                Text(
+                  customerName,
+                  style: TextStyle(
+                    fontSize: AppFonts.fontSizeLarge,
+                    fontWeight: AppFonts.fontWeightSemiBold,
+                    color: AppColors.text,
                   ),
                 ),
-                Expanded(
-                  child: Text(
-                    'الكمية',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      fontWeight: AppFonts.fontWeightSemiBold,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'السعر',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      fontWeight: AppFonts.fontWeightSemiBold,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'الإجمالي',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      fontWeight: AppFonts.fontWeightSemiBold,
-                      color: AppColors.textSecondary,
-                      letterSpacing: 0.3,
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  invoiceDate,
+                  style: TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '${products.length} منتج',
+              style: TextStyle(
+                fontSize: AppFonts.fontSizeSmall,
+                fontWeight: AppFonts.fontWeightMedium,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+        // Table Header
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'اسم المنتج',
+                  style: TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightSemiBold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  'الكمية',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightSemiBold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  'السعر',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightSemiBold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  'الإجمالي',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightSemiBold,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
 
         // Products List
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(8),
-              bottomRight: Radius.circular(8),
-            ),
-            border: Border(
-              left: BorderSide(color: AppColors.border, width: 0.5),
-              right: BorderSide(color: AppColors.border, width: 0.5),
-              bottom: BorderSide(color: AppColors.border, width: 0.5),
-            ),
-          ),
-          child: Column(
-            children: products.asMap().entries.map((entry) {
-              final index = entry.key;
-              final product = entry.value;
-              return _buildProductRow(product, index);
-            }).toList(),
-          ),
+        Column(
+          children: products.asMap().entries.map((entry) {
+            final index = entry.key;
+            final product = entry.value;
+            return _buildProductRow(product, index);
+          }).toList(),
         ),
       ],
     );
@@ -164,18 +161,13 @@ class InvoiceInfoCardWidget extends StatelessWidget {
     final unitPrice = product.unitPrice;
     final total = product.totalPrice;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.border,
-            style: index == products.length - 1
-                ? BorderStyle.none
-                : BorderStyle.solid,
-            width: 0.5,
-          ),
-        ),
-        color: index % 2 == 0 ? Colors.transparent : AppColors.background,
+        border: index < products.length - 1
+            ? const Border(
+                bottom: BorderSide(color: AppColors.divider, width: 1),
+              )
+            : null,
       ),
       child: Row(
         children: [

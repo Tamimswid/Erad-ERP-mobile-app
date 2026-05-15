@@ -51,7 +51,8 @@ class _CustomersPageState extends State<CustomersPage> {
       create: (context) => _customerCubit,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: BlocConsumer<CustomerCubit, CustomerState>(
+        body: SafeArea(
+          child: BlocConsumer<CustomerCubit, CustomerState>(
           listener: (context, state) {
             final cubit = context.read<CustomerCubit>();
             if (state is CustomerError) {
@@ -84,6 +85,7 @@ class _CustomersPageState extends State<CustomersPage> {
               ],
             );
           },
+        ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           label: Text('إضافة عميل جديد', style: TextStyle(color: AppColors.background)),
