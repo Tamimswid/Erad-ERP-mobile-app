@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/sales_invoice.dart';
 import '../../data/models/purchase_invoice.dart';
+import '../../data/models/invoice_status.dart';
+import '../../data/models/payment_status.dart';
 
 class InvoiceCardWidget extends StatelessWidget {
   final dynamic invoice;
@@ -20,13 +22,14 @@ class InvoiceCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSale = type == 'sale';
-    final statusInfo = _getStatusInfo(invoice.paymentStatus.toString());
+    final invoiceStatus = _getInvoiceStatus();
+    final paymentStatus = _getPaymentStatus();
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Card(
         elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.05),
+        shadowColor: Colors.black.withValues(alpha: 0.05),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
           onTap: onTap,
@@ -38,7 +41,7 @@ class InvoiceCardWidget extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.white.withOpacity(0.95)],
+                colors: [Colors.white, Colors.white.withValues(alpha: 0.95)],
               ),
             ),
             child: Column(
@@ -82,40 +85,8 @@ class InvoiceCardWidget extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    // Status container with real data
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusInfo['backgroundColor'],
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: statusInfo['borderColor'],
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            statusInfo['icon'],
-                            size: 14,
-                            color: statusInfo['color'],
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            statusInfo['label'],
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: statusInfo['color'],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // Status container - showing payment status
+                    _buildStatusBadge(invoiceStatus, paymentStatus),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -211,60 +182,6 @@ class InvoiceCardWidget extends StatelessWidget {
     );
   }
 
-  Map<String, dynamic> _getStatusInfo(String status) {
-    switch (status) {
-      case 'SalesInvoiceStatus.paid':
-      case 'PurchaseInvoiceStatus.paid':
-        return {
-          'label': 'مكتمل',
-          'icon': Icons.check_circle,
-          'color': AppColors.success,
-          'backgroundColor': AppColors.success.withValues(alpha: 0.15),
-          'borderColor': AppColors.success,
-          'amountColor': AppColors.success,
-        };
-      case 'SalesInvoiceStatus.pending':
-      case 'PurchaseInvoiceStatus.pending':
-        return {
-          'label': 'قيد الانتظار',
-          'icon': Icons.access_time,
-          'color': AppColors.secondary,
-          'backgroundColor': AppColors.secondary.withValues(alpha: 0.15),
-          'borderColor': AppColors.secondary,
-          'amountColor': AppColors.secondary,
-        };
-      case 'SalesInvoiceStatus.overdue':
-      case 'PurchaseInvoiceStatus.overdue':
-        return {
-          'label': 'تأخرت',
-          'icon': Icons.error,
-          'color': AppColors.warning,
-          'backgroundColor': AppColors.warning.withValues(alpha: 0.15),
-          'borderColor': AppColors.warning,
-          'amountColor': AppColors.warning,
-        };
-      case 'SalesInvoiceStatus.cancelled':
-      case 'PurchaseInvoiceStatus.cancelled':
-        return {
-          'label': 'تم الإلغاء',
-          'icon': Icons.cancel,
-          'color': AppColors.error,
-          'backgroundColor': AppColors.error.withValues(alpha: 0.15),
-          'borderColor': AppColors.error,
-          'amountColor': AppColors.error,
-        };
-      default:
-        return {
-          'label': 'مجهول',
-          'icon': Icons.help,
-          'color': AppColors.error,
-          'backgroundColor': AppColors.error.withValues(alpha: 0.15),
-          'borderColor': AppColors.error,
-          'amountColor': AppColors.error,
-        };
-    }
-  }
-
   String _getInvoiceNumber() {
     if (invoice is SalesInvoice) {
       return (invoice as SalesInvoice).invoiceNumber;
@@ -301,36 +218,54 @@ class InvoiceCardWidget extends StatelessWidget {
     return 0.0;
   }
 
-  String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  InvoiceStatus _getInvoiceStatus() {
+    if (invoice is SalesInvoice) {
+      return (invoice as SalesInvoice).status;
+    } else if (invoice is PurchaseInvoice) {
+      return (invoice as PurchaseInvoice).status;
+    }
+    return InvoiceStatus.pending;
   }
 
-  String _formatCurrency(double amount) {
-    final formatted = amount.toStringAsFixed(2);
-    final buffer = StringBuffer();
-    int counter = 0;
-    for (int i = formatted.length - 1; i >= 0; i--) {
-      counter++;
-      if (counter % 3 == 0 && i != 0) {
-        buffer.write(',');
-      }
-      buffer.write(formatted[formatted.length - 1 - i]);
+  PaymentStatus _getPaymentStatus() {
+    if (invoice is SalesInvoice) {
+      return (invoice as SalesInvoice).paymentStatus;
+    } else if (invoice is PurchaseInvoice) {
+      return (invoice as PurchaseInvoice).paymentStatus;
     }
-    return buffer.toString();
+    return PaymentStatus.cash;
+  }
+
+  Widget _buildStatusBadge(InvoiceStatus invoiceStatus, PaymentStatus paymentStatus) {
+    // Use payment status to determine display - cash = paid, debt = pending
+    final bool isPaid = paymentStatus == PaymentStatus.cash;
+    final Color color = isPaid ? AppColors.success : AppColors.warning;
+    final String label = isPaid ? 'مدفوعة' : 'مديون';
+    final IconData icon = isPaid ? Icons.check_circle : Icons.access_time;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color, width: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

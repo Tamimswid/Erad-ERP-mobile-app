@@ -151,7 +151,7 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
               return const Center(child: CircularProgressIndicator());
             }
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -162,14 +162,14 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
                       totalCount: state.totalCount,
                       averageAmount: state.averageAmount,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     ExpenseMonthlyChartWidget(
                       expenses: state.expenses,
                       year: _getSelectedYear(),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _buildCategoryChips(context, state),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     ExpenseTableWidget(
                       expenses: state.expenses,
                       categories: state.categories,

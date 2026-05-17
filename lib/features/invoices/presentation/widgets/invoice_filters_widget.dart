@@ -247,18 +247,18 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
         ? DateTimeRange(start: widget.dateFrom!, end: widget.dateTo!)
         : null;
 
-    await CustomDateRangePicker.showDateRangePicker(
-      context: context,
-      onDateRangeChanged: (dateRange) {
-        widget.onDateRangeChanged(dateRange.start, dateRange.end);
-      },
-      initialDateRange: initialRange,
-      firstDate: DateTime(2026),
-      lastDate: DateTime.now(),
-      startDateText: 'start_date',
-      endDateText: 'end_date',
-      confirmText: 'confirm',
-      cancelText: 'cancel',
-    );
+    // await CustomDateRangePicker.showDateRangePicker(
+    //   context: context,
+    //   onDateRangeChanged: (dateRange) {
+    //     widget.onDateRangeChanged(dateRange.start, dateRange.end);
+    //   },
+    //   initialDateRange: initialRange,
+    //   firstDate: DateTime(2026),
+    //   lastDate: DateTime.now(),
+    //   startDateText: 'start_date',
+    //   endDateText: 'end_date',
+    //   confirmText: 'confirm',
+    //   cancelText: 'cancel',
+    // );
   }
 }

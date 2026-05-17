@@ -12,7 +12,6 @@ class NumberFormatter {
   // Available currencies
   static final Map<String, String> _currencySymbols = {
     'SYP': 'ل.س',
-    'SAR': 'ر.س',
     'USD': r'$',
     'EUR': '€',
     'TRY': '₺',

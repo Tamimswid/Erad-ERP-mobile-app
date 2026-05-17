@@ -2,6 +2,7 @@ import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/features/customer_debts/presentation/pages/customer_debts_page.dart';
 import 'package:erad/features/dashboard/presentation/pages/more_page.dart';
 import 'package:erad/features/expenses/presentation/pages/expenses_page.dart';
+import 'package:erad/features/suppliers_debts/presentation/pages/suppliers_debts_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
@@ -40,8 +41,8 @@ class _DashboardPageState extends State<DashboardPage> {
   final List<MenuItem> _menuItems = [
     const MenuItem(icon: Iconsax.home, title: 'لوحة التحكم', index: 0),
     const MenuItem(icon: Iconsax.document, title: 'الفواتير', index: 1),
-    const MenuItem(icon: Iconsax.wallet, title: 'الديون', index: 2),
-    const MenuItem(icon: Iconsax.money_forbidden, title: 'المصاريف', index: 3),
+    const MenuItem(icon: Iconsax.wallet, title: 'دين العملاء', index: 2),
+    const MenuItem(icon: Iconsax.money_forbidden, title: 'دين الموردين', index: 3),
     const MenuItem(icon: Iconsax.more, title: 'المزيد', index: 4),
   ];
 
@@ -94,7 +95,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 2:
          return const CustomerDebtsPage();
       case 3:
-        return const ExpensesPage();
+        return const SuppliersDebtsPage();
       case 4:
         return MorePage();
       default:

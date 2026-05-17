@@ -51,60 +51,69 @@ class _CustomersPageState extends State<CustomersPage> {
       create: (context) => _customerCubit,
       child: Scaffold(
         backgroundColor: AppColors.background,
+
         body: SafeArea(
           child: BlocConsumer<CustomerCubit, CustomerState>(
-          listener: (context, state) {
-            final cubit = context.read<CustomerCubit>();
-            if (state is CustomerError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
-            } else if (state is CustomerSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            } else if (state is CustomerLoaded) {
-              log('UI[${cubit.hashCode}]: CustomerLoaded - ${state.customers.length} customers');
-            }
-          },
-          builder: (context, state) {
-            return Column(
-              children: [
-                // Header with title and search
-                _buildHeader(context),
-                // Customers grid
-                Expanded(
-                  child: Container(
-                    color: AppColors.background,
-                    child: _buildContent(state),
+            listener: (context, state) {
+              if (state is CustomerError) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
+              } else if (state is CustomerSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
                   ),
-                ),
-              ],
-            );
-          },
-        ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return Column(
+                children: [
+                  // Header with title and search
+                  _buildHeader(context),
+                  // Customers grid
+                  Expanded(
+                    child: Container(
+                      color: AppColors.background,
+                      child: _buildContent(state),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
         floatingActionButton: FloatingActionButton.extended(
-          label: Text('إضافة عميل جديد', style: TextStyle(color: AppColors.background)),
+          label: Text(
+            'إضافة عميل جديد',
+            style: TextStyle(color: AppColors.background),
+          ),
           backgroundColor: AppColors.primary,
           onPressed: () {
             final cubit = context.read<CustomerCubit>();
             log('PAGE: FAB using CustomerCubit[${cubit.hashCode}]');
-            _showAddCustomerDialog(context: context, onCustomerAdded: (customer) {
-              log('PAGE: Dialog callback using CustomerCubit[${cubit.hashCode}]');
-              cubit.createCustomer(customer);
-            });
+            _showAddCustomerDialog(
+              context: context,
+              onCustomerAdded: (customer) {
+                log(
+                  'PAGE: Dialog callback using CustomerCubit[${cubit.hashCode}]',
+                );
+                cubit.createCustomer(customer);
+              },
+            );
           },
         ),
       ),
     );
   }
 
-  
-  void _showAddCustomerDialog( {required BuildContext context ,required Function(CustomerModel customer) onCustomerAdded , CustomerModel? customerModel}) {
+  void _showAddCustomerDialog({
+    required BuildContext context,
+    required Function(CustomerModel customer) onCustomerAdded,
+    CustomerModel? customerModel,
+  }) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -119,7 +128,10 @@ class _CustomersPageState extends State<CustomersPage> {
                   children: [
                     const Text(
                       'إضافة عميل جديد',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
@@ -128,7 +140,7 @@ class _CustomersPageState extends State<CustomersPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                 Expanded(
+                Expanded(
                   child: CustomerFormWidget(
                     customerModel: customerModel,
                     onTap: (customerModel) => onCustomerAdded(customerModel),
@@ -150,27 +162,36 @@ class _CustomersPageState extends State<CustomersPage> {
         border: Border(bottom: BorderSide(color: AppColors.divider)),
       ),
       child: Container(
-        height: 40,
+                height: 40,
         decoration: BoxDecoration(
           color: Colors.grey[100],
           borderRadius: BorderRadius.circular(20),
         ),
-        child: TextField(
-          controller: _searchController,
-          onChanged: (value) => _onSearchChanged(context, value),
-          decoration: InputDecoration(
-            hintText: 'بحث عن عميل...',
-            prefixIcon: const Icon(Icons.search, size: 20),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 10,
+        child: Row(
+          children: [
+            IconButton(
+              color: Colors.black,
+              onPressed: () =>  Navigator.pop(context),
+              icon: const Icon(Icons.navigate_before,size: 25),
             ),
-            hintStyle: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
+        
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) => _onSearchChanged(context, value),
+                decoration: InputDecoration(
+                  hintText: 'بحث عن عميل...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

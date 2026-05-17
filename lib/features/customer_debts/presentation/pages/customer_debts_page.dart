@@ -104,8 +104,6 @@ class CustomerDebtsPage extends StatelessWidget {
                     if (debts.isEmpty)
                       _buildEmptyState()
                     else
-                      const DebtTableHeaderWidget(),
-
                     Column(
                       children: debts.map((debt) {
                         return DebtCardWidget(

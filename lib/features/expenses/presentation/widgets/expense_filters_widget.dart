@@ -170,11 +170,11 @@ class ExpenseFiltersWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        CustomDateRangePicker.buildDateRangeDisplay(
-          dateRange: customDateRange,
-          onTap: onDateRangeTap,
-          placeholder: 'اختر نطاق التاريخ',
-        ),
+        // CustomDateRangePicker.buildDateRangeDisplay(
+        //   dateRange: customDateRange,
+        //   onTap: onDateRangeTap,
+        //   placeholder: 'اختر نطاق التاريخ',
+        // ),
       ],
     );
   }

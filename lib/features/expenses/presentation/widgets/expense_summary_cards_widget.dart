@@ -14,32 +14,35 @@ class ExpenseSummaryCardsWidget extends StatelessWidget {
     required this.averageAmount,
   });
 
-  @override
+@override
   Widget build(BuildContext context) {
+    final currencySymbol = NumberFormatter.getCurrencySymbol();
+    
     return LayoutBuilder(
       builder: (context, constraints) {
-        return GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
-          childAspectRatio: 1,
+        return Row(
+          spacing: 5,
           children: [
-            _buildCard(
-              title: 'إجمالي المصروفات',
-              value: NumberFormatter.format(totalAmount),
-              valueColor: AppColors.primary,
+            Expanded(
+              child: _buildCard(
+                title: 'إجمالي',
+                value: '${NumberFormatter.format(totalAmount)} $currencySymbol ',
+                valueColor: AppColors.primary,
+              ),
             ),
-            _buildCard(
-              title: 'عدد المصروفات',
-              value: totalCount.toString(),
-              valueColor: AppColors.text,
+            Expanded(
+              child: _buildCard(
+                title: 'عدد',
+                value: totalCount.toString(),
+                valueColor: AppColors.text,
+              ),
             ),
-            _buildCard(
-              title: 'المتوسط',
-              value: NumberFormatter.format(averageAmount),
-              valueColor: AppColors.text,
+            Expanded(
+              child: _buildCard(
+                title: 'المتوسط',
+                value: '${NumberFormatter.format(averageAmount)} $currencySymbol',
+                valueColor: AppColors.text,
+              ),
             ),
           ],
         );
@@ -58,24 +61,24 @@ class ExpenseSummaryCardsWidget extends StatelessWidget {
         border: Border.all(color: AppColors.divider),
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             title,
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             value,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               color: valueColor,
             ),

@@ -30,6 +30,10 @@ import '../../features/invoices/presentation/bloc/edit_invoice_cubit.dart';
 import '../../features/suppliers/data/datasource/supplier_remote_datasource.dart';
 import '../../features/suppliers/data/repositories/supplier_repository.dart';
 import '../../features/suppliers/presentation/bloc/supplier_cubit.dart';
+import '../../features/suppliers_debts/data/datasource/supplier_debt_remote_datasource.dart';
+import '../../features/suppliers_debts/data/repositories/supplier_debt_repository.dart';
+import '../../features/suppliers_debts/data/repositories/supplier_debt_repository_impl.dart';
+import '../../features/suppliers_debts/presentation/bloc/supplier_debt_cubit.dart';
 import '../../features/expenses/data/datasource/expense_remote_datasource.dart';
 import '../../features/expenses/data/repositories/expense_repository.dart';
 import '../../features/expenses/presentation/bloc/expense_cubit.dart';
@@ -137,6 +141,17 @@ Future<void> initServicesLocator() async {
   );
 
   sl.registerFactory(() => SupplierCubit(supplierRepository: sl()));
+
+  // Supplier Debts
+  sl.registerLazySingleton<SupplierDebtRemoteDataSource>(
+    () => SupplierDebtRemoteDataSource(sl()),
+  );
+
+  sl.registerLazySingleton<SupplierDebtRepository>(
+    () => SupplierDebtRepositoryImpl(sl(), sl()),
+  );
+
+  sl.registerFactory(() => SupplierDebtCubit(repository: sl()));
 
   // Expenses
   sl.registerLazySingleton<ExpenseRemoteDataSource>(

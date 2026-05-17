@@ -1,5 +1,4 @@
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
-import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/payment_status.dart';
 
 class Invoice {

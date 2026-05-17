@@ -8,98 +8,158 @@ class DebtCardWidget extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onPaymentTap;
   final bool isEnd;
-  final int index ;
+  final int index;
 
   const DebtCardWidget({
     super.key,
     required this.debt,
     required this.onTap,
     required this.onPaymentTap,
-    required this.isEnd, required this.index,
+    this.isEnd = false,
+    this.index = 0,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isFirs = index %2 == 0 ;
-    return Container(
-      // margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
+    final remaining = debt.remainingDebt;
+    final hasDebt = remaining > 0;
 
-        color:isFirs ? AppColors.surface : AppColors.border.withValues(alpha: 0.1),
-        border: Border(
-          left: BorderSide(color: AppColors.border),
-          right: BorderSide(color: AppColors.border),
-          bottom: BorderSide(
-            color: isEnd ? AppColors.border : Colors.transparent,
+    return Container(
+      margin: EdgeInsets.only(bottom: index == 0 ? 16 : 0),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            debt.name,
+                            style: TextStyle(
+                              fontSize: AppFonts.fontSizeLarge,
+                              fontWeight: AppFonts.fontWeightSemiBold,
+                              color: AppColors.text,
+                            ),
+                          ),
+                          if (debt.phone != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              debt.phone!,
+                              style: TextStyle(
+                                fontSize: AppFonts.fontSizeSmall,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: hasDebt
+                            ? AppColors.warning.withValues(alpha: 0.1)
+                            : AppColors.success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        hasDebt
+                            ? '${NumberFormatter.format(remaining)} ${NumberFormatter.getCurrencySymbol()}'
+                            : 'مدفوع',
+                        style: TextStyle(
+                          fontSize: AppFonts.fontSizeSmall,
+                          fontWeight: AppFonts.fontWeightSemiBold,
+                          color: hasDebt
+                              ? AppColors.warning
+                              : AppColors.success,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatItem(
+                      'إجمالي الفواتير',
+                      '${NumberFormatter.format(debt.totalInvoices)} ${NumberFormatter.getCurrencySymbol()}',
+                    ),
+                    _buildStatItem(
+                      'المدفوع',
+                      '${NumberFormatter.format(debt.totalPaid)} ${NumberFormatter.getCurrencySymbol()}',
+                    ),
+                    _buildStatItem(
+                      'الديون',
+                      '${NumberFormatter.format(remaining)} ${NumberFormatter.getCurrencySymbol()}',
+                    ),
+                  ],
+                ),
+                if (hasDebt) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 40,
+                    child: ElevatedButton(
+                      onPressed: onPaymentTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        'تسجيل دفعة',
+                        style: TextStyle(color: AppColors.background),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
-        borderRadius: isEnd
-            ? BorderRadius.only(
-                bottomRight: Radius.circular(10),
-                bottomLeft: Radius.circular(10),
-              )
-            : null,
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  debt.name,
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeMedium,
-                    fontWeight: AppFonts.fontWeightSemiBold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  NumberFormatter.formatCurrency(debt.totalInvoices),
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeMedium,
-                    fontWeight: AppFonts.fontWeightSemiBold,
-                    color: AppColors.text,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  NumberFormatter.formatCurrency(debt.totalPaid),
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeMedium,
-                    fontWeight: AppFonts.fontWeightSemiBold,
-                    color: AppColors.text,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  NumberFormatter.formatCurrency(debt.remainingDebt),
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeMedium,
-                    fontWeight: AppFonts.fontWeightBold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
-    
-            ],
+    );
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: AppFonts.fontSizeSmall,
+            color: AppColors.textSecondary,
           ),
         ),
-      ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: AppFonts.fontSizeMedium,
+            fontWeight: AppFonts.fontWeightSemiBold,
+            color: AppColors.text,
+          ),
+        ),
+      ],
     );
   }
 }

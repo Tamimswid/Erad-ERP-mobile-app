@@ -28,11 +28,16 @@ class ExpenseCubit extends Cubit<ExpenseState> {
   ExpenseCubit({required ExpenseRepository expenseRepository})
       : _expenseRepository = expenseRepository,
         super(ExpenseInitial()) {
-    _startRealtimeListeners();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!isClosed) {
+        _startRealtimeListeners();
+      }
+    });
   }
 
   // Real-time listeners
   void _startRealtimeListeners() {
+    emit(ExpenseLoading());
     // Listen to categories stream
     _categoriesSubscription = _expenseRepository.watchExpenseCategories().listen(
       (result) {

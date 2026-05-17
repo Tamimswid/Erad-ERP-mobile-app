@@ -438,7 +438,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               // رأس الصفحة - معلومات العميل
@@ -448,60 +448,49 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
                 onBackPressed: () => Navigator.pop(context),
               ),
 
-              // بطاقات الملخص - الإحصائيات (بدون تقصير الأرقام)
+              // بطاقات الملخص - الإحصائيات
               CustomerSummaryCardsWidget(
                 totalInvoices: _totalInvoices,
                 totalPaid: _totalPaid,
                 remainingDebt: _remainingDebt,
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // المحتوى الرئيسي - شبكة الفواتير والمدفوعات
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // المحتوى الرئيسي -Invoice-المدفوعات 
+              // stacked vertically for mobile
+              Column(
                 children: [
-                  // الفواتير المستحقة (أول 5 أو الكل)
-                  Expanded(
-                    child: Column(
-                      children: [
-                        UnpaidInvoicesWidget(
-                          invoices: _displayedInvoices,
-                          onQuickPay: (invoiceId) => _showPaymentModal(),
-                        ),
-                        if (_hasMoreInvoices)
-                          _buildShowMoreButton(
-                            isShowingAll: _showAllInvoices,
-                            totalCount: _invoiceModels.length,
-                            displayedCount: _displayedInvoices.length,
-                            onToggle: _toggleShowAllInvoices,
-                            itemType: 'فاتورة',
-                          ),
-                      ],
-                    ),
+                  // الفواتير المستحقة
+                  UnpaidInvoicesWidget(
+                    invoices: _displayedInvoices,
+                    onQuickPay: (invoiceId) => _showPaymentModal(),
                   ),
-                  const SizedBox(width: 24),
-
-                  // سجل المدفوعات (أول 5 أو الكل)
-                  Expanded(
-                    child: Column(
-                      children: [
-                        PaymentHistoryWidget(
-                          payments: _displayedPayments,
-                          onAddPayment: _showPaymentModal,
-                          onDeletePayment: _deletePayment,
-                        ),
-                        if (_hasMorePayments)
-                          _buildShowMoreButton(
-                            isShowingAll: _showAllPayments,
-                            totalCount: _paymentModels.length,
-                            displayedCount: _displayedPayments.length,
-                            onToggle: _toggleShowAllPayments,
-                            itemType: 'دفعة',
-                          ),
-                      ],
+                  if (_hasMoreInvoices)
+                    _buildShowMoreButton(
+                      isShowingAll: _showAllInvoices,
+                      totalCount: _invoiceModels.length,
+                      displayedCount: _displayedInvoices.length,
+                      onToggle: _toggleShowAllInvoices,
+                      itemType: 'فاتورة',
                     ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // سجل المدفوعات
+                  PaymentHistoryWidget(
+                    payments: _displayedPayments,
+                    onAddPayment: _showPaymentModal,
+                    onDeletePayment: _deletePayment,
                   ),
+                  if (_hasMorePayments)
+                    _buildShowMoreButton(
+                      isShowingAll: _showAllPayments,
+                      totalCount: _paymentModels.length,
+                      displayedCount: _displayedPayments.length,
+                      onToggle: _toggleShowAllPayments,
+                      itemType: 'دفعة',
+                    ),
                 ],
               ),
             ],

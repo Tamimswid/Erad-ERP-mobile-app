@@ -123,7 +123,8 @@ class _ProductsPageState extends State<ProductsPage>
                         onEdit: (product) => _showAddProductDialog(
                           product: product,
                           context: context,
-                          onSubmit: (product) => _productCubit.updateProduct(product),
+                          onSubmit: (product) =>
+                              _productCubit.updateProduct(product),
                           categoryList: _categories,
                         ),
                       ),
@@ -225,7 +226,8 @@ class _ProductsPageState extends State<ProductsPage>
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: ElevatedButton.icon(
-                              onPressed: () => _showAddCategoryDialog(dialogContext),
+                              onPressed: () =>
+                                  _showAddCategoryDialog(dialogContext),
                               icon: const Icon(Icons.add),
                               label: const Text('إضافة فئة جديدة'),
                             ),
@@ -379,8 +381,14 @@ class _ProductsPageState extends State<ProductsPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Title row with search and categories buttons
+
           Row(
             children: [
+              IconButton(
+                color: Colors.black,
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.navigate_before, size: 30),
+              ),
               const Text(
                 'المنتجات',
                 style: TextStyle(
@@ -428,11 +436,7 @@ class _ProductsPageState extends State<ProductsPage>
             border: Border.all(color: AppColors.divider),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: AppColors.textSecondary,
-          ),
+          child: Icon(icon, size: 20, color: AppColors.textSecondary),
         ),
       ),
     );

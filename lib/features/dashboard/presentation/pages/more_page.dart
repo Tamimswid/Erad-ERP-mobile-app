@@ -41,7 +41,7 @@ class MorePage extends StatelessWidget {
             ),
             _NavCard(
               icon: Iconsax.money_recive,
-              title: 'الانسحابات',
+              title: 'السحوبات',
               color: const Color(0xFFF59E0B),
               onTap: () => Navigator.pushNamed(context, AppRoutes.withdrawals),
             ),

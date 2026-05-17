@@ -152,22 +152,33 @@ class _SuppliersPageState extends State<SuppliersPage> {
           color: Colors.grey[100],
           borderRadius: BorderRadius.circular(20),
         ),
-        child: TextField(
-          controller: _searchController,
-          onChanged: _onSearchChanged,
-          decoration: InputDecoration(
-            hintText: 'بحث عن مورد...',
-            prefixIcon: const Icon(Icons.search, size: 20),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 10,
-            ),
-            hintStyle: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
+        child: Row(
+          children: [
+                  IconButton(
+            color: Colors.black,
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.navigate_before,size: 25),
           ),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                decoration: InputDecoration(
+                  hintText: 'بحث عن مورد...',
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  hintStyle: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

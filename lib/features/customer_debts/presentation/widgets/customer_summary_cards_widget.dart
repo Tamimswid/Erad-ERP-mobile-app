@@ -17,33 +17,68 @@ class CustomerSummaryCardsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final currencySymbol = NumberFormatter.getCurrencySymbol();
+    
+    return Column(
       children: [
-        Expanded(
-          child: _buildSummaryCard(
-            'إجمالي الفواتير',
-            AppUtils.formatNumber(totalInvoices) ,
-       
-            Icons.receipt_long_outlined,
-            AppColors.primary,
-          ),
+        // Top row - Total Invoices and Paid
+        Row(
+          children: [
+            Expanded(
+              child: _buildSummaryCard(
+                'إجمالي',
+                '$currencySymbol ${AppUtils.formatNumber(totalInvoices)}',        
+                Icons.receipt_long_outlined,
+                AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildSummaryCard(
+                'المدفوع',
+                '$currencySymbol ${AppUtils.formatNumber(totalPaid)}',
+                Icons.payment_outlined,
+                AppColors.success,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildSummaryCard(
-            'إجمالي المبلغ المدفوع',
-            AppUtils.formatNumber(totalPaid) ,
-            Icons.payment_outlined,
-            AppColors.success,
+        const SizedBox(height: 12),
+        // Bottom row - Remaining debt
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: remainingDebt > 0 
+                ? AppColors.error.withValues(alpha: 0.1) 
+                : AppColors.success.withValues(alpha: 0.1),
+            border: Border.all(
+              color: remainingDebt > 0 
+                  ? AppColors.error.withValues(alpha: 0.3) 
+                  : AppColors.success.withValues(alpha: 0.3)
+            ),
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
           ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildSummaryCard(
-            'الديون المتبقية',
-         AppUtils.formatNumber(remainingDebt), 
-            Icons.account_balance_wallet_outlined,
-            remainingDebt > 0 ? AppColors.error : AppColors.success,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'المتبقي',
+                style: TextStyle(
+                  fontSize: AppFonts.fontSizeMedium,
+                  fontWeight: AppFonts.fontWeightSemiBold,
+                  color: AppColors.text,
+                ),
+              ),
+              Text(
+                '$currencySymbol ${AppUtils.formatNumber(remainingDebt)}',
+                style: TextStyle(
+                  fontSize: AppFonts.fontSizeXLarge,
+                  fontWeight: AppFonts.fontWeightBold,
+                  color: remainingDebt > 0 ? AppColors.error : AppColors.success,
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -51,9 +86,8 @@ class CustomerSummaryCardsWidget extends StatelessWidget {
   }
 
   Widget _buildSummaryCard(String title, String value, IconData icon, Color color) {
-    final currencySymbol = NumberFormatter.getCurrencySymbol();
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surface,
         border: Border.all(color: AppColors.border),
@@ -62,33 +96,28 @@ class CustomerSummaryCardsWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: AppFonts.fontSizeSmall,
-              fontWeight: AppFonts.fontWeightMedium,
-              color: AppColors.textSecondary,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 8),
           Row(
             children: [
-              Icon(
-                icon,
-                size: 20,
-                color: color,
-              ),
-              const SizedBox(width: 8),
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
               Text(
-                '$value $currencySymbol',
+                title,
                 style: TextStyle(
-                  fontSize: AppFonts.fontSizeXLarge,
-                  fontWeight: AppFonts.fontWeightBold,
-                  color: color,
+                  fontSize: AppFonts.fontSizeSmall,
+                  fontWeight: AppFonts.fontWeightMedium,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: AppFonts.fontSizeLarge,
+              fontWeight: AppFonts.fontWeightBold,
+              color: color,
+            ),
           ),
         ],
       ),

@@ -5,43 +5,61 @@ import '../../../../core/utils/number_formatter.dart';
 
 class MonthlyChartWidget extends StatelessWidget {
   final List<double> monthlyData;
-  final String title;
-  final String currencySymbol;
 
   const MonthlyChartWidget({
     super.key,
     required this.monthlyData,
-    this.title = 'المقارنة الشهرية',
-    this.currencySymbol = '﷼',
   });
 
   @override
   Widget build(BuildContext context) {
+    final values = monthlyData;
+    final isEmpty = values.isEmpty || values.every((v) => v == 0);
+
+    if (isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: const Center(
+          child: Text(
+            'لا توجد بيانات للعرض',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+      );
+    }
+
+    final maxY = _calculateMaxY(values);
+
     return Container(
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.divider),
       ),
-      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+          const Text(
+            'السحوبات الشهرية',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
               color: AppColors.text,
             ),
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 230,
+            height: 200,
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
-                maxY: _calculateMaxY(),
+                maxY: maxY,
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
@@ -49,11 +67,11 @@ class MonthlyChartWidget extends StatelessWidget {
                     tooltipMargin: 8,
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
-                        NumberFormatter.format(rod.toY),
+                        '${NumberFormatter.format(rod.toY)}',
                         const TextStyle(
                           color: Colors.white,
+                          fontWeight: FontWeight.bold,
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
                         ),
                       );
                     },
@@ -64,16 +82,27 @@ class MonthlyChartWidget extends StatelessWidget {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      getTitlesWidget: (value, meta) => _getBottomTitles(value),
-                      reservedSize: 30,
+                      getTitlesWidget: (value, meta) {
+                        final index = value.toInt();
+                        if (index < 0 || index > 11) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            (index + 1).toString(),
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 10,
+                            ),
+                          ),
+                        );
+                      },
+                      reservedSize: 28,
                     ),
                   ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) => _getLeftTitles(value),
-                      reservedSize: 50,
-                    ),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
                   ),
                   topTitles: const AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
@@ -82,20 +111,24 @@ class MonthlyChartWidget extends StatelessWidget {
                     sideTitles: SideTitles(showTitles: false),
                   ),
                 ),
-                gridData: FlGridData(
-                  show: true,
-                  drawHorizontalLine: true,
-                  horizontalInterval: _calculateMaxY() / 5,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: AppColors.divider,
-                      strokeWidth: 1,
-                    );
-                  },
-                  drawVerticalLine: false,
-                ),
                 borderData: FlBorderData(show: false),
-                barGroups: _buildBarGroups(),
+                gridData: const FlGridData(show: false),
+                barGroups: List.generate(12, (index) {
+                  return BarChartGroupData(
+                    x: index,
+                    barRods: [
+                      BarChartRodData(
+                        toY: values[index],
+                        color: AppColors.primary,
+                        width: 16,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(4),
+                          topRight: Radius.circular(4),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ),
             ),
           ),
@@ -104,67 +137,8 @@ class MonthlyChartWidget extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> _buildBarGroups() {
-    return monthlyData.asMap().entries.map((entry) {
-      return BarChartGroupData(
-        x: entry.key,
-        barRods: [
-          BarChartRodData(
-            toY: entry.value,
-            color: AppColors.primary,
-            width: 16,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(4),
-            ),
-          ),
-        ],
-        showingTooltipIndicators: entry.value > 0 ? [0] : [],
-      );
-    }).toList();
-  }
-
-  Widget _getBottomTitles(double value) {
-    const months = [
-      'ينا', 'فبر', 'مار', 'أبر', 'ماي', 'يون',
-      'يول', 'أغس', 'سبت', 'أكت', 'نوف', 'ديس'
-    ];
-    final index = value.toInt();
-    if (index < 0 || index >= months.length) return const SizedBox();
-    return Text(
-      months[index],
-      style: const TextStyle(
-        color: AppColors.text,
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-
-  Widget _getLeftTitles(double value) {
-    if (value == 0) return const SizedBox();
-    final formatted = _formatCompactNumber(value);
-    return Text(
-      formatted,
-      style: const TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: 10,
-      ),
-    );
-  }
-
-  double _calculateMaxY() {
-    if (monthlyData.isEmpty) return 100;
-    final max = monthlyData.reduce((a, b) => a > b ? a : b);
-    if (max <= 0) return 100;
-    return max * 1.2;
-  }
-
-  String _formatCompactNumber(double value) {
-    if (value >= 1000000) {
-      return '${(value / 1000000).toStringAsFixed(1)}M';
-    } else if (value >= 1000) {
-      return '${(value / 1000).toStringAsFixed(1)}K';
-    }
-    return value.toStringAsFixed(0);
+  double _calculateMaxY(List<double> values) {
+    final maxValue = values.isEmpty ? 0.0 : values.reduce((a, b) => a > b ? a : b);
+    return maxValue > 0 ? maxValue * 1.2 : 100;
   }
 }

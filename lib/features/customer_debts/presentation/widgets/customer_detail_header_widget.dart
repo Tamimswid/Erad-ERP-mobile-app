@@ -16,7 +16,7 @@ class CustomerDetailHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
           IconButton(
@@ -31,7 +31,7 @@ class CustomerDetailHeaderWidget extends StatelessWidget {
               padding: const EdgeInsets.all(8),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,29 +39,31 @@ class CustomerDetailHeaderWidget extends StatelessWidget {
                 Text(
                   customerName,
                   style: TextStyle(
-                    fontSize: AppFonts.fontSizeXXLarge,
+                    fontSize: AppFonts.fontSizeXLarge,
                     fontWeight: AppFonts.fontWeightBold,
                     color: AppColors.text,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.phone_outlined,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      customerPhone,
-                      style: TextStyle(
-                        fontSize: AppFonts.fontSizeMedium,
+                if (customerPhone.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.phone_outlined,
+                        size: 14,
                         color: AppColors.textSecondary,
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 6),
+                      Text(
+                        customerPhone,
+                        style: TextStyle(
+                          fontSize: AppFonts.fontSizeSmall,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

@@ -334,23 +334,26 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           return false;
       }
 
-      // Status filter - Fix: Use enum comparison
+      // Status filter - Check both InvoiceStatus and PaymentStatus
       if (_selectedStatus != 'all') {
         bool statusMatch = false;
 
-        if (invoice is SalesInvoice && invoice is PurchaseInvoice) {
-          switch (_selectedStatus) {
-            case 'paid':
-              statusMatch = invoice.status == InvoiceStatus.paid;
-              break;
-            case 'pending':
-              statusMatch = invoice.status == InvoiceStatus.pending;
-              break;
-            case 'cancelled':
-              statusMatch = invoice.status == InvoiceStatus.cancelled;
-              break;
+        if (invoice is SalesInvoice) {
+          final salesInvoice = invoice;
+          // Check InvoiceStatus first
+          statusMatch = _matchInvoiceStatus(salesInvoice.status);
+          // If no match, also check PaymentStatus for 'paid' and 'pending'
+          if (!statusMatch) {
+            statusMatch = _matchPaymentStatus(salesInvoice.paymentStatus);
+          }
+        } else if (invoice is PurchaseInvoice) {
+          final purchaseInvoice = invoice;
+          statusMatch = _matchInvoiceStatus(purchaseInvoice.status);
+          if (!statusMatch) {
+            statusMatch = _matchPaymentStatus(purchaseInvoice.paymentStatus);
           }
         }
+        
         if (!statusMatch) return false;
       }
 
@@ -432,6 +435,38 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         totalAmount: totalAmount,
       ),
     );
+  }
+
+  bool _matchInvoiceStatus(InvoiceStatus status) {
+    // For 'paid' - check both InvoiceStatus.paid and PaymentStatus.cash
+    if (_selectedStatus == 'paid') {
+      if (status == InvoiceStatus.paid) return true;
+    }
+    // For 'pending' - check both InvoiceStatus.pending and PaymentStatus.debt
+    if (_selectedStatus == 'pending') {
+      if (status == InvoiceStatus.pending) return true;
+    }
+    // For 'draft' and 'cancelled' - only check InvoiceStatus
+    switch (_selectedStatus) {
+      case 'draft':
+        return status == InvoiceStatus.draft;
+      case 'cancelled':
+        return status == InvoiceStatus.cancelled;
+      default:
+        return false;
+    }
+  }
+
+  bool _matchPaymentStatus(PaymentStatus paymentStatus) {
+    // For 'paid' - match PaymentStatus.cash
+    if (_selectedStatus == 'paid') {
+      return paymentStatus == PaymentStatus.cash;
+    }
+    // For 'pending' - match PaymentStatus.debt
+    if (_selectedStatus == 'pending') {
+      return paymentStatus == PaymentStatus.debt;
+    }
+    return false;
   }
 
   void clearFilters() {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/expense.dart';
@@ -19,7 +18,6 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final chartData = _getChartData(expenses, year);
     final values = chartData.map((d) => d.amount).toList();
-    final labels = chartData.map((d) => d.label).toList();
 
     if (values.isEmpty || values.every((v) => v == 0)) {
       return Container(
@@ -41,7 +39,11 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
     final maxY = _calculateMaxY(values);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(
+        bottom: 10,
+        top: 10,
+        right: 10
+      ),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
@@ -58,9 +60,9 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
               color: AppColors.text,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           SizedBox(
-            height: 250,
+            height: 200,
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
@@ -86,22 +88,22 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
                         final index = value.toInt();
-                        if (index < 0 || index >= labels.length) {
+                        if (index < 0 || index > 11) {
                           return const SizedBox();
                         }
                         return Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            labels[index],
+                            (index + 1).toString(),
                             style: const TextStyle(
                               color: AppColors.text,
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         );
                       },
-                      reservedSize: 30,
+                      reservedSize: 25,
                     ),
                   ),
                   leftTitles: AxisTitles(
@@ -146,7 +148,7 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
                       BarChartRodData(
                         toY: entry.value,
                         color: AppColors.primary,
-                        width: 16,
+                        width: 12,
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(4),
                         ),
@@ -164,25 +166,23 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
   }
 
   List<ChartData> _getChartData(List<Expense> expenses, int year) {
-    final Map<String, double> groupedData = {};
-    final DateFormat dateFormat = DateFormat('MMM', 'ar');
+    final Map<int, double> groupedData = {};
 
     // Initialize all 12 months with 0
     for (int i = 1; i <= 12; i++) {
-      final date = DateTime(year, i, 1);
-      groupedData[dateFormat.format(date)] = 0;
+      groupedData[i] = 0;
     }
 
     // Sum up expense amounts for selected year
     for (final expense in expenses) {
       if (expense.expenseDate.year == year) {
-        final key = dateFormat.format(expense.expenseDate);
-        groupedData[key] = (groupedData[key] ?? 0) + expense.amount;
+        final month = expense.expenseDate.month;
+        groupedData[month] = (groupedData[month] ?? 0) + expense.amount;
       }
     }
 
-    // Convert to chart data (months are already sorted by DateFormat)
-    return groupedData.entries.map((e) => ChartData(e.key, e.value)).toList();
+    // Convert to chart data with month numbers
+    return groupedData.entries.map((e) => ChartData(e.key.toString(), e.value)).toList();
   }
 
   double _calculateMaxY(List<double> values) {

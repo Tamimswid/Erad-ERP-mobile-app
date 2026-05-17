@@ -21,6 +21,7 @@ class WithdrawalsLoaded extends WithdrawalState {
   final String? selectedPartnerId;
   final DateTime? startDate;
   final DateTime? endDate;
+  final String? selectedYear;
 
   const WithdrawalsLoaded({
     required this.withdrawals,
@@ -32,6 +33,7 @@ class WithdrawalsLoaded extends WithdrawalState {
     this.selectedPartnerId,
     this.startDate,
     this.endDate,
+    this.selectedYear,
   });
 
   WithdrawalsLoaded copyWith({
@@ -44,6 +46,7 @@ class WithdrawalsLoaded extends WithdrawalState {
     String? selectedPartnerId,
     DateTime? startDate,
     DateTime? endDate,
+    String? selectedYear,
     bool clearSelectedPartner = false,
     bool clearDates = false,
   }) {
@@ -57,6 +60,7 @@ class WithdrawalsLoaded extends WithdrawalState {
       selectedPartnerId: clearSelectedPartner ? null : (selectedPartnerId ?? this.selectedPartnerId),
       startDate: clearDates ? null : (startDate ?? this.startDate),
       endDate: clearDates ? null : (endDate ?? this.endDate),
+      selectedYear: selectedYear ?? this.selectedYear,
     );
   }
 
@@ -71,6 +75,7 @@ class WithdrawalsLoaded extends WithdrawalState {
         selectedPartnerId,
         startDate,
         endDate,
+        selectedYear,
       ];
 }
 

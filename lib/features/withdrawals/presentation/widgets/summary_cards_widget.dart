@@ -1,48 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/number_formatter.dart';
 
 class SummaryCardsWidget extends StatelessWidget {
   final double totalAmount;
   final int totalCount;
   final double averageAmount;
-  final String currencySymbol;
 
   const SummaryCardsWidget({
     super.key,
     required this.totalAmount,
     required this.totalCount,
     required this.averageAmount,
-    this.currencySymbol = '﷼',
   });
 
   @override
   Widget build(BuildContext context) {
+    final currencySymbol = NumberFormatter.getCurrencySymbol();
+    
     return LayoutBuilder(
       builder: (context, constraints) {
-        // final isSmall = constraints.maxWidth < 600;
-        return GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 14,
-          crossAxisSpacing: 14,
-          childAspectRatio: 3,
+        return Row(
+          spacing: 5,
           children: [
-            _buildCard(
-              title: 'المبلغ الإجمالي',
-              value: _formatCurrency(totalAmount),
-              valueColor: AppColors.primary,
+            Expanded(
+              child: _buildCard(
+                title: 'إجمالي',
+                value: '${NumberFormatter.format(totalAmount)} $currencySymbol',
+                valueColor: AppColors.primary,
+              ),
             ),
-            _buildCard(
-              title: 'عدد السحوبات',
-              value: totalCount.toString(),
-              valueColor: AppColors.text,
+            Expanded(
+              child: _buildCard(
+                title: 'عدد',
+                value: totalCount.toString(),
+                valueColor: AppColors.text,
+              ),
             ),
-            _buildCard(
-              title: 'المتوسط',
-              value: _formatCurrency(averageAmount),
-              valueColor: AppColors.text,
+            Expanded(
+              child: _buildCard(
+                title: 'المتوسط',
+                value: '${NumberFormatter.format(averageAmount)} $currencySymbol',
+                valueColor: AppColors.text,
+              ),
             ),
           ],
         );
@@ -61,24 +61,24 @@ class SummaryCardsWidget extends StatelessWidget {
         border: Border.all(color: AppColors.divider),
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
             title,
             style: const TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
             value,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.w700,
               color: valueColor,
             ),
@@ -86,10 +86,5 @@ class SummaryCardsWidget extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatCurrency(double amount) {
-    final formatter = NumberFormat('#,##0.00', 'tr_TR');
-    return '${formatter.format(amount)} $currencySymbol';
   }
 }

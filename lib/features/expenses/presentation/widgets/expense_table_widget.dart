@@ -4,6 +4,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/expense.dart';
 import '../../data/models/expense_category.dart';
+import 'expense_detail_dialog.dart';
 
 class ExpenseTableWidget extends StatelessWidget {
   final List<Expense> expenses;
@@ -49,7 +50,7 @@ class ExpenseTableWidget extends StatelessWidget {
         border: Border.all(color: AppColors.divider),
       ),
       child: InkWell(
-        onTap: () => onTap(expense),
+        onTap: () => _showDetailDialog(context, expense, category),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
@@ -197,5 +198,9 @@ class ExpenseTableWidget extends StatelessWidget {
 
   String _formatCurrency(double amount) {
     return '${NumberFormatter.format(amount)} ${NumberFormatter.getCurrencySymbol()}';
+  }
+
+  void _showDetailDialog(BuildContext context, Expense expense, ExpenseCategory? category) {
+    ExpenseDetailDialog.show(context, expense, category);
   }
 }

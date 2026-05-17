@@ -16,7 +16,13 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
 
   WithdrawalCubit({required this.withdrawalRepository})
       : super(WithdrawalInitial()) {
-    _startRealtimeListeners();
+    emit(WithdrawalLoading());
+    // Use delayed to ensure loading state is visible for at least a moment
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!isClosed) {
+        _startRealtimeListeners();
+      }
+    });
   }
 
   List<Withdrawal> _allWithdrawals = [];
@@ -24,8 +30,10 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
   String? _selectedPartnerId;
   DateTime? _startDate;
   DateTime? _endDate;
+  String? _selectedYear;
 
   void _startRealtimeListeners() {
+    emit(WithdrawalLoading());
     // Listen to withdrawals stream
     _withdrawalsSubscription = withdrawalRepository
         .watchWithdrawals()
@@ -60,12 +68,18 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
   void _applyFilters() {
     if (isClosed) return;
 
-    // Filter withdrawals by partner and date range
     var filteredWithdrawals = _allWithdrawals;
 
     if (_selectedPartnerId != null) {
       filteredWithdrawals = filteredWithdrawals
           .where((w) => w.partnerId == _selectedPartnerId)
+          .toList();
+    }
+
+    if (_selectedYear != null) {
+      final year = int.parse(_selectedYear!);
+      filteredWithdrawals = filteredWithdrawals
+          .where((w) => w.withdrawalDate.year == year)
           .toList();
     }
 
@@ -112,6 +126,7 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
       selectedPartnerId: _selectedPartnerId,
       startDate: _startDate,
       endDate: _endDate,
+      selectedYear: _selectedYear,
     ));
   }
 
@@ -132,6 +147,14 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
   void filterByDateRange(DateTime? start, DateTime? end) {
     _startDate = start;
     _endDate = end;
+    _selectedYear = null;
+    _applyFilters();
+  }
+
+  void filterByYear(String year) {
+    _selectedYear = year;
+    _startDate = null;
+    _endDate = null;
     _applyFilters();
   }
 
@@ -139,6 +162,7 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
     _selectedPartnerId = null;
     _startDate = null;
     _endDate = null;
+    _selectedYear = null;
     _applyFilters();
   }
 
@@ -149,8 +173,9 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
     result.fold(
       (failure) => emit(WithdrawalError(failure.message)),
       (createdWithdrawal) {
-        // Real-time stream will automatically update the UI
-        // No need to emit WithdrawalSuccess - stream handles it
+        emit(WithdrawalSuccess('تم إضافة السحب بنجاح'));
+        // Immediately emit loaded state so UI doesn't break
+        _applyFilters();
       },
     );
   }
