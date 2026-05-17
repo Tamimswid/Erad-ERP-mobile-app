@@ -152,7 +152,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {    
     return BlocListener<InvoiceCubit, InvoiceState>(
       listener: (context, state) {
         if (state is InvoiceFormUpdated) {
@@ -213,231 +213,10 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
                   ),
                   const SizedBox(height: AppConstants.spacingMd),
 
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'اسم المنتج',
-                                style: const TextStyle(
-                                  fontSize: AppFonts.fontSizeSmall,
-                                  fontWeight: AppFonts.fontWeightMedium,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              TextField(
-                                controller: _searchController,
-                                focusNode: _searchFocusNode,
-                                decoration: InputDecoration(
-                                  hintText:
-                                      'ابحث عن منتج أو اكتب اسم المنتج...',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.borderRadius,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: AppColors.border,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.borderRadius,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: AppColors.border,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.borderRadius,
-                                    ),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.primary,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  filled: true,
-                                  fillColor: AppColors.surface,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 10,
-                                  ),
-                                  isDense: true,
-                                ),
-                                onChanged: _onSearchChanged,
-                                onSubmitted: _onSearchSubmitted,
-                              ),
+               
+                    _buildMobileAddForm() ,
 
-                              if (_searchResults.isNotEmpty)
-                                Container(
-                                  constraints: const BoxConstraints(
-                                    maxHeight: 180,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: AppColors.border),
-                                    borderRadius: const BorderRadius.only(
-                                      bottomLeft: Radius.circular(
-                                        AppConstants.borderRadius,
-                                      ),
-                                      bottomRight: Radius.circular(
-                                        AppConstants.borderRadius,
-                                      ),
-                                    ),
-                                    color: AppColors.surface,
-                                    boxShadow: AppConstants.cardShadow,
-                                  ),
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: _searchResults.length,
-                                    itemBuilder: (context, index) {
-                                      final product = _searchResults[index];
-                                      return ListTile(
-                                        dense: true,
-                                        // leading: CircleAvatar(
-                                        //   backgroundColor: AppColors.primary
-                                        //       .withValues(alpha: 0.1),
-                                        //   child: Icon(
-                                        //     Icons.inventory_2,
-                                        //     color: AppColors.primary,
-                                        //     size: 18,
-                                        //   ),
-                                        // ),
-                                        trailing: Icon(
-                                          Icons.navigate_next,
-                                          size: 18,
-                                        ),
-                                        title: Text(
-                                          product.nameWithMeasurementUnit,
-                                          style: const TextStyle(
-                                            fontWeight:
-                                                AppFonts.fontWeightSemiBold,
-                                            color: AppColors.text,
-                                            fontSize: AppFonts.fontSizeSmall,
-                                          ),
-                                        ),
 
-                                        onTap: () =>
-                                            _onProductSelected(product),
-                                      );
-                                    },
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'الكمية',
-                                style: const TextStyle(
-                                  fontSize: AppFonts.fontSizeSmall,
-                                  fontWeight: AppFonts.fontWeightMedium,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              TextField(
-                                controller: _quantityController,
-                                focusNode: _quantityFocusNode,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.borderRadius,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: AppColors.border,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.borderRadius,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: AppColors.border,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      AppConstants.borderRadius,
-                                    ),
-                                    borderSide: const BorderSide(
-                                      color: AppColors.primary,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  filled: true,
-                                  fillColor: AppColors.surface,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 10,
-                                  ),
-                                  isDense: true,
-                                ),
-                                keyboardType: TextInputType.number,
-                                textInputAction: TextInputAction.done,
-                                textAlign: TextAlign.center,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                onSubmitted: (_) => _onQuantitySubmitted(),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        Expanded(
-                          flex: 2,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 22),
-                              SizedBox(
-                                width: double.infinity,
-                                height: 35,
-                                child: ElevatedButton(
-                                  onPressed: _onQuantitySubmitted,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: AppColors.surface,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 8,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        AppConstants.borderRadius,
-                                      ),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  child: Text('إضافة'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(height: 16),
                   Container(
                     padding: EdgeInsets.all(10),
@@ -486,6 +265,117 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
       ],
     );
   }
+
+  Widget _buildMobileAddForm() {
+    return Column(
+      children: [
+        TextField(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          decoration: InputDecoration(
+            labelText: 'اسم المنتج',
+            hintText: 'ابحث عن منتج أو اكتب اسم المنتج...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            filled: true,
+            fillColor: AppColors.surface,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          ),
+          onChanged: _onSearchChanged,
+          onSubmitted: _onSearchSubmitted,
+        ),
+        if (_searchResults.isNotEmpty)
+          Container(
+            constraints: const BoxConstraints(maxHeight: 150),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              color: AppColors.surface,
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) {
+                final product = _searchResults[index];
+                return ListTile(
+                  dense: true,
+                  title: Text(
+                    product.nameWithMeasurementUnit,
+                    style: const TextStyle(
+                      fontWeight: AppFonts.fontWeightSemiBold,
+                      fontSize: AppFonts.fontSizeSmall,
+                    ),
+                  ),
+                  onTap: () => _onProductSelected(product),
+                );
+              },
+            ),
+          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _quantityController,
+                focusNode: _quantityFocusNode,
+                decoration: InputDecoration(
+                  labelText: 'الكمية',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                ),
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                textAlign: TextAlign.center,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onSubmitted: (_) => _onQuantitySubmitted(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 100,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _onQuantitySubmitted,
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.all(0),
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text('إضافة'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+
 }
 
 

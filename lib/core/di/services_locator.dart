@@ -1,5 +1,6 @@
 import 'package:erad/core/constants/api_constans.dart';
 import 'package:get_it/get_it.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -51,6 +52,7 @@ Future<void> initServicesLocator() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
 
+  sl.registerLazySingleton(() => InternetConnectionChecker.createInstance());
 
   // Initialize Supabase
   await Supabase.initialize(
@@ -60,6 +62,7 @@ Future<void> initServicesLocator() async {
   sl.registerLazySingleton(() => Supabase.instance.client);
 
   // Core utilities
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
   sl.registerLazySingleton(() => AppUtils());
   sl.registerLazySingleton(() => UserService());
 

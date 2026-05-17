@@ -537,6 +537,23 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     }
   }
 
+  void updateItemPrice(int index, double newPrice) {
+    if (index >= 0 && index < _invoiceItems.length) {
+      final item = _invoiceItems[index];
+      _invoiceItems[index] = InvoiceItem(
+        measurement: item.measurement,
+        unit: item.unit,
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: newPrice,
+        totalPrice: newPrice * item.quantity,
+      );
+      _calculateAndUpdateTotals();
+      emit(InvoiceFormUpdated(updateType: 'updatePrice'));
+    }
+  }
+
   void _calculateAndUpdateTotals() {
     // This method ensures totals are calculated and ready for UI
     final subtotal = calculateSubtotal();
