@@ -139,9 +139,9 @@ class DashboardCubit extends Cubit<DashboardState> {
       // Calculate withdrawals
       final totalWithdrawals = withdrawals.fold(0.0, (sum, w) => sum + w.amount);
 
-      // Calculate profits
-      final totalProfit = totalSales - totalPurchases;
-      final netProfit = totalProfit - totalExpenses - totalWithdrawals;
+      // Calculate profits from invoice profit field
+      final totalProfit = filteredSales.fold(0.0, (sum, i) => sum + (i.profit ?? 0));
+      final netProfit = totalProfit - totalExpenses;
 
       // Get product count and low stock
       final totalProducts = products.length;
@@ -289,7 +289,9 @@ class DashboardCubit extends Cubit<DashboardState> {
           .where((w) => w.withdrawalDate.month == month && w.withdrawalDate.year == year)
           .fold(0.0, (sum, w) => sum + w.amount);
 
-      final profit = monthSales - monthPurchases;
+      final profit = salesInvoices
+          .where((i) => i.invoiceDate.month == month && i.invoiceDate.year == year)
+          .fold(0.0, (sum, i) => sum + (i.profit ?? 0));
 
       return {
         'month': monthName,

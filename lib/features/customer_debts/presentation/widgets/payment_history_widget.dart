@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/utils/app_utils.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/customer_debts/data/models/payment_model.dart';
 import 'package:flutter/material.dart';
@@ -195,7 +196,7 @@ class PaymentHistoryWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  NumberFormatter.formatCurrency(payment.amount),
+                 '${AppUtils.formatNumber(payment.amount)} ${NumberFormatter.getCurrencySymbol()}',
                   style: TextStyle(
                     fontSize: AppFonts.fontSizeMedium,
                     fontWeight: AppFonts.fontWeightBold,

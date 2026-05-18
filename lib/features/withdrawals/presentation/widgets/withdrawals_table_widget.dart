@@ -1,3 +1,4 @@
+import 'package:erad/core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -117,7 +118,7 @@ class WithdrawalsTableWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    NumberFormatter.format(withdrawal.amount),
+                    '${AppUtils.formatNumber(withdrawal.amount)} ${NumberFormatter.getCurrencySymbol()}',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,

@@ -1,3 +1,4 @@
+import 'package:erad/core/utils/number_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/constants/app_constants.dart';
@@ -116,7 +117,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                         ],
                         decoration: _buildInputDecoration(
                           hint: 'أدخل المبلغ',
-                          prefix: const Text('ل.س '),
+                          prefix:  Text(NumberFormatter.getCurrencySymbol()),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {

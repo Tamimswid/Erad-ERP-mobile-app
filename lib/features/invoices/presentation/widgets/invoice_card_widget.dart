@@ -224,7 +224,7 @@ class InvoiceCardWidget extends StatelessWidget {
     } else if (invoice is PurchaseInvoice) {
       return (invoice as PurchaseInvoice).status;
     }
-    return InvoiceStatus.pending;
+    return InvoiceStatus.draft;
   }
 
   PaymentStatus _getPaymentStatus() {

@@ -25,9 +25,10 @@ class SupplierDetailPage extends StatefulWidget {
   State<SupplierDetailPage> createState() => _SupplierDetailPageState();
 }
 
-class _SupplierDetailPageState extends State<SupplierDetailPage> {
+class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTickerProviderStateMixin {
   final SupplierDebtRepository _repository = sl<SupplierDebtRepository>();
   final _supabase = Supabase.instance.client;
+  late TabController _tabController;
 
   List<Map<String, dynamic>> _invoices = [];
   List<Map<String, dynamic>> _payments = [];
@@ -39,6 +40,21 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
 
   StreamSubscription<List<Map<String, dynamic>>>? _invoicesSubscription;
   StreamSubscription<List<Map<String, dynamic>>>? _paymentsSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _initializeRealTimeStreams();
+    _loadInitialData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _cancelSubscriptions();
+    super.dispose();
+  }
 
   List<PurchaseInvoiceModel> get _invoiceModels {
     return _invoices
@@ -97,19 +113,6 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
         _showAllPayments = !_showAllPayments;
       });
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeRealTimeStreams();
-    _loadInitialData();
-  }
-
-  @override
-  void dispose() {
-    _cancelSubscriptions();
-    super.dispose();
   }
 
   void _cancelSubscriptions() {
@@ -398,57 +401,107 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              SupplierDetailHeaderWidget(
-                supplierName: widget.supplier.name,
-                supplierPhone: widget.supplier.phone ?? '',
-                onBackPressed: () => Navigator.pop(context),
-              ),
-              CustomerSummaryCardsWidget(
-                totalInvoices: _totalInvoices,
-                totalPaid: _totalPaid,
-                remainingDebt: _remainingDebt,
-              ),
-              const SizedBox(height: 20),
-              // stacked vertically for mobile
-              Column(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  UnpaidInvoicesWidget(
-                    invoices: _displayedInvoices,
-                    onQuickPay: (invoiceId) => _showPaymentModal(),
+                  SupplierDetailHeaderWidget(
+                    supplierName: widget.supplier.name,
+                    supplierPhone: widget.supplier.phone ?? '',
+                    onBackPressed: () => Navigator.pop(context),
                   ),
-                  if (_hasMoreInvoices)
-                    _buildShowMoreButton(
-                      isShowingAll: _showAllInvoices,
-                      totalCount: _invoiceModels.length,
-                      displayedCount: _displayedInvoices.length,
-                      onToggle: _toggleShowAllInvoices,
-                      itemType: 'فاتورة',
-                    ),
-                  
                   const SizedBox(height: 16),
-                  
-                  PaymentHistoryWidget(
-                    payments: _displayedPayments,
-                    onAddPayment: _showPaymentModal,
-                    onDeletePayment: _deletePayment,
+                  CustomerSummaryCardsWidget(
+                    totalInvoices: _totalInvoices,
+                    totalPaid: _totalPaid,
+                    remainingDebt: _remainingDebt,
                   ),
-                  if (_hasMorePayments)
-                    _buildShowMoreButton(
-                      isShowingAll: _showAllPayments,
-                      totalCount: _paymentModels.length,
-                      displayedCount: _displayedPayments.length,
-                      onToggle: _toggleShowAllPayments,
-                      itemType: 'دفعة',
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: AppColors.primary,
+                      unselectedLabelColor: AppColors.textSecondary,
+                      indicatorColor: AppColors.primary,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      indicator: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                      tabs: [
+                        Tab(text: 'الفواتير (${_invoiceModels.length})'),
+                        Tab(text: 'المدفوعات (${_paymentModels.length})'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildInvoicesTab(),
+                  _buildPaymentsTab(),
+                ],
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInvoicesTab() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          UnpaidInvoicesWidget(
+            invoices: _displayedInvoices,
+            onQuickPay: (invoiceId) => _showPaymentModal(),
+          ),
+          if (_hasMoreInvoices)
+            _buildShowMoreButton(
+              isShowingAll: _showAllInvoices,
+              totalCount: _invoiceModels.length,
+              displayedCount: _displayedInvoices.length,
+              onToggle: _toggleShowAllInvoices,
+              itemType: 'فاتورة',
+            ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentsTab() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          PaymentHistoryWidget(
+            payments: _displayedPayments,
+            onAddPayment: _showPaymentModal,
+            onDeletePayment: _deletePayment,
+          ),
+          if (_hasMorePayments)
+            _buildShowMoreButton(
+              isShowingAll: _showAllPayments,
+              totalCount: _paymentModels.length,
+              displayedCount: _displayedPayments.length,
+              onToggle: _toggleShowAllPayments,
+              itemType: 'دفعة',
+            ),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }

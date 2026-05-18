@@ -1,3 +1,4 @@
+import 'package:erad/core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
@@ -26,14 +27,14 @@ class SummaryCardsWidget extends StatelessWidget {
             Expanded(
               child: _buildCard(
                 title: 'إجمالي',
-                value: '${NumberFormatter.format(totalAmount)} $currencySymbol',
+                value: '${AppUtils.formatNumber(totalAmount)} $currencySymbol',
                 valueColor: AppColors.primary,
               ),
             ),
             Expanded(
               child: _buildCard(
                 title: 'المتوسط',
-                value: '${NumberFormatter.format(averageAmount)} $currencySymbol',
+                value: '${AppUtils.formatNumber(averageAmount)} $currencySymbol',
                 valueColor: AppColors.text,
               ),
             ),

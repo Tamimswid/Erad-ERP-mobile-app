@@ -139,6 +139,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
       productName: name,
       quantity: quantity,
       unitPrice: existingProduct.salePrice,
+      purchasePrice: existingProduct.purchasePrice,
       totalPrice: (existingProduct.salePrice) * quantity,
     );
 

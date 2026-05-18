@@ -466,6 +466,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
         productName: item.productName,
         quantity: item.quantity ?? 0,
         unitPrice: item.unitPrice ?? 0.0,
+        purchasePrice: 0.0,
         totalPrice: (item.quantity ?? 0) * (item.unitPrice ?? 0.0),
         discountAmount: 0.0,
       );

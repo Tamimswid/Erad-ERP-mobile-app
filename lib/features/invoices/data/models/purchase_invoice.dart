@@ -150,8 +150,8 @@ class PurchaseInvoice extends Equatable {
         orElse: () => PaymentStatus.cash,
       ),
       status: InvoiceStatus.values.firstWhere(
-        (e) => e.name == json['payment_status'],
-        orElse: () => InvoiceStatus.pending,
+        (e) => e.name == json['status'],
+        orElse: () => InvoiceStatus.draft,
       ),
       notes: json['notes'],
       isFinalized: json['is_finalized'] ?? false,

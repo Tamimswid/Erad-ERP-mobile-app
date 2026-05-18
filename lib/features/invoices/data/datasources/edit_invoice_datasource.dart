@@ -117,6 +117,7 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
           'product_name': item.productName,
           'quantity': item.quantity,
           'unit_price': item.unitPrice,
+          'purchase_price': item.purchasePrice,
           'discount_amount': item.discountAmount,
           'total_price': item.totalPrice,
           'measurement': item.measurement,
@@ -171,6 +172,7 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
           'product_name': item.productName,
           'quantity': item.quantity,
           'unit_price': item.unitPrice,
+          'purchase_price': item.purchasePrice,
           'total_price': item.totalPrice,
           'measurement': item.measurement,
         }).toList();

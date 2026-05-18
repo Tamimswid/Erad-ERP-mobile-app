@@ -442,23 +442,15 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   }
 
   bool _matchInvoiceStatus(InvoiceStatus status) {
-    // For 'paid' - check both InvoiceStatus.paid and PaymentStatus.cash
-    if (_selectedStatus == 'paid') {
-      if (status == InvoiceStatus.paid) return true;
+    // For 'completed' - check InvoiceStatus.completed
+    if (_selectedStatus == 'completed') {
+      if (status == InvoiceStatus.completed) return true;
     }
-    // For 'pending' - check both InvoiceStatus.pending and PaymentStatus.debt
-    if (_selectedStatus == 'pending') {
-      if (status == InvoiceStatus.pending) return true;
+    // For 'cancelled' - only check InvoiceStatus
+    if (_selectedStatus == 'cancelled') {
+      return status == InvoiceStatus.cancelled;
     }
-    // For 'draft' and 'cancelled' - only check InvoiceStatus
-    switch (_selectedStatus) {
-      case 'draft':
-        return status == InvoiceStatus.draft;
-      case 'cancelled':
-        return status == InvoiceStatus.cancelled;
-      default:
-        return false;
-    }
+    return false;
   }
 
   bool _matchPaymentStatus(PaymentStatus paymentStatus) {
@@ -551,6 +543,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         productName: item.productName,
         quantity: item.quantity,
         unitPrice: newPrice,
+        purchasePrice: item.purchasePrice,
         totalPrice: newPrice * item.quantity,
       );
       _calculateAndUpdateTotals();
@@ -730,6 +723,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
       print('DEBUG: Payment Status: ${_getPaymentStatus()}');
       print('DEBUG: Invoice Number: $invoiceNumber');
       print('DEBUG: Items count: ${_invoiceItems.length}');
+      print('DEBUG: Items total purchase: ${_invoiceItems.fold(0.0, (sum, item) => sum + (item.purchasePrice * item.quantity))}');
 
       if (_invoiceType == 'sale') {
         final salesInvoice = SalesInvoice(
@@ -748,28 +742,29 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           totalAmount: calculateGrandTotal(),
           paidAmount: _paidAmount,
           remainingAmount: calculateRemainingAmount(),
-          paymentMethod: _paymentMethod.isEmpty ? 'cash' : _paymentMethod,
-          paymentStatus: _getPaymentStatus(),
+paymentMethod: _paymentMethod.isEmpty ? 'cash' : _paymentMethod,
+          paymentStatus: _getPurchasePaymentStatus(),
           notes: _notes.isEmpty ? null : _notes,
           isFinalized: _status == 'approved',
           createdAt: now,
           updatedAt: now,
-          items: _invoiceItems
+items: _invoiceItems
               .map(
                 (item) => InvoiceItem(
-                  unit: item.unit,
-                  measurement: item.measurement,
+                measurement: item.measurement,
+                unit: item.unit,
                   productId: item.productId,
                   productName: item.productName,
                   quantity: item.quantity,
                   unitPrice: item.unitPrice,
-                  discountAmount:
-                      0.0, // InvoiceItem doesn't have discountAmount
+                  purchasePrice: item.purchasePrice,
                   totalPrice: item.totalPrice,
                   createdAt: now,
                 ),
               )
               .toList(),
+          totalPurchaseAmount: _invoiceItems.fold(0.0, (sum, item) => sum + (item.purchasePrice * item.quantity)),
+          profit: calculateGrandTotal() - _invoiceItems.fold(0.0, (sum, item) => sum + (item.purchasePrice * item.quantity)),
         );
 
         print('DEBUG: Creating sales invoice: ${salesInvoice.toJson()}');
@@ -827,6 +822,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
                   productName: item.productName,
                   quantity: item.quantity,
                   unitPrice: item.unitPrice,
+                  purchasePrice: item.purchasePrice,
                   totalPrice: item.totalPrice,
                   createdAt: now,
                 ),
@@ -891,7 +887,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
       } else if (invoice is PurchaseInvoice) {
         final updatedStatus = InvoiceStatus.values.firstWhere(
           (e) => e.name == newStatus,
-          orElse: () => InvoiceStatus.pending,
+          orElse: () => InvoiceStatus.draft,
         );
 
         final updatedInvoice = invoice.copyWith(

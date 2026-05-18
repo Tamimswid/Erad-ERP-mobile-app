@@ -48,17 +48,14 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .order('created_at', ascending: false);
 
       final products = response.map((product) => ProductModel.fromMap(product)).toList();
-
+      
       final allCalculatedStock = await stockService.getAllCalculatedStock();
-
-      log('ProductRemoteDataSource: Got calculated stock for ${allCalculatedStock.length} products');
-
+      
       final productsWithStock = products.map((product) {
         final calculatedStock = allCalculatedStock[product.id] ?? product.currentStock;
-        log('ProductRemoteDataSource: Product ${product.name} - stored: ${product.currentStock}, calculated: $calculatedStock');
         return product.copyWith(currentStock: calculatedStock);
       }).toList();
-
+      
       return productsWithStock;
     } catch (e) {
       log(e.toString());

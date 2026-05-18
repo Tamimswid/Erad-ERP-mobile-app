@@ -27,7 +27,7 @@ class CustomerSummaryCardsWidget extends StatelessWidget {
             Expanded(
               child: _buildSummaryCard(
                 'إجمالي',
-                '$currencySymbol ${AppUtils.formatNumber(totalInvoices)}',        
+                '${AppUtils.formatNumber(totalInvoices)} $currencySymbol',        
                 Icons.receipt_long_outlined,
                 AppColors.primary,
               ),
@@ -36,7 +36,7 @@ class CustomerSummaryCardsWidget extends StatelessWidget {
             Expanded(
               child: _buildSummaryCard(
                 'المدفوع',
-                '$currencySymbol ${AppUtils.formatNumber(totalPaid)}',
+                '${AppUtils.formatNumber(totalPaid)} $currencySymbol',
                 Icons.payment_outlined,
                 AppColors.success,
               ),
@@ -71,7 +71,7 @@ class CustomerSummaryCardsWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                '$currencySymbol ${AppUtils.formatNumber(remainingDebt)}',
+                '${AppUtils.formatNumber(remainingDebt)} $currencySymbol',
                 style: TextStyle(
                   fontSize: AppFonts.fontSizeXLarge,
                   fontWeight: AppFonts.fontWeightBold,

@@ -14,7 +14,7 @@ class CustomerDebtRemoteDataSource {
   // جلب جميع ديون العملاء (الفواتير التي لم يتم دفعها)
   Future<List<CustomerDebtModel>> getCustomerDebts() async {
     try {
-       final userId = await UserService.getUserId();
+      final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
@@ -51,7 +51,8 @@ class CustomerDebtRemoteDataSource {
         final payment = json as Map<String, dynamic>;
         final customerId = payment['customer_id'] as String;
         final amount = (payment['amount'] ?? 0.0).toDouble();
-        customerPayments[customerId] = (customerPayments[customerId] ?? 0.0) + amount;
+        customerPayments[customerId] =
+            (customerPayments[customerId] ?? 0.0) + amount;
       }
 
       // Group invoices by customer_id to show each customer once with total debt
@@ -77,7 +78,10 @@ class CustomerDebtRemoteDataSource {
             totalInvoicesCount: existing.totalInvoicesCount + 1,
             pendingInvoicesCount: existing.pendingInvoicesCount + 1,
             overdueInvoicesCount: existing.overdueInvoicesCount,
-            latestDueDate: _getLatestDate(existing.latestDueDate, invoiceData['due_date']),
+            latestDueDate: _getLatestDate(
+              existing.latestDueDate,
+              invoiceData['due_date'],
+            ),
           );
         } else {
           // Create new customer debt entry
@@ -105,13 +109,15 @@ class CustomerDebtRemoteDataSource {
   String? _getLatestDate(String? current, String? newDate) {
     if (current == null) return newDate;
     if (newDate == null) return current;
-    return DateTime.parse(newDate).isAfter(DateTime.parse(current)) ? newDate : current;
+    return DateTime.parse(newDate).isAfter(DateTime.parse(current))
+        ? newDate
+        : current;
   }
 
   // البحث عن ديون العملاء
   Future<List<CustomerDebtModel>> searchCustomerDebts(String query) async {
     try {
-       final userId = await UserService.getUserId();
+      final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
@@ -139,7 +145,9 @@ class CustomerDebtRemoteDataSource {
       // Get customer IDs from search results
       final Set<String> customerIds = {};
       for (var json in response as List) {
-        customerIds.add((json as Map<String, dynamic>)['customer_id'] as String);
+        customerIds.add(
+          (json as Map<String, dynamic>)['customer_id'] as String,
+        );
       }
 
       // Get payments for these customers
@@ -155,7 +163,8 @@ class CustomerDebtRemoteDataSource {
           final payment = json as Map<String, dynamic>;
           final customerId = payment['customer_id'] as String;
           final amount = (payment['amount'] ?? 0.0).toDouble();
-          customerPayments[customerId] = (customerPayments[customerId] ?? 0.0) + amount;
+          customerPayments[customerId] =
+              (customerPayments[customerId] ?? 0.0) + amount;
         }
       }
 
@@ -182,7 +191,10 @@ class CustomerDebtRemoteDataSource {
             totalInvoicesCount: existing.totalInvoicesCount + 1,
             pendingInvoicesCount: existing.pendingInvoicesCount + 1,
             overdueInvoicesCount: existing.overdueInvoicesCount,
-            latestDueDate: _getLatestDate(existing.latestDueDate, invoiceData['due_date']),
+            latestDueDate: _getLatestDate(
+              existing.latestDueDate,
+              invoiceData['due_date'],
+            ),
           );
         } else {
           // Create new customer debt entry
@@ -207,9 +219,14 @@ class CustomerDebtRemoteDataSource {
   }
 
   // إضافة دفعة جديدة لعميل
-  Future<void> addPayment(String customerId, double amount, String? note, String paymentDate) async {
+  Future<void> addPayment(
+    String customerId,
+    double amount,
+    String? note,
+    String paymentDate,
+  ) async {
     try {
-       final userId = await UserService.getUserId();
+      final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
@@ -237,7 +254,7 @@ class CustomerDebtRemoteDataSource {
   // جلب ديون عميل محدد (فواتير العميل غير المدفوعة)
   Future<CustomerDebtModel> getCustomerDebt(String customerId) async {
     try {
-       final userId = await UserService.getUserId();
+      final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
@@ -296,7 +313,10 @@ class CustomerDebtRemoteDataSource {
             totalInvoicesCount: existing.totalInvoicesCount + 1,
             pendingInvoicesCount: existing.pendingInvoicesCount + 1,
             overdueInvoicesCount: existing.overdueInvoicesCount,
-            latestDueDate: _getLatestDate(existing.latestDueDate, invoiceData['due_date']),
+            latestDueDate: _getLatestDate(
+              existing.latestDueDate,
+              invoiceData['due_date'],
+            ),
           );
         } else {
           // Create new customer debt entry
@@ -322,9 +342,11 @@ class CustomerDebtRemoteDataSource {
   }
 
   // جلب فواتير العميل (الديون والنقد)
-  Future<List<Map<String, dynamic>>> getCustomerInvoices(String customerId) async {
+  Future<List<Map<String, dynamic>>> getCustomerInvoices(
+    String customerId,
+  ) async {
     try {
-       final userId = await UserService.getUserId();
+      final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
@@ -343,9 +365,11 @@ class CustomerDebtRemoteDataSource {
   }
 
   // جلب دفعات العميل
-  Future<List<Map<String, dynamic>>> getCustomerPayments(String customerId) async {
+  Future<List<Map<String, dynamic>>> getCustomerPayments(
+    String customerId,
+  ) async {
     try {
-       final userId = await UserService.getUserId();
+      final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
@@ -364,9 +388,13 @@ class CustomerDebtRemoteDataSource {
   }
 
   // حذف دفعة وتحديث الرصيد
-  Future<void> deletePayment(String paymentId, String customerId, double amount) async {
+  Future<void> deletePayment(
+    String paymentId,
+    String customerId,
+    double amount,
+  ) async {
     try {
-       final userId = await UserService.getUserId();
+      final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
@@ -379,10 +407,13 @@ class CustomerDebtRemoteDataSource {
           .eq('user_id', userId);
 
       // تحديث رصيد العميل (إضافة مبلغ الدفعة مرة أخرى)
-      await supabaseClient.rpc('update_customer_balance', params: {
-        'p_customer_id': customerId,
-        'p_amount': amount, // Positive to add back to balance
-      });
+      await supabaseClient.rpc(
+        'update_customer_balance',
+        params: {
+          'p_customer_id': customerId,
+          'p_amount': amount, // Positive to add back to balance
+        },
+      );
     } catch (e) {
       log(e.toString());
       throw exceptionToFailure(e);
@@ -396,13 +427,15 @@ class CustomerDebtRemoteDataSource {
 
     log('CustomerDebtDataSource: Starting watchCustomerDebts stream...');
 
-    await for (final data in supabaseClient
-        .from('sales_invoices')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId)
-        .order('invoice_date', ascending: false)) {
-
-      log('CustomerDebtDataSource: Received ${data.length} invoices from stream');
+    await for (final data
+        in supabaseClient
+            .from('sales_invoices')
+            .stream(primaryKey: ['id'])
+            .eq('user_id', userId)
+            .order('invoice_date', ascending: false)) {
+      log(
+        'CustomerDebtDataSource: Received ${data.length} invoices from stream',
+      );
 
       // Get all payments for customers
       final customerPayments = <String, double>{};
@@ -416,7 +449,8 @@ class CustomerDebtRemoteDataSource {
           final payment = json as Map<String, dynamic>;
           final customerId = payment['customer_id'] as String;
           final amount = (payment['amount'] ?? 0.0).toDouble();
-          customerPayments[customerId] = (customerPayments[customerId] ?? 0.0) + amount;
+          customerPayments[customerId] =
+              (customerPayments[customerId] ?? 0.0) + amount;
         }
       } catch (e) {
         log('Error fetching payments in stream: $e');
@@ -443,13 +477,17 @@ class CustomerDebtRemoteDataSource {
             totalInvoicesCount: existing.totalInvoicesCount + 1,
             pendingInvoicesCount: existing.pendingInvoicesCount + 1,
             overdueInvoicesCount: existing.overdueInvoicesCount,
-            latestDueDate: _getLatestDate(existing.latestDueDate, json['due_date']),
+            latestDueDate: _getLatestDate(
+              existing.latestDueDate,
+              json['due_date'],
+            ),
           );
         } else {
           // Create new customer debt entry
           customerDebts[customerId] = CustomerDebtModel(
             id: customerId,
-            name: 'عميل #$customerId', // Placeholder - stream doesn't support joins
+            name:
+                'عميل #$customerId', // Placeholder - stream doesn't support joins
             phone: null,
             totalInvoices: totalAmount,
             totalPaid: paidAmount, // Use total from payments table
@@ -461,7 +499,9 @@ class CustomerDebtRemoteDataSource {
         }
       }
 
-      log('CustomerDebtDataSource: Filtered ${customerDebts.length} customers with debt');
+      log(
+        'CustomerDebtDataSource: Filtered ${customerDebts.length} customers with debt',
+      );
       yield customerDebts.values.toList();
     }
   }

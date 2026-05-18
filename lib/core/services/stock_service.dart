@@ -31,10 +31,11 @@ class StockService {
     
     final invoiceStatus = InvoiceStatus.values.firstWhere(
       (e) => e.name == status.toLowerCase(),
-      orElse: () => InvoiceStatus.pending,
+      orElse: () => InvoiceStatus.draft,
     );
     
-    return invoiceStatus != InvoiceStatus.cancelled;
+    // Only "completed" invoices affect stock calculations
+    return invoiceStatus == InvoiceStatus.completed;
   }
 
   Future<void> _recordMovement({
@@ -178,31 +179,13 @@ class StockService {
   }) async {
     log('StockService.handleStatusChange - oldStatus: $oldStatus, newStatus: $newStatus');
     
-    final shouldApply = newStatus == InvoiceStatus.completed;
-    final shouldReverse = (oldStatus == InvoiceStatus.completed) &&
-        (newStatus == InvoiceStatus.cancelled);
-
-    log('StockService: shouldApply: $shouldApply, shouldReverse: $shouldReverse');
-
-    if (shouldApply && !_wasAlreadyCompleted(oldStatus)) {
-      log('StockService: Applying stock for completed invoice');
+    if (newStatus == InvoiceStatus.completed) {
       await applyInvoiceStock(
         items: items,
         isPurchase: isPurchase,
         invoiceId: invoiceId,
       );
-    } else if (shouldReverse) {
-      log('StockService: Reversing stock for cancelled invoice');
-      await reverseInvoiceStock(
-        items: items,
-        isPurchase: isPurchase,
-        invoiceId: invoiceId,
-      );
     }
-  }
-
-  bool _wasAlreadyCompleted(InvoiceStatus? oldStatus) {
-    return oldStatus == InvoiceStatus.completed;
   }
 
   Future<int> getCalculatedStockForProduct(String productId) async {

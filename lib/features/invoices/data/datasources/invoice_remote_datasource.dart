@@ -155,6 +155,7 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
                 'product_name': item.productName,
                 'quantity': item.quantity,
                 'unit_price': item.unitPrice,
+                'purchase_price': item.purchasePrice,
                 'discount_amount': item.discountAmount,
                 'total_price': item.totalPrice,
                 'measurement': item.measurement,
@@ -166,7 +167,10 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
         await _supabaseClient.from('sales_invoice_items').insert(itemsData);
       }
 
+      log('StockService: Invoice status = ${invoice.status}, isCompleted = ${invoice.status == InvoiceStatus.completed}');
+      
       if (invoice.status == InvoiceStatus.completed) {
+        log('StockService: Applying stock for completed invoice');
         await _stockService.applyInvoiceStock(
           items: invoice.items,
           isPurchase: false,
@@ -213,6 +217,7 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
                 'product_name': item.productName,
                 'quantity': item.quantity,
                 'unit_price': item.unitPrice,
+                'purchase_price': item.purchasePrice,
                 'total_price': item.totalPrice,
                 'measurement': item.measurement,
                 'unit': item.unit,
@@ -227,12 +232,17 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
         log('Purchase invoice items inserted successfully');
       }
 
+      log('StockService: Creating purchase invoice, status is: ${invoice.status}');
+      
       if (invoice.status == InvoiceStatus.completed) {
+        log('StockService: Purchase invoice status is completed, applying stock');
         await _stockService.applyInvoiceStock(
           items: invoice.items,
           isPurchase: true,
           invoiceId: response['id'],
         );
+      } else {
+        log('StockService: Purchase invoice status is NOT completed, skipping stock');
       }
 
       final completeInvoice = await _supabaseClient

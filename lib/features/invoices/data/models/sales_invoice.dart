@@ -28,6 +28,8 @@ class SalesInvoice extends Equatable {
   final DateTime? deletedAt;
   final String? customerName;
   final List<InvoiceItem> items;
+  final double totalPurchaseAmount;
+  final double profit;
 
   const SalesInvoice({
     required this.id,
@@ -54,6 +56,8 @@ class SalesInvoice extends Equatable {
     this.deletedAt,
     this.customerName,
     this.items = const [],
+    this.totalPurchaseAmount = 0.0,
+    this.profit = 0.0,
   });
 
   SalesInvoice copyWith({
@@ -81,6 +85,8 @@ class SalesInvoice extends Equatable {
     DateTime? deletedAt,
     String? customerName,
     List<InvoiceItem>? items,
+    double? totalPurchaseAmount,
+    double? profit,
   }) {
     return SalesInvoice(
       id: id ?? this.id,
@@ -107,6 +113,8 @@ class SalesInvoice extends Equatable {
       deletedAt: deletedAt ?? this.deletedAt,
       customerName: customerName ?? this.customerName,
       items: items ?? this.items,
+      totalPurchaseAmount: totalPurchaseAmount ?? this.totalPurchaseAmount,
+      profit: profit ?? this.profit,
     );
   }
 
@@ -133,6 +141,8 @@ class SalesInvoice extends Equatable {
       'updated_at': updatedAt.toIso8601String(),
       'deleted_at': deletedAt?.toIso8601String(),
       'customer_name': customerName,
+      'total_purchase_amount': totalPurchaseAmount,
+      'profit': profit,
       'items': items.map((InvoiceItem item) => item.toJson()).toList(),
     };
   }
@@ -156,7 +166,7 @@ class SalesInvoice extends Equatable {
       paymentMethod: json['payment_method'] ?? 'cash',
       status: InvoiceStatus.values.firstWhere(
         (e) => e.name == json['status'],
-        orElse: () => InvoiceStatus.pending,
+        orElse: () => InvoiceStatus.draft,
       ),
       paymentStatus: PaymentStatus.values.firstWhere(
         (e) => e.name == json['payment_status'],
@@ -168,6 +178,8 @@ class SalesInvoice extends Equatable {
       updatedAt: DateTime.parse(json['updated_at']),
       deletedAt: json['deleted_at'] != null ? DateTime.parse(json['deleted_at']) : null,
       customerName: json['customer_name'],
+      totalPurchaseAmount: (json['total_purchase_amount'] ?? 0).toDouble(),
+      profit: (json['profit'] ?? 0).toDouble(),
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => InvoiceItem.fromJson(item))
               .toList() ??
@@ -200,6 +212,8 @@ class SalesInvoice extends Equatable {
         deletedAt,
         customerName,
         items,
+        totalPurchaseAmount,
+        profit,
       ];
 }
 

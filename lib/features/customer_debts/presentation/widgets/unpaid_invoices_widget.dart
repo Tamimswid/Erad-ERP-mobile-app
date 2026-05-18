@@ -1,4 +1,5 @@
 import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/utils/app_utils.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/customer_debts/data/models/invoice_model.dart';
 import 'package:erad/features/invoices/presentation/pages/invoice_detail_page.dart';
@@ -206,7 +207,7 @@ class UnpaidInvoicesWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                NumberFormatter.formatCurrency(invoice.remainingAmount),
+                '${AppUtils.formatNumber(invoice.remainingAmount)} ${NumberFormatter.getCurrencySymbol()}',
                 style: TextStyle(
                   fontSize: AppFonts.fontSizeMedium,
                   fontWeight: AppFonts.fontWeightBold,

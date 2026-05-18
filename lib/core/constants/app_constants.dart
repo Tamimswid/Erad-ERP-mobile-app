@@ -8,6 +8,8 @@ class AppColors {
   static const background = Color.fromARGB(255, 249, 249, 249);     // Açık gri beyaz
   static const surface = Color(0xFFFFFFFF);        // Saf beyaz
   static const text = Color(0xFF1A1A2E);           // Koyu gri-siyah
+  // 
+  
   
   // ACCENT - Tek vurgu rengi
   static const primary = Color(0xFF1D4ED8);        // Mavi

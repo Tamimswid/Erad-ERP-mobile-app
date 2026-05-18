@@ -8,12 +8,13 @@ class InvoiceItem extends Equatable {
   final String productName;
   final int quantity;
   final double unitPrice;
+  final double purchasePrice;
   final double discountAmount;
   final double totalPrice;
   final String unit;  
   final String measurement;
   final DateTime? createdAt;
-  
+   
 
   const InvoiceItem({
      this.id,
@@ -21,6 +22,7 @@ class InvoiceItem extends Equatable {
     required this.productName,
     required this.quantity,
     required this.unitPrice,
+    this.purchasePrice = 0.0,
     this.discountAmount = 0.0,
     required this.totalPrice,
    required this.unit ,
@@ -34,6 +36,7 @@ class InvoiceItem extends Equatable {
     String? productName,
     int? quantity,
     double? unitPrice,
+    double? purchasePrice,
     double? discountAmount,
     double? totalPrice,
     String? unit,
@@ -46,6 +49,7 @@ class InvoiceItem extends Equatable {
       productName: productName ?? this.productName,
       quantity: quantity ?? this.quantity,
       unitPrice: unitPrice ?? this.unitPrice,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
       discountAmount: discountAmount ?? this.discountAmount,
       totalPrice: totalPrice ?? this.totalPrice,
       unit: unit ?? this.unit,
@@ -64,6 +68,7 @@ class InvoiceItem extends Equatable {
       productName: product.name,
       quantity: quantity,
       unitPrice: unitPrice,
+      purchasePrice: product.purchasePrice,
       totalPrice: totalPrice,
       unit: product.unit,
     );
@@ -76,6 +81,7 @@ class InvoiceItem extends Equatable {
       productName: json['product_name'] as String,
       quantity: json['quantity'] as int,
       unitPrice: (json['unit_price'] as num).toDouble(),
+      purchasePrice: (json['purchase_price'] as num?)?.toDouble() ?? 0.0,
       discountAmount: (json['discount_amount'] as num?)?.toDouble() ?? 0.0,
       totalPrice: (json['total_price'] as num).toDouble(),
       unit: json['unit'] as String ,
@@ -93,6 +99,7 @@ class InvoiceItem extends Equatable {
       'product_name': productName,
       'quantity': quantity,
       'unit_price': unitPrice,
+      'purchase_price': purchasePrice,
       'discount_amount': discountAmount,
       'total_price': totalPrice,
       'unit': unit,
@@ -109,6 +116,7 @@ class InvoiceItem extends Equatable {
         productName,
         quantity,
         unitPrice,
+        purchasePrice,
         discountAmount,
         totalPrice,
         unit,

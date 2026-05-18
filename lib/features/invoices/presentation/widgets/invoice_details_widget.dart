@@ -583,13 +583,13 @@ class InvoiceDetailsWidget extends StatelessWidget {
   void _updateInvoiceStatus(BuildContext context, String newStatus) {
     if (invoice is SalesInvoice) {
       final updatedInvoice = invoice.copyWith(
-        status: InvoiceStatus.values.firstWhere((e) => e.name == newStatus, orElse: () => InvoiceStatus.pending),
+        status: InvoiceStatus.values.firstWhere((e) => e.name == newStatus, orElse: () => InvoiceStatus.draft),
         updatedAt: DateTime.now(),
       );
       context.read<InvoiceCubit>().updateSalesInvoice(updatedInvoice);
     } else if (invoice is PurchaseInvoice) {
       final updatedInvoice = invoice.copyWith(
-        status: InvoiceStatus.values.firstWhere((e) => e.name == newStatus, orElse: () => InvoiceStatus.pending),
+        status: InvoiceStatus.values.firstWhere((e) => e.name == newStatus, orElse: () => InvoiceStatus.draft),
         updatedAt: DateTime.now(),
       );
       context.read<InvoiceCubit>().updatePurchaseInvoice(updatedInvoice);

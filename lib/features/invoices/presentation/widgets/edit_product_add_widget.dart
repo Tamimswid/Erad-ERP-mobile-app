@@ -118,12 +118,13 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
       name = '${existingProduct.name} (${existingProduct.unit})';
     }
 
-    final invoiceItem = InvoiceItem(
-    
+final invoiceItem = InvoiceItem(
+      
       productId: existingProduct?.id ?? '',
       productName: name,
       quantity: quantity,
       unitPrice: existingProduct?.salePrice ?? 0,
+      purchasePrice: existingProduct?.purchasePrice ?? 0,
       totalPrice: (existingProduct?.salePrice ?? 0) * quantity,
       unit: existingProduct!.unit ,
       measurement: existingProduct.measurement,
@@ -648,6 +649,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                                   productName: item.productName,
                                   quantity: item.quantity,
                                   unitPrice: newPrice,
+                                  purchasePrice: item.purchasePrice,
                                   discountAmount: item.discountAmount,
                                   totalPrice: item.quantity * newPrice,
                                   unit: item.unit,
@@ -713,6 +715,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                   productName: item.productName,
                   quantity: newQuantity,
                   unitPrice: item.unitPrice,
+                  purchasePrice: item.purchasePrice,
                   discountAmount: item.discountAmount,
                   totalPrice: newQuantity * item.unitPrice,
                   unit: item.unit,
@@ -758,6 +761,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                   productName: item.productName,
                   quantity: item.quantity,
                   unitPrice: newPrice,
+                  purchasePrice: item.purchasePrice,
                   discountAmount: item.discountAmount,
                   totalPrice: item.quantity * newPrice,
                   unit: item.unit,

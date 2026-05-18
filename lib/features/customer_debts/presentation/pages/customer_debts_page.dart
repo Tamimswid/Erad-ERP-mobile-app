@@ -18,6 +18,7 @@ class CustomerDebtsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => sl<CustomerDebtCubit>()..getCustomerDebts(),
       child: Scaffold(
+        
         backgroundColor: AppColors.background,
         body: BlocConsumer<CustomerDebtCubit, CustomerDebtState>(
           listener: (context, state) {

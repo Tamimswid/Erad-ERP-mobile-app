@@ -190,14 +190,6 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                   value: 'completed',
                   child: Text('مكتملة'),
                 ),
-                DropdownMenuItem(
-                  value: 'approved',
-                  child: Text('معتمدة'),
-                ),
-                DropdownMenuItem(
-                  value: 'cancelled',
-                  child: Text('ملغاة'),
-                ),
               ],
               onChanged: _isSaving ? null : _onStatusChanged,
             ),
