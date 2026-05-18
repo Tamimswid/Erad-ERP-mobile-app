@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../models/product_category.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/services/stock_service.dart';
 
 abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> getProducts();
@@ -27,8 +28,9 @@ abstract class ProductRemoteDataSource {
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   final SupabaseClient client;
+  final StockService stockService;
 
-  ProductRemoteDataSourceImpl(this.client);
+  ProductRemoteDataSourceImpl(this.client, this.stockService);
 
   @override
   Future<List<ProductModel>> getProducts() async {
@@ -45,7 +47,19 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .eq('is_active', true)
           .order('created_at', ascending: false);
 
-      return response.map((product) => ProductModel.fromMap(product)).toList();
+      final products = response.map((product) => ProductModel.fromMap(product)).toList();
+
+      final allCalculatedStock = await stockService.getAllCalculatedStock();
+
+      log('ProductRemoteDataSource: Got calculated stock for ${allCalculatedStock.length} products');
+
+      final productsWithStock = products.map((product) {
+        final calculatedStock = allCalculatedStock[product.id] ?? product.currentStock;
+        log('ProductRemoteDataSource: Product ${product.name} - stored: ${product.currentStock}, calculated: $calculatedStock');
+        return product.copyWith(currentStock: calculatedStock);
+      }).toList();
+
+      return productsWithStock;
     } catch (e) {
       log(e.toString());
       throw exceptionToFailure(e);
@@ -242,7 +256,18 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .eq('is_active', true)
           .order('created_at', ascending: false)
           .asStream()
-          .map((response) => response.map((product) => ProductModel.fromMap(product)).toList());
+          .asyncMap((productsData) async {
+        final products = productsData.map((product) => ProductModel.fromMap(product)).toList();
+        
+        final allCalculatedStock = await stockService.getAllCalculatedStock();
+        
+        final productsWithStock = products.map((product) {
+          final calculatedStock = allCalculatedStock[product.id] ?? product.currentStock;
+          return product.copyWith(currentStock: calculatedStock);
+        }).toList();
+        
+        return productsWithStock;
+      });
     } catch (e) {
       log('Error in watchProducts stream: ${e.toString()}');
       throw exceptionToFailure(e);

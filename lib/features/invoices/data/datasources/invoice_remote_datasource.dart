@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:erad/core/services/stock_service.dart';
+import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -41,8 +43,9 @@ abstract class InvoiceRemoteDataSource {
 
 class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   final SupabaseClient _supabaseClient;
+  final StockService _stockService;
 
-  InvoiceRemoteDataSourceImpl(this._supabaseClient);
+  InvoiceRemoteDataSourceImpl(this._supabaseClient, this._stockService);
 
   @override
   Future<List<SalesInvoice>> getSalesInvoices() async {
@@ -131,22 +134,20 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     try {
       final invoiceData = invoice.toJson();
 
-      // إزالة الحقول التي يتم إنشاؤها تلقائياً
       invoiceData.remove('created_at');
       invoiceData.remove('updated_at');
       invoiceData.remove('customer_name');
       invoiceData.remove('items');
 
-      // إدخال الفاتورة الرئيسية
       final response = await _supabaseClient
           .from('sales_invoices')
           .insert(invoiceData)
           .select('*, customers(name)')
           .single();
 
-      // إدخال عناصر الفاتورة إذا وجدت
+      List<Map<String, dynamic>> itemsData = [];
       if (invoice.items.isNotEmpty) {
-        final itemsData = invoice.items
+        itemsData = invoice.items
             .map(
               (item) => {
                 'invoice_id': response['id'],
@@ -165,7 +166,14 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
         await _supabaseClient.from('sales_invoice_items').insert(itemsData);
       }
 
-      // جلب الفاتورة الكاملة مع العناصر
+      if (invoice.status == InvoiceStatus.completed) {
+        await _stockService.applyInvoiceStock(
+          items: invoice.items,
+          isPurchase: false,
+          invoiceId: response['id'],
+        );
+      }
+
       final completeInvoice = await _supabaseClient
           .from('sales_invoices')
           .select('*, customers(name), sales_invoice_items(*)')
@@ -183,23 +191,21 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   Future<PurchaseInvoice> createPurchaseInvoice(PurchaseInvoice invoice) async {
     try {
       final invoiceData = invoice.toJson();
-      // إزالة الحقول التي يتم إنشاؤها تلقائياً
       invoiceData.remove('id');
       invoiceData.remove('created_at');
       invoiceData.remove('updated_at');
       invoiceData.remove('supplier_name');
       invoiceData.remove('items');
 
-      // إدخال الفاتورة الرئيسية
       final response = await _supabaseClient
           .from('purchase_invoices')
           .insert(invoiceData)
           .select('*, suppliers!inner(name)')
           .single();
 
-      // إدخال عناصر الفاتورة إذا وجدت
+      List<Map<String, dynamic>> itemsData = [];
       if (invoice.items.isNotEmpty) {
-        final itemsData = invoice.items
+        itemsData = invoice.items
             .map(
               (item) => {
                 'invoice_id': response['id'],
@@ -221,7 +227,14 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
         log('Purchase invoice items inserted successfully');
       }
 
-      // جلب الفاتورة الكاملة مع العناصر
+      if (invoice.status == InvoiceStatus.completed) {
+        await _stockService.applyInvoiceStock(
+          items: invoice.items,
+          isPurchase: true,
+          invoiceId: response['id'],
+        );
+      }
+
       final completeInvoice = await _supabaseClient
           .from('purchase_invoices')
           .select('*, suppliers(name), purchase_invoice_items(*)')
@@ -238,6 +251,10 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   @override
   Future<SalesInvoice> updateSalesInvoice(SalesInvoice invoice) async {
     try {
+      final oldInvoice = await getSalesInvoiceById(invoice.id);
+      final oldStatus = oldInvoice.status;
+      final newStatus = invoice.status;
+
       final invoiceData = invoice.toJson();
       invoiceData.remove('created_at');
       invoiceData.remove('customer_name');
@@ -250,6 +267,16 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
           .select('*, customers(name)')
           .single();
 
+      if (oldStatus != newStatus) {
+        await _stockService.handleStatusChange(
+          newStatus: newStatus,
+          oldStatus: oldStatus,
+          items: invoice.items,
+          isPurchase: false,
+          invoiceId: invoice.id,
+        );
+      }
+
       return _mapJsonToSalesInvoice(response);
     } catch (e) {
       throw Exception('Failed to update sales invoice: $e');
@@ -259,6 +286,10 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   @override
   Future<PurchaseInvoice> updatePurchaseInvoice(PurchaseInvoice invoice) async {
     try {
+      final oldInvoice = await getPurchaseInvoiceById(invoice.id);
+      final oldStatus = oldInvoice.status;
+      final newStatus = invoice.status;
+
       final invoiceData = invoice.toJson();
       invoiceData.remove('created_at');
       invoiceData.remove('supplier_name');
@@ -271,6 +302,16 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
           .select('*, suppliers(name)')
           .single();
 
+      if (oldStatus != newStatus) {
+        await _stockService.handleStatusChange(
+          newStatus: newStatus,
+          oldStatus: oldStatus,
+          items: invoice.items,
+          isPurchase: true,
+          invoiceId: invoice.id,
+        );
+      }
+
       return _mapJsonToPurchaseInvoice(response);
     } catch (e) {
       throw Exception('Failed to update purchase invoice: $e');
@@ -280,31 +321,16 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   @override
   Future<void> deleteSalesInvoice(String id) async {
     try {
-      // 1. Stoku geri almak için önce fatura öğelerini al
-      final items = await _supabaseClient
-          .from('sales_invoice_items')
-          .select('product_id, quantity')
-          .eq('invoice_id', id);
-
-      // 2. Her ürünün stok miktarını geri ekle (satış iptal → stok +)
-      for (final item in items) {
-        if (item['product_id'] != null) {
-          final productId = item['product_id'] as String;
-          final quantity = item['quantity'] as int;
-          final product = await _supabaseClient
-              .from('products')
-              .select('current_stock')
-              .eq('id', productId)
-              .single();
-          final currentStock = product['current_stock'] as int;
-          await _supabaseClient
-              .from('products')
-              .update({'current_stock': currentStock + quantity})
-              .eq('id', productId);
-        }
+      final oldInvoice = await getSalesInvoiceById(id);
+      
+      if (oldInvoice.status == InvoiceStatus.completed) {
+        await _stockService.reverseInvoiceStock(
+          items: oldInvoice.items,
+          isPurchase: false,
+          invoiceId: id,
+        );
       }
 
-      // 3. Fatura öğelerini ve faturayı sil
       await _supabaseClient
           .from('sales_invoice_items')
           .delete()
@@ -318,31 +344,16 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   @override
   Future<void> deletePurchaseInvoice(String id) async {
     try {
-      // 1. Stoku geri almak için önce fatura öğelerini al
-      final items = await _supabaseClient
-          .from('purchase_invoice_items')
-          .select('product_id, quantity')
-          .eq('invoice_id', id);
-
-      // 2. Her ürünün stok miktarını azalt (alış iptal → stok -)
-      for (final item in items) {
-        if (item['product_id'] != null) {
-          final productId = item['product_id'] as String;
-          final quantity = item['quantity'] as int;
-          final product = await _supabaseClient
-              .from('products')
-              .select('current_stock')
-              .eq('id', productId)
-              .single();
-          final currentStock = product['current_stock'] as int;
-          await _supabaseClient
-              .from('products')
-              .update({'current_stock': currentStock - quantity})
-              .eq('id', productId);
-        }
+      final oldInvoice = await getPurchaseInvoiceById(id);
+      
+      if (oldInvoice.status == InvoiceStatus.completed) {
+        await _stockService.reverseInvoiceStock(
+          items: oldInvoice.items,
+          isPurchase: true,
+          invoiceId: id,
+        );
       }
 
-      // 3. Fatura öğelerini ve faturayı sil
       await _supabaseClient
           .from('purchase_invoice_items')
           .delete()

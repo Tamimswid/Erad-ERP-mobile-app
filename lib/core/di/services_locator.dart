@@ -1,4 +1,5 @@
 import 'package:erad/core/constants/api_constans.dart';
+import 'package:erad/core/services/stock_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -66,6 +67,8 @@ Future<void> initServicesLocator() async {
   sl.registerLazySingleton(() => AppUtils());
   sl.registerLazySingleton(() => UserService());
 
+  sl.registerLazySingleton(() => StockService(sl()));
+
   // Auth
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(sl()),
@@ -81,7 +84,7 @@ Future<void> initServicesLocator() async {
 
   // Products
   sl.registerLazySingleton<ProductRemoteDataSource>(
-    () => ProductRemoteDataSourceImpl(sl()),
+    () => ProductRemoteDataSourceImpl(sl(), sl()),
   );
 
   sl.registerLazySingleton<ProductRepository>(
@@ -92,11 +95,11 @@ Future<void> initServicesLocator() async {
 
   // Invoices
   sl.registerLazySingleton<InvoiceRemoteDataSource>(
-    () => InvoiceRemoteDataSourceImpl(sl()),
+    () => InvoiceRemoteDataSourceImpl(sl(), sl()),
   );
 
   sl.registerLazySingleton<EditInvoiceDataSource>(
-    () => EditInvoiceDataSourceImpl(sl()),
+    () => EditInvoiceDataSourceImpl(sl(), sl()),
   );
 
   sl.registerLazySingleton<InvoiceRepository>(

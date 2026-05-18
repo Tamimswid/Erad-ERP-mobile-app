@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:erad/core/services/stock_service.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
+import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class EditInvoiceDataSource {
@@ -16,8 +18,9 @@ abstract class EditInvoiceDataSource {
 
 class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
   final SupabaseClient _supabaseClient;
+  final StockService _stockService;
 
-  EditInvoiceDataSourceImpl(this._supabaseClient);
+  EditInvoiceDataSourceImpl(this._supabaseClient, this._stockService);
 
   @override
   Future<SalesInvoice> getSalesInvoiceForEdit(String id) async {
@@ -88,6 +91,10 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
   @override
   Future<SalesInvoice> updateSalesInvoice(SalesInvoice invoice, List<InvoiceItem> newItems) async {
     try {
+      final oldInvoice = await getSalesInvoiceForEdit(invoice.id);
+      final oldStatus = oldInvoice.status;
+      final newStatus = invoice.status;
+
       final invoiceData = invoice.toJson();
       invoiceData.remove('created_at');
       invoiceData.remove('customer_name');
@@ -118,6 +125,16 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
         await _supabaseClient.from('sales_invoice_items').insert(itemsData);
       }
 
+      if (oldStatus != newStatus) {
+        await _stockService.handleStatusChange(
+          newStatus: newStatus,
+          oldStatus: oldStatus,
+          items: newItems,
+          isPurchase: false,
+          invoiceId: invoice.id,
+        );
+      }
+
       final updatedInvoice = await getSalesInvoiceForEdit(invoice.id);
       return updatedInvoice;
     } catch (e) {
@@ -128,6 +145,10 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
   @override
   Future<PurchaseInvoice> updatePurchaseInvoice(PurchaseInvoice invoice, List<InvoiceItem> newItems) async {
     try {
+      final oldInvoice = await getPurchaseInvoiceForEdit(invoice.id);
+      final oldStatus = oldInvoice.status;
+      final newStatus = invoice.status;
+
       final invoiceData = invoice.toJson();
       invoiceData.remove('created_at');
       invoiceData.remove('supplier_name');
@@ -155,6 +176,16 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
         }).toList();
         
         await _supabaseClient.from('purchase_invoice_items').insert(itemsData);
+      }
+
+      if (oldStatus != newStatus) {
+        await _stockService.handleStatusChange(
+          newStatus: newStatus,
+          oldStatus: oldStatus,
+          items: newItems,
+          isPurchase: true,
+          invoiceId: invoice.id,
+        );
       }
 
       final updatedInvoice = await getPurchaseInvoiceForEdit(invoice.id);
