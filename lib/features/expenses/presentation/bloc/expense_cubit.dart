@@ -97,7 +97,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
   }
 
   List<Expense> _getFilteredExpenses() {
-    return _expenses.where((expense) {
+    final filtered = _expenses.where((expense) {
       // Date filter
       if (_startDate != null && _endDate != null) {
         final expenseDate = expense.expenseDate;
@@ -111,6 +111,10 @@ class ExpenseCubit extends Cubit<ExpenseState> {
       }
       return true;
     }).toList();
+    
+    // Sort by date descending (newest first)
+    filtered.sort((a, b) => b.expenseDate.compareTo(a.expenseDate));
+    return filtered;
   }
 
   @override
@@ -198,12 +202,14 @@ class ExpenseCubit extends Cubit<ExpenseState> {
 
   // CRUD operations - Stream will handle automatic updates
   Future<void> createExpense(Expense expense) async {
+    emit(ExpenseLoading());
     final result = await _expenseRepository.createExpense(expense);
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (createdExpense) {
         emit(ExpenseSuccess('تم إضافة المصروف بنجاح'));
-        // Stream will automatically update the list
+        // Reload data to show updated list
+        _emitExpensesLoaded();
       },
     );
   }
@@ -214,7 +220,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
       (failure) => emit(ExpenseError(failure.message)),
       (updatedExpense) {
         emit(ExpenseSuccess('تم تحديث المصروف بنجاح'));
-        // Stream will automatically update the list
+        _emitExpensesLoaded();
       },
     );
   }
@@ -225,7 +231,7 @@ class ExpenseCubit extends Cubit<ExpenseState> {
       (failure) => emit(ExpenseError(failure.message)),
       (_) {
         emit(ExpenseSuccess('تم حذف المصروف بنجاح'));
-        // Stream will automatically update the list
+        _emitExpensesLoaded();
       },
     );
   }

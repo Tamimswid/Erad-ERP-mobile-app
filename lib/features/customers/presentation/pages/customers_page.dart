@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
@@ -92,17 +91,7 @@ class _CustomersPageState extends State<CustomersPage> {
           ),
           backgroundColor: AppColors.primary,
           onPressed: () {
-            final cubit = context.read<CustomerCubit>();
-            log('PAGE: FAB using CustomerCubit[${cubit.hashCode}]');
-            _showAddCustomerDialog(
-              context: context,
-              onCustomerAdded: (customer) {
-                log(
-                  'PAGE: Dialog callback using CustomerCubit[${cubit.hashCode}]',
-                );
-                cubit.createCustomer(customer);
-              },
-            );
+            _showAddCustomerDialog(context: context);
           },
         ),
       ),
@@ -111,14 +100,13 @@ class _CustomersPageState extends State<CustomersPage> {
 
   void _showAddCustomerDialog({
     required BuildContext context,
-    required Function(CustomerModel customer) onCustomerAdded,
     CustomerModel? customerModel,
   }) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
+          height: MediaQuery.of(dialogContext).size.height * 0.55,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -134,7 +122,7 @@ class _CustomersPageState extends State<CustomersPage> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(dialogContext),
                       icon: const Icon(Icons.close),
                     ),
                   ],
@@ -142,8 +130,9 @@ class _CustomersPageState extends State<CustomersPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: CustomerFormWidget(
+                    cubit: _customerCubit,
                     customerModel: customerModel,
-                    onTap: (customerModel) => onCustomerAdded(customerModel),
+                    onTap: (customerModel) {},
                   ),
                 ),
               ],

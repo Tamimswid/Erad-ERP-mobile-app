@@ -7,7 +7,8 @@ class EditInvoiceActionsWidget extends StatefulWidget {
   const EditInvoiceActionsWidget({super.key});
 
   @override
-  State<EditInvoiceActionsWidget> createState() => _EditInvoiceActionsWidgetState();
+  State<EditInvoiceActionsWidget> createState() =>
+      _EditInvoiceActionsWidgetState();
 }
 
 class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
@@ -80,7 +81,9 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
                             height: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Icon(Icons.save, size: 20),
@@ -92,13 +95,16 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _isSaving 
-                          ? AppColors.primary.withValues(alpha: 0.7) 
+                      padding: EdgeInsets.all(0),
+                      backgroundColor: _isSaving
+                          ? AppColors.primary.withValues(alpha: 0.7)
                           : AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
                       ),
                     ),
                   ),
@@ -119,10 +125,13 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.all(0),
                       foregroundColor: AppColors.text,
                       side: BorderSide(color: AppColors.border),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
                       ),
                     ),
                   ),

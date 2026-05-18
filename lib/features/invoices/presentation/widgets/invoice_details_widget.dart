@@ -527,24 +527,47 @@ class InvoiceDetailsWidget extends StatelessWidget {
   void _deleteInvoice(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('تأكيد الحذف'),
         content: Text('هل أنت متأكد من حذف فاتورة ${invoice.invoiceNumber}؟'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('إلغاء'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
-              if (invoice is SalesInvoice) {
-                // Use new method that adjusts customer balance before deleting
-                await context.read<InvoiceCubit>().deleteSalesInvoiceWithBalanceAdjustment(invoice as SalesInvoice);
-              } else if (invoice is PurchaseInvoice) {
-                context.read<InvoiceCubit>().deletePurchaseInvoice(invoice.id);
+              Navigator.pop(dialogContext);
+
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (loadingContext) => const PopScope(
+                  canPop: false,
+                  child: AlertDialog(
+                    content: Row(
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(width: 16),
+                        Text('جاري حذف الفاتورة...'),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+
+              try {
+                if (invoice is SalesInvoice) {
+                  await context.read<InvoiceCubit>().deleteSalesInvoiceWithBalanceAdjustment(invoice as SalesInvoice);
+                } else if (invoice is PurchaseInvoice) {
+                  await context.read<InvoiceCubit>().deletePurchaseInvoice(invoice.id);
+                }
+              } finally {
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(true);
+                }
               }
-              Navigator.pop(context);
             },
             child: const Text('حذف', style: TextStyle(color: Colors.red)),
           ),

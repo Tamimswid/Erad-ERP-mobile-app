@@ -83,9 +83,7 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final paddingSize = MediaQuery.of(context).size.width > 1200 ? 200.0 : 100.0;
-    
+  Widget build(BuildContext context) {    
     return BlocConsumer<EditInvoiceCubit, EditInvoiceState>(
       listener: (context, state) {
         if (state is EditInvoiceUpdated) {
@@ -137,17 +135,12 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
               ),
             ),
             body: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: paddingSize),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: EditInvoiceTypeWidget(isSales: widget.isSales),
-                      ),
-                      const SizedBox(width: 16),
                       Expanded(
                         flex: 1,
                         child: EditInvoiceDatesWidget(),

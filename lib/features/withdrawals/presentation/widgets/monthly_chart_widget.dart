@@ -92,17 +92,32 @@ class MonthlyChartWidget extends StatelessWidget {
                           child: Text(
                             (index + 1).toString(),
                             style: const TextStyle(
-                              color: AppColors.textSecondary,
+                              color: AppColors.text,
                               fontSize: 10,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         );
                       },
-                      reservedSize: 28,
+                      reservedSize: 25,
                     ),
                   ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        if (value == 0) return const SizedBox();
+                        final formatted = _formatCompactNumber(value);
+                        return Text(
+                          formatted,
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 10,
+                          ),
+                        );
+                      },
+                      reservedSize: 40,
+                    ),
                   ),
                   topTitles: const AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
@@ -112,7 +127,16 @@ class MonthlyChartWidget extends StatelessWidget {
                   ),
                 ),
                 borderData: FlBorderData(show: false),
-                gridData: const FlGridData(show: false),
+                gridData: FlGridData(
+                  show: true,
+                  drawHorizontalLine: true,
+                  horizontalInterval: maxY / 5,
+                  getDrawingHorizontalLine: (value) => const FlLine(
+                    color: AppColors.divider,
+                    strokeWidth: 1,
+                  ),
+                  drawVerticalLine: false,
+                ),
                 barGroups: List.generate(12, (index) {
                   return BarChartGroupData(
                     x: index,
@@ -120,13 +144,14 @@ class MonthlyChartWidget extends StatelessWidget {
                       BarChartRodData(
                         toY: values[index],
                         color: AppColors.primary,
-                        width: 16,
+                        width: 12,
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(4),
                           topRight: Radius.circular(4),
                         ),
                       ),
                     ],
+                    showingTooltipIndicators: values[index] > 0 ? [0] : [],
                   );
                 }),
               ),
@@ -140,5 +165,14 @@ class MonthlyChartWidget extends StatelessWidget {
   double _calculateMaxY(List<double> values) {
     final maxValue = values.isEmpty ? 0.0 : values.reduce((a, b) => a > b ? a : b);
     return maxValue > 0 ? maxValue * 1.2 : 100;
+  }
+
+  String _formatCompactNumber(double value) {
+    if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(1)}M';
+    } else if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(1)}K';
+    }
+    return value.toStringAsFixed(0);
   }
 }

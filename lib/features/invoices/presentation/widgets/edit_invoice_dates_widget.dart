@@ -92,7 +92,7 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
         }
         
         return SizedBox(
-          height: 120,
+          height: 140,
           child: Card(
             elevation: AppConstants.cardElevation,
             color: AppColors.surface,

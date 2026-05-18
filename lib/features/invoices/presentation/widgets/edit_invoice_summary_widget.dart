@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:iconsax/iconsax.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/app_utils.dart';
 import '../../../../core/utils/number_formatter.dart';
@@ -129,16 +130,16 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        const Text(
-          'الخصم (المبلغ)',
-          style: TextStyle(
-            fontSize: AppFonts.fontSizeSmall,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(width: 8),
+        // const Text(
+        //   'الخصم (المبلغ)',
+        //   style: TextStyle(
+        //     fontSize: AppFonts.fontSizeSmall,
+        //     color: AppColors.textSecondary,
+        //   ),
+        // ),
+        // const SizedBox(width: 8),
         SizedBox(
-          width: 200,
+          width: 150,
           child: TextField(
             controller: _discountController,
             keyboardType: TextInputType.number,
@@ -170,19 +171,24 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
           ),
         ),
         const SizedBox(width: 8),
-        MaterialButton(
-          onPressed: () {
-            final amount = double.tryParse(_discountController.text) ?? 0.0;
-            context.read<EditInvoiceCubit>().setDiscountAmount(amount);
-            setState(() {});
-          },
-          color: AppColors.primary,
-          shape: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5),
-            borderSide: BorderSide.none,
+        SizedBox(
+          width: 40,
+          child: MaterialButton(
+            height: 40,
+            onPressed: () {
+              final amount = double.tryParse(_discountController.text) ?? 0.0;
+              context.read<EditInvoiceCubit>().setDiscountAmount(amount);
+              setState(() {});
+            },
+            color: AppColors.primary,
+            padding: EdgeInsets.all(0),
+            shape:OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none
+            ),
+            elevation: 0,
+            child:  Center(child: Icon(Iconsax.add,color: AppColors.divider,)),
           ),
-          elevation: 0,
-          child: const Center(child: Text('طبق', style: TextStyle(color: AppColors.surface))),
         ),
         const Spacer(),
         Text(

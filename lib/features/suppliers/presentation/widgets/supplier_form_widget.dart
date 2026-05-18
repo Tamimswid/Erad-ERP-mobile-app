@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/services/user_service.dart';
 import '../../data/models/supplier.dart';
+import '../bloc/supplier_cubit.dart';
 
 class SupplierFormWidget extends StatefulWidget {
   final SupplierModel? supplier;
   final Function(SupplierModel) onSubmit;
+  final SupplierCubit? cubit;
 
-  const SupplierFormWidget({super.key, this.supplier, required this.onSubmit});
+  const SupplierFormWidget({super.key, this.supplier, required this.onSubmit, this.cubit});
 
   @override
   State<SupplierFormWidget> createState() => _SupplierFormWidgetState();
@@ -52,7 +55,12 @@ class _SupplierFormWidgetState extends State<SupplierFormWidget> {
         createdAt: widget.supplier?.createdAt ?? now,
         updatedAt: now,
       );
-      widget.onSubmit(supplier);
+      
+      if (widget.cubit != null) {
+        widget.cubit!.createSupplier(supplier);
+      } else {
+        widget.onSubmit(supplier);
+      }
     }
   }
 
@@ -98,7 +106,12 @@ class _SupplierFormWidgetState extends State<SupplierFormWidget> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _submit,
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _submit();
+                    Navigator.pop(context);
+                  }
+                },
                 child: Text(widget.supplier == null ? 'إضافة' : 'تحديث'),
               ),
             ),

@@ -2,8 +2,6 @@ part of 'invoice_cubit.dart';
 
 enum DateFilter {
   all,
-  // today,
-  // thisWeek,
   thisMonth,
   thisYear,
   custom,

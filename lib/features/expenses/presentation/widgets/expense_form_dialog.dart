@@ -151,25 +151,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                       _buildLabel('التاريخ *'),
                       const SizedBox(height: 8),
                       _buildDatePicker(),
-                      const SizedBox(height: 16),
-
-                      // Payment Method
-                      _buildLabel('طريقة الدفع'),
                       const SizedBox(height: 8),
-                      _buildPaymentMethodSelector(),
-                      const SizedBox(height: 16),
-
-                      // Receipt Number
-                      _buildLabel('رقم الإيصال'),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _receiptController,
-                        decoration: _buildInputDecoration(
-                          hint: 'رقم الإيصال (اختياري)',
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
                       // Notes
                       _buildLabel('ملاحظات'),
                       const SizedBox(height: 8),

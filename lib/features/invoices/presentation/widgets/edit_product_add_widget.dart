@@ -20,6 +20,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
   final _quantityController = TextEditingController(text: '1');
   final _searchFocusNode = FocusNode();
   final _quantityFocusNode = FocusNode();
+  final Map<int, TextEditingController> _priceControllers = {};
 
   List<ProductModel> _allProducts = [];
   List<ProductModel> _searchResults = [];
@@ -31,6 +32,9 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
     _quantityController.dispose();
     _searchFocusNode.dispose();
     _quantityFocusNode.dispose();
+    for (final controller in _priceControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -137,6 +141,8 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    
     return BlocBuilder<ProductCubit, ProductState>(
       builder: (context, productState) {
         if (productState is ProductsLoaded) {
@@ -185,192 +191,11 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     ),
                     const SizedBox(height: AppConstants.spacingMd),
 
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 7,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'اسم المنتج',
-                                  style: const TextStyle(
-                                    fontSize: AppFonts.fontSizeSmall,
-                                    fontWeight: AppFonts.fontWeightMedium,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _searchController,
-                                  focusNode: _searchFocusNode,
-                                  decoration: InputDecoration(
-                                    hintText: 'ابحث عن منتج أو اكتب اسم المنتج...',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        AppConstants.borderRadius,
-                                      ),
-                                      borderSide: BorderSide(color: AppColors.border),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        AppConstants.borderRadius,
-                                      ),
-                                      borderSide: BorderSide(color: AppColors.border),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        AppConstants.borderRadius,
-                                      ),
-                                      borderSide: const BorderSide(
-                                        color: AppColors.primary,
-                                        width: 2,
-                                      ),
-                                    ),
-                                    filled: true,
-                                    fillColor: AppColors.surface,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                      vertical: 10,
-                                    ),
-                                    isDense: true,
-                                  ),
-                                  onChanged: _onSearchChanged,
-                                  onSubmitted: _onSearchSubmitted,
-                                ),
+                    if (isMobile)
+                      _buildMobileAddForm()
+                    else
+                      _buildDesktopAddForm(),
 
-                                if (_searchResults.isNotEmpty)
-                                  Container(
-                                    constraints: const BoxConstraints(maxHeight: 180),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: AppColors.border),
-                                      borderRadius: const BorderRadius.only(
-                                        bottomLeft: Radius.circular(AppConstants.borderRadius),
-                                        bottomRight: Radius.circular(AppConstants.borderRadius),
-                                      ),
-                                      color: AppColors.surface,
-                                      boxShadow: AppConstants.cardShadow,
-                                    ),
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: _searchResults.length,
-                                      itemBuilder: (context, index) {
-                                        final product = _searchResults[index];
-                                        return ListTile(
-                                          dense: true,
-                                          leading: CircleAvatar(
-                                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                                            child: Icon(Icons.inventory_2, color: AppColors.primary, size: 18),
-                                          ),
-                                          title: Text(
-                                            product.name,
-                                            style: const TextStyle(
-                                              fontWeight: AppFonts.fontWeightSemiBold,
-                                              color: AppColors.text,
-                                              fontSize: AppFonts.fontSizeSmall,
-                                            ),
-                                          ),
-                                          subtitle: Text(
-                                            '${product.code} - ${product.salePrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()} (${product.unit})',
-                                            style: const TextStyle(fontSize: 12),
-                                          ),
-                                          onTap: () => _onProductSelected(product),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'الكمية',
-                                  style: const TextStyle(
-                                    fontSize: AppFonts.fontSizeSmall,
-                                    fontWeight: AppFonts.fontWeightMedium,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                TextField(
-                                  controller: _quantityController,
-                                  focusNode: _quantityFocusNode,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                                      borderSide: BorderSide(color: AppColors.border),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                                      borderSide: BorderSide(color: AppColors.border),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                                    ),
-                                    filled: true,
-                                    fillColor: AppColors.surface,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                    isDense: true,
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  textInputAction: TextInputAction.done,
-                                  textAlign: TextAlign.center,
-                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                  onSubmitted: (_) => _onQuantitySubmitted(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 2,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 22),
-                                SizedBox(
-                                  width: double.infinity,
-                                  height: 35,
-                                  child: ElevatedButton(
-                                    onPressed: _confirmAddProduct,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      foregroundColor: AppColors.surface,
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                                      ),
-                                    ),
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.add, size: 18),
-                                        SizedBox(width: 4),
-                                        Text('إضافة'),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     const SizedBox(height: 16),
                     _buildProductList(items),
                   ],
@@ -380,6 +205,294 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildMobileAddForm() {
+    return Column(
+      children: [
+        TextField(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          decoration: InputDecoration(
+            labelText: 'اسم المنتج',
+            hintText: 'ابحث عن منتج أو اكتب اسم المنتج...',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            filled: true,
+            fillColor: AppColors.surface,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          ),
+          onChanged: _onSearchChanged,
+          onSubmitted: _onSearchSubmitted,
+        ),
+        if (_searchResults.isNotEmpty)
+          Container(
+            constraints: const BoxConstraints(maxHeight: 150),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              color: AppColors.surface,
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _searchResults.length,
+              itemBuilder: (context, index) {
+                final product = _searchResults[index];
+                return ListTile(
+                  dense: true,
+                  title: Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontWeight: AppFonts.fontWeightSemiBold,
+                      fontSize: AppFonts.fontSizeSmall,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${product.salePrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()} (${product.unit})',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onTap: () => _onProductSelected(product),
+                );
+              },
+            ),
+          ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _quantityController,
+                focusNode: _quantityFocusNode,
+                decoration: InputDecoration(
+                  labelText: 'الكمية',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderSide: BorderSide(color: AppColors.border),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                ),
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                textAlign: TextAlign.center,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onSubmitted: (_) => _onQuantitySubmitted(),
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 100,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _confirmAddProduct,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.surface,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                  ),
+                ),
+                child: const Text('إضافة'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopAddForm() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 7,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'اسم المنتج',
+                  style: const TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightMedium,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: InputDecoration(
+                    hintText: 'ابحث عن منتج أو اكتب اسم المنتج...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    isDense: true,
+                  ),
+                  onChanged: _onSearchChanged,
+                  onSubmitted: _onSearchSubmitted,
+                ),
+                if (_searchResults.isNotEmpty)
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 180),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(AppConstants.borderRadius),
+                        bottomRight: Radius.circular(AppConstants.borderRadius),
+                      ),
+                      color: AppColors.surface,
+                      boxShadow: AppConstants.cardShadow,
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final product = _searchResults[index];
+                        return ListTile(
+                          dense: true,
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                            child: Icon(Icons.inventory_2, color: AppColors.primary, size: 18),
+                          ),
+                          title: Text(
+                            product.name,
+                            style: const TextStyle(
+                              fontWeight: AppFonts.fontWeightSemiBold,
+                              color: AppColors.text,
+                              fontSize: AppFonts.fontSizeSmall,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${product.code} - ${product.salePrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()} (${product.unit})',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          onTap: () => _onProductSelected(product),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'الكمية',
+                  style: const TextStyle(
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightMedium,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _quantityController,
+                  focusNode: _quantityFocusNode,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    isDense: true,
+                  ),
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.done,
+                  textAlign: TextAlign.center,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  onSubmitted: (_) => _onQuantitySubmitted(),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  height: 35,
+                  child: ElevatedButton(
+                    onPressed: _confirmAddProduct,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.surface,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, size: 18),
+                        SizedBox(width: 4),
+                        Text('إضافة'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -420,46 +533,34 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border, width: 1),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: AppColors.border.withValues(alpha: 0.3),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Expanded(flex: 4, child: Text('المنتج', style: TextStyle(fontWeight: FontWeight.w500))),
-                const Expanded(flex: 1, child: Text('الكمية', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w500))),
-                const Expanded(flex: 2, child: Text('السعر', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w500))),
-                const Expanded(flex: 2, child: Text('الإجمالي', textAlign: TextAlign.right, style: TextStyle(fontWeight: FontWeight.w500))),
-                const SizedBox(width: 40),
-              ],
-            ),
+    for (int i = 0; i < items.length; i++) {
+      if (!_priceControllers.containsKey(i)) {
+        _priceControllers[i] = TextEditingController(text: items[i].unitPrice.toStringAsFixed(2));
+      }
+    }
+
+    _priceControllers.removeWhere((key, _) => key >= items.length);
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.border, width: 1),
           ),
-          ...items.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: index % 2 == 0 ? AppColors.surface : AppColors.background,
-                border: index < items.length - 1 ? Border(bottom: BorderSide(color: AppColors.border.withValues(alpha: 0.5), width: 0.5)) : null,
-              ),
-              child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
                   Expanded(
-                    flex: 4,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -468,56 +569,119 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                       ],
                     ),
                   ),
+                  IconButton(
+                    icon: Icon(Icons.delete_outline, size: 20, color: AppColors.error),
+                    onPressed: () {
+                      _priceControllers.remove(index);
+                      context.read<EditInvoiceCubit>().removeItem(index);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
                   Expanded(
-                    flex: 1,
-                    child: GestureDetector(
-                      onTap: () => _showEditQuantityDialog(index, item),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('الكمية', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () => _showEditQuantityDialog(index, item),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary)),
+                                const SizedBox(width: 4),
+                                const Icon(Icons.edit, size: 14, color: AppColors.primary),
+                              ],
+                            ),
+                          ),
                         ),
-                        child: Text(
-                          '${item.quantity}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('السعر', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 36,
+                          child: TextField(
+                            controller: _priceControllers[index],
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(6),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(6),
+                                borderSide: BorderSide(color: AppColors.border),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(6),
+                                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                              ),
+                              filled: true,
+                              fillColor: AppColors.background,
+                            ),
+                            onChanged: (value) {
+                              final newPrice = double.tryParse(value);
+                              if (newPrice != null && newPrice >= 0) {
+                                final updatedItem = InvoiceItem(
+                                  id: item.id,
+                                  productId: item.productId,
+                                  productName: item.productName,
+                                  quantity: item.quantity,
+                                  unitPrice: newPrice,
+                                  discountAmount: item.discountAmount,
+                                  totalPrice: item.quantity * newPrice,
+                                  unit: item.unit,
+                                  measurement: item.measurement,
+                                  createdAt: item.createdAt,
+                                );
+                                context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
+                              }
+                            },
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
+                  const SizedBox(width: 12),
                   Expanded(
-                    flex: 2,
-                    child: GestureDetector(
-                      onTap: () => _showEditPriceDialog(index, item),
-                      child: Text(
-                        '${item.unitPrice.toStringAsFixed(2)}',
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      '${item.totalPrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
-                      textAlign: TextAlign.right,
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 40,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      onPressed: () => context.read<EditInvoiceCubit>().removeItem(index),
-                      color: AppColors.error.withValues(alpha: 0.7),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('الإجمالي', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${item.totalPrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            );
-          }),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 

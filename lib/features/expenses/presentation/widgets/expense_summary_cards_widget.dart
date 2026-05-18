@@ -30,13 +30,13 @@ class ExpenseSummaryCardsWidget extends StatelessWidget {
                 valueColor: AppColors.primary,
               ),
             ),
-            Expanded(
-              child: _buildCard(
-                title: 'عدد',
-                value: totalCount.toString(),
-                valueColor: AppColors.text,
-              ),
-            ),
+            // Expanded(
+            //   child: _buildCard(
+            //     title: 'عدد',
+            //     value: totalCount.toString(),
+            //     valueColor: AppColors.text,
+            //   ),
+            // ),
             Expanded(
               child: _buildCard(
                 title: 'المتوسط',

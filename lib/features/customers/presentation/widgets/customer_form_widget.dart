@@ -1,11 +1,13 @@
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
 import 'package:flutter/material.dart';
+import '../bloc/customer_cubit.dart';
 
 class CustomerFormWidget extends StatefulWidget {
   final CustomerModel? customerModel;
   final Function(CustomerModel customerModel) onTap;
-  const CustomerFormWidget({super.key, this.customerModel, required this.onTap});
+  final CustomerCubit? cubit;
+  const CustomerFormWidget({super.key, this.customerModel, required this.onTap, this.cubit});
 
   @override
   State<CustomerFormWidget> createState() => _CustomerFormWidgetState();
@@ -63,9 +65,13 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
         updatedAt: now,
         deletedAt: widget.customerModel?.deletedAt,
       );
-      widget.onTap(customer);
-      if (context.mounted) {
-        Navigator.pop(context);
+      if (widget.cubit != null) {
+        widget.cubit!.createCustomer(customer);
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      } else {
+        widget.onTap(customer);
       }
     }
   }

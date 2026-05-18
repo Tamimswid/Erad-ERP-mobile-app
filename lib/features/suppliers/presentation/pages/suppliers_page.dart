@@ -104,7 +104,7 @@ class _SuppliersPageState extends State<SuppliersPage> {
       builder: (context) => Dialog(
         child: SizedBox(
           width: 500,
-          height: MediaQuery.of(context).size.height * 0.45,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -125,8 +125,8 @@ class _SuppliersPageState extends State<SuppliersPage> {
                 const SizedBox(height: 16),
                 Expanded(
                   child: SupplierFormWidget(
+                    cubit: _supplierCubit,
                     onSubmit: (supplier) {
-                      onSubmit(supplier);
                       Navigator.pop(context);
                     },
                   ),

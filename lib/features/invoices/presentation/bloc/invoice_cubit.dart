@@ -398,6 +398,10 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         .whereType<PurchaseInvoice>()
         .toList();
 
+    // Sort by date descending (newest first)
+    filteredSales.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+    filteredPurchase.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+
     // Calculate statistics
     final totalCount = filteredInvoices.length;
     final paidCount = filteredInvoices.where((invoice) {

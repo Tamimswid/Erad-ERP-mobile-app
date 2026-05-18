@@ -95,6 +95,9 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
           .toList();
     }
 
+    // Sort by date descending (newest first)
+    filteredWithdrawals.sort((a, b) => b.withdrawalDate.compareTo(a.withdrawalDate));
+
     _emitLoadedState(filteredWithdrawals);
   }
 

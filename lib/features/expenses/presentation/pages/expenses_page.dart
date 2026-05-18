@@ -202,6 +202,7 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
               context: context,
               onTap: (expense) {
                 context.read<ExpenseCubit>().createExpense(expense);
+                Navigator.pop(context);
               },
               categories: categories,
             ),

@@ -82,7 +82,28 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
       appBar: AppBar(
         title: const Text('السحوبات'),
         backgroundColor: AppColors.background,
-        actions: [
+        actions: [  Builder(
+            builder: (context) {
+              final cubit = context.read<WithdrawalCubit>();
+              final state = cubit.state;
+              final hasPartners = state is WithdrawalsLoaded && state.partners.isNotEmpty;
+              return hasPartners 
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: IconButton(
+                        onPressed: () => _showAddPartnerDialog(context),
+                        icon: const Icon(Icons.person_add_alt_1, size: 22),
+                        tooltip: 'إضافة شريك',
+                        style: IconButton.styleFrom(
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink();
+            },
+          ),
+          const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(left: 8),
             child: _WithdrawalsDateFilter(
@@ -103,6 +124,7 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
               },
             ),
           ),
+        
         ],
       ),
       backgroundColor: AppColors.background,
