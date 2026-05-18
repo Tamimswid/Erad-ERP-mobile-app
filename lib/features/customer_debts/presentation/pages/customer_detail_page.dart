@@ -163,14 +163,16 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
           },
         );
 
-    // بث المدفوعات - الاستماع للتغييرات الفورية
+    // بث المدفوعات - الاستماع للتغييرات الفورية (only customer payments)
     _paymentsSubscription = _supabase
         .from('payments')
         .stream(primaryKey: ['id'])
         .asyncMap((data) async {
           final filtered = data
               .where((p) =>
-                  p['user_id'] == userId && p['customer_id'] == customerId)
+                  p['user_id'] == userId && 
+                  p['customer_id'] == customerId &&
+                  p['payment_type'] == 'customer')
               .toList();
           return List<Map<String, dynamic>>.from(filtered);
         })

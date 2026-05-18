@@ -155,7 +155,9 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
         .asyncMap((data) async {
           final filtered = data
               .where((p) =>
-                  p['user_id'] == userId && p['supplier_id'] == supplierId)
+                  p['user_id'] == userId && 
+                  p['supplier_id'] == supplierId &&
+                  p['payment_type'] == 'supplier')
               .toList();
           return List<Map<String, dynamic>>.from(filtered);
         })
@@ -447,12 +449,15 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
               ),
             ),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildInvoicesTab(),
-                  _buildPaymentsTab(),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildInvoicesTab(),
+                    _buildPaymentsTab(),
+                  ],
+                ),
               ),
             ),
           ],
@@ -485,6 +490,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
 
   Widget _buildPaymentsTab() {
     return SingleChildScrollView(
+      // physics: NeverScrollableScrollPhysics(),
       child: Column(
         children: [
           PaymentHistoryWidget(

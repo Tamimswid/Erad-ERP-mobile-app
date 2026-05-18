@@ -95,6 +95,31 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
         backgroundColor: AppColors.background,
         actions: [
           Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Builder(
+              builder: (context) {
+                final cubit = context.read<ExpenseCubit>();
+                final categories = cubit.categories;
+                return IconButton(
+                  onPressed: () => _showAddExpenseDialog(
+                    context: context,
+                    onTap: (expense) {
+                      context.read<ExpenseCubit>().createExpense(expense);
+                    },
+                    categories: categories,
+                  ),
+                  icon: const Icon(Icons.add_circle_outline, size: 24),
+                  tooltip: 'إضافة مصروف',
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    foregroundColor: AppColors.primary,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          Padding(
             padding: const EdgeInsets.only(left: 8),
             child: _ExpensesDateFilter(
             selectedYear: widget.selectedYear,

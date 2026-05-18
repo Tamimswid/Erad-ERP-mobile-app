@@ -142,6 +142,7 @@ class SupplierDebtRemoteDataSource {
             .from('payments')
             .select('supplier_id, amount')
             .eq('user_id', userId)
+            .eq('payment_type', 'supplier')
             .inFilter('supplier_id', supplierIds.toList());
 
         for (var json in paymentsResponse as List) {
@@ -209,6 +210,7 @@ class SupplierDebtRemoteDataSource {
       await supabaseClient.from('payments').insert({
         'user_id': userId,
         'supplier_id': supplierId,
+        'payment_type': 'supplier',
         'amount': amount,
         'payment_date': paymentDate,
         'notes': note,

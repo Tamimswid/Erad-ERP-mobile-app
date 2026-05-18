@@ -15,6 +15,7 @@ class PaymentModel extends Equatable {
   final String? notes;
   final String createdAt;
   final String? updatedAt;
+  final String paymentType; // 'customer' or 'supplier'
 
   const PaymentModel({
     required this.id,
@@ -27,6 +28,7 @@ class PaymentModel extends Equatable {
     this.notes,
     required this.createdAt,
     this.updatedAt,
+    this.paymentType = 'customer',
   });
 
   /// إنشاء نموذج فارغ
@@ -53,6 +55,7 @@ class PaymentModel extends Equatable {
     String? notes,
     String? createdAt,
     String? updatedAt,
+    String? paymentType,
   }) {
     return PaymentModel(
       id: id ?? this.id,
@@ -65,12 +68,12 @@ class PaymentModel extends Equatable {
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      paymentType: paymentType ?? this.paymentType,
     );
   }
 
   /// تحويل إلى Map
   Map<String, dynamic> toMap() {
-    
     return {
       'user_id': userId,
       'customer_id': customerId,
@@ -81,6 +84,7 @@ class PaymentModel extends Equatable {
       'notes': notes,
       'created_at': createdAt,
       'updated_at': updatedAt,
+      'payment_type': paymentType,
     };
   }
 
@@ -97,6 +101,7 @@ class PaymentModel extends Equatable {
       notes: map['notes'],
       createdAt: map['created_at'] ?? '',
       updatedAt: map['updated_at'],
+      paymentType: map['payment_type'] ?? 'customer',
     );
   }
 
@@ -118,6 +123,7 @@ class PaymentModel extends Equatable {
         notes,
         createdAt,
         updatedAt,
+        paymentType,
       ];
 
   @override

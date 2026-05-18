@@ -7,6 +7,7 @@ import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.da
 import 'package:erad/features/suppliers_debts/data/repositories/supplier_debt_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class SupplierDebtState extends Equatable {
   const SupplierDebtState();
@@ -73,7 +74,8 @@ class SupplierPaymentSuccess extends SupplierDebtState {
 
 class SupplierDebtCubit extends Cubit<SupplierDebtState> {
   final SupplierDebtRepository repository;
-  StreamSubscription<Either<Failure, List<SupplierDebtModel>>>? _debtsSubscription;
+  final _supabase = Supabase.instance.client;
+  StreamSubscription<List<Map<String, dynamic>>>? _paymentsSubscription;
 
   SupplierDebtCubit({required this.repository}) : super(SupplierDebtInitial()) {
     _startRealtimeListener();
@@ -84,7 +86,19 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
   String _searchQuery = '';
 
   void _startRealtimeListener() {
-    log('SupplierDebtCubit: Real-time stream disabled - using manual refresh for supplier names');
+    _paymentsSubscription = _supabase
+        .from('payments')
+        .stream(primaryKey: ['id'])
+        .asyncMap((data) async {
+          final filtered = data
+              .where((p) => p['payment_type'] == 'supplier' && p['supplier_id'] != null)
+              .toList();
+          return List<Map<String, dynamic>>.from(filtered);
+        })
+        .listen((_) {
+          log('SupplierDebtCubit: Payment change detected - refreshing data');
+          getSupplierDebts();
+        });
   }
 
   void _applySearchFilter() {
@@ -104,7 +118,6 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
 
   Future<void> getSupplierDebts() async {
     if (isClosed) return;
-    emit(SupplierDebtLoading());
     final result = await repository.getSupplierDebts();
     if (isClosed) return;
     result.fold(
@@ -147,7 +160,7 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
       (failure) => emit(SupplierDebtError(failure.message)),
       (_) async {
         if (!isClosed) {
-          emit(SupplierPaymentSuccess('Ödeme kaydedildi: ${amount.toStringAsFixed(2)}'));
+          emit(SupplierPaymentSuccess('تم تسجيل الدفعة: ${amount.toStringAsFixed(2)}'));
         }
         await getSupplierDebts();
       },
@@ -181,7 +194,7 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
 
   @override
   Future<void> close() {
-    _debtsSubscription?.cancel();
+    _paymentsSubscription?.cancel();
     return super.close();
   }
 }

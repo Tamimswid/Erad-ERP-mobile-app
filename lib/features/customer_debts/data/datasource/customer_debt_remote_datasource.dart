@@ -39,17 +39,20 @@ class CustomerDebtRemoteDataSource {
           .eq('user_id', userId)
           .order('invoice_date', ascending: false);
 
-      // Get all payments for customers
+      // Get all payments for customers (only customer type)
       final paymentsResponse = await supabaseClient
           .from('payments')
           .select('customer_id, amount')
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .eq('payment_type', 'customer')
+          .not('customer_id', 'is', null);
 
       // Calculate total payments per customer
       final customerPayments = <String, double>{};
       for (var json in paymentsResponse as List) {
         final payment = json as Map<String, dynamic>;
-        final customerId = payment['customer_id'] as String;
+        final customerId = payment['customer_id'] as String?;
+        if (customerId == null) continue;
         final amount = (payment['amount'] ?? 0.0).toDouble();
         customerPayments[customerId] =
             (customerPayments[customerId] ?? 0.0) + amount;
@@ -235,6 +238,7 @@ class CustomerDebtRemoteDataSource {
       await supabaseClient.from('payments').insert({
         'user_id': userId,
         'customer_id': customerId,
+        'payment_type': 'customer',
         'amount': amount,
         'payment_date': paymentDate,
         'notes': note,

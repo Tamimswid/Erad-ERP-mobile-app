@@ -100,6 +100,7 @@ class UnpaidInvoicesWidget extends StatelessWidget {
                     ),
                   )
                 : ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
                     itemCount: unpaidInvoices.length,
                     itemBuilder: (context, index) {
