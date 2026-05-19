@@ -1,3 +1,4 @@
+import 'package:erad/core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/widgets/common_widgets.dart';
@@ -70,7 +71,7 @@ class InvoiceTotalsWidget extends StatelessWidget {
           ],
         ),
         Text(
-          '${isDiscount ? '-' : ''}${NumberFormatter.getCurrencySymbol()} ${NumberFormatter.format(value)}',
+          '${isDiscount ? '-' : ''}${AppUtils.formatNumber(value)} ${NumberFormatter.getCurrencySymbol()}',
           style: TextStyle(
             fontSize: isLarge ? AppFonts.fontSizeXLarge : AppFonts.fontSizeMedium,
             fontWeight: isLarge ? AppFonts.fontWeightBold : AppFonts.fontWeightSemiBold,

@@ -90,6 +90,12 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
                   ),
                   child: Column(
                     children: [
+                      _buildInfoRow(
+                        Icons.inventory_2_outlined,
+                        'عدد المنتجات',
+                        '${cubit.invoiceItems.length} منتج',
+                      ),
+                      const SizedBox(height: 8),
                       _buildSummaryRow('المجموع الفرعي', subtotal),
                       const SizedBox(height: 6),
                       _buildDiscountRow(discountAmount, subtotal),
@@ -119,6 +125,36 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
             fontSize: AppFonts.fontSizeMedium,
             fontWeight: AppFonts.fontWeightSemiBold,
             color: AppColors.text,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Icon(icon, size: 18, color: AppColors.primary),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: AppFonts.fontWeightMedium,
+                fontSize: AppFonts.fontSizeSmall,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: AppFonts.fontWeightSemiBold,
+            fontSize: AppFonts.fontSizeSmall,
+            color: AppColors.primary,
           ),
         ),
       ],

@@ -79,8 +79,19 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
     if (_selectedProduct != null) {
       final quantity = int.tryParse(_quantityController.text);
       if (quantity != null && quantity > 0) {
-        final invoiceItem = InvoiceItem.fromProduct(_selectedProduct!, quantity);
-        context.read<EditInvoiceCubit>().addItem(invoiceItem);
+        final editCubit = context.read<EditInvoiceCubit>();
+        final unitPrice = editCubit.isSales ? _selectedProduct!.salePrice : _selectedProduct!.purchasePrice;
+        final invoiceItem = InvoiceItem(
+          measurement: _selectedProduct!.measurement,
+          productId: _selectedProduct!.id,
+          productName: _selectedProduct!.name,
+          quantity: quantity,
+          unitPrice: unitPrice,
+          purchasePrice: _selectedProduct!.purchasePrice,
+          totalPrice: unitPrice * quantity,
+          unit: _selectedProduct!.unit,
+        );
+        editCubit.addItem(invoiceItem);
 
         setState(() {
           _searchController.clear();
@@ -118,20 +129,25 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
       name = '${existingProduct.name} (${existingProduct.unit})';
     }
 
-final invoiceItem = InvoiceItem(
+    final editCubit = context.read<EditInvoiceCubit>();
+    final unitPrice = editCubit.isSales 
+        ? (existingProduct?.salePrice ?? 0) 
+        : (existingProduct?.purchasePrice ?? 0);
+
+    final invoiceItem = InvoiceItem(
       
       productId: existingProduct?.id ?? '',
       productName: name,
       quantity: quantity,
-      unitPrice: existingProduct?.salePrice ?? 0,
+      unitPrice: unitPrice,
       purchasePrice: existingProduct?.purchasePrice ?? 0,
-      totalPrice: (existingProduct?.salePrice ?? 0) * quantity,
+      totalPrice: unitPrice * quantity,
       unit: existingProduct!.unit ,
       measurement: existingProduct.measurement,
       createdAt: DateTime.now(),
     );
 
-    context.read<EditInvoiceCubit>().addItem(invoiceItem);
+    editCubit.addItem(invoiceItem);
 
     setState(() {
       _searchController.clear();

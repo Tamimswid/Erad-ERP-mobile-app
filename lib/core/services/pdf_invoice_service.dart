@@ -104,29 +104,26 @@ class PdfInvoiceService {
         0: const pw.FlexColumnWidth(3), // Product name
         1: const pw.FlexColumnWidth(1), // Quantity
         2: const pw.FlexColumnWidth(1), // Unit price
-        3: const pw.FlexColumnWidth(1), // Discount
-        4: const pw.FlexColumnWidth(1), // Total
+        3: const pw.FlexColumnWidth(1), // Total
       },
       children: [
         // Header row
         pw.TableRow(
           decoration: const pw.BoxDecoration(color: PdfColors.grey200),
           children: [
-            _buildTableCell(_processArabicText('الصنف'), boldFont, isHeader: true),
-            _buildTableCell(_processArabicText('الكمية'), boldFont, isHeader: true),
-            _buildTableCell(_processArabicText('السعر'), boldFont, isHeader: true),
-            _buildTableCell(_processArabicText('الخصم'), boldFont, isHeader: true),
             _buildTableCell(_processArabicText('الإجمالي'), boldFont, isHeader: true),
+            _buildTableCell(_processArabicText('السعر'), boldFont, isHeader: true),
+            _buildTableCell(_processArabicText('الكمية'), boldFont, isHeader: true),
+            _buildTableCell(_processArabicText('الصنف'), boldFont, isHeader: true),
           ],
         ),
         // Data rows
         ...items.map((item) => pw.TableRow(
           children: [
-            _buildTableCell(_processArabicText(item.productName ?? 'صنف غير محدد'), font),
-            _buildTableCell('${item.quantity ?? 0}', font),
-            _buildTableCell('${item.unitPrice ?? 0.0}', font),
-            _buildTableCell('${item.discountAmount ?? 0.0}', font),
             _buildTableCell('${item.totalPrice ?? 0.0}', font),
+            _buildTableCell('${item.unitPrice ?? 0.0}', font),
+            _buildTableCell('${item.quantity ?? 0}', font),
+            _buildTableCell(_processArabicText(item.productName ?? 'صنف غير محدد'), font),
           ],
         )).toList(),
       ],
@@ -149,19 +146,70 @@ class PdfInvoiceService {
   }
 
   pw.Widget _buildTotals(dynamic invoice, pw.Font boldFont, pw.Font font) {
+    final subtotal = _getSubtotal(invoice);
+    final discount = _getDiscountAmount(invoice);
     final total = _getTotalAmount(invoice);
 
     return pw.Container(
-      padding: const pw.EdgeInsets.all(8),
+      padding: const pw.EdgeInsets.all(12),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.grey300),
         borderRadius: pw.BorderRadius.circular(8),
       ),
-      child: pw.Text(
-        _processArabicText('${total.toStringAsFixed(2)} ل.س'),
-        style: pw.TextStyle(font: boldFont, fontSize: 14, fontWeight: pw.FontWeight.bold),
-        textAlign: pw.TextAlign.right,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          _buildTotalRow(
+            _processArabicText('المجموع الفرعي'),
+            '${subtotal.toStringAsFixed(2)} ل.س',
+            font,
+          ),
+          pw.SizedBox(height: 4),
+          if (discount > 0) ...[
+            _buildTotalRow(
+              _processArabicText('الخصم'),
+              '- ${discount.toStringAsFixed(2)} ل.س',
+              font,
+              valueColor: PdfColors.red,
+            ),
+            pw.SizedBox(height: 4),
+          ],
+          pw.Divider(thickness: 1),
+          pw.SizedBox(height: 4),
+          _buildTotalRow(
+            _processArabicText('المجموع الكلي'),
+            '${total.toStringAsFixed(2)} ل.س',
+            boldFont,
+            isBold: true,
+            valueColor: PdfColors.blue,
+          ),
+        ],
       ),
+    );
+  }
+
+  pw.Widget _buildTotalRow(String label, String value, pw.Font font, {bool isBold = false, PdfColor? valueColor}) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text(
+          label,
+          style: pw.TextStyle(
+            font: font,
+            fontSize: 13,
+            fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+          ),
+        ),
+        pw.Text(
+          value,
+          style: pw.TextStyle(
+            font: font,
+            fontSize: isBold ? 14 : 13,
+            fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            color: valueColor,
+          ),
+        ),
+      ],
     );
   }
 

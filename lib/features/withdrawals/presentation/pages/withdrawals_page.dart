@@ -82,13 +82,15 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
       appBar: AppBar(
         title: const Text('السحوبات'),
         backgroundColor: AppColors.background,
-        actions: [  Builder(
+        actions: [ 
+           Builder(
             builder: (context) {
               final cubit = context.read<WithdrawalCubit>();
               final state = cubit.state;
               final hasPartners = state is WithdrawalsLoaded && state.partners.isNotEmpty;
-              return hasPartners 
-                  ? Padding(
+              // return hasPartners  ?
+                 return
+                   Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: IconButton(
                         onPressed: () => _showAddPartnerDialog(context),
@@ -99,8 +101,8 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
                           foregroundColor: AppColors.primary,
                         ),
                       ),
-                    )
-                  : const SizedBox.shrink();
+                    ) ;
+                  // : const SizedBox.shrink();
             },
           ),
           const SizedBox(width: 8),
@@ -203,7 +205,7 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
               ? partners.partners 
               : <Partner>[];
           return FloatingActionButton.extended(
-            label: Text('سحب', style: TextStyle(color: AppColors.surface)),
+            label: Text( 'إضافة سحب', style: TextStyle(color: AppColors.surface)),
             onPressed: () => _showAddWithdrawalDialog(
               context: context,
               onTap: (withdrawal) {

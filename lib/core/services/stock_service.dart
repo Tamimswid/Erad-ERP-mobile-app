@@ -41,8 +41,8 @@ class StockService {
   Future<void> _recordMovement({
     required String productId,
     required int quantityChange,
-    required int previousStock,
-    required int newStock,
+    required double previousStock,
+    required double newStock,
     required StockMovementType type,
     String? referenceId,
     String? referenceType,
@@ -78,20 +78,20 @@ class StockService {
     }
   }
 
-  Future<void> _updateProductStock(String productId, int newStock) async {
+  Future<void> _updateProductStock(String productId, double newStock) async {
     await _client
         .from('products')
         .update({'current_stock': newStock})
         .eq('id', productId);
   }
 
-  Future<int> _getProductCurrentStock(String productId) async {
+  Future<double> _getProductCurrentStock(String productId) async {
     final result = await _client
         .from('products')
         .select('current_stock')
         .eq('id', productId)
         .single();
-    return result['current_stock'] as int? ?? 0;
+    return result['current_stock'] as double? ?? 0.0;
   }
 
   Future<void> applyInvoiceStock({

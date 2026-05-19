@@ -222,6 +222,8 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.all(0),
+
                       backgroundColor: _isSaving ? AppColors.primary.withOpacity(0.7) : AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
@@ -247,6 +249,7 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.all(0),
                       backgroundColor: _isSaving ? AppColors.error.withOpacity(0.5) : AppColors.error,
                       foregroundColor: Colors.white,
                       elevation: 0,
@@ -257,31 +260,31 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    onPressed: _isSaving ? null : _exportToPDF,
-                    icon: const Icon(Icons.picture_as_pdf, size: 18),
-                    label: Text(
-                      'PDF',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isSaving ? AppColors.secondary.withOpacity(0.5) : AppColors.secondary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // const SizedBox(width: 8),
+              // Expanded(
+              //   child: SizedBox(
+              //     height: 48,
+              //     child: ElevatedButton.icon(
+              //       onPressed: _isSaving ? null : _exportToPDF,
+              //       icon: const Icon(Icons.picture_as_pdf, size: 18),
+              //       label: Text(
+              //         'PDF',
+              //         style: const TextStyle(
+              //           fontWeight: AppFonts.fontWeightSemiBold,
+              //           fontSize: 13,
+              //         ),
+              //       ),
+              //       style: ElevatedButton.styleFrom(
+              //         backgroundColor: _isSaving ? AppColors.secondary.withOpacity(0.5) : AppColors.secondary,
+              //         foregroundColor: Colors.white,
+              //         elevation: 0,
+              //         shape: RoundedRectangleBorder(
+              //           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ],

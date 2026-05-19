@@ -1,5 +1,4 @@
 import 'package:erad/features/invoices/data/repositories/invoice_repository.dart';
-import 'package:erad/features/invoices/presentation/widgets/customer_supplier_search_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/services_locator.dart' as sl;
@@ -60,7 +59,6 @@ class _CreateInvoicePageContent extends StatefulWidget {
 class _CreateInvoicePageContentState extends State<_CreateInvoicePageContent> {
   @override
   Widget build(BuildContext context) {
-    final paddingSize = MediaQuery.of(context).size.width > 1200 ? 200.0 : 100.0;
     
     return BlocListener<InvoiceCubit, InvoiceState>(
       listener: (context, state) {

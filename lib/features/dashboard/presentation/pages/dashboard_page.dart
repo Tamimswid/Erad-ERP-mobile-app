@@ -39,7 +39,7 @@ class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
 
   final List<MenuItem> _menuItems = [
-    const MenuItem(icon: Iconsax.home, title: 'لوحة التحكم', index: 0),
+    const MenuItem(icon: Iconsax.home, title: 'الرئيسية', index: 0),
     const MenuItem(icon: Iconsax.document, title: 'الفواتير', index: 1),
     const MenuItem(icon: Iconsax.wallet, title: 'دين العملاء', index: 2),
     const MenuItem(icon: Iconsax.money_forbidden, title: 'دين الموردين', index: 3),
@@ -61,7 +61,7 @@ class _DashboardPageState extends State<DashboardPage> {
         bottomNavigationBar: NavigationBar(
           backgroundColor: AppColors.background,
           indicatorColor: AppColors.primary.withValues(alpha: 0.3),
-          height: 70,
+          height: 75,
           overlayColor: WidgetStatePropertyAll<Color>(
             AppColors.primary.withValues(alpha: 0.5),
           ),

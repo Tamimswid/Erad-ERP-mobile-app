@@ -80,13 +80,13 @@ class NumberFormatter {
 
   static String _formatStandard(num number) {
     if (number is int) {
-      return number.toString();
+      return number.toStringAsFixed(2);
     }
-    return number.toStringAsFixed(0).replaceAll(RegExp(r'\.?0+$'), '');
+    return number.toStringAsFixed(2);
   }
 
   static String _formatArabic(num number) {
-    if (number == 0) return '0';
+    if (number == 0) return '0.00';
 
     final absNumber = number.abs();
     final isNegative = number < 0;
@@ -94,15 +94,15 @@ class NumberFormatter {
 
     if (absNumber >= 1000000000) {
       final billions = absNumber / 1000000000;
-      result = '${billions.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} مليار';
+      result = '${billions.toStringAsFixed(2)} مليار';
     } else if (absNumber >= 1000000) {
       final millions = absNumber / 1000000;
-      result = '${millions.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ميليون';
+      result = '${millions.toStringAsFixed(2)} ميليون';
     } else if (absNumber >= 1000) {
       final thousands = absNumber / 1000;
-      result = '${thousands.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '')} ألف';
+      result = '${thousands.toStringAsFixed(2)} ألف';
     } else {
-      result = absNumber.toStringAsFixed(0);
+      result = absNumber.toStringAsFixed(2);
     }
 
     return isNegative ? '-$result' : result;
@@ -132,10 +132,10 @@ class NumberFormatter {
 
   static String _formatShortStandard(num number) {
     if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
+      return '${(number / 1000000).toStringAsFixed(2)}M';
     } else if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}K';
+      return '${(number / 1000).toStringAsFixed(2)}K';
     }
-    return number.toStringAsFixed(0);
+    return number.toStringAsFixed(2);
   }
 }

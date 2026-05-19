@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import '../../../invoices/data/repositories/invoice_repository.dart';
 import '../../../invoices/data/models/sales_invoice.dart';
 import '../../../invoices/data/models/purchase_invoice.dart';
+import '../../../invoices/data/models/invoice_status.dart';
 import '../../../customers/data/repositories/customer_repository.dart';
 import '../../../products/data/repositories/product_repository.dart';
 import '../../../products/data/models/product.dart';
@@ -119,14 +120,16 @@ class DashboardCubit extends Cubit<DashboardState> {
         (productList) => products = productList,
       );
 
-      // Calculate totals based on date range
+      // Calculate totals based on date range (only completed invoices)
       final filteredSales = salesInvoices.where((invoice) {
-        return invoice.invoiceDate.isAfter(effectiveDateRange.start) &&
+        return invoice.status == InvoiceStatus.completed &&
+            invoice.invoiceDate.isAfter(effectiveDateRange.start) &&
             invoice.invoiceDate.isBefore(effectiveDateRange.end.add(const Duration(days: 1)));
       });
 
       final filteredPurchases = purchaseInvoices.where((invoice) {
-        return invoice.invoiceDate.isAfter(effectiveDateRange.start) &&
+        return invoice.status == InvoiceStatus.completed &&
+            invoice.invoiceDate.isAfter(effectiveDateRange.start) &&
             invoice.invoiceDate.isBefore(effectiveDateRange.end.add(const Duration(days: 1)));
       });
 
@@ -274,11 +277,11 @@ class DashboardCubit extends Cubit<DashboardState> {
       final monthName = _getArabicMonthName(month);
 
       final monthSales = salesInvoices
-          .where((i) => i.invoiceDate.month == month && i.invoiceDate.year == year)
+          .where((i) => i.status == InvoiceStatus.completed && i.invoiceDate.month == month && i.invoiceDate.year == year)
           .fold(0.0, (sum, i) => sum + i.totalAmount);
 
       final monthPurchases = purchaseInvoices
-          .where((i) => i.invoiceDate.month == month && i.invoiceDate.year == year)
+          .where((i) => i.status == InvoiceStatus.completed && i.invoiceDate.month == month && i.invoiceDate.year == year)
           .fold(0.0, (sum, i) => sum + i.totalAmount);
 
       final monthExpenses = expenses
@@ -290,7 +293,7 @@ class DashboardCubit extends Cubit<DashboardState> {
           .fold(0.0, (sum, w) => sum + w.amount);
 
       final profit = salesInvoices
-          .where((i) => i.invoiceDate.month == month && i.invoiceDate.year == year)
+          .where((i) => i.status == InvoiceStatus.completed && i.invoiceDate.month == month && i.invoiceDate.year == year)
           .fold(0.0, (sum, i) => sum + (i.profit ?? 0));
 
       return {

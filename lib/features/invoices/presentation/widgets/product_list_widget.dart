@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/utils/app_utils.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/invoice_item.dart';
 import '../bloc/invoice_cubit.dart';
@@ -68,272 +69,133 @@ class _ProductListWidgetState extends State<ProductListWidget> {
   }
 
   Widget _buildProductList(List<InvoiceItem> items) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-    
-    if (isMobile) {
-      return _buildMobileProductList(items);
-    }
-    
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border, width: 1),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.border.withValues(alpha: 0.3),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
+    return Column(
+      children: [
+        ...items.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          return Dismissible(
+            key: Key('product_${item.productId}_$index'),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              color: AppColors.error,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              child: const Icon(
+                Icons.delete,
+                color: Colors.white,
+                size: 24,
               ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: Text(
-                    'المنتج',
-                    style: TextStyle(
-                      fontWeight: AppFonts.fontWeightMedium,
-                      color: AppColors.text,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'الكمية',
-                    style: TextStyle(
-                      fontWeight: AppFonts.fontWeightMedium,
-                      color: AppColors.text,
-                      fontSize: 11,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'السعر',
-                    style: TextStyle(
-                      fontWeight: AppFonts.fontWeightMedium,
-                      color: AppColors.text,
-                      fontSize: 11,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    'الإجمالي',
-                    style: TextStyle(
-                      fontWeight: AppFonts.fontWeightMedium,
-                      color: AppColors.text,
-                      fontSize: 11,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-                const SizedBox(width: 30),
-              ],
-            ),
-          ),
-          
-          ...items.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return Dismissible(
-              key: Key('product_${item.productId}_$index'),
-              direction: DismissDirection.endToStart,
-              background: Container(
-                color: AppColors.error,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                  size: 24,
-                ),
+            onDismissed: (direction) {
+              _removeItem(index);
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.border, width: 1),
               ),
-              onDismissed: (direction) {
-                _removeItem(index);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                decoration: BoxDecoration(
-                  color: index % 2 == 0 ? AppColors.surface : AppColors.background,
-                  border: index < items.length - 1 
-                      ? Border(
-                          bottom: BorderSide(
-                            color: AppColors.border.withValues(alpha: 0.5),
-                            width: 0.5,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.nameWithMeasurementUnit,
+                          style: const TextStyle(
+                            fontWeight: AppFonts.fontWeightSemiBold,
+                            color: AppColors.text,
+                            fontSize: 14,
                           ),
-                        )
-                      : null,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.productName,
-                            style: const TextStyle(
-                              fontWeight: AppFonts.fontWeightSemiBold,
-                              color: AppColors.text,
-                              fontSize: 11,
-                            ),
-                          ),
-                          Text(
-                            item.unit,
-                            style: TextStyle(
-                              fontWeight: AppFonts.fontWeightMedium,
-                              color: AppColors.textSecondary,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        '${item.quantity}',
-                        style: const TextStyle(
-                          fontWeight: AppFonts.fontWeightSemiBold,
-                          color: AppColors.primary,
-                          fontSize: 11,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: _buildEditablePrice(index, item),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        '${NumberFormatter.format(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '×${item.quantity}',
+                          style: const TextStyle(
+                            fontWeight: AppFonts.fontWeightBold,
+                            color: AppColors.primary,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${AppUtils.formatNumber(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
                         style: const TextStyle(
                           fontWeight: AppFonts.fontWeightBold,
                           color: AppColors.primary,
-                          fontSize: 11,
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMobileProductList(List<InvoiceItem> items) {
-    return Column(
-      children: items.asMap().entries.map((entry) {
-        final index = entry.key;
-        final item = entry.value;
-        return Dismissible(
-          key: Key('product_${item.productId}_$index'),
-          direction: DismissDirection.endToStart,
-          background: Container(
-            color: AppColors.error,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            child: const Icon(
-              Icons.delete,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-          onDismissed: (direction) {
-            _removeItem(index);
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.border, width: 1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        item.productName,
-                        style: const TextStyle(
-                          fontWeight: AppFonts.fontWeightSemiBold,
-                          color: AppColors.text,
                           fontSize: 14,
                         ),
                       ),
-                    ),
-                    Text(
-                      '${NumberFormatter.format(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightBold,
-                        color: AppColors.primary,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'الكمية: ${item.quantity}',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12,
-                            ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'السعر: ',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'السعر: ',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 100,
-                      height: 36,
-                      child: _buildEditablePrice(index, item, isMobile: true),
-                    ),
-                  ],
-                ),
-              ],
+                      SizedBox(
+                        width: 100,
+                        height: 36,
+                        child: _buildEditablePrice(index, item, isMobile: true),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+          );
+        }).toList(),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
           ),
-        );
-      }).toList(),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 18,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${items.length} منتج',
+                style: TextStyle(
+                  fontWeight: AppFonts.fontWeightSemiBold,
+                  fontSize: AppFonts.fontSizeSmall,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
+
+
 
   Widget _buildEditablePrice(int index, InvoiceItem item, {bool isMobile = false}) {
     if (!_priceControllers.containsKey(index)) {

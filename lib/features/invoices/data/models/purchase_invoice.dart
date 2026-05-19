@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:equatable/equatable.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
@@ -112,13 +110,13 @@ class PurchaseInvoice extends Equatable {
       'supplier_id': supplierId,
       'invoice_date': invoiceDate.toIso8601String(),
       'due_date': dueDate?.toIso8601String(),
-      'subtotal': subtotal,
-      'discount_amount': discountAmount,
-      'tax_amount': taxAmount,
-      'shipping_cost': shippingCost,
-      'total_amount': totalAmount,
-      'paid_amount': paidAmount,
-      'remaining_amount': remainingAmount,
+      'subtotal': subtotal.toDouble(),
+      'discount_amount': discountAmount.toDouble(),
+      'tax_amount': taxAmount.toDouble(),
+      'shipping_cost': shippingCost.toDouble(),
+      'total_amount': totalAmount.toDouble(),
+      'paid_amount': paidAmount.toDouble(),
+      'remaining_amount': remainingAmount.toDouble(),
       'status': status.name,
       'payment_status': paymentStatus.name,
       'is_finalized': isFinalized,

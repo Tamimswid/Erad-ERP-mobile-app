@@ -29,7 +29,7 @@ height: 400,
               crossAxisCount: 2,
               mainAxisSpacing: AppConstants.spacing,
               crossAxisSpacing: AppConstants.spacing,
-              childAspectRatio: 1.4,
+              childAspectRatio: 1.3,
               // mainAxisExtent: 120,
             ),
             children:([

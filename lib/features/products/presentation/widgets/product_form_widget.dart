@@ -215,7 +215,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 controller: _purchasePriceController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'سعر الشراء *',
+                  labelText: 'شراء*',
                   prefixIcon: Icon(Icons.shopping_cart),
                 ),
                 validator: (value) {
@@ -228,11 +228,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                   return null;
                 },
               ),
-              // Row(
-              //   children: [
-            
-              //   ],
-              // ),
+
                     TextFormField(
                       controller: _measurementController,
                       decoration: const InputDecoration(

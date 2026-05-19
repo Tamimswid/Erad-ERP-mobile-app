@@ -182,8 +182,8 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down),
           items: const [
-            DropdownMenuItem(value: 'sale', child: Text('فاتورة مبيعات')),
-            DropdownMenuItem(value: 'purchase', child: Text('فاتورة مشتريات')),
+            DropdownMenuItem(value: 'sale', child: Text('مبيع')),
+            DropdownMenuItem(value: 'purchase', child: Text('شراء')),
           ],
           onChanged: (value) {
             if (value != null) {

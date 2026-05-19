@@ -21,46 +21,45 @@ class InvoiceStatsWidget extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
-      crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 1.6,
-        children: [
-          _buildStatCard(
-            context,
-            'الاجمالي',
-            totalCount.toString(),
-            Icons.description,
-            const Color(0xFF1D4ED8),
-            const Color(0xFFEFF6FF),
-          ),
-          _buildStatCard(
-            context,
-            'المدفوع',
-            paidCount.toString(),
-            Icons.check_circle,
-            const Color(0xFF1D4ED8),
-            const Color(0xFFEFF6FF),
-          ),
-          _buildStatCard(
-            context,
-            'المعلق',
-            pendingCount.toString(),
-            Icons.access_time_filled,
-            const Color(0xFF1D4ED8),
-            const Color(0xFFF0F9FF),
-          ),
-          _buildStatCard(
-            context,
-            'الاجمالي المبلغ',
-            '${totalAmount.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
-            Icons.account_balance_wallet,
-            const Color(0xFF1D4ED8),
-            const Color(0xFFEFF6FF),
-            isAmount: true,
-          ),
-        ],
-      );
-    
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      childAspectRatio: 2.0,
+      children: [
+        _buildStatCard(
+          context,
+          'الاجمالي',
+          totalCount.toString(),
+          Icons.description,
+          const Color(0xFF1D4ED8),
+          const Color(0xFFEFF6FF),
+        ),
+        _buildStatCard(
+          context,
+          'المدفوع',
+          paidCount.toString(),
+          Icons.check_circle,
+          const Color(0xFF1D4ED8),
+          const Color(0xFFEFF6FF),
+        ),
+        _buildStatCard(
+          context,
+          'المعلق',
+          pendingCount.toString(),
+          Icons.access_time_filled,
+          const Color(0xFF1D4ED8),
+          const Color(0xFFF0F9FF),
+        ),
+        _buildStatCard(
+          context,
+          'الاجمالي المبلغ',
+          '${totalAmount.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
+          Icons.account_balance_wallet,
+          const Color(0xFF1D4ED8),
+          const Color(0xFFEFF6FF),
+          isAmount: true,
+        ),
+      ],
+    );
   }
 
   Widget _buildStatCard(
@@ -73,10 +72,10 @@ class InvoiceStatsWidget extends StatelessWidget {
     bool isAmount = false,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Row(
@@ -84,23 +83,23 @@ class InvoiceStatsWidget extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: const Color(0xFF6B7280),
                     fontWeight: FontWeight.w400,
-                    fontSize: 14,
+                    fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 4),
                 Text(
                   value,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: const Color(0xFF111827),
                     fontWeight: FontWeight.bold,
-                    fontSize: isAmount ? 16 : 20,
+                    fontSize: isAmount ? 13 : 16,
                   ),
                 ),
               ],

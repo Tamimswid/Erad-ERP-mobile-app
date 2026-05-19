@@ -30,7 +30,6 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
   }
 
   void _initializeDates() {
-    print('DEBUG: _initializeDates called');
     final now = DateTime.now();
     final cubit = context.read<InvoiceCubit>();
 
@@ -38,17 +37,13 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
     final existingDueDate = cubit.dueDate;
     final existingDeliveryDate = cubit.deliveryDate;
 
-    print('DEBUG: Existing invoice date: $existingInvoiceDate');
 
     // Initialize invoice date - if no existing date, set today's date in cubit
     if (existingInvoiceDate != null) {
       _invoiceDateController.text = _formatDate(existingInvoiceDate);
-      print('DEBUG: Using existing invoice date');
     } else {
       _invoiceDateController.text = _formatDate(now);
-      print('DEBUG: Setting invoice date to: $now');
       cubit.setInvoiceDate(now); // Set the date in cubit state
-      print('DEBUG: Invoice date after setting: ${cubit.invoiceDate}');
     }
     
     // Initialize due date
@@ -76,7 +71,6 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
     TextEditingController controller,
     String field,
   ) async {
-    print('DEBUG: _selectDate called for field: $field');
     final cubit = context.read<InvoiceCubit>();
     DateTime initialDate;
     
@@ -116,13 +110,11 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
     );
 
     if (picked != null) {
-      print('DEBUG: Date picked for field: $field, date: $picked');
       controller.text = _formatDate(picked);
       setState(() {});
 
       switch (field) {
         case 'invoice':
-          print('DEBUG: Setting invoice date');
           cubit.setInvoiceDate(picked);
           break;
         case 'due':
@@ -132,9 +124,7 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
           cubit.setDeliveryDate(picked);
           break;
       }
-    } else {
-      print('DEBUG: No date picked for field: $field');
-    }
+    } 
   }
 
   @override
@@ -142,7 +132,6 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
     return BlocListener<InvoiceCubit, InvoiceState>(
       listener: (context, state) {
         if (state is InvoiceFormUpdated && state.updateType == 'clearAll') {
-          print('DEBUG: clearAll detected, updating date fields');
           _initializeDates();
         }
       },
@@ -170,13 +159,7 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
                       Icons.event_outlined,
                       'invoice',
                     ),
-                    // const SizedBox(height: 12),
-                    // _buildDateField(
-                    //   _dueDateController,
-                    //   'تاريخ الاستحقاق',
-                    //   Icons.event_available_outlined,
-                    //   'due',
-                    // ),
+                    
                     const SizedBox(height: 12),
                     _buildDateField(
                       _deliveryDateController,
@@ -247,7 +230,6 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
             suffixIcon: IconButton(
               icon: const Icon(Icons.calendar_today, size: 18),
               onPressed: () {
-                print('DEBUG: Calendar icon pressed for field: $field');
                 _selectDate(controller, field);
               },
             ),
@@ -265,7 +247,6 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
           readOnly: true,
           enableInteractiveSelection: false,
           onTap: () {
-            print('DEBUG: TextFormField tapped for field: $field');
             _selectDate(controller, field);
           },
         ),

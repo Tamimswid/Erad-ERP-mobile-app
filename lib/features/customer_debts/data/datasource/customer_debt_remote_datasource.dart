@@ -37,6 +37,7 @@ class CustomerDebtRemoteDataSource {
             )
           ''')
           .eq('user_id', userId)
+          .eq('status', 'completed')
           .order('invoice_date', ascending: false);
 
       // Get all payments for customers (only customer type)

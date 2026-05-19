@@ -126,7 +126,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                     totalAmount: state.totalAmount,
                   ),
                   
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   // Invoice Cards Grid
                   _buildInvoiceGrid(state),
                 ],

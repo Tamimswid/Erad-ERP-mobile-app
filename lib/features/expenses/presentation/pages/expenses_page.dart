@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/widgets/date_filter_sheet.dart';
 import '../bloc/expense_cubit.dart';
+import '../widgets/expense_categories_dialog.dart';
 import '../widgets/expense_filters_widget.dart';
 import '../widgets/expense_form_dialog.dart';
 import '../widgets/expense_monthly_chart_widget.dart';
@@ -101,15 +102,23 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
                 final cubit = context.read<ExpenseCubit>();
                 final categories = cubit.categories;
                 return IconButton(
-                  onPressed: () => _showAddExpenseDialog(
+                  onPressed: () => showDialog(
                     context: context,
-                    onTap: (expense) {
-                      context.read<ExpenseCubit>().createExpense(expense);
-                    },
-                    categories: categories,
+                    builder: (dialogContext) => ExpenseCategoriesDialog(
+                      categories: categories,
+                      onAddCategory: (category) {
+                        context.read<ExpenseCubit>().createExpenseCategory(category);
+                      },
+                      onUpdateCategory: (category) {
+                        context.read<ExpenseCubit>().updateExpenseCategory(category);
+                      },
+                      onDeleteCategory: (id) {
+                        context.read<ExpenseCubit>().deleteExpenseCategory(id);
+                      },
+                    ),
                   ),
-                  icon: const Icon(Icons.add_circle_outline, size: 24),
-                  tooltip: 'إضافة مصروف',
+                  icon: const Icon(Icons.category_outlined, size: 24),
+                  tooltip: 'إدارة التصنيفات',
                   style: IconButton.styleFrom(
                     backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     foregroundColor: AppColors.primary,
@@ -222,7 +231,7 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
         builder: (context) {
           final categories = context.watch<ExpenseCubit>().categories;
           return FloatingActionButton.extended(
-            label: Text('مصروف',style: TextStyle(color: AppColors.surface),)  ,
+            label: Text( 'إضافة مصروف',style: TextStyle(color: AppColors.surface),)  ,
             onPressed: () => _showAddExpenseDialog(
               context: context,
               onTap: (expense) {

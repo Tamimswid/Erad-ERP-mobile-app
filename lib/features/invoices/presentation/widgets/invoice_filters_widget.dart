@@ -50,17 +50,17 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Column(
         children: [
-          _buildFirstRow(),
-          const SizedBox(height: 16),
+          _buildSearchField(),
+          const SizedBox(height: 10),
           _buildSecondRow(),
         ],
       ),
@@ -71,7 +71,7 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
     return Column(
       children: [
         _buildSearchField(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
       ],
     );
   }
@@ -82,7 +82,7 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
         Expanded(
           child: _buildTypeFilter(),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 10),
         Expanded(
           child: _buildStatusFilter(),
         ),
@@ -92,16 +92,17 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
 
   Widget _buildTypeFilter() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFE5E7EB)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: widget.selectedType,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down),
+          icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+          style: const TextStyle(fontSize: 13),
           items: const [
             DropdownMenuItem(value: 'all', child: Text('الكل')),
             DropdownMenuItem(value: 'sale', child: Text('بيع')),
@@ -122,7 +123,8 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
       controller: _searchController,
       decoration: InputDecoration(
         hintText: 'بحث عن فاتورة أو عميل أو مورد...',
-        prefixIcon: const Icon(Icons.search, color: Color(0xFF9CA3AF)),
+        hintStyle: const TextStyle(fontSize: 13),
+        prefixIcon: const Icon(Icons.search, color: Color(0xFF9CA3AF), size: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -135,23 +137,26 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Color(0xFF3B82F6)),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        isDense: true,
       ),
+      style: const TextStyle(fontSize: 13),
     );
   }
 
   Widget _buildStatusFilter() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFE5E7EB)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: widget.selectedStatus,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down),
+          icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+          style: const TextStyle(fontSize: 13),
           items: const [
             DropdownMenuItem(value: 'all', child: Text('الكل')),
             DropdownMenuItem(value: 'paid', child: Text('مدفوع')),

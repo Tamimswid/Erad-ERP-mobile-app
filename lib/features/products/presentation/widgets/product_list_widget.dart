@@ -94,15 +94,9 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                 
                 return RefreshIndicator(
                   onRefresh: () => context.read<ProductCubit>().getProducts(),
-                  child: GridView.builder(
+                  child: ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 1,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 0.8,
-                    ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
@@ -149,15 +143,9 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                   );
                 }
                 
-                return GridView.builder(
+                return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 1,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 0.8,
-                  ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     final product = products[index];

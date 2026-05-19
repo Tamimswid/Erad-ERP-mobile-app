@@ -5,6 +5,8 @@ import 'package:erad/features/invoices/data/models/payment_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/utils/app_utils.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../bloc/invoice_cubit.dart';
 import '../../../../core/services/invoice_pdf_service.dart';
 
@@ -241,28 +243,28 @@ class InvoiceDetailsWidget extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.all(8),
                               child: Text(
-                                item.quantity.toString(),
+                                AppUtils.formatNumber(item.quantity),
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8),
                               child: Text(
-                                '${item.unitPrice.toStringAsFixed(2)}',
+                                '${AppUtils.formatNumber(item.unitPrice)} ${NumberFormatter.getCurrencySymbol()}',
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8),
                               child: Text(
-                                '${item.discountAmount.toStringAsFixed(2)}',
+                                '${AppUtils.formatNumber(item.discountAmount)} ${NumberFormatter.getCurrencySymbol()}',
                                 textAlign: TextAlign.center,
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8),
                               child: Text(
-                                '${item.totalPrice.toStringAsFixed(2)}',
+                                '${AppUtils.formatNumber(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
@@ -485,7 +487,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             ),
           ),
           Text(
-            '${amount.toStringAsFixed(2)} ل.س',
+            '${AppUtils.formatNumber(amount)} ${NumberFormatter.getCurrencySymbol()}',
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontSize: isLarge ? 18 : 14,

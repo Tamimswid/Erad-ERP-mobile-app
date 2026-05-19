@@ -174,23 +174,11 @@ class InvoiceInfoCardWidget extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Text(
-              name,
+              product.nameWithMeasurementUnit,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeSmall,
                 fontWeight: AppFonts.fontWeightMedium,
                 color: AppColors.text,
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: Text(
-              quantity.toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: AppFonts.fontSizeSmall,
-                fontWeight: AppFonts.fontWeightMedium,
-                color: AppColors.textSecondary,
               ),
             ),
           ),

@@ -35,6 +35,7 @@ class SupplierDebtRemoteDataSource {
             )
           ''')
           .eq('user_id', userId)
+          .eq('status', 'completed')
           .order('invoice_date', ascending: false);
 
       final paymentsResponse = await supabaseClient

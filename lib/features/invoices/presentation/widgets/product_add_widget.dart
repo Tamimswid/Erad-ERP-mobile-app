@@ -29,7 +29,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
   @override
   void initState() {
     super.initState();
-    _searchFocusNode.requestFocus();
+    // _searchFocusNode.requestFocus();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<ProductCubit>().getProducts();
@@ -87,11 +87,20 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
     if (_selectedProduct != null) {
       final quantity = int.tryParse(_quantityController.text);
       if (quantity != null && quantity > 0) {
-        final invoiceItem = InvoiceItem.fromProduct(
-          _selectedProduct!,
-          quantity,
+        final invoiceCubit = context.read<InvoiceCubit>();
+        final isSale = invoiceCubit.invoiceType == 'sale';
+        final unitPrice = isSale ? _selectedProduct!.salePrice : _selectedProduct!.purchasePrice;
+      final invoiceItem = InvoiceItem(
+          measurement: _selectedProduct!.measurement,
+          productId: _selectedProduct!.id,
+          productName: _selectedProduct!.name,
+          quantity: quantity,
+          unitPrice: unitPrice,
+          purchasePrice: _selectedProduct!.purchasePrice,
+          totalPrice: unitPrice * quantity,
+          unit: _selectedProduct!.unit,
         );
-        context.read<InvoiceCubit>().addInvoiceItem(invoiceItem);
+        invoiceCubit.addInvoiceItem(invoiceItem);
 
         setState(() {
           _searchController.clear();
@@ -131,6 +140,10 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
       name = '${existingProduct.name} (${existingProduct.unit})';
     }
 
+    final invoiceCubit = context.read<InvoiceCubit>();
+    final isSale = invoiceCubit.invoiceType == 'sale';
+    final unitPrice = isSale ? existingProduct!.salePrice : existingProduct!.purchasePrice;
+
     final invoiceItem = InvoiceItem(
       measurement: existingProduct!.measurement ,
       
@@ -138,12 +151,12 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
       productId: existingProduct.id,
       productName: name,
       quantity: quantity,
-      unitPrice: existingProduct.salePrice,
+      unitPrice: unitPrice,
       purchasePrice: existingProduct.purchasePrice,
-      totalPrice: (existingProduct.salePrice) * quantity,
+      totalPrice: unitPrice * quantity,
     );
 
-    context.read<InvoiceCubit>().addInvoiceItem(invoiceItem);
+    invoiceCubit.addInvoiceItem(invoiceItem);
 
     setState(() {
       _searchController.clear();
