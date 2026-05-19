@@ -502,6 +502,23 @@ class CustomerDebtRemoteDataSource {
             (customerPayments[customerId] ?? 0.0) + amount;
       }
 
+      // Get customer names
+      final customerNames = <String, Map<String, dynamic>>{};
+      final customerIds = response
+          .map((inv) => (inv as Map<String, dynamic>)['customer_id'] as String)
+          .toSet();
+      if (customerIds.isNotEmpty) {
+        final customersResponse = await supabaseClient
+            .from('customers')
+            .select('id, name, phone')
+            .inFilter('id', customerIds.toList());
+
+        for (var json in customersResponse as List) {
+          final customer = json as Map<String, dynamic>;
+          customerNames[customer['id'] as String] = customer;
+        }
+      }
+
       // Group by customer_id
       final customerDebts = <String, CustomerDebtModel>{};
 
@@ -510,6 +527,7 @@ class CustomerDebtRemoteDataSource {
         final customerId = invoiceData['customer_id'] as String;
         final totalAmount = (invoiceData['total_amount'] ?? 0.0).toDouble();
         final paidAmount = customerPayments[customerId] ?? 0.0;
+        final customerData = customerNames[customerId];
 
         if (customerDebts.containsKey(customerId)) {
           final existing = customerDebts[customerId]!;
@@ -530,8 +548,8 @@ class CustomerDebtRemoteDataSource {
         } else {
           customerDebts[customerId] = CustomerDebtModel(
             id: customerId,
-            name: 'عميل #$customerId',
-            phone: null,
+            name: customerData?['name'] ?? 'غير محدد',
+            phone: customerData?['phone'] as String?,
             totalInvoices: totalAmount,
             totalPaid: paidAmount,
             totalInvoicesCount: 1,

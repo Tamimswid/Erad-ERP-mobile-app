@@ -25,7 +25,6 @@ class DashboardLoaded extends DashboardState {
   final int totalCustomers;
   final int totalProducts;
   final List<Map<String, dynamic>> monthlyChartData;
-  final List<Map<String, dynamic>> lowStockProducts;
   final List<Map<String, dynamic>> recentInvoices;
   final List<Map<String, dynamic>> topProductsBySales;
   final List<Map<String, dynamic>>? topProductsByPurchases;
@@ -43,7 +42,6 @@ class DashboardLoaded extends DashboardState {
     required this.totalCustomers,
     required this.totalProducts,
     required this.monthlyChartData,
-    required this.lowStockProducts,
     required this.recentInvoices,
     required this.topProductsBySales,
     this.topProductsByPurchases,
@@ -62,7 +60,6 @@ class DashboardLoaded extends DashboardState {
     int? totalCustomers,
     int? totalProducts,
     List<Map<String, dynamic>>? monthlyChartData,
-    List<Map<String, dynamic>>? lowStockProducts,
     List<Map<String, dynamic>>? recentInvoices,
     List<Map<String, dynamic>>? topProductsBySales,
     List<Map<String, dynamic>>? topProductsByPurchases = const [],
@@ -80,7 +77,6 @@ class DashboardLoaded extends DashboardState {
       totalCustomers: totalCustomers ?? this.totalCustomers,
       totalProducts: totalProducts ?? this.totalProducts,
       monthlyChartData: monthlyChartData ?? this.monthlyChartData,
-      lowStockProducts: lowStockProducts ?? this.lowStockProducts,
       recentInvoices: recentInvoices ?? this.recentInvoices,
       topProductsBySales: topProductsBySales ?? this.topProductsBySales,
       topProductsByPurchases: topProductsByPurchases ?? this.topProductsByPurchases,
@@ -101,7 +97,6 @@ class DashboardLoaded extends DashboardState {
         totalCustomers,
         totalProducts,
         monthlyChartData,
-        lowStockProducts,
         recentInvoices,
         topProductsBySales,
         topProductsByPurchases,

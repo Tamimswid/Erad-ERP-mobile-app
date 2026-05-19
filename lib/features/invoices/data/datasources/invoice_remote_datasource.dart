@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:erad/core/services/stock_service.dart';
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
@@ -43,9 +42,8 @@ abstract class InvoiceRemoteDataSource {
 
 class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   final SupabaseClient _supabaseClient;
-  final StockService _stockService;
 
-  InvoiceRemoteDataSourceImpl(this._supabaseClient, this._stockService);
+  InvoiceRemoteDataSourceImpl(this._supabaseClient);
 
   @override
   Future<List<SalesInvoice>> getSalesInvoices() async {
@@ -167,16 +165,7 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
         await _supabaseClient.from('sales_invoice_items').insert(itemsData);
       }
 
-      log('StockService: Invoice status = ${invoice.status}, isCompleted = ${invoice.status == InvoiceStatus.completed}');
-      
-      if (invoice.status == InvoiceStatus.completed) {
-        log('StockService: Applying stock for completed invoice');
-        await _stockService.applyInvoiceStock(
-          items: invoice.items,
-          isPurchase: false,
-          invoiceId: response['id'],
-        );
-      }
+      log('Stock şimdilik donduruldu - Invoice status = ${invoice.status}');
 
       final completeInvoice = await _supabaseClient
           .from('sales_invoices')
@@ -232,18 +221,7 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
         log('Purchase invoice items inserted successfully');
       }
 
-      log('StockService: Creating purchase invoice, status is: ${invoice.status}');
-      
-      if (invoice.status == InvoiceStatus.completed) {
-        log('StockService: Purchase invoice status is completed, applying stock');
-        await _stockService.applyInvoiceStock(
-          items: invoice.items,
-          isPurchase: true,
-          invoiceId: response['id'],
-        );
-      } else {
-        log('StockService: Purchase invoice status is NOT completed, skipping stock');
-      }
+      log('Stock şimdilik donduruldu - Creating purchase invoice');
 
       final completeInvoice = await _supabaseClient
           .from('purchase_invoices')
@@ -277,15 +255,16 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
           .select('*, customers(name)')
           .single();
 
-      if (oldStatus != newStatus) {
-        await _stockService.handleStatusChange(
-          newStatus: newStatus,
-          oldStatus: oldStatus,
-          items: invoice.items,
-          isPurchase: false,
-          invoiceId: invoice.id,
-        );
-      }
+      // Stock şimdilik donduruldu
+      // if (oldStatus != newStatus) {
+      //   await _stockService.handleStatusChange(
+      //     newStatus: newStatus,
+      //     oldStatus: oldStatus,
+      //     items: invoice.items,
+      //     isPurchase: false,
+      //     invoiceId: invoice.id,
+      //   );
+      // }
 
       return _mapJsonToSalesInvoice(response);
     } catch (e) {
@@ -312,15 +291,16 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
           .select('*, suppliers(name)')
           .single();
 
-      if (oldStatus != newStatus) {
-        await _stockService.handleStatusChange(
-          newStatus: newStatus,
-          oldStatus: oldStatus,
-          items: invoice.items,
-          isPurchase: true,
-          invoiceId: invoice.id,
-        );
-      }
+      // Stock şimdilik donduruldu
+      // if (oldStatus != newStatus) {
+      //   await _stockService.handleStatusChange(
+      //     newStatus: newStatus,
+      //     oldStatus: oldStatus,
+      //     items: invoice.items,
+      //     isPurchase: true,
+      //     invoiceId: invoice.id,
+      //   );
+      // }
 
       return _mapJsonToPurchaseInvoice(response);
     } catch (e) {
@@ -333,13 +313,14 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     try {
       final oldInvoice = await getSalesInvoiceById(id);
       
-      if (oldInvoice.status == InvoiceStatus.completed) {
-        await _stockService.reverseInvoiceStock(
-          items: oldInvoice.items,
-          isPurchase: false,
-          invoiceId: id,
-        );
-      }
+      // Stock şimdilik donduruldu
+      // if (oldInvoice.status == InvoiceStatus.completed) {
+      //   await _stockService.reverseInvoiceStock(
+      //     items: oldInvoice.items,
+      //     isPurchase: false,
+      //     invoiceId: id,
+      //   );
+      // }
 
       await _supabaseClient
           .from('sales_invoice_items')
@@ -356,13 +337,14 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     try {
       final oldInvoice = await getPurchaseInvoiceById(id);
       
-      if (oldInvoice.status == InvoiceStatus.completed) {
-        await _stockService.reverseInvoiceStock(
-          items: oldInvoice.items,
-          isPurchase: true,
-          invoiceId: id,
-        );
-      }
+      // Stock şimdilik donduruldu
+      // if (oldInvoice.status == InvoiceStatus.completed) {
+      //   await _stockService.reverseInvoiceStock(
+      //     items: oldInvoice.items,
+      //     isPurchase: true,
+      //     invoiceId: id,
+      //   );
+      // }
 
       await _supabaseClient
           .from('purchase_invoice_items')

@@ -84,7 +84,7 @@ Future<void> initServicesLocator() async {
 
   // Products
   sl.registerLazySingleton<ProductRemoteDataSource>(
-    () => ProductRemoteDataSourceImpl(sl(), sl()),
+    () => ProductRemoteDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<ProductRepository>(
@@ -95,11 +95,11 @@ Future<void> initServicesLocator() async {
 
   // Invoices
   sl.registerLazySingleton<InvoiceRemoteDataSource>(
-    () => InvoiceRemoteDataSourceImpl(sl(), sl()),
+    () => InvoiceRemoteDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<EditInvoiceDataSource>(
-    () => EditInvoiceDataSourceImpl(sl(), sl()),
+    () => EditInvoiceDataSourceImpl(sl()),
   );
 
   sl.registerLazySingleton<InvoiceRepository>(

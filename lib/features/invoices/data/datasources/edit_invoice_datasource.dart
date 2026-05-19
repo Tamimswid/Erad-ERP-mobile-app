@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-import 'package:erad/core/services/stock_service.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
@@ -18,9 +17,8 @@ abstract class EditInvoiceDataSource {
 
 class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
   final SupabaseClient _supabaseClient;
-  final StockService _stockService;
 
-  EditInvoiceDataSourceImpl(this._supabaseClient, this._stockService);
+  EditInvoiceDataSourceImpl(this._supabaseClient);
 
   @override
   Future<SalesInvoice> getSalesInvoiceForEdit(String id) async {
@@ -126,15 +124,16 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
         await _supabaseClient.from('sales_invoice_items').insert(itemsData);
       }
 
-      if (oldStatus != newStatus) {
-        await _stockService.handleStatusChange(
-          newStatus: newStatus,
-          oldStatus: oldStatus,
-          items: newItems,
-          isPurchase: false,
-          invoiceId: invoice.id,
-        );
-      }
+      // Stock şimdilik donduruldu
+      // if (oldStatus != newStatus) {
+      //   await _stockService.handleStatusChange(
+      //     newStatus: newStatus,
+      //     oldStatus: oldStatus,
+      //     items: newItems,
+      //     isPurchase: false,
+      //     invoiceId: invoice.id,
+      //   );
+      // }
 
       final updatedInvoice = await getSalesInvoiceForEdit(invoice.id);
       return updatedInvoice;
@@ -180,15 +179,16 @@ class EditInvoiceDataSourceImpl implements EditInvoiceDataSource {
         await _supabaseClient.from('purchase_invoice_items').insert(itemsData);
       }
 
-      if (oldStatus != newStatus) {
-        await _stockService.handleStatusChange(
-          newStatus: newStatus,
-          oldStatus: oldStatus,
-          items: newItems,
-          isPurchase: true,
-          invoiceId: invoice.id,
-        );
-      }
+      // Stock şimdilik donduruldu
+      // if (oldStatus != newStatus) {
+      //   await _stockService.handleStatusChange(
+      //     newStatus: newStatus,
+      //     oldStatus: oldStatus,
+      //     items: newItems,
+      //     isPurchase: true,
+      //     invoiceId: invoice.id,
+      //   );
+      // }
 
       final updatedInvoice = await getPurchaseInvoiceForEdit(invoice.id);
       return updatedInvoice;

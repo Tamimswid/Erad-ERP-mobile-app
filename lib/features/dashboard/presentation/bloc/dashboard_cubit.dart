@@ -146,17 +146,8 @@ class DashboardCubit extends Cubit<DashboardState> {
       final totalProfit = filteredSales.fold(0.0, (sum, i) => sum + (i.profit ?? 0));
       final netProfit = totalProfit - totalExpenses;
 
-      // Get product count and low stock
+      // Get product count
       final totalProducts = products.length;
-      final lowStockProducts = products
-          .where((p) => p.currentStock < p.minStock)
-          .map((p) => {
-                'name': '${p.name} (${p.measurement}${p.unit})',
-                'stock': p.currentStock,
-                'unit': '',
-              })
-          .take(7)
-          .toList();
 
       // Get recent invoices
       final recentInvoices = filteredSales
@@ -196,7 +187,6 @@ class DashboardCubit extends Cubit<DashboardState> {
         totalCustomers: totalCustomers,
         totalProducts: totalProducts,
         monthlyChartData: monthlyChartData,
-        lowStockProducts: lowStockProducts,
         recentInvoices: recentInvoicesData,
         topProductsBySales: topProductsBySales,
         topProductsByPurchases: topProductsByPurchases,
@@ -214,8 +204,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
     for (final invoice in salesInvoices) {
       for (final item in invoice.items) {
-        final productName = item.productName.isNotEmpty ? item.productName : (item.productId ?? 'Unknown');
-        final unit = item.unit.isNotEmpty ? item.unit : 'pcs';
+        final productName = item.nameWithMeasurementUnit;
         final quantity = item.quantity;
 
         if (productSales.containsKey(productName)) {
@@ -224,7 +213,7 @@ class DashboardCubit extends Cubit<DashboardState> {
           productSales[productName] = {
             'name': productName,
             'quantity': quantity,
-            'unit': unit,
+            'unit': '',
           };
         }
       }
@@ -241,8 +230,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
     for (final invoice in purchaseInvoices) {
       for (final item in invoice.items) {
-        final productName = item.productName.isNotEmpty ? item.productName : (item.productId ?? 'Unknown');
-        final unit = item.unit.isNotEmpty ? item.unit : 'pcs';
+        final productName = item.nameWithMeasurementUnit;
         final quantity = item.quantity;
 
         if (productPurchases.containsKey(productName)) {
@@ -251,7 +239,7 @@ class DashboardCubit extends Cubit<DashboardState> {
           productPurchases[productName] = {
             'name': productName,
             'quantity': quantity,
-            'unit': unit,
+            'unit': '',
           };
         }
       }

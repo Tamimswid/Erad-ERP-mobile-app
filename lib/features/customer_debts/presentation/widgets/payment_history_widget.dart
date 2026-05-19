@@ -263,7 +263,7 @@ class PaymentHistoryWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                 '${AppUtils.formatNumber(payment.amount)} ${NumberFormatter.getCurrencySymbol()}',
+                 '${AppUtils.formatNumber(payment.amount,)} ${NumberFormatter.getCurrencySymbol()}',
                   style: TextStyle(
                     fontSize: AppFonts.fontSizeMedium,
                     fontWeight: AppFonts.fontWeightBold,
