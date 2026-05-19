@@ -11,7 +11,6 @@ class InvoiceActionsWidget extends StatefulWidget {
 }
 
 class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
-  String _currentStatus = 'completed';
   String _currentPaymentType = 'debt';
   bool _isSaving = false;
 
@@ -26,18 +25,8 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
   void _loadInitialStatus() {
     final cubit = context.read<InvoiceCubit>();
     setState(() {
-      _currentStatus = cubit.status;
       _currentPaymentType = cubit.paymentType;
     });
-  }
-
-  void _onStatusChanged(String? value) {
-    if (value != null) {
-      context.read<InvoiceCubit>().setStatus(value);
-      setState(() {
-        _currentStatus = value;
-      });
-    }
   }
 
   void _onPaymentTypeChanged(String? value) {
@@ -135,17 +124,6 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<InvoiceCubit>();
-    final currentStatus = cubit.status;
-    
-    if (currentStatus != _currentStatus) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          _currentStatus = currentStatus;
-        });
-      });
-    }
-    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

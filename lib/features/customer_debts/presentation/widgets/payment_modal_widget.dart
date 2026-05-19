@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class PaymentModalWidget extends StatefulWidget {
   final double remainingDebt;
-  final Function(double amount, String date) onPaymentSubmit;
+  final Function(double amount, String date, String? note) onPaymentSubmit;
 
   const PaymentModalWidget({
     super.key,
@@ -19,6 +19,7 @@ class PaymentModalWidget extends StatefulWidget {
 class _PaymentModalWidgetState extends State<PaymentModalWidget> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  final _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
 
   Future<void> _selectDate(BuildContext context) async {
@@ -38,6 +39,7 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
   @override
   void dispose() {
     _amountController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -156,6 +158,34 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
                   
                   const SizedBox(height: 16),
                   
+                  // Note Field
+                  TextFormField(
+                    controller: _noteController,
+                    decoration: InputDecoration(
+                      labelText: 'ملاحظة (اختياري)',
+                      hintText: 'إضافة ملاحظة...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                      prefixIcon: Icon(
+                        Icons.note_outlined,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    maxLines: 2,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
                   // Date Field
                   InkWell(
                     onTap: () => _selectDate(context),
@@ -222,8 +252,11 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         final amount = double.parse(_amountController.text);
+                        final note = _noteController.text.trim().isEmpty 
+                            ? null 
+                            : _noteController.text.trim();
                         final formattedDate = '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}';
-                        widget.onPaymentSubmit(amount, formattedDate);
+                        widget.onPaymentSubmit(amount, formattedDate, note);
                       }
                     },
                     style: ElevatedButton.styleFrom(

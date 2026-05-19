@@ -105,8 +105,8 @@ class CustomerDebtRemoteDataSource {
         }
       }
 
-      // Only return customers who still have remaining debt
-      return customerDebts.values.where((debt) => debt.remainingDebt > 0).toList();
+      // Return all customers with debt invoices (including fully paid ones for history)
+      return customerDebts.values.toList();
     } catch (e) {
       log(e.toString());
       throw exceptionToFailure(e);
@@ -221,8 +221,8 @@ class CustomerDebtRemoteDataSource {
         }
       }
 
-      // Only return customers who still have remaining debt
-      return customerDebts.values.where((debt) => debt.remainingDebt > 0).toList();
+      // Return all customers with debt invoices (including fully paid ones for history)
+      return customerDebts.values.toList();
     } catch (e) {
       throw exceptionToFailure(e);
     }
@@ -434,97 +434,119 @@ class CustomerDebtRemoteDataSource {
   }
 
   // دStream لمتابعة تغييرات رصيد العملاء في الوقت الفعلي
-  Stream<List<CustomerDebtModel>> watchCustomerDebts() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) throw Exception('User not logged in');
+  Stream<List<CustomerDebtModel>> watchCustomerDebts() {
+    final controller = StreamController<List<CustomerDebtModel>>();
+    List<StreamSubscription> subscriptions = [];
 
-    log('CustomerDebtDataSource: Starting watchCustomerDebts stream...');
+    _fetchAndEmitDebts(controller);
 
-    await for (final data
-        in supabaseClient
-            .from('sales_invoices')
-            .stream(primaryKey: ['id'])
-            .eq('user_id', userId)
-            .order('invoice_date', ascending: false)) {
-      // Filter to only debt invoices
-      final debtInvoices = data
-          .where((inv) => inv['payment_status'] == 'debt')
-          .toList();
+    final userId = UserService.getUserId();
 
-      log(
-        'CustomerDebtDataSource: Received ${data.length} invoices, ${debtInvoices.length} are debt invoices',
-      );
+    userId.then((uid) {
+      if (uid == null) return;
+
+      final invoiceStream = supabaseClient
+          .from('sales_invoices')
+          .stream(primaryKey: ['id'])
+          .eq('user_id', uid);
+
+      final paymentStream = supabaseClient
+          .from('payments')
+          .stream(primaryKey: ['id'])
+          .eq('user_id', uid);
+
+      subscriptions.add(invoiceStream.listen((_) => _fetchAndEmitDebts(controller)));
+      subscriptions.add(paymentStream.listen((_) => _fetchAndEmitDebts(controller)));
+    });
+
+    controller.onCancel = () {
+      for (final sub in subscriptions) {
+        sub.cancel();
+      }
+      controller.close();
+    };
+
+    return controller.stream;
+  }
+
+  Future<void> _fetchAndEmitDebts(
+    StreamController<List<CustomerDebtModel>> controller,
+  ) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) return;
+
+      // Get only debt invoices
+      final response = await supabaseClient
+          .from('sales_invoices')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('payment_status', 'debt')
+          .order('invoice_date', ascending: false);
 
       // Get all payments for customers
       final customerPayments = <String, double>{};
-      try {
-        final paymentsResponse = await supabaseClient
-            .from('payments')
-            .select('customer_id, amount')
-            .eq('user_id', userId);
+      final paymentsResponse = await supabaseClient
+          .from('payments')
+          .select('customer_id, amount')
+          .eq('user_id', userId)
+          .eq('payment_type', 'customer')
+          .not('customer_id', 'is', null);
 
-        for (var json in paymentsResponse as List) {
-          final payment = json as Map<String, dynamic>;
-          final customerId = payment['customer_id'] as String?;
-          if (customerId == null) continue;
-          final amount = (payment['amount'] ?? 0.0).toDouble();
-          customerPayments[customerId] =
-              (customerPayments[customerId] ?? 0.0) + amount;
-        }
-      } catch (e) {
-        log('Error fetching payments in stream: $e');
+      for (var json in paymentsResponse as List) {
+        final payment = json as Map<String, dynamic>;
+        final customerId = payment['customer_id'] as String?;
+        if (customerId == null) continue;
+        final amount = (payment['amount'] ?? 0.0).toDouble();
+        customerPayments[customerId] =
+            (customerPayments[customerId] ?? 0.0) + amount;
       }
 
-      // Group all invoices by customer_id to show total debt
+      // Group by customer_id
       final customerDebts = <String, CustomerDebtModel>{};
 
-      for (var json in debtInvoices) {
-        final customerId = json['customer_id'] as String?;
-        if (customerId == null) continue;
-        final totalAmount = (json['total_amount'] ?? 0.0).toDouble();
-        // Calculate paid amount from payments table
+      for (var json in response as List) {
+        final invoiceData = json as Map<String, dynamic>;
+        final customerId = invoiceData['customer_id'] as String;
+        final totalAmount = (invoiceData['total_amount'] ?? 0.0).toDouble();
         final paidAmount = customerPayments[customerId] ?? 0.0;
 
         if (customerDebts.containsKey(customerId)) {
-          // Add to existing customer's debt
           final existing = customerDebts[customerId]!;
           customerDebts[customerId] = CustomerDebtModel(
             id: customerId,
             name: existing.name,
             phone: existing.phone,
             totalInvoices: existing.totalInvoices + totalAmount,
-            totalPaid: paidAmount, // Use total from payments table
+            totalPaid: paidAmount,
             totalInvoicesCount: existing.totalInvoicesCount + 1,
             pendingInvoicesCount: existing.pendingInvoicesCount + 1,
             overdueInvoicesCount: existing.overdueInvoicesCount,
             latestDueDate: _getLatestDate(
               existing.latestDueDate,
-              json['due_date'],
+              invoiceData['due_date'],
             ),
           );
         } else {
-          // Create new customer debt entry
           customerDebts[customerId] = CustomerDebtModel(
             id: customerId,
-            name:
-                'عميل #$customerId', // Placeholder - stream doesn't support joins
+            name: 'عميل #$customerId',
             phone: null,
             totalInvoices: totalAmount,
-            totalPaid: paidAmount, // Use total from payments table
+            totalPaid: paidAmount,
             totalInvoicesCount: 1,
             pendingInvoicesCount: 1,
             overdueInvoicesCount: 0,
-            latestDueDate: json['due_date'],
+            latestDueDate: invoiceData['due_date'],
           );
         }
       }
 
-      // Only yield customers who still have remaining debt
-      final debtsWithBalance = customerDebts.values.where((debt) => debt.remainingDebt > 0).toList();
-      log(
-        'CustomerDebtDataSource: Filtered to ${debtsWithBalance.length} customers with remaining debt',
-      );
-      yield debtsWithBalance;
+      if (!controller.isClosed) {
+        controller.add(customerDebts.values.toList());
+      }
+    } catch (e) {
+      log('Error in _fetchAndEmitDebts: $e');
     }
   }
 }

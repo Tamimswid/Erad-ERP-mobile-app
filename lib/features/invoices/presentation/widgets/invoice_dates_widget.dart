@@ -13,7 +13,6 @@ class InvoiceDatesWidget extends StatefulWidget {
 class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
   final _invoiceDateController = TextEditingController();
   final _dueDateController = TextEditingController();
-  final _deliveryDateController = TextEditingController();
 
   @override
   void initState() {
@@ -25,7 +24,6 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
   void dispose() {
     _invoiceDateController.dispose();
     _dueDateController.dispose();
-    _deliveryDateController.dispose();
     super.dispose();
   }
 
@@ -35,31 +33,21 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
 
     final existingInvoiceDate = cubit.invoiceDate;
     final existingDueDate = cubit.dueDate;
-    final existingDeliveryDate = cubit.deliveryDate;
-
 
     // Initialize invoice date - if no existing date, set today's date in cubit
     if (existingInvoiceDate != null) {
       _invoiceDateController.text = _formatDate(existingInvoiceDate);
     } else {
       _invoiceDateController.text = _formatDate(now);
-      cubit.setInvoiceDate(now); // Set the date in cubit state
+      cubit.setInvoiceDate(now);
     }
     
-    // Initialize due date
+    // Initialize due date - default to same as invoice date
     if (existingDueDate != null) {
       _dueDateController.text = _formatDate(existingDueDate);
     } else {
-      final dueDate = now.add(const Duration(days: 30));
-      _dueDateController.text = _formatDate(dueDate);
-      cubit.setDueDate(dueDate); // Set the date in cubit state
-    }
-    
-    // Initialize delivery date
-    if (existingDeliveryDate != null) {
-      _deliveryDateController.text = _formatDate(existingDeliveryDate);
-    } else {
-      _deliveryDateController.text = '';
+      _dueDateController.text = _invoiceDateController.text;
+      cubit.setDueDate(existingInvoiceDate ?? now);
     }
   }
 
@@ -116,12 +104,14 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
       switch (field) {
         case 'invoice':
           cubit.setInvoiceDate(picked);
+          // Also update due date to match if they were the same
+          if (_dueDateController.text == _invoiceDateController.text || cubit.dueDate == cubit.invoiceDate) {
+            _dueDateController.text = _formatDate(picked);
+            cubit.setDueDate(picked);
+          }
           break;
         case 'due':
           cubit.setDueDate(picked);
-          break;
-        case 'delivery':
-          cubit.setDeliveryDate(picked);
           break;
       }
     } 
@@ -137,38 +127,34 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
       },
       child: BlocBuilder<InvoiceCubit, InvoiceState>(
         builder: (context, state) {
-          return SizedBox(
-            height: 230,
-            child: Card(
-              elevation: AppConstants.cardElevation,
-              color: AppColors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-                side: BorderSide(color: AppColors.border, width: 1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.cardPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionTitle(Icons.calendar_today, 'التواريخ'),
-                    const SizedBox(height: 16),
-                    _buildDateField(
-                      _invoiceDateController,
-                      'تاريخ الفاتورة',
-                      Icons.event_outlined,
-                      'invoice',
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    _buildDateField(
-                      _deliveryDateController,
-                      'تاريخ التسليم',
-                      Icons.local_shipping_outlined,
-                      'delivery',
-                    ),
-                  ],
-                ),
+          return Card(
+            elevation: AppConstants.cardElevation,
+            color: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
+              side: BorderSide(color: AppColors.border, width: 1),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppConstants.cardPadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSectionTitle(Icons.calendar_today, 'التواريخ'),
+                  const SizedBox(height: 16),
+                  _buildDateField(
+                    _invoiceDateController,
+                    'تاريخ الفاتورة',
+                    Icons.event_outlined,
+                    'invoice',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildDateField(
+                    _dueDateController,
+                    'تاريخ الاستحقاق',
+                    Icons.calendar_month_outlined,
+                    'due',
+                  ),
+                ],
               ),
             ),
           );
@@ -180,7 +166,6 @@ class _InvoiceDatesWidgetState extends State<InvoiceDatesWidget> {
   Widget _buildSectionTitle(IconData icon, String title) {
     return Row(
       children: [
-
         Text(
           title,
           style: const TextStyle(

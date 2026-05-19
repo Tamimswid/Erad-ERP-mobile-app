@@ -19,6 +19,7 @@ class ProductListWidget extends StatefulWidget {
 class _ProductListWidgetState extends State<ProductListWidget> {
   final Map<int, TextEditingController> _priceControllers = {};
   final Map<int, bool> _editingStates = {};
+  int _previousItemCount = 0;
 
   @override
   void dispose() {
@@ -35,7 +36,16 @@ class _ProductListWidgetState extends State<ProductListWidget> {
         final items = context.read<InvoiceCubit>().invoiceItems;
 
         if (items.isEmpty) {
+          _priceControllers.clear();
+          _editingStates.clear();
+          _previousItemCount = 0;
           return _buildEmptyState();
+        }
+
+        if (items.length != _previousItemCount) {
+          _priceControllers.clear();
+          _editingStates.clear();
+          _previousItemCount = items.length;
         }
 
         return _buildProductList(items);
@@ -212,18 +222,19 @@ class _ProductListWidgetState extends State<ProductListWidget> {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         textAlign: TextAlign.right,
         style: const TextStyle(
-          fontSize: 11,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
           color: AppColors.text,
         ),
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
             borderSide: BorderSide(color: AppColors.primary),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
             borderSide: const BorderSide(color: AppColors.primary, width: 2),
           ),
         ),
@@ -246,18 +257,18 @@ class _ProductListWidgetState extends State<ProductListWidget> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.background,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(6),
           border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
         ),
         child: Text(
           NumberFormatter.format(item.unitPrice),
           style: const TextStyle(
-            fontWeight: AppFonts.fontWeightMedium,
+            fontWeight: AppFonts.fontWeightSemiBold,
             color: AppColors.text,
-            fontSize: 11,
+            fontSize: 14,
           ),
           textAlign: TextAlign.right,
         ),

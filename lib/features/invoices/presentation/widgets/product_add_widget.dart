@@ -17,7 +17,7 @@ class ProductAddWidget extends StatefulWidget {
 
 class _ProductAddWidgetState extends State<ProductAddWidget> {
   final _searchController = TextEditingController();
-  final _quantityController = TextEditingController(text: '1');
+  final _quantityController = TextEditingController();
   final _searchFocusNode = FocusNode();
   final _quantityFocusNode = FocusNode();
 
@@ -104,7 +104,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
 
         setState(() {
           _searchController.clear();
-          _quantityController.text = '1';
+        _quantityController.clear();
           _selectedProduct = null;
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -121,9 +121,13 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
 
   void _confirmAddProduct() {
     var name = _searchController.text.trim();
-    final quantity = int.tryParse(_quantityController.text) ?? 1;
+    final quantity = int.tryParse(_quantityController.text);
 
     if (name.isEmpty) {
+      return;
+    }
+
+    if (quantity == null || quantity <= 0) {
       return;
     }
 

@@ -47,7 +47,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   String _project = '';
   String _paymentMethod = '';
   String _paymentType = 'debt'; // 'debt' or 'cash'
-  String _status = 'draft';
+  String _status = 'completed';
 
   // Getters for accessing filter state
   String get selectedType => _selectedType;
@@ -77,7 +77,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   InvoiceCubit(this._repository) : super(const InvoiceInitial()) {
     // Initialize with default values for new invoice creation
     _invoiceDate = DateTime.now();
-    _dueDate = DateTime.now().add(const Duration(days: 1));
+    _dueDate = DateTime.now();
     // Start real-time listeners
     _startRealtimeListeners();
   }
@@ -518,7 +518,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   }
 
   void addInvoiceItem(InvoiceItem item) {
-    _invoiceItems.add(item);
+    _invoiceItems.insert(0, item);
     // Calculate totals immediately after adding item
     _calculateAndUpdateTotals();
     emit(InvoiceFormUpdated(updateType: 'addItem'));
@@ -638,7 +638,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     _selectedSupplierId = null;
     // Reset to defaults instead of null to avoid validation issues
     _invoiceDate = DateTime.now();
-    _dueDate = DateTime.now().add(const Duration(days: 30));
+    _dueDate = DateTime.now();
     _deliveryDate = null;
     _invoiceItems.clear();
     _discountAmount = 0.0;
@@ -648,7 +648,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     _project = '';
     _paymentMethod = '';
     _paymentType = 'debt';
-    _status = 'draft';
+    _status = 'completed';
     print('DEBUG: clearInvoiceData - reset invoice date to: $_invoiceDate');
     emit(InvoiceFormUpdated(updateType: 'clearAll'));
   }

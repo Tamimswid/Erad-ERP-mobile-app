@@ -4,7 +4,6 @@ import 'package:erad/features/customer_debts/data/models/customer_debt_model.dar
 import 'package:erad/features/customer_debts/presentation/bloc/customer_debt_cubit.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/debt_stats_widget.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/debt_card_widget.dart';
-import 'package:erad/features/customer_debts/presentation/widgets/debt_table_header_widget.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/payment_dialog_widget.dart';
 import 'package:erad/features/customer_debts/presentation/pages/customer_detail_page.dart';
 import 'package:flutter/material.dart';
@@ -169,10 +168,7 @@ class CustomerDebtsPage extends StatelessWidget {
       builder: (dialogContext) => PaymentDialogWidget(
         debt: debt,
         onPaymentSubmit: (amount, note, paymentDate) async {
-          // Close dialog first
-          Navigator.pop(dialogContext);
-
-          // Add payment
+          // Add payment (dialog closes itself via PaymentDialogWidget)
           await context.read<CustomerDebtCubit>().addPayment(debt.id, amount, note, paymentDate);
 
           // Show success message on main page
