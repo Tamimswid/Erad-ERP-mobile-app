@@ -156,7 +156,6 @@ class InvoiceInfoCardWidget extends StatelessWidget {
   }
 
   Widget _buildProductRow(InvoiceItem product, int index) {
-    final name = product.nameWithMeasurementUnit;
     final quantity = product.quantity;
     final unitPrice = product.unitPrice;
     final total = product.totalPrice;
@@ -179,6 +178,17 @@ class InvoiceInfoCardWidget extends StatelessWidget {
                 fontSize: AppFonts.fontSizeSmall,
                 fontWeight: AppFonts.fontWeightMedium,
                 color: AppColors.text,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              quantity.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: AppFonts.fontSizeSmall,
+                fontWeight: AppFonts.fontWeightSemiBold,
+                color: AppColors.primary,
               ),
             ),
           ),

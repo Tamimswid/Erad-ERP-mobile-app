@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/widgets/common_widgets.dart';
-import 'package:iconsax/iconsax.dart' show Iconsax;
+import 'package:flutter/material.dart';
 
 class InvoiceActionButtonsWidget extends StatelessWidget {
   final VoidCallback onExportPdf;
@@ -25,67 +24,55 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Column(
         children: [
-          // Primary Actions Row
           Row(
             children: [
               Expanded(
                 child: _buildActionButton(
                   icon: Icons.edit,
-                  label: 'تعديل الفاتورة',
+                  label: 'تعديل',
                   onPressed: onEdit,
-                  isPrimary: true,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildActionButton(
-                  isPrimary: true,
                   icon: Icons.picture_as_pdf,
-                  label: 'الطباعة PDF',
+                  label: 'PDF',
                   onPressed: onExportPdf,
-                  isSecondary: true,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Secondary Actions Row
-          Row(
-            children: [
-              Expanded(
-                child: _buildActionButton(
-                  isPrimary: true,
-                  icon: Icons.receipt,
-                  label: 'حالة الفاتورة',
-                  onPressed: onUpdateInvoiceStatus,
-                  isSecondary: true,
+                  color: AppColors.secondary,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildActionButton(
-                  isPrimary: true,
-                  icon: Iconsax.money_change,
-                  label: 'طريقة الدفع',
-                  onPressed: onUpdatePaymentStatus,
-                  isDanger: false,
+                  icon: Icons.receipt,
+                  label: 'الحالة',
+                  onPressed: onUpdateInvoiceStatus,
+                  color: AppColors.info,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-
           Row(
             children: [
               Expanded(
                 child: _buildActionButton(
-                  isPrimary: true,
-                  isDanger: true,
-                  icon: Icons.delete,
-                  label: 'حذف',
+                  icon: Icons.payments,
+                  label: 'الدفع',
+                  onPressed: onUpdatePaymentStatus,
+                  color: AppColors.warning,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: _buildActionButton(
+                  icon: Icons.delete_outline,
+                  label: 'حذف الفاتورة',
                   onPressed: onDelete,
-                  color: AppColors.error
+                  color: AppColors.error,
                 ),
               ),
             ],
@@ -99,54 +86,33 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
-    bool isPrimary = false,
-    bool isSecondary = false,
-    bool isDanger = false,
-    Color color = AppColors.primary,
+    required Color color,
   }) {
-    Color backgroundColor;
-    Color foregroundColor;
-    BorderSide borderSide;
-
-    if (isPrimary) {
-      backgroundColor = color ;
-      foregroundColor = Colors.white;
-      borderSide = BorderSide.none;
-    } else if (isDanger) {
-      backgroundColor = Colors.transparent;
-      foregroundColor = color ;
-      borderSide = BorderSide(color: AppColors.error.withOpacity(0.3));
-    } else {
-      backgroundColor = Colors.transparent;
-      foregroundColor = AppColors.text;
-      borderSide = BorderSide(color: AppColors.border);
-    }
-
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border.fromBorderSide(borderSide),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: 0.1),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 16, color: foregroundColor),
-                const SizedBox(width: 8),
+                Icon(icon, size: 18, color: color),
+                const SizedBox(width: 6),
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: AppFonts.fontSizeMedium,
-                    fontWeight: AppFonts.fontWeightMedium,
-                    color: foregroundColor,
+                    fontSize: AppFonts.fontSizeSmall,
+                    fontWeight: AppFonts.fontWeightSemiBold,
+                    color: color,
                   ),
                 ),
               ],

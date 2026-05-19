@@ -61,6 +61,8 @@ class InvoiceDetailView extends StatefulWidget {
 class _InvoiceDetailViewState extends State<InvoiceDetailView> {
   dynamic invoice;
   bool isLoading = true;
+  bool isDeleting = false;
+  bool isGeneratingPdf = false;
   List<Map<String, dynamic>> products = [];
 
   @override
@@ -171,7 +173,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                   },
                   child: BlocBuilder<InvoiceCubit, InvoiceState>(
                     builder: (context, state) {
-                      if (isLoading || state is InvoiceLoading) {
+                      if (isLoading || state is InvoiceLoading || isDeleting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
@@ -197,49 +199,70 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
 
     final cubit = context.read<InvoiceCubit>();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          InvoiceDetailHeaderWidget(
-            invoiceNumber: _getInvoiceNumber(),
-            onBackPressed: () => Navigator.pop(context),
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              InvoiceDetailHeaderWidget(
+                invoiceNumber: _getInvoiceNumber(),
+                onBackPressed: () => Navigator.pop(context),
+              ),
+              const SizedBox(height: 12),
+              // Info Card with Products
+              InvoiceInfoCardWidget(
+                invoiceDate: _formatDate(_getInvoiceDate()),
+                customerName: _getCustomerOrSupplierName(),
+                products: _getProductsList(),
+              ),
+
+
+              // Totals
+              InvoiceTotalsWidget(
+                subtotal: _getSubtotal(),
+                discount: _getDiscountAmount(),
+                total: _getTotalAmount(),
+              ),
+
+
+              // Action Buttons
+              InvoiceActionButtonsWidget(
+                onExportPdf: _generatePdf,
+                onEdit: _editInvoice,
+                onUpdateInvoiceStatus: () => _updateInvoiceStatus(
+                  onUpdate: (newState) => _updateInvoiceStatusOptimistic(newState, cubit),
+                ),
+                onUpdatePaymentStatus: () => _updatePaymentStatus(
+                  onUpdate: (paymentStatus) => _updatePaymentStatusOptimistic(paymentStatus, cubit),
+                ),
+                onDelete: _deleteInvoice,
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          _buildStatusSection(),
-          const SizedBox(height: 12),
-          // Info Card with Products
-          InvoiceInfoCardWidget(
-            invoiceDate: _formatDate(_getInvoiceDate()),
-            customerName: _getCustomerOrSupplierName(),
-            products: _getProductsList(),
-          ),
-
-
-          // Totals
-          InvoiceTotalsWidget(
-            subtotal: _getSubtotal(),
-            discount: _getDiscountAmount(),
-            total: _getTotalAmount(),
-          ),
-
-
-          // Action Buttons
-          InvoiceActionButtonsWidget(
-            onExportPdf: _generatePdf,
-            onEdit: _editInvoice,
-            onUpdateInvoiceStatus: () => _updateInvoiceStatus(
-              onUpdate: (newState) => _updateInvoiceStatusOptimistic(newState, cubit),
+        ),
+        if (isGeneratingPdf)
+          Container(
+            color: Colors.black54,
+            child: const Center(
+              child: Card(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('جاري إنشاء PDF...'),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            onUpdatePaymentStatus: () => _updatePaymentStatus(
-              onUpdate: (paymentStatus) => _updatePaymentStatusOptimistic(paymentStatus, cubit),
-            ),
-            onDelete: _deleteInvoice,
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -409,12 +432,23 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
       context: context,
       builder: (dialogContext) => DeleteInvoiceDialog(
         invoiceNumber: widget.invoiceId,
-        onConfirm: () {
-          // Cubit'i kullanarak faturayı sil
-          if (widget.type == 'sale') {
-            cubit.deleteSalesInvoice(widget.invoiceId);
-          } else {
-            cubit.deletePurchaseInvoice(widget.invoiceId);
+        onConfirm: () async {
+          Navigator.pop(dialogContext);
+          setState(() {
+            isDeleting = true;
+          });
+          try {
+            if (widget.type == 'sale') {
+              await cubit.deleteSalesInvoice(widget.invoiceId);
+            } else {
+              await cubit.deletePurchaseInvoice(widget.invoiceId);
+            }
+          } finally {
+            if (mounted) {
+              setState(() {
+                isDeleting = false;
+              });
+            }
           }
         },
       ),
@@ -423,6 +457,9 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
 
   void _generatePdf() async {
     try {
+      setState(() {
+        isGeneratingPdf = true;
+      });
       final pdfService = PdfInvoiceService();
       final pdfFile = await pdfService.generateInvoicePdf(invoice, widget.type);
 
@@ -434,6 +471,12 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('فشل إنشاء PDF: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isGeneratingPdf = false;
+        });
+      }
     }
   }
 
@@ -473,80 +516,6 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
     }).toList();
   }
 
-
-  Widget _buildStatusSection() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatusBadge(
-            label: 'حالة الفاتورة',
-            value: getStatusText(_getInvoiceStatus()),
-            color: getStatusColor(_getInvoiceStatus()),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatusBadge(
-            label: 'حالة الدفع',
-            value: getPaymentStatusText(_getPaymentStatus()),
-            color: getPaymentStatusColor(_getPaymentStatus()),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusBadge({
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 32,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeSmall,
-                    fontWeight: AppFonts.fontWeightMedium,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeLarge,
-                    fontWeight: AppFonts.fontWeightBold,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
     Color getStatusColor(String status) {
     return InvoiceStatus.fromString(status).getColor;
