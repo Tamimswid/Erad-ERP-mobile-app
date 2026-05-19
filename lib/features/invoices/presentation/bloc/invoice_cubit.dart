@@ -455,11 +455,11 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   bool _matchPaymentStatus(PaymentStatus paymentStatus) {
     // For 'paid' - match PaymentStatus.cash
-    if (_selectedStatus == 'paid') {
+    if (_selectedStatus == 'cash') {
       return paymentStatus == PaymentStatus.cash;
     }
     // For 'pending' - match PaymentStatus.debt
-    if (_selectedStatus == 'pending') {
+    if (_selectedStatus == 'debt') {
       return paymentStatus == PaymentStatus.debt;
     }
     return false;

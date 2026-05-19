@@ -28,6 +28,7 @@ class DashboardLoaded extends DashboardState {
   final List<Map<String, dynamic>> recentInvoices;
   final List<Map<String, dynamic>> topProductsBySales;
   final List<Map<String, dynamic>>? topProductsByPurchases;
+  final List<Map<String, dynamic>> remainingStock;
   final String selectedYear;
   final DateTimeRange? customDateRange;
   final bool isCustomDateRange;
@@ -45,6 +46,7 @@ class DashboardLoaded extends DashboardState {
     required this.recentInvoices,
     required this.topProductsBySales,
     this.topProductsByPurchases,
+    this.remainingStock = const [],
     required this.selectedYear,
     this.customDateRange,
     this.isCustomDateRange = false,
@@ -63,6 +65,7 @@ class DashboardLoaded extends DashboardState {
     List<Map<String, dynamic>>? recentInvoices,
     List<Map<String, dynamic>>? topProductsBySales,
     List<Map<String, dynamic>>? topProductsByPurchases = const [],
+    List<Map<String, dynamic>>? remainingStock,
     String? selectedYear,
     DateTimeRange? customDateRange,
     bool? isCustomDateRange,
@@ -80,6 +83,7 @@ class DashboardLoaded extends DashboardState {
       recentInvoices: recentInvoices ?? this.recentInvoices,
       topProductsBySales: topProductsBySales ?? this.topProductsBySales,
       topProductsByPurchases: topProductsByPurchases ?? this.topProductsByPurchases,
+      remainingStock: remainingStock ?? this.remainingStock,
       selectedYear: selectedYear ?? this.selectedYear,
       customDateRange: customDateRange ?? this.customDateRange,
       isCustomDateRange: isCustomDateRange ?? this.isCustomDateRange,
@@ -100,6 +104,7 @@ class DashboardLoaded extends DashboardState {
         recentInvoices,
         topProductsBySales,
         topProductsByPurchases,
+        remainingStock,
         selectedYear,
         customDateRange,
         isCustomDateRange,

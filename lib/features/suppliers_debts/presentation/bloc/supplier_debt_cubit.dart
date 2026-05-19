@@ -7,7 +7,6 @@ import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.da
 import 'package:erad/features/suppliers_debts/data/repositories/supplier_debt_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class SupplierDebtState extends Equatable {
   const SupplierDebtState();
@@ -74,8 +73,7 @@ class SupplierPaymentSuccess extends SupplierDebtState {
 
 class SupplierDebtCubit extends Cubit<SupplierDebtState> {
   final SupplierDebtRepository repository;
-  final _supabase = Supabase.instance.client;
-  StreamSubscription<List<Map<String, dynamic>>>? _paymentsSubscription;
+  StreamSubscription<Either<Failure, List<SupplierDebtModel>>>? _debtsSubscription;
 
   SupplierDebtCubit({required this.repository}) : super(SupplierDebtInitial()) {
     _startRealtimeListener();
@@ -86,19 +84,29 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
   String _searchQuery = '';
 
   void _startRealtimeListener() {
-    _paymentsSubscription = _supabase
-        .from('payments')
-        .stream(primaryKey: ['id'])
-        .asyncMap((data) async {
-          final filtered = data
-              .where((p) => p['payment_type'] == 'supplier' && p['supplier_id'] != null)
-              .toList();
-          return List<Map<String, dynamic>>.from(filtered);
-        })
-        .listen((_) {
-          log('SupplierDebtCubit: Payment change detected - refreshing data');
-          getSupplierDebts();
-        });
+    log('SupplierDebtCubit: Starting real-time listener...');
+    _debtsSubscription = repository.watchSupplierDebts().listen(
+      (result) {
+        if (isClosed) return;
+        result.fold(
+          (failure) {
+            log('SupplierDebtCubit: Stream error - ${failure.message}');
+            emit(SupplierDebtError(failure.message));
+          },
+          (debts) {
+            log('SupplierDebtCubit: Received ${debts.length} suppliers with debt');
+            _allDebts = debts;
+            _applySearchFilter();
+          },
+        );
+      },
+      onError: (error) {
+        log('SupplierDebtCubit: Stream error - $error');
+        if (!isClosed) {
+          emit(SupplierDebtError('Stream error: $error'));
+        }
+      },
+    );
   }
 
   void _applySearchFilter() {
@@ -194,7 +202,7 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
 
   @override
   Future<void> close() {
-    _paymentsSubscription?.cancel();
+    _debtsSubscription?.cancel();
     return super.close();
   }
 }

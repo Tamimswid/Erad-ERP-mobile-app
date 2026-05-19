@@ -1,4 +1,5 @@
 import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/utils/app_utils.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/suppliers_debts/data/models/payment_model.dart';
 import 'package:flutter/material.dart';
@@ -9,12 +10,14 @@ class PaymentHistoryWidget extends StatelessWidget {
   final List<SupplierPaymentModel> payments;
   final VoidCallback onAddPayment;
   final Function(String paymentId) onDeletePayment;
+  final Function(SupplierPaymentModel payment)? onPaymentTap;
 
   const PaymentHistoryWidget({
     super.key,
     required this.payments,
     required this.onAddPayment,
     required this.onDeletePayment,
+    this.onPaymentTap,
   });
 
   void _showDeleteConfirmation(BuildContext context, SupplierPaymentModel payment) {
@@ -49,6 +52,63 @@ class PaymentHistoryWidget extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showPaymentDetails(BuildContext context, SupplierPaymentModel payment) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'تفاصيل الدفعة',
+          textAlign: TextAlign.right,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailRow('المبلغ', '${AppUtils.formatNumber(payment.amount)} ${NumberFormatter.getCurrencySymbol()}'),
+            const SizedBox(height: 12),
+            _buildDetailRow('التاريخ', payment.paymentDate),
+            const SizedBox(height: 12),
+            _buildDetailRow('طريقة الدفع', payment.paymentMethod),
+            if (payment.notes != null && payment.notes!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _buildDetailRow('الملاحظة', payment.notes!),
+            ],
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.start,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إغلاق'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label: ',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+      ],
     );
   }
 
@@ -157,7 +217,15 @@ class PaymentHistoryWidget extends StatelessWidget {
     SupplierPaymentModel payment,
     int index,
   ) {
-    return Container(
+    return GestureDetector(
+      onTap: () {
+        if (onPaymentTap != null) {
+          onPaymentTap!(payment);
+        } else {
+          _showPaymentDetails(context, payment);
+        }
+      },
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -214,6 +282,7 @@ class PaymentHistoryWidget extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

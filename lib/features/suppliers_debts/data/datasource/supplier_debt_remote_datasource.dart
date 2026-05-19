@@ -367,47 +367,96 @@ class SupplierDebtRemoteDataSource {
     }
   }
 
-  Stream<List<SupplierDebtModel>> watchSupplierDebts() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) throw Exception('User not logged in');
+  Stream<List<SupplierDebtModel>> watchSupplierDebts() {
+    final controller = StreamController<List<SupplierDebtModel>>();
+    List<StreamSubscription> subscriptions = [];
 
-    log('SupplierDebtDataSource: Starting watchSupplierDebts stream...');
+    _fetchAndEmitSupplierDebts(controller);
 
-    await for (final data in supabaseClient
-        .from('purchase_invoices')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId)
-        .order('invoice_date', ascending: false)) {
+    final userId = UserService.getUserId();
 
-      log('SupplierDebtDataSource: Received ${data.length} invoices from stream');
+    userId.then((uid) {
+      if (uid == null) return;
+
+      final invoiceStream = supabaseClient
+          .from('purchase_invoices')
+          .stream(primaryKey: ['id'])
+          .eq('user_id', uid);
+
+      final paymentStream = supabaseClient
+          .from('payments')
+          .stream(primaryKey: ['id'])
+          .eq('user_id', uid);
+
+      subscriptions.add(invoiceStream.listen((_) => _fetchAndEmitSupplierDebts(controller)));
+      subscriptions.add(paymentStream.listen((_) => _fetchAndEmitSupplierDebts(controller)));
+    });
+
+    controller.onCancel = () {
+      for (final sub in subscriptions) {
+        sub.cancel();
+      }
+      controller.close();
+    };
+
+    return controller.stream;
+  }
+
+  Future<void> _fetchAndEmitSupplierDebts(
+    StreamController<List<SupplierDebtModel>> controller,
+  ) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) return;
+
+      final response = await supabaseClient
+          .from('purchase_invoices')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('payment_status', 'debt')
+          .order('invoice_date', ascending: false);
 
       final supplierPayments = <String, double>{};
-      try {
-        final paymentsResponse = await supabaseClient
-            .from('payments')
-            .select('supplier_id, amount')
-            .eq('user_id', userId);
+      final paymentsResponse = await supabaseClient
+          .from('payments')
+          .select('supplier_id, amount')
+          .eq('user_id', userId)
+          .eq('payment_type', 'supplier')
+          .not('supplier_id', 'is', null);
 
-        for (var json in paymentsResponse as List) {
-          final payment = json as Map<String, dynamic>;
-          final supplierId = payment['supplier_id'] as String?;
-          if (supplierId != null) {
-            final amount = (payment['amount'] ?? 0.0).toDouble();
-            supplierPayments[supplierId] = (supplierPayments[supplierId] ?? 0.0) + amount;
-          }
+      for (var json in paymentsResponse as List) {
+        final payment = json as Map<String, dynamic>;
+        final supplierId = payment['supplier_id'] as String?;
+        if (supplierId == null) continue;
+        final amount = (payment['amount'] ?? 0.0).toDouble();
+        supplierPayments[supplierId] =
+            (supplierPayments[supplierId] ?? 0.0) + amount;
+      }
+
+      final supplierNames = <String, Map<String, dynamic>>{};
+      final supplierIds = response
+          .map((inv) => (inv as Map<String, dynamic>)['supplier_id'] as String)
+          .toSet();
+      if (supplierIds.isNotEmpty) {
+        final suppliersResponse = await supabaseClient
+            .from('suppliers')
+            .select('id, name, phone')
+            .inFilter('id', supplierIds.toList());
+
+        for (var json in suppliersResponse as List) {
+          final supplier = json as Map<String, dynamic>;
+          supplierNames[supplier['id'] as String] = supplier;
         }
-      } catch (e) {
-        log('Error fetching payments in stream: $e');
       }
 
       final supplierDebts = <String, SupplierDebtModel>{};
 
-      for (var json in data) {
-        final supplierId = json['supplier_id'] as String?;
-        if (supplierId == null) continue;
-
-        final totalAmount = (json['total_amount'] ?? 0.0).toDouble();
+      for (var json in response as List) {
+        final invoiceData = json as Map<String, dynamic>;
+        final supplierId = invoiceData['supplier_id'] as String;
+        final totalAmount = (invoiceData['total_amount'] ?? 0.0).toDouble();
         final paidAmount = supplierPayments[supplierId] ?? 0.0;
+        final supplierData = supplierNames[supplierId];
 
         if (supplierDebts.containsKey(supplierId)) {
           final existing = supplierDebts[supplierId]!;
@@ -420,25 +469,31 @@ class SupplierDebtRemoteDataSource {
             totalInvoicesCount: existing.totalInvoicesCount + 1,
             pendingInvoicesCount: existing.pendingInvoicesCount + 1,
             overdueInvoicesCount: existing.overdueInvoicesCount,
-            latestDueDate: _getLatestDate(existing.latestDueDate, json['due_date']),
+            latestDueDate: _getLatestDate(
+              existing.latestDueDate,
+              invoiceData['due_date'],
+            ),
           );
         } else {
           supplierDebts[supplierId] = SupplierDebtModel(
             id: supplierId,
-            name: 'مورد #$supplierId',
-            phone: null,
+            name: supplierData?['name'] ?? 'غير محدد',
+            phone: supplierData?['phone'] as String?,
             totalInvoices: totalAmount,
             totalPaid: paidAmount,
             totalInvoicesCount: 1,
             pendingInvoicesCount: 1,
             overdueInvoicesCount: 0,
-            latestDueDate: json['due_date'],
+            latestDueDate: invoiceData['due_date'],
           );
         }
       }
 
-      log('SupplierDebtDataSource: Filtered ${supplierDebts.length} suppliers with debt');
-      yield supplierDebts.values.toList();
+      if (!controller.isClosed) {
+        controller.add(supplierDebts.values.toList());
+      }
+    } catch (e) {
+      log('Error in _fetchAndEmitSupplierDebts: $e');
     }
   }
 }

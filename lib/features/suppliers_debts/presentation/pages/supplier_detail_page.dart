@@ -58,9 +58,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
 
   List<PurchaseInvoiceModel> get _invoiceModels {
     return _invoices
-        .where((inv) =>
-            inv['payment_status'] == 'debt' ||
-            (inv['remaining_amount'] ?? 0.0) > 0)
+        .where((inv) => inv['payment_status'] == 'debt')
         .map((inv) => PurchaseInvoiceModel.fromMap(inv))
         .toList();
   }
@@ -338,9 +336,9 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
       context: context,
       builder: (context) => PaymentModalWidget(
         remainingDebt: _remainingDebt,
-        onPaymentSubmit: (amount, date) {
+        onPaymentSubmit: (amount, date, note) {
           Navigator.pop(context);
-          _addPayment(amount, date, null);
+          _addPayment(amount, date, note);
         },
       ),
     );

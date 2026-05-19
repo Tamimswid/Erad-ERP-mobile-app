@@ -35,22 +35,6 @@ class InvoiceStatsWidget extends StatelessWidget {
         ),
         _buildStatCard(
           context,
-          'المدفوع',
-          paidCount.toString(),
-          Icons.check_circle,
-          const Color(0xFF1D4ED8),
-          const Color(0xFFEFF6FF),
-        ),
-        _buildStatCard(
-          context,
-          'المعلق',
-          pendingCount.toString(),
-          Icons.access_time_filled,
-          const Color(0xFF1D4ED8),
-          const Color(0xFFF0F9FF),
-        ),
-        _buildStatCard(
-          context,
           'الاجمالي المبلغ',
           '${totalAmount.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
           Icons.account_balance_wallet,

@@ -9,6 +9,7 @@ import '../widgets/stats_grid.dart';
 import '../widgets/financial_chart_section.dart';
 import '../widgets/customer_count_card.dart';
 import '../widgets/product_sales_section.dart';
+import '../widgets/remaining_stock_section.dart';
 import '../widgets/recent_invoices_section.dart';
 
 class DashboardOverview extends StatelessWidget {
@@ -93,7 +94,7 @@ class _DashboardOverviewContent extends StatelessWidget {
             padding: const EdgeInsets.all(AppConstants.spacingMd),
             child: CustomScrollView(
               slivers: [
-                SliverToBoxAdapter(child: SizedBox(height: 8)),
+                // SliverToBoxAdapter(child: SizedBox(height: 8)),
 
                 // Stats Grid - 6 cards in a GridView
                 SliverToBoxAdapter(child: const StatsGrid()),
@@ -104,6 +105,8 @@ class _DashboardOverviewContent extends StatelessWidget {
                 SliverToBoxAdapter(child: const CustomerCountCard()),
                 SliverToBoxAdapter(child: SizedBox(height: 24)),
                 SliverToBoxAdapter(child: const ProductSalesSection()),
+                SliverToBoxAdapter(child: SizedBox(height: 24)),
+                SliverToBoxAdapter(child: const RemainingStockSection()),
                 SliverToBoxAdapter(child: SizedBox(height: 24)),
                 SliverToBoxAdapter(child: const RecentInvoicesSection()),
               ],

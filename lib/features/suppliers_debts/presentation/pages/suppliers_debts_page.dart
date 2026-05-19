@@ -162,7 +162,6 @@ class SuppliersDebtsPage extends StatelessWidget {
       builder: (dialogContext) => PaymentDialogWidget(
         debt: debt,
         onPaymentSubmit: (amount, note, paymentDate) async {
-          Navigator.pop(dialogContext);
           await context.read<SupplierDebtCubit>().addPayment(debt.id, amount, note, paymentDate);
           if (context.mounted) {
             _showSuccessMessage(context, 'تم تسجيل الدفعة بنجاح');

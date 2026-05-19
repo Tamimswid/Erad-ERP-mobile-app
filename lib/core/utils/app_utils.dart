@@ -36,7 +36,7 @@ class AppUtils {
     return formatter.format(amount);
   }
   
-  static String formatNumber(double number, {int decimalDigits = 1}) {
+  static String formatNumber(double number, {int decimalDigits = 2}) {
     final formatter = NumberFormat.decimalPatternDigits(
       locale: 'ar_SA',
       decimalDigits: decimalDigits,

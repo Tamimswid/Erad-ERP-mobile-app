@@ -28,28 +28,20 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.edit,
-                  label: 'تعديل',
-                  onPressed: onEdit,
-                  color: AppColors.primary,
+                  icon: Icons.payments,
+                  label: 'الدفع',
+                  onPressed: onUpdatePaymentStatus,
+                  color: AppColors.warning,
                 ),
               ),
               const SizedBox(width: 8),
+
               Expanded(
                 child: _buildActionButton(
                   icon: Icons.picture_as_pdf,
                   label: 'PDF',
                   onPressed: onExportPdf,
                   color: AppColors.secondary,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildActionButton(
-                  icon: Icons.receipt,
-                  label: 'الحالة',
-                  onPressed: onUpdateInvoiceStatus,
-                  color: AppColors.info,
                 ),
               ),
             ],
@@ -59,15 +51,14 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.payments,
-                  label: 'الدفع',
-                  onPressed: onUpdatePaymentStatus,
-                  color: AppColors.warning,
+                  icon: Icons.edit,
+                  label: 'تعديل',
+                  onPressed: onEdit,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                flex: 2,
                 child: _buildActionButton(
                   icon: Icons.delete_outline,
                   label: 'حذف الفاتورة',

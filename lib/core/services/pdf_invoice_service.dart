@@ -73,19 +73,9 @@ class PdfInvoiceService {
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
                 pw.Text(
-                  _processArabicText('حالة الدفع: ${_getPaymentStatusName(_getPaymentStatus(invoice))}'),
-                  style: pw.TextStyle(font: font, fontSize: 12),
-                ),
-                pw.SizedBox(height: 2),
-                pw.Text(
                   _processArabicText('التاريخ: ${DateFormat('yyyy-MM-dd').format(_getInvoiceDate(invoice))}'),
                   style: pw.TextStyle(font: font, fontSize: 12),
                 ),
-                if (_getDueDate(invoice) != null)
-                  pw.Text(
-                    _processArabicText('تاريخ الاستحقاق: ${DateFormat('yyyy-MM-dd').format(_getDueDate(invoice)!)}'),
-                    style: pw.TextStyle(font: font, fontSize: 12),
-                  ),
               ],
             ),
           ],

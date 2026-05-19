@@ -34,7 +34,7 @@ class StatCard extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
               color: AppColors.textSecondary,
             ),
@@ -49,7 +49,7 @@ class StatCard extends StatelessWidget {
               Text(
                 NumberFormatter.format(amount),
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: AppColors.text,
                 ),

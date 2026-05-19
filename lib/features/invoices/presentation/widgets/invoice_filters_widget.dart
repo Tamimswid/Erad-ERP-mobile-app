@@ -67,14 +67,14 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
     );
   }
 
-  Widget _buildFirstRow() {
-    return Column(
-      children: [
-        _buildSearchField(),
-        const SizedBox(height: 10),
-      ],
-    );
-  }
+  // Widget _buildFirstRow() {
+  //   return Column(
+  //     children: [
+  //       _buildSearchField(),
+  //       const SizedBox(height: 10),
+  //     ],
+  //   );
+  // }
 
   Widget _buildSecondRow() {
     return Row(
@@ -104,9 +104,9 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
           icon: const Icon(Icons.keyboard_arrow_down, size: 18),
           style: const TextStyle(fontSize: 13),
           items: const [
-            DropdownMenuItem(value: 'all', child: Text('الكل')),
-            DropdownMenuItem(value: 'sale', child: Text('بيع')),
-            DropdownMenuItem(value: 'purchase', child: Text('شراء')),
+            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(color: Colors.black ,fontSize: 14),)),
+            DropdownMenuItem(value: 'sale', child: Text('بيع',style: TextStyle(color: Colors.black,fontSize: 14),)),
+            DropdownMenuItem(value: 'purchase', child: Text('شراء',style: TextStyle(color: Colors.black,fontSize: 14),)),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -158,11 +158,10 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
           icon: const Icon(Icons.keyboard_arrow_down, size: 18),
           style: const TextStyle(fontSize: 13),
           items: const [
-            DropdownMenuItem(value: 'all', child: Text('الكل')),
-            DropdownMenuItem(value: 'paid', child: Text('مدفوع')),
-            DropdownMenuItem(value: 'pending', child: Text('قيد الانتظار')),
-            DropdownMenuItem(value: 'draft', child: Text('مسودة')),
-            DropdownMenuItem(value: 'cancelled', child: Text('ملغي')),
+            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(fontSize: 13,color: Colors.black))),
+            DropdownMenuItem(value: 'debt', child: Text('دين',style: TextStyle(fontSize: 13,color: Colors.black))),
+            DropdownMenuItem(value: 'cash', child: Text(  'نقدي',style: TextStyle(fontSize: 13,color: Colors.black))),
+
           ],
           onChanged: (value) {
             if (value != null) {
@@ -174,96 +173,7 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
     );
   }
 
-  Widget _buildDateFilter() {
-    return Row(
-      children: [
-        Text(
-          'التاريخ:',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: const Color(0xFF6B7280),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 120,
-          child: TextField(
-            readOnly: true,
-            onTap: () => _selectDateRange(context),
-            decoration: InputDecoration(
-              hintText: widget.dateFrom != null
-                  ? '${widget.dateFrom!.day}/${widget.dateFrom!.month}/${widget.dateFrom!.year}'
-                  : 'البداية',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            ),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Text('—', style: TextStyle(color: Color(0xFF9CA3AF))),
-        ),
-        SizedBox(
-          width: 120,
-          child: TextField(
-            readOnly: true,
-            onTap: () => _selectDateRange(context),
-            decoration: InputDecoration(
-              hintText: widget.dateTo != null
-                  ? '${widget.dateTo!.day}/${widget.dateTo!.month}/${widget.dateTo!.year}'
-                  : 'نهاية',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        IconButton(
-          onPressed: () => widget.onDateRangeChanged(null, null),
-          icon: const Icon(Icons.close, color: Color(0xFF9CA3AF), size: 20),
-          style: IconButton.styleFrom(
-            backgroundColor: const Color(0xFFF3F4F6),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 
-  
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? initialRange = widget.dateFrom != null && widget.dateTo != null
-        ? DateTimeRange(start: widget.dateFrom!, end: widget.dateTo!)
-        : null;
 
-    // await CustomDateRangePicker.showDateRangePicker(
-    //   context: context,
-    //   onDateRangeChanged: (dateRange) {
-    //     widget.onDateRangeChanged(dateRange.start, dateRange.end);
-    //   },
-    //   initialDateRange: initialRange,
-    //   firstDate: DateTime(2026),
-    //   lastDate: DateTime.now(),
-    //   startDateText: 'start_date',
-    //   endDateText: 'end_date',
-    //   confirmText: 'confirm',
-    //   cancelText: 'cancel',
-    // );
-  }
+
 }

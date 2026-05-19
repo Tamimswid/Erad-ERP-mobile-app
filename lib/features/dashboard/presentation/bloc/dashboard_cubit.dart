@@ -177,6 +177,12 @@ class DashboardCubit extends Cubit<DashboardState> {
       // Calculate top products by purchases quantity (from purchase invoices)
       final topProductsByPurchases = _calculateTopProductsByPurchases(filteredPurchases.toList());
 
+      // Calculate remaining stock per product
+      final remainingStock = _calculateRemainingStock(
+        salesInvoices: salesInvoices,
+        purchaseInvoices: purchaseInvoices,
+      );
+
       emit(DashboardLoaded(
         totalSales: totalSales,
         totalPurchases: totalPurchases,
@@ -190,6 +196,7 @@ class DashboardCubit extends Cubit<DashboardState> {
         recentInvoices: recentInvoicesData,
         topProductsBySales: topProductsBySales,
         topProductsByPurchases: topProductsByPurchases,
+        remainingStock: remainingStock,
         selectedYear: year,
         customDateRange: dateRange,
         isCustomDateRange: isCustom,
@@ -249,6 +256,60 @@ class DashboardCubit extends Cubit<DashboardState> {
       ..sort((a, b) => (b['quantity'] as num).compareTo(a['quantity'] as num));
 
     return sortedProducts;
+  }
+
+  List<Map<String, dynamic>> _calculateRemainingStock({
+    required List<SalesInvoice> salesInvoices,
+    required List<PurchaseInvoice> purchaseInvoices,
+  }) {
+    final Map<String, Map<String, dynamic>> productStock = {};
+
+    for (final invoice in purchaseInvoices) {
+      if (invoice.status != InvoiceStatus.completed) continue;
+      for (final item in invoice.items) {
+        final productName = item.nameWithMeasurementUnit;
+        final quantity = item.quantity;
+
+        if (productStock.containsKey(productName)) {
+          productStock[productName]!['purchased'] = (productStock[productName]!['purchased'] as num) + quantity;
+        } else {
+          productStock[productName] = {
+            'name': productName,
+            'purchased': quantity,
+            'sold': 0,
+          };
+        }
+      }
+    }
+
+    for (final invoice in salesInvoices) {
+      if (invoice.status != InvoiceStatus.completed) continue;
+      for (final item in invoice.items) {
+        final productName = item.nameWithMeasurementUnit;
+        final quantity = item.quantity;
+
+        if (productStock.containsKey(productName)) {
+          productStock[productName]!['sold'] = (productStock[productName]!['sold'] as num) + quantity;
+        } else {
+          productStock[productName] = {
+            'name': productName,
+            'purchased': 0,
+            'sold': quantity,
+          };
+        }
+      }
+    }
+
+    final remaining = productStock.values.map((data) {
+      final purchased = data['purchased'] as num;
+      final sold = data['sold'] as num;
+      data['remaining'] = purchased - sold;
+      return data;
+    }).toList();
+
+    remaining.sort((a, b) => (b['remaining'] as num).compareTo(a['remaining'] as num));
+
+    return remaining;
   }
 
   List<Map<String, dynamic>> _calculateMonthlyChartData(
