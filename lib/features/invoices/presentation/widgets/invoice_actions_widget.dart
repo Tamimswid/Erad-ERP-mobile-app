@@ -11,7 +11,7 @@ class InvoiceActionsWidget extends StatefulWidget {
 }
 
 class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
-  String _currentStatus = 'draft';
+  String _currentStatus = 'completed';
   String _currentPaymentType = 'debt';
   bool _isSaving = false;
 
@@ -86,20 +86,20 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
     }
   }
 
-  void _exportToPDF() {
-    final cubit = context.read<InvoiceCubit>();
+  // void _exportToPDF() {
+  //   final cubit = context.read<InvoiceCubit>();
     
-    if (!cubit.canSaveInvoice) {
-      _showToast('يرجى إكمال جميع الحقول المطلوبة أولاً', isError: true);
-      return;
-    }
+  //   if (!cubit.canSaveInvoice) {
+  //     _showToast('يرجى إكمال جميع الحقول المطلوبة أولاً', isError: true);
+  //     return;
+  //   }
 
-    _showToast('جاري إنشاء ملف PDF...');
+  //   _showToast('جاري إنشاء ملف PDF...');
 
-    Future.delayed(const Duration(seconds: 2), () {
-      _showToast('تم إنشاء ملف PDF بنجاح');
-    });
-  }
+  //   Future.delayed(const Duration(seconds: 2), () {
+  //     _showToast('تم إنشاء ملف PDF بنجاح');
+  //   });
+  // }
 
   Future<bool?> _showConfirmationDialog(String title, String message) {
     return showDialog<bool>(
@@ -164,7 +164,7 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
               border: Border.all(color: AppColors.border),
             ),
             child: DropdownButtonFormField<String>(
-              value: _currentStatus,
+              value: _currentPaymentType,
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
@@ -172,7 +172,7 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                   vertical: 8,
                 ),
                 prefixIcon: Icon(
-                  Icons.info_outline,
+                  Icons.money,
                   color: AppColors.textSecondary,
                   size: 18,
                 ),
@@ -183,15 +183,15 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
               ),
               items: const [
                 DropdownMenuItem(
-                  value: 'draft',
-                  child: Text('مسودة'),
+                  value: 'cash',
+                  child: Text('مدفوعة نقدا'),
                 ),
                 DropdownMenuItem(
-                  value: 'completed',
-                  child: Text('مكتملة'),
+                  value: 'debt',
+                  child: Text('مديون'),
                 ),
               ],
-              onChanged: _isSaving ? null : _onStatusChanged,
+              onChanged: _isSaving ? null : _onPaymentTypeChanged,
             ),
           ),
           const SizedBox(height: 12),

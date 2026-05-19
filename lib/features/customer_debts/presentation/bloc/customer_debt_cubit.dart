@@ -7,14 +7,12 @@ import 'package:erad/features/customer_debts/data/models/customer_debt_model.dar
 import 'package:erad/features/customer_debts/data/repositories/customer_debt_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'customer_debt_state.dart';
 
 class CustomerDebtCubit extends Cubit<CustomerDebtState> {
   final CustomerDebtRepository repository;
-  final _supabase = Supabase.instance.client;
-  StreamSubscription<List<Map<String, dynamic>>>? _paymentsSubscription;
+  StreamSubscription<Either<Failure, List<CustomerDebtModel>>>? _debtsSubscription;
 
   CustomerDebtCubit({required this.repository}) : super(CustomerDebtInitial()) {
     _startRealtimeListener();
@@ -25,19 +23,29 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
   String _searchQuery = '';
 
   void _startRealtimeListener() {
-    _paymentsSubscription = _supabase
-        .from('payments')
-        .stream(primaryKey: ['id'])
-        .asyncMap((data) async {
-          final filtered = data
-              .where((p) => p['payment_type'] == 'customer' && p['customer_id'] != null)
-              .toList();
-          return List<Map<String, dynamic>>.from(filtered);
-        })
-        .listen((_) {
-          log('CustomerDebtCubit: Payment change detected - refreshing data');
-          getCustomerDebts();
-        });
+    log('CustomerDebtCubit: Starting real-time debt listener...');
+    _debtsSubscription = repository.watchCustomerDebts().listen(
+      (result) {
+        if (isClosed) return;
+        result.fold(
+          (failure) {
+            log('CustomerDebtCubit: Stream error - ${failure.message}');
+            emit(CustomerDebtError(failure.message));
+          },
+          (debts) {
+            log('CustomerDebtCubit: Received ${debts.length} customers with debt');
+            _allDebts = debts;
+            _applySearchFilter();
+          },
+        );
+      },
+      onError: (error) {
+        log('CustomerDebtCubit: Stream error - $error');
+        if (!isClosed) {
+          emit(CustomerDebtError('Stream error: $error'));
+        }
+      },
+    );
   }
 
   void _applySearchFilter() {
@@ -101,7 +109,7 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
         if (!isClosed) {
           emit(PaymentSuccess('تم تسجيل الدفعة: ${amount.toStringAsFixed(2)}'));
         }
-        await getCustomerDebts();
+        // Real-time stream will automatically refresh
       },
     );
   }
@@ -133,7 +141,7 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
 
   @override
   Future<void> close() {
-    _paymentsSubscription?.cancel();
+    _debtsSubscription?.cancel();
     return super.close();
   }
 }

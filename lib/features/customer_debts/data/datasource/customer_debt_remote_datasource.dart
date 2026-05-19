@@ -19,7 +19,7 @@ class CustomerDebtRemoteDataSource {
         throw const AuthFailure('User not authenticated');
       }
 
-      // Get all sales invoices and join with customers to get name
+      // Get only debt invoices (payment_status = 'debt')
       final response = await supabaseClient
           .from('sales_invoices')
           .select('''
@@ -29,6 +29,7 @@ class CustomerDebtRemoteDataSource {
             invoice_date,
             due_date,
             total_amount,
+            remaining_amount,
             payment_status,
             status,
             customers!inner(
@@ -38,6 +39,7 @@ class CustomerDebtRemoteDataSource {
           ''')
           .eq('user_id', userId)
           .eq('status', 'completed')
+          .eq('payment_status', 'debt')
           .order('invoice_date', ascending: false);
 
       // Get all payments for customers (only customer type)
@@ -103,7 +105,8 @@ class CustomerDebtRemoteDataSource {
         }
       }
 
-      return customerDebts.values.toList();
+      // Only return customers who still have remaining debt
+      return customerDebts.values.where((debt) => debt.remainingDebt > 0).toList();
     } catch (e) {
       log(e.toString());
       throw exceptionToFailure(e);
@@ -135,6 +138,7 @@ class CustomerDebtRemoteDataSource {
             invoice_date,
             due_date,
             total_amount,
+            remaining_amount,
             payment_status,
             status,
             customers!inner(
@@ -143,6 +147,7 @@ class CustomerDebtRemoteDataSource {
             )
           ''')
           .eq('user_id', userId)
+          .eq('payment_status', 'debt')
           .or('customers.name.ilike.%$query%,invoice_number.ilike.%$query%')
           .order('invoice_date', ascending: false);
 
@@ -216,7 +221,8 @@ class CustomerDebtRemoteDataSource {
         }
       }
 
-      return customerDebts.values.toList();
+      // Only return customers who still have remaining debt
+      return customerDebts.values.where((debt) => debt.remainingDebt > 0).toList();
     } catch (e) {
       throw exceptionToFailure(e);
     }
@@ -264,7 +270,7 @@ class CustomerDebtRemoteDataSource {
         throw const AuthFailure('User not authenticated');
       }
 
-      // Get all invoices for this customer
+      // Get only debt invoices for this customer
       final response = await supabaseClient
           .from('sales_invoices')
           .select('''
@@ -274,6 +280,7 @@ class CustomerDebtRemoteDataSource {
             invoice_date,
             due_date,
             total_amount,
+            remaining_amount,
             payment_status,
             status,
             customers!inner(
@@ -283,6 +290,7 @@ class CustomerDebtRemoteDataSource {
           ''')
           .eq('user_id', userId)
           .eq('customer_id', customerId)
+          .eq('payment_status', 'debt')
           .order('invoice_date', ascending: false);
 
       // Get total payments for this customer
@@ -438,8 +446,13 @@ class CustomerDebtRemoteDataSource {
             .stream(primaryKey: ['id'])
             .eq('user_id', userId)
             .order('invoice_date', ascending: false)) {
+      // Filter to only debt invoices
+      final debtInvoices = data
+          .where((inv) => inv['payment_status'] == 'debt')
+          .toList();
+
       log(
-        'CustomerDebtDataSource: Received ${data.length} invoices from stream',
+        'CustomerDebtDataSource: Received ${data.length} invoices, ${debtInvoices.length} are debt invoices',
       );
 
       // Get all payments for customers
@@ -452,7 +465,8 @@ class CustomerDebtRemoteDataSource {
 
         for (var json in paymentsResponse as List) {
           final payment = json as Map<String, dynamic>;
-          final customerId = payment['customer_id'] as String;
+          final customerId = payment['customer_id'] as String?;
+          if (customerId == null) continue;
           final amount = (payment['amount'] ?? 0.0).toDouble();
           customerPayments[customerId] =
               (customerPayments[customerId] ?? 0.0) + amount;
@@ -464,8 +478,9 @@ class CustomerDebtRemoteDataSource {
       // Group all invoices by customer_id to show total debt
       final customerDebts = <String, CustomerDebtModel>{};
 
-      for (var json in data) {
-        final customerId = json['customer_id'] as String;
+      for (var json in debtInvoices) {
+        final customerId = json['customer_id'] as String?;
+        if (customerId == null) continue;
         final totalAmount = (json['total_amount'] ?? 0.0).toDouble();
         // Calculate paid amount from payments table
         final paidAmount = customerPayments[customerId] ?? 0.0;
@@ -504,10 +519,12 @@ class CustomerDebtRemoteDataSource {
         }
       }
 
+      // Only yield customers who still have remaining debt
+      final debtsWithBalance = customerDebts.values.where((debt) => debt.remainingDebt > 0).toList();
       log(
-        'CustomerDebtDataSource: Filtered ${customerDebts.length} customers with debt',
+        'CustomerDebtDataSource: Filtered to ${debtsWithBalance.length} customers with remaining debt',
       );
-      yield customerDebts.values.toList();
+      yield debtsWithBalance;
     }
   }
 }

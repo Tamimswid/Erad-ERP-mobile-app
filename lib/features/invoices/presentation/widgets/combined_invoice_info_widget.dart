@@ -142,10 +142,8 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
                     Expanded(
                       child: _buildInvoiceTypeDropdown(state),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildPaymentTypeDropdown(state),
-                    ),
+            
+              
                   ],
                 ),
                 const SizedBox(height: 16),
