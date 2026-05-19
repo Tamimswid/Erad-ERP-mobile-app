@@ -325,6 +325,24 @@ class PdfInvoiceService {
     return 0.0;
   }
 
+  double _getSubtotal(dynamic invoice) {
+    if (invoice is SalesInvoice) {
+      return invoice.subtotal;
+    } else if (invoice is PurchaseInvoice) {
+      return invoice.subtotal;
+    }
+    return 0.0;
+  }
+
+  double _getDiscountAmount(dynamic invoice) {
+    if (invoice is SalesInvoice) {
+      return invoice.discountAmount;
+    } else if (invoice is PurchaseInvoice) {
+      return invoice.discountAmount;
+    }
+    return 0.0;
+  }
+
   String? _getNotes(dynamic invoice) {
     if (invoice is SalesInvoice) {
       return invoice.notes;
