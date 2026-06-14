@@ -43,6 +43,8 @@ class DashboardLoaded extends DashboardState {
   double get totalSupplierDebt => financials.totalSupplierDebt;
   double get cashInHand => financials.cashInHand;
   double get totalWithdrawals => financials.totalWithdrawals;
+  double get totalSalesRevenue => financials.totalSalesRevenue;
+  double get totalPurchaseCost => financials.totalPurchaseCost;
 
   DashboardLoaded copyWith({
     DashboardFinancialsModel? financials,

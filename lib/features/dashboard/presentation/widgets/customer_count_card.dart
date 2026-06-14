@@ -15,10 +15,10 @@ class CustomerCountCard extends StatelessWidget {
         }
 
         return Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(3),
             border: Border.all(color: AppColors.divider),
           ),
           child: Row(
@@ -30,9 +30,9 @@ class CustomerCountCard extends StatelessWidget {
                     const Text(
                       'إجمالي عدد العملاء',
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.text,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w100,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -57,9 +57,10 @@ class CustomerCountCard extends StatelessWidget {
               ),
               Container(
                 width: 1,
-                height: 80,
+                height: 120,
                 color: AppColors.divider,
               ),
+              SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,9 +68,9 @@ class CustomerCountCard extends StatelessWidget {
                     const Text(
                       'إجمالي عدد المنتجات',
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.text,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w100,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 16),

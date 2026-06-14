@@ -9,6 +9,8 @@ class DashboardFinancialsModel extends Equatable {
   final double totalSupplierDebt;
   final double cashInHand;
   final double totalWithdrawals;
+  final double totalSalesRevenue;
+  final double totalPurchaseCost;
 
   const DashboardFinancialsModel({
     required this.userId,
@@ -19,6 +21,8 @@ class DashboardFinancialsModel extends Equatable {
     this.totalSupplierDebt = 0,
     this.cashInHand = 0,
     this.totalWithdrawals = 0,
+    this.totalSalesRevenue = 0,
+    this.totalPurchaseCost = 0,
   });
 
   factory DashboardFinancialsModel.fromMap(Map<String, dynamic> map) {
@@ -31,6 +35,8 @@ class DashboardFinancialsModel extends Equatable {
       totalSupplierDebt: _toDouble(map['total_supplier_debt']),
       cashInHand: _toDouble(map['cash_in_hand']),
       totalWithdrawals: _toDouble(map['total_withdrawals']),
+      totalSalesRevenue: _toDouble(map['total_sales_revenue']),
+      totalPurchaseCost: _toDouble(map['total_purchase_cost']),
     );
   }
 
@@ -52,5 +58,7 @@ class DashboardFinancialsModel extends Equatable {
         totalSupplierDebt,
         cashInHand,
         totalWithdrawals,
+        totalSalesRevenue,
+        totalPurchaseCost,
       ];
 }

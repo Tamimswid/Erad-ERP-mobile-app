@@ -21,10 +21,9 @@ class RemainingStockSection extends StatelessWidget {
         }
 
         return Container(
-          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(3),
             border: Border.all(color: AppColors.divider),
           ),
           child: Column(
@@ -33,31 +32,61 @@ class RemainingStockSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'المخزون المتبقي',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.text,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '${productStock.length} منتج',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: Text(
+                              'المنتج',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w100,
+                              ),
+                            ),
+                          ),
+
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'مُباع',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w100,
+                              ),
+                            ),
+                          ),
+
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              'الباقي',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w100,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 16),
               ...productStock.take(10).map((product) {
                 final isNegative = product.calculatedRemainingStock < 0;
@@ -65,86 +94,45 @@ class RemainingStockSection extends StatelessWidget {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
-                      color: isNegative
-                          ? AppColors.error.withValues(alpha: 0.05)
-                          : AppColors.background,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isNegative
-                            ? AppColors.error.withValues(alpha: 0.2)
-                            : AppColors.border,
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.border),
                       ),
                     ),
                     child: Row(
                       children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: isNegative
-                                ? AppColors.error.withValues(alpha: 0.1)
-                                : AppColors.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            isNegative
-                                ? Icons.warning_amber_rounded
-                                : Icons.inventory_2_outlined,
-                            color: isNegative ? AppColors.error : AppColors.success,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                product.productName,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.text,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Text(
-                                    'شراء: ${product.totalPurchasedQty}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'بيع: ${product.totalSoldQty}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          flex: 4,
+                          child: Text(
+                            product.productName,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.text,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            isNegative
+                                ? '${product.totalPurchasedQty.abs()}-'
+                                : '${product.totalPurchasedQty}',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.info,
+                            ),
                           ),
-                          decoration: BoxDecoration(
-                            color: isNegative
-                                ? AppColors.error.withValues(alpha: 0.15)
-                                : AppColors.success.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
                           child: Text(
                             isNegative
                                 ? '${product.calculatedRemainingStock.abs()}-'
@@ -152,7 +140,7 @@ class RemainingStockSection extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: isNegative ? AppColors.error : AppColors.success,
+                              color: AppColors.text,
                             ),
                           ),
                         ),
@@ -187,10 +175,7 @@ class RemainingStockSection extends StatelessWidget {
             SizedBox(height: 12),
             Text(
               'لا توجد بيانات مخزون',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
           ],
         ),

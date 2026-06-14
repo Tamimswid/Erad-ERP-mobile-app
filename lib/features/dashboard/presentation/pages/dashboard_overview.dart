@@ -1,6 +1,5 @@
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/features/dashboard/presentation/widgets/app_bar_date_filter.dart';
-import 'package:erad/features/dashboard/presentation/widgets/custom_app_drawe.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/services_locator.dart' as sl;
@@ -28,11 +27,16 @@ class _DashboardOverviewContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('لوحة التحكم'),
+        backgroundColor: AppColors.primary,
+        title: const Text('لوحة التحكم',style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: AppColors.surface,
+        ),),
         actions: [
           Padding(
             padding: const EdgeInsets.only(left: 8),
-            child: AppBarDateFilter(),
+            child: AppBarDateFilter(color: AppColors.surface,),
           ),
         ],
       ),
@@ -91,11 +95,7 @@ class _DashboardOverviewContent extends StatelessWidget {
             padding: const EdgeInsets.all(AppConstants.spacingMd),
             child: CustomScrollView(
               slivers: [
-                // SliverToBoxAdapter(child: SizedBox(height: 8)),
-
                 SliverToBoxAdapter(child: const StatsGrid()),
-                SliverToBoxAdapter(child: SizedBox(height: 24)),
-                SliverToBoxAdapter(child: const CustomerCountCard()),
                 SliverToBoxAdapter(child: SizedBox(height: 24)),
                 SliverToBoxAdapter(child: const RemainingStockSection()),
               ],

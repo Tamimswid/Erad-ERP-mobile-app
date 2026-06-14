@@ -12,7 +12,9 @@ class AppColors {
   
   
   // ACCENT - Tek vurgu rengi
-  static const primary = Color(0xFF1D4ED8);        // Mavi
+  static const primary = Color(0xFF0F1B3D);        // Mavi
+  // static const primary = Color(0xFF1D4ED8);        // Mavi
+
   
   // SEMANTIC - Durum renkleri (minimum kullanım)
   static const success = Color(0xFF10B981);       // Yeşil
@@ -26,7 +28,7 @@ class AppColors {
   
   // Aliases
   static const secondary = textSecondary;
-  static const info = primary;
+  static const info = Color(0xFF1E3A5F);
   static const accent = primary;
 }
 

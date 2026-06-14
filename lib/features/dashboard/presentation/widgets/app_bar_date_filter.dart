@@ -6,8 +6,10 @@ import '../../../../core/widgets/date_filter_sheet.dart';
 import '../bloc/dashboard_cubit.dart';
 
 class AppBarDateFilter extends StatelessWidget {
-  const AppBarDateFilter({super.key});
-
+  const AppBarDateFilter({super.key, 
+   this.color = AppColors.primary
+  });
+final Color color ;
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DashboardCubit, DashboardState>(
@@ -25,10 +27,10 @@ class AppBarDateFilter extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2),
+                color: color.withValues(alpha: 0.2),
               ),
             ),
             child: Row(
@@ -37,13 +39,13 @@ class AppBarDateFilter extends StatelessWidget {
                 Icon(
                   Iconsax.calendar,
                   size: 16,
-                  color: AppColors.primary,
+                  color: color
                 ),
                 const SizedBox(width: 6),
                 Text(
                   label,
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style:  TextStyle(
+                    color: color,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -52,7 +54,7 @@ class AppBarDateFilter extends StatelessWidget {
                 Icon(
                   Iconsax.arrow_down_1,
                   size: 14,
-                  color: AppColors.primary,
+                  color: color,
                 ),
               ],
             ),
