@@ -65,7 +65,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final networkInfo = sl.sl<NetworkInfo>();
     final connected = await networkInfo.isConnected;
     if (mounted) {
-      setState(() => _isConnected = !connected);
+      setState(() => _isConnected = connected);
     }
     _connectionSubscription = networkInfo.connectionStream.listen((connected) {
       if (mounted) {

@@ -5,6 +5,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../database/app_database.dart';
 import '../network/network_info.dart';
 import '../utils/app_utils.dart';
 import '../services/user_service.dart';
@@ -16,6 +17,7 @@ import '../../features/customers/data/datasource/customer_remote_datasource.dart
 import '../../features/customers/data/repositories/customer_repository.dart';
 import '../../features/customers/presentation/bloc/customer_cubit.dart';
 import '../../features/customer_debts/data/datasource/customer_debt_remote_datasource.dart';
+import '../../features/customer_debts/data/datasource/customer_debt_local_datasource.dart';
 import '../../features/customer_debts/data/repositories/customer_debt_repository.dart';
 import '../../features/customer_debts/data/repositories/customer_debt_repository_impl.dart';
 import '../../features/customer_debts/presentation/bloc/customer_debt_cubit.dart';
@@ -23,6 +25,7 @@ import '../../features/products/data/datasource/product_remote_datasource.dart';
 import '../../features/products/data/repositories/product_repository.dart';
 import '../../features/products/presentation/bloc/product_cubit.dart';
 import '../../features/invoices/data/datasources/invoice_remote_datasource.dart';
+import '../../features/invoices/data/datasources/invoice_local_datasource.dart';
 import '../../features/invoices/data/datasources/edit_invoice_datasource.dart';
 import '../../features/invoices/data/repositories/invoice_repository.dart';
 import '../../features/invoices/data/repositories/edit_invoice_repository.dart';
@@ -64,10 +67,25 @@ Future<void> initServicesLocator() async {
 
   // Core utilities
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
+  // sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
+
   sl.registerLazySingleton(() => AppUtils());
   sl.registerLazySingleton(() => UserService());
 
   sl.registerLazySingleton(() => StockService(sl()));
+
+  // Database
+  final db = await AppDatabase.create();
+  sl.registerSingleton<AppDatabase>(db);
+
+  // Local datasources
+  sl.registerLazySingleton<InvoiceLocalDataSource>(
+    () => InvoiceLocalDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<CustomerDebtLocalDataSource>(
+    () => CustomerDebtLocalDataSourceImpl(sl()),
+  );
 
   // Auth
   sl.registerLazySingleton<AuthRemoteDataSource>(
@@ -103,7 +121,7 @@ Future<void> initServicesLocator() async {
   );
 
   sl.registerLazySingleton<InvoiceRepository>(
-    () => InvoiceRepositoryImpl(sl()),
+    () => InvoiceRepositoryImpl(sl(), sl(), sl()),
   );
 
   sl.registerLazySingleton<EditInvoiceRepository>(
@@ -130,7 +148,7 @@ Future<void> initServicesLocator() async {
   );
 
   sl.registerLazySingleton<CustomerDebtRepository>(
-    () => CustomerDebtRepositoryImpl(sl(), sl()),
+    () => CustomerDebtRepositoryImpl(sl(), sl(), sl()),
   );
 
   sl.registerFactory(() => CustomerDebtCubit(repository: sl()));

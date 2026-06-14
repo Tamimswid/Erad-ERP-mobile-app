@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/network/network_info.dart';
+import '../../../../core/services/user_service.dart';
 import '../models/sales_invoice.dart';
 import '../models/purchase_invoice.dart';
+import '../datasources/invoice_local_datasource.dart';
 import '../datasources/invoice_remote_datasource.dart';
 
 abstract class InvoiceRepository {
@@ -42,26 +45,60 @@ abstract class InvoiceRepository {
 // تنفيذ مستودع الفواتير - يغلف datasource ويعالج الأخطاء
 class InvoiceRepositoryImpl implements InvoiceRepository {
   final InvoiceRemoteDataSource remoteDataSource;
+  final InvoiceLocalDataSource localDataSource;
+  final NetworkInfo networkInfo;
 
-  InvoiceRepositoryImpl(this.remoteDataSource);
+  InvoiceRepositoryImpl(this.remoteDataSource, this.localDataSource, this.networkInfo);
 
   @override
   Future<Either<Failure, List<SalesInvoice>>> getSalesInvoices() async {
-    try {
-      final invoices = await remoteDataSource.getSalesInvoices();
-      return Right(invoices);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    if (await networkInfo.isConnected) {
+      try {
+        final invoices = await remoteDataSource.getSalesInvoices();
+        final userId = await UserService.getUserId();
+        if (userId != null) {
+          await localDataSource.cacheSalesInvoices(userId, invoices);
+        }
+        return Right(invoices);
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    } else {
+      try {
+        final userId = await UserService.getUserId();
+        if (userId == null) return Left(ServerFailure('User not found'));
+        final cached = await localDataSource.getCachedSalesInvoices(userId);
+        if (cached.isNotEmpty) return Right(cached);
+        return Left(NetworkFailure.noConnection());
+      } catch (_) {
+        return Left(NetworkFailure.noConnection());
+      }
     }
   }
 
   @override
   Future<Either<Failure, List<PurchaseInvoice>>> getPurchaseInvoices() async {
-    try {
-      final invoices = await remoteDataSource.getPurchaseInvoices();
-      return Right(invoices);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    if (await networkInfo.isConnected) {
+      try {
+        final invoices = await remoteDataSource.getPurchaseInvoices();
+        final userId = await UserService.getUserId();
+        if (userId != null) {
+          await localDataSource.cachePurchaseInvoices(userId, invoices);
+        }
+        return Right(invoices);
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    } else {
+      try {
+        final userId = await UserService.getUserId();
+        if (userId == null) return Left(ServerFailure('User not found'));
+        final cached = await localDataSource.getCachedPurchaseInvoices(userId);
+        if (cached.isNotEmpty) return Right(cached);
+        return Left(NetworkFailure.noConnection());
+      } catch (_) {
+        return Left(NetworkFailure.noConnection());
+      }
     }
   }
 
