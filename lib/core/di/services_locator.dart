@@ -44,9 +44,7 @@ import '../../features/withdrawals/presentation/bloc/withdrawal_cubit.dart';
 import '../../features/dashboard/data/datasource/dashboard_remote_datasource.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
-import '../../features/app_status/data/datasource/app_status_remote_datasource.dart';
-import '../../features/app_status/data/repositories/app_status_repository.dart';
-import '../../features/app_status/presentation/bloc/app_status_cubit.dart';
+
 
 final GetIt sl = GetIt.instance;
 
@@ -196,14 +194,4 @@ Future<void> initServicesLocator() async {
     productRepository: sl(),
   ));
 
-  // App Status
-  sl.registerLazySingleton<AppStatusRemoteDataSource>(
-    () => AppStatusRemoteDataSource(sl()),
-  );
-
-  sl.registerLazySingleton<AppStatusRepository>(
-    () => AppStatusRepository(remoteDataSource: sl()),
-  );
-
-  sl.registerFactory(() => AppStatusCubit(repository: sl()));
 }

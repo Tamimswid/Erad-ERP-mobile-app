@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // BASE PALETTE 
-  static const background = Color.fromARGB(255, 249, 249, 249);     // Açık gri beyaz
+  static const background = Color.fromARGB(255, 255, 255, 255);     // Açık gri beyaz
   static const surface = Color(0xFFFFFFFF);        // Saf beyaz
   static const text = Color(0xFF1A1A2E);           // Koyu gri-siyah
   // 

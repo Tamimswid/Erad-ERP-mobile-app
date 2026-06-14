@@ -98,6 +98,8 @@ class _DashboardOverviewContent extends StatelessWidget {
                 SliverToBoxAdapter(child: const StatsGrid()),
                 SliverToBoxAdapter(child: SizedBox(height: 24)),
                 SliverToBoxAdapter(child: const RemainingStockSection()),
+                SliverToBoxAdapter(child: SizedBox(height: 100)),
+
               ],
             ),
           );

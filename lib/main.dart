@@ -2,11 +2,10 @@ import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart' as sl;
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/auth/presentation/bloc/auth_cubit.dart';
-import 'package:erad/features/auth/presentation/pages/login_page.dart' hide AppStatusWrapper;
+import 'package:erad/features/auth/presentation/pages/login_page.dart';
 
 import 'package:erad/features/customers/presentation/pages/customers_page.dart';
 import 'package:erad/features/customer_debts/presentation/pages/customer_debts_page.dart';
-import 'package:erad/features/app_status/presentation/pages/app_status_wrapper.dart';
 import 'package:erad/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:erad/features/expenses/presentation/pages/expenses_page.dart';
 import 'package:erad/features/invoices/presentation/bloc/invoice_cubit.dart';
@@ -119,7 +118,7 @@ class MainWrapper extends StatelessWidget {
         }
 
         if (authState is Authenticated) {
-          return AppStatusWrapper(user: authState.user);
+          return const DashboardPage();
         }
 
         return const LoginPage();
