@@ -1,5 +1,4 @@
 import 'package:erad/core/constants/app_constants.dart';
-import 'package:erad/core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/dashboard_cubit.dart';
@@ -15,9 +14,9 @@ class RemainingStockSection extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final remainingStock = state.remainingStock;
+        final productStock = state.productStock;
 
-        if (remainingStock.isEmpty) {
+        if (productStock.isEmpty) {
           return _buildEmptyState();
         }
 
@@ -49,7 +48,7 @@ class RemainingStockSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${remainingStock.length} منتج',
+                      '${productStock.length} منتج',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -60,12 +59,8 @@ class RemainingStockSection extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              ...remainingStock.take(10).map((product) {
-                final name = product['name'] as String;
-                final purchased = (product['purchased'] as num).toInt();
-                final sold = (product['sold'] as num).toInt();
-                final remaining = (product['remaining'] as num).toInt();
-                final isNegative = remaining < 0;
+              ...productStock.take(10).map((product) {
+                final isNegative = product.calculatedRemainingStock < 0;
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -107,7 +102,7 @@ class RemainingStockSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                name,
+                                product.productName,
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -120,7 +115,7 @@ class RemainingStockSection extends StatelessWidget {
                               Row(
                                 children: [
                                   Text(
-                                    'شراء: $purchased',
+                                    'شراء: ${product.totalPurchasedQty}',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary,
@@ -128,7 +123,7 @@ class RemainingStockSection extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'بيع: $sold',
+                                    'بيع: ${product.totalSoldQty}',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary,
@@ -151,7 +146,9 @@ class RemainingStockSection extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            isNegative ? '${remaining.abs()}-' : '$remaining',
+                            isNegative
+                                ? '${product.calculatedRemainingStock.abs()}-'
+                                : '${product.calculatedRemainingStock}',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

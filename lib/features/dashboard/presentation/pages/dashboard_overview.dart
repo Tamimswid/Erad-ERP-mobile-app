@@ -6,11 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/services_locator.dart' as sl;
 import '../bloc/dashboard_cubit.dart';
 import '../widgets/stats_grid.dart';
-import '../widgets/financial_chart_section.dart';
 import '../widgets/customer_count_card.dart';
-import '../widgets/product_sales_section.dart';
 import '../widgets/remaining_stock_section.dart';
-import '../widgets/recent_invoices_section.dart';
 
 class DashboardOverview extends StatelessWidget {
   const DashboardOverview({super.key});
@@ -96,19 +93,11 @@ class _DashboardOverviewContent extends StatelessWidget {
               slivers: [
                 // SliverToBoxAdapter(child: SizedBox(height: 8)),
 
-                // Stats Grid - 6 cards in a GridView
                 SliverToBoxAdapter(child: const StatsGrid()),
-                SliverToBoxAdapter(child: SizedBox(height: 24)),
-                // Left: Financial Chart (larger)
-                SliverToBoxAdapter(child: const FinancialChartSection()),
                 SliverToBoxAdapter(child: SizedBox(height: 24)),
                 SliverToBoxAdapter(child: const CustomerCountCard()),
                 SliverToBoxAdapter(child: SizedBox(height: 24)),
-                SliverToBoxAdapter(child: const ProductSalesSection()),
-                SliverToBoxAdapter(child: SizedBox(height: 24)),
                 SliverToBoxAdapter(child: const RemainingStockSection()),
-                SliverToBoxAdapter(child: SizedBox(height: 24)),
-                SliverToBoxAdapter(child: const RecentInvoicesSection()),
               ],
             ),
           );

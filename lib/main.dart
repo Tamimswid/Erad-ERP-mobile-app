@@ -52,6 +52,7 @@ class ERADApp extends StatelessWidget {
         child: child!,
       ),
       home: SafeArea(child: const MainWrapper()),
+      // home: LoginPage() ,
       onGenerateRoute: _generateRoute,
     );
   }

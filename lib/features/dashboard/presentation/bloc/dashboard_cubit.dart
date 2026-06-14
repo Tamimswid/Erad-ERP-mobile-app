@@ -1,38 +1,34 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../invoices/data/repositories/invoice_repository.dart';
 import '../../../invoices/data/models/sales_invoice.dart';
-import '../../../invoices/data/models/purchase_invoice.dart';
 import '../../../invoices/data/models/invoice_status.dart';
 import '../../../customers/data/repositories/customer_repository.dart';
 import '../../../products/data/repositories/product_repository.dart';
-import '../../../products/data/models/product.dart';
-import '../../../expenses/data/repositories/expense_repository.dart';
-import '../../../expenses/data/models/expense.dart';
-import '../../../withdrawals/data/repositories/withdrawal_repository.dart';
-import '../../../withdrawals/data/models/withdrawal.dart';
+import '../../data/models/dashboard_financials.dart';
+import '../../data/models/dashboard_product_stock.dart';
+import '../../data/repositories/dashboard_repository.dart';
 
 part 'dashboard_state.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
+  final DashboardRepository _dashboardRepository;
   final InvoiceRepository _invoiceRepository;
   final CustomerRepository _customerRepository;
   final ProductRepository _productRepository;
-  final ExpenseRepository _expenseRepository;
-  final WithdrawalRepository _withdrawalRepository;
 
   DashboardCubit({
+    required DashboardRepository dashboardRepository,
     required InvoiceRepository invoiceRepository,
     required CustomerRepository customerRepository,
     required ProductRepository productRepository,
-    required ExpenseRepository expenseRepository,
-    required WithdrawalRepository withdrawalRepository,
-  })  : _invoiceRepository = invoiceRepository,
+  })  : _dashboardRepository = dashboardRepository,
+        _invoiceRepository = invoiceRepository,
         _customerRepository = customerRepository,
         _productRepository = productRepository,
-        _expenseRepository = expenseRepository,
-        _withdrawalRepository = withdrawalRepository,
         super(const DashboardInitial()) {
     _initialize();
   }
@@ -46,7 +42,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     emit(const DashboardLoading());
 
     try {
-      // Calculate date range
       final effectiveDateRange = isCustom && dateRange != null
           ? dateRange
           : DateTimeRange(
@@ -54,105 +49,40 @@ class DashboardCubit extends Cubit<DashboardState> {
               end: DateTime(int.parse(year), 12, 31),
             );
 
-      // Fetch all data concurrently for performance
       final results = await Future.wait([
-        _invoiceRepository.getSalesInvoices(),
-        _invoiceRepository.getPurchaseInvoices(),
-        _expenseRepository.getExpenses(
-          startDate: effectiveDateRange.start,
-          endDate: effectiveDateRange.end,
-        ),
-        _withdrawalRepository.getWithdrawals(
-          startDate: effectiveDateRange.start,
-          endDate: effectiveDateRange.end,
-        ),
+        _dashboardRepository.getFinancials(),
+        _dashboardRepository.getProductStock(),
         _customerRepository.getCustomers(),
         _productRepository.getProducts(),
+        _invoiceRepository.getSalesInvoices(),
       ]);
 
-      // Extract data from results
-      final salesInvoicesResult = results[0] as dynamic;
-      final purchaseInvoicesResult = results[1] as dynamic;
-      final expensesResult = results[2] as dynamic;
-      final withdrawalsResult = results[3] as dynamic;
-      final customersResult = results[4] as dynamic;
-      final productsResult = results[5] as dynamic;
+      DashboardFinancialsModel financials = const DashboardFinancialsModel(userId: '');
+      final financialsResult = results[0] as Either<Failure, DashboardFinancialsModel>;
+      financialsResult.fold((failure) => null, (data) => financials = data);
 
-      // Handle sales invoices
-      List<SalesInvoice> salesInvoices = [];
-      salesInvoicesResult.fold(
-        (failure) => null,
-        (invoices) => salesInvoices = invoices,
-      );
+      List<DashboardProductStockModel> productStock = [];
+      final stockResult = results[1] as Either<Failure, List<DashboardProductStockModel>>;
+      stockResult.fold((failure) => null, (data) => productStock = data);
 
-      // Handle purchase invoices
-      List<PurchaseInvoice> purchaseInvoices = [];
-      purchaseInvoicesResult.fold(
-        (failure) => null,
-        (invoices) => purchaseInvoices = invoices,
-      );
-
-      // Handle expenses
-      List<Expense> expenses = [];
-      expensesResult.fold(
-        (failure) => null,
-        (expenseList) => expenses = expenseList,
-      );
-
-      // Handle withdrawals
-      List<Withdrawal> withdrawals = [];
-      withdrawalsResult.fold(
-        (failure) => null,
-        (withdrawalList) => withdrawals = withdrawalList,
-      );
-
-      // Handle customers
       int totalCustomers = 0;
-      customersResult.fold(
-        (failure) => null,
-        (customerList) => totalCustomers = customerList.length,
-      );
+      final customersResult = results[2] as Either<Failure, List>;
+      customersResult.fold((failure) => null, (data) => totalCustomers = data.length);
 
-      // Handle products
-      List<ProductModel> products = [];
-      productsResult.fold(
-        (failure) => null,
-        (productList) => products = productList,
-      );
+      int totalProducts = 0;
+      final productsResult = results[3] as Either<Failure, List>;
+      productsResult.fold((failure) => null, (data) => totalProducts = data.length);
 
-      // Calculate totals based on date range (only completed invoices)
-      final filteredSales = salesInvoices.where((invoice) {
-        return invoice.status == InvoiceStatus.completed &&
-            invoice.invoiceDate.isAfter(effectiveDateRange.start) &&
-            invoice.invoiceDate.isBefore(effectiveDateRange.end.add(const Duration(days: 1)));
-      });
+      List<SalesInvoice> salesInvoices = [];
+      final invoicesResult = results[4] as Either<Failure, List<SalesInvoice>>;
+      invoicesResult.fold((failure) => null, (data) => salesInvoices = data);
 
-      final filteredPurchases = purchaseInvoices.where((invoice) {
-        return invoice.status == InvoiceStatus.completed &&
-            invoice.invoiceDate.isAfter(effectiveDateRange.start) &&
-            invoice.invoiceDate.isBefore(effectiveDateRange.end.add(const Duration(days: 1)));
-      });
-
-      final totalSales = filteredSales.fold(0.0, (sum, i) => sum + i.totalAmount);
-      final totalPurchases = filteredPurchases.fold(0.0, (sum, i) => sum + i.totalAmount);
-
-      // Calculate expenses
-      final totalExpenses = expenses.fold(0.0, (sum, e) => sum + e.amount);
-
-      // Calculate withdrawals
-      final totalWithdrawals = withdrawals.fold(0.0, (sum, w) => sum + w.amount);
-
-      // Calculate profits from invoice profit field
-      final totalProfit = filteredSales.fold(0.0, (sum, i) => sum + (i.profit ?? 0));
-      final netProfit = totalProfit - totalExpenses;
-
-      // Get product count
-      final totalProducts = products.length;
-
-      // Get recent invoices
-      final recentInvoices = filteredSales
+      final recentInvoices = salesInvoices
+          .where((i) => i.status == InvoiceStatus.completed
+              && i.invoiceDate.isAfter(effectiveDateRange.start)
+              && i.invoiceDate.isBefore(effectiveDateRange.end.add(const Duration(days: 1))))
           .toList()
-          ..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+        ..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
 
       final recentInvoicesData = recentInvoices.take(5).map((i) => {
             'invoiceNumber': i.invoiceNumber,
@@ -162,41 +92,12 @@ class DashboardCubit extends Cubit<DashboardState> {
             'status': i.paymentStatus.name,
           }).toList();
 
-      // Calculate monthly chart data
-      final monthlyChartData = _calculateMonthlyChartData(
-        salesInvoices,
-        purchaseInvoices,
-        expenses,
-        withdrawals,
-        effectiveDateRange,
-      );
-
-      // Calculate top products by sales quantity
-      final topProductsBySales = _calculateTopProductsBySales(filteredSales.toList());
-
-      // Calculate top products by purchases quantity (from purchase invoices)
-      final topProductsByPurchases = _calculateTopProductsByPurchases(filteredPurchases.toList());
-
-      // Calculate remaining stock per product
-      final remainingStock = _calculateRemainingStock(
-        salesInvoices: salesInvoices,
-        purchaseInvoices: purchaseInvoices,
-      );
-
       emit(DashboardLoaded(
-        totalSales: totalSales,
-        totalPurchases: totalPurchases,
-        totalExpenses: totalExpenses,
-        totalWithdrawals: totalWithdrawals,
-        totalProfit: totalProfit,
-        netProfit: netProfit,
+        financials: financials,
+        productStock: productStock,
         totalCustomers: totalCustomers,
         totalProducts: totalProducts,
-        monthlyChartData: monthlyChartData,
         recentInvoices: recentInvoicesData,
-        topProductsBySales: topProductsBySales,
-        topProductsByPurchases: topProductsByPurchases,
-        remainingStock: remainingStock,
         selectedYear: year,
         customDateRange: dateRange,
         isCustomDateRange: isCustom,
@@ -204,177 +105,6 @@ class DashboardCubit extends Cubit<DashboardState> {
     } catch (e) {
       emit(DashboardError('Failed to load dashboard data: $e'));
     }
-  }
-
-  List<Map<String, dynamic>> _calculateTopProductsBySales(List<SalesInvoice> salesInvoices) {
-    final Map<String, Map<String, dynamic>> productSales = {};
-
-    for (final invoice in salesInvoices) {
-      for (final item in invoice.items) {
-        final productName = item.nameWithMeasurementUnit;
-        final quantity = item.quantity;
-
-        if (productSales.containsKey(productName)) {
-          productSales[productName]!['quantity'] = (productSales[productName]!['quantity'] as num) + quantity;
-        } else {
-          productSales[productName] = {
-            'name': productName,
-            'quantity': quantity,
-            'unit': '',
-          };
-        }
-      }
-    }
-
-    final sortedProducts = productSales.values.toList()
-      ..sort((a, b) => (b['quantity'] as num).compareTo(a['quantity'] as num));
-
-    return sortedProducts.take(1).toList();
-  }
-
-  List<Map<String, dynamic>> _calculateTopProductsByPurchases(List<PurchaseInvoice> purchaseInvoices) {
-    final Map<String, Map<String, dynamic>> productPurchases = {};
-
-    for (final invoice in purchaseInvoices) {
-      for (final item in invoice.items) {
-        final productName = item.nameWithMeasurementUnit;
-        final quantity = item.quantity;
-
-        if (productPurchases.containsKey(productName)) {
-          productPurchases[productName]!['quantity'] = (productPurchases[productName]!['quantity'] as num) + quantity;
-        } else {
-          productPurchases[productName] = {
-            'name': productName,
-            'quantity': quantity,
-            'unit': '',
-          };
-        }
-      }
-    }
-
-    final sortedProducts = productPurchases.values.toList()
-      ..sort((a, b) => (b['quantity'] as num).compareTo(a['quantity'] as num));
-
-    return sortedProducts;
-  }
-
-  List<Map<String, dynamic>> _calculateRemainingStock({
-    required List<SalesInvoice> salesInvoices,
-    required List<PurchaseInvoice> purchaseInvoices,
-  }) {
-    final Map<String, Map<String, dynamic>> productStock = {};
-
-    for (final invoice in purchaseInvoices) {
-      if (invoice.status != InvoiceStatus.completed) continue;
-      for (final item in invoice.items) {
-        final productName = item.nameWithMeasurementUnit;
-        final quantity = item.quantity;
-
-        if (productStock.containsKey(productName)) {
-          productStock[productName]!['purchased'] = (productStock[productName]!['purchased'] as num) + quantity;
-        } else {
-          productStock[productName] = {
-            'name': productName,
-            'purchased': quantity,
-            'sold': 0,
-          };
-        }
-      }
-    }
-
-    for (final invoice in salesInvoices) {
-      if (invoice.status != InvoiceStatus.completed) continue;
-      for (final item in invoice.items) {
-        final productName = item.nameWithMeasurementUnit;
-        final quantity = item.quantity;
-
-        if (productStock.containsKey(productName)) {
-          productStock[productName]!['sold'] = (productStock[productName]!['sold'] as num) + quantity;
-        } else {
-          productStock[productName] = {
-            'name': productName,
-            'purchased': 0,
-            'sold': quantity,
-          };
-        }
-      }
-    }
-
-    final remaining = productStock.values.map((data) {
-      final purchased = data['purchased'] as num;
-      final sold = data['sold'] as num;
-      data['remaining'] = purchased - sold;
-      return data;
-    }).toList();
-
-    remaining.sort((a, b) => (b['remaining'] as num).compareTo(a['remaining'] as num));
-
-    return remaining;
-  }
-
-  List<Map<String, dynamic>> _calculateMonthlyChartData(
-    List<SalesInvoice> salesInvoices,
-    List<PurchaseInvoice> purchaseInvoices,
-    List<Expense> expenses,
-    List<Withdrawal> withdrawals,
-    DateTimeRange dateRange,
-  ) {
-    final year = dateRange.start.year;
-
-    final monthlyData = List.generate(12, (index) {
-      final month = index + 1;
-      final monthName = _getArabicMonthName(month);
-
-      final monthSales = salesInvoices
-          .where((i) => i.status == InvoiceStatus.completed && i.invoiceDate.month == month && i.invoiceDate.year == year)
-          .fold(0.0, (sum, i) => sum + i.totalAmount);
-
-      final monthPurchases = purchaseInvoices
-          .where((i) => i.status == InvoiceStatus.completed && i.invoiceDate.month == month && i.invoiceDate.year == year)
-          .fold(0.0, (sum, i) => sum + i.totalAmount);
-
-      final monthExpenses = expenses
-          .where((e) => e.expenseDate.month == month && e.expenseDate.year == year)
-          .fold(0.0, (sum, e) => sum + e.amount);
-
-      final monthWithdrawals = withdrawals
-          .where((w) => w.withdrawalDate.month == month && w.withdrawalDate.year == year)
-          .fold(0.0, (sum, w) => sum + w.amount);
-
-      final profit = salesInvoices
-          .where((i) => i.status == InvoiceStatus.completed && i.invoiceDate.month == month && i.invoiceDate.year == year)
-          .fold(0.0, (sum, i) => sum + (i.profit ?? 0));
-
-      return {
-        'month': monthName,
-        'monthIndex': month,
-        'sales': monthSales,
-        'purchases': monthPurchases,
-        'expenses': monthExpenses,
-        'withdrawals': monthWithdrawals,
-        'profit': profit,
-      };
-    });
-
-    return monthlyData;
-  }
-
-  String _getArabicMonthName(int month) {
-    const months = [
-      'يناير',
-      'فبراير',
-      'مارس',
-      'أبريل',
-      'مايو',
-      'يونيو',
-      'يوليو',
-      'أغسطس',
-      'سبتمبر',
-      'أكتوبر',
-      'نوفمبر',
-      'ديسمبر',
-    ];
-    return months[month - 1];
   }
 
   void setYear(String year) {
@@ -385,11 +115,7 @@ class DashboardCubit extends Cubit<DashboardState> {
 
   void setCustomDateRange(DateTimeRange dateRange) {
     if (state is DashboardLoaded) {
-      loadDashboardData(
-        DateTime.now().year.toString(),
-        dateRange,
-        true,
-      );
+      loadDashboardData(DateTime.now().year.toString(), dateRange, true);
     }
   }
 

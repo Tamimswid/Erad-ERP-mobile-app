@@ -41,6 +41,8 @@ import '../../features/expenses/presentation/bloc/expense_cubit.dart';
 import '../../features/withdrawals/data/datasource/withdrawal_remote_datasource.dart';
 import '../../features/withdrawals/data/repositories/withdrawal_repository.dart';
 import '../../features/withdrawals/presentation/bloc/withdrawal_cubit.dart';
+import '../../features/dashboard/data/datasource/dashboard_remote_datasource.dart';
+import '../../features/dashboard/data/repositories/dashboard_repository.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
 import '../../features/app_status/data/datasource/app_status_remote_datasource.dart';
 import '../../features/app_status/data/repositories/app_status_repository.dart';
@@ -179,12 +181,19 @@ Future<void> initServicesLocator() async {
   sl.registerFactory(() => WithdrawalCubit(withdrawalRepository: sl()));
 
   // Dashboard
+  sl.registerLazySingleton<DashboardRemoteDataSource>(
+    () => DashboardRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<DashboardRepository>(
+    () => DashboardRepository(sl(), sl()),
+  );
+
   sl.registerFactory(() => DashboardCubit(
+    dashboardRepository: sl(),
     invoiceRepository: sl(),
     customerRepository: sl(),
     productRepository: sl(),
-    expenseRepository: sl(),
-    withdrawalRepository: sl(),
   ));
 
   // App Status
