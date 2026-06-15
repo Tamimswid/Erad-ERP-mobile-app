@@ -24,9 +24,9 @@ class DebtCardWidget extends StatelessWidget {
     final remaining = debt.remainingDebt;
     final hasDebt = remaining > 0;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: index == 0 ? 16 : 0),
-      child: Card(
+    return 
+  Card(
+        margin: EdgeInsets.only(bottom: 10),
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -135,8 +135,7 @@ class DebtCardWidget extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );    
   }
 
   Widget _buildStatItem(String label, String value) {

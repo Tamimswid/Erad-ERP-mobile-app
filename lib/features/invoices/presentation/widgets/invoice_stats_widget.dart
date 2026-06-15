@@ -1,3 +1,4 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/utils/number_formatter.dart';
 
@@ -17,30 +18,21 @@ class InvoiceStatsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
-      childAspectRatio: 2.0,
+    return Row(
       children: [
-        _buildStatCard(
-          context,
-          'الاجمالي',
-          totalCount.toString(),
-          Icons.description,
-          const Color(0xFF1D4ED8),
-          const Color(0xFFEFF6FF),
-        ),
+        // _buildStatCard(
+        //   context,
+        //   'الاجمالي',
+        //   totalCount.toString(),
+        //   Icons.description,
+        //   const Color(0xFF1D4ED8),
+        //   const Color(0xFFEFF6FF),
+        // ),
         _buildStatCard(
           context,
           'الاجمالي المبلغ',
-          '${totalAmount.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
-          Icons.account_balance_wallet,
-          const Color(0xFF1D4ED8),
-          const Color(0xFFEFF6FF),
-          isAmount: true,
+          '$totalAmount',
+          NumberFormatter.getCurrencySymbol(),
         ),
       ],
     );
@@ -50,46 +42,53 @@ class InvoiceStatsWidget extends StatelessWidget {
     BuildContext context,
     String title,
     String value,
-    IconData icon,
-    Color iconColor,
-    Color backgroundColor, {
-    bool isAmount = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF6B7280),
-                    fontWeight: FontWeight.w400,
-                    fontSize: 11,
+    String currencySymbol,
+  ) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.surface,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 11,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: const Color(0xFF111827),
-                    fontWeight: FontWeight.bold,
-                    fontSize: isAmount ? 13 : 16,
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.surface,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
                   ),
-                ),
-              ],
+                  Text(
+                    currencySymbol,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w200,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),      
-        ],
+          ],
+        ),
       ),
     );
   }

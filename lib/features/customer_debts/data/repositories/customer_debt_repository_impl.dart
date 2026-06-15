@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer' as dev;
+
 import 'package:dartz/dartz.dart';
 import 'package:erad/core/errors/failures.dart';
 import 'package:erad/core/network/network_info.dart';
@@ -12,8 +15,17 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
   final CustomerDebtRemoteDataSource remoteDataSource;
   final CustomerDebtLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
+  StreamSubscription<bool>? _connectionSubscription;
 
-  CustomerDebtRepositoryImpl(this.remoteDataSource, this.localDataSource, this.networkInfo);
+  CustomerDebtRepositoryImpl(this.remoteDataSource, this.localDataSource, this.networkInfo) {
+    _connectionSubscription = networkInfo.connectionStream.listen((isConnected) {
+      dev.log('CustomerDebtRepo: connection changed -> $isConnected');
+      if (isConnected) {
+        dev.log('CustomerDebtRepo: Connection restored, syncing pending payments...');
+        syncPendingPayments();
+      }
+    });
+  }
 
   @override
   Future<Either<Failure, List<CustomerDebtModel>>> getCustomerDebts() async {
@@ -31,11 +43,17 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
     } else {
       try {
         final userId = await UserService.getUserId();
-        if (userId == null) return Left(CacheFailure.notFound());
+        if (userId == null) {
+          dev.log('getCustomerDebts offline: userId null');
+          return Left(CacheFailure.notFound());
+        }
         final cached = await localDataSource.getCachedCustomerDebts(userId);
+        dev.log('getCustomerDebts offline: found ${cached.length} cached debts');
         if (cached.isNotEmpty) return Right(cached);
+        dev.log('getCustomerDebts offline: cache empty');
         return Left(NetworkFailure.noConnection());
-      } catch (_) {
+      } catch (e) {
+        dev.log('getCustomerDebts offline error: $e');
         return Left(NetworkFailure.noConnection());
       }
     }
@@ -72,20 +90,86 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
     }
   }
 
-  // إضافة دفعة جديدة مع التحقق من الاتصال
   @override
   Future<Either<Failure, void>> addPayment(String customerId, double amount, String? note, String paymentDate) async {
     if (await networkInfo.isConnected) {
       try {
         await remoteDataSource.addPayment(customerId, amount, note, paymentDate);
+        await syncPendingPayments();
         return const Right(null);
       } on Failure catch (failure) {
         return Left(failure);
       } catch (e) {
+        dev.log('addPayment remote error: $e');
         return Left(exceptionToFailure(e));
       }
     } else {
-      return Left(NetworkFailure.noConnection());
+      try {
+        final userId = await UserService.getUserId();
+        if (userId == null) {
+          dev.log('addPayment offline: userId null');
+          return Left(CacheFailure.notFound());
+        }
+        dev.log('addPayment offline: queuing for userId=$userId customerId=$customerId amount=$amount');
+        await localDataSource.queuePayment({
+          'id': 'pending_${DateTime.now().millisecondsSinceEpoch}',
+          'user_id': userId,
+          'customer_id': customerId,
+          'amount': amount,
+          'notes': note,
+          'payment_date': paymentDate,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+        await localDataSource.updateDebtAfterPayment(userId, customerId, amount);
+        await localDataSource.addPaymentToLocalCache(userId, customerId, {
+          'id': 'pending_${DateTime.now().millisecondsSinceEpoch}',
+          'user_id': userId,
+          'customer_id': customerId,
+          'amount': amount,
+          'notes': note,
+          'payment_date': paymentDate,
+          'payment_method': 'نقداً',
+          'payment_type': 'customer',
+          'created_at': DateTime.now().toIso8601String(),
+        });
+        dev.log('addPayment offline: queued and caches updated');
+        return const Right(null);
+      } catch (e) {
+        dev.log('addPayment offline error: $e');
+        return Left(CacheFailure.writeError());
+      }
+    }
+  }
+
+  Future<void> syncPendingPayments() async {
+    dev.log('syncPendingPayments: starting...');
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        dev.log('syncPendingPayments: userId null');
+        return;
+      }
+      final pending = await localDataSource.getPendingPayments(userId);
+      dev.log('syncPendingPayments: found ${pending.length} pending payments');
+      for (final payment in pending) {
+        try {
+          dev.log('syncPendingPayments: sending payment ${payment['id']} for customer ${payment['customer_id']} amount ${payment['amount']}');
+          await remoteDataSource.addPayment(
+            payment['customer_id'] as String,
+            (payment['amount'] as num).toDouble(),
+            payment['notes'] as String?,
+            payment['payment_date'] as String,
+          );
+          await localDataSource.deletePendingPayment(payment['id'] as String);
+          dev.log('syncPendingPayments: payment ${payment['id']} synced and deleted');
+        } catch (e) {
+          dev.log('syncPendingPayments: failed for ${payment['id']}: $e');
+          break;
+        }
+      }
+      dev.log('syncPendingPayments: done');
+    } catch (e) {
+      dev.log('syncPendingPayments: error $e');
     }
   }
 
@@ -131,9 +215,9 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
         if (userId == null) return Left(CacheFailure.notFound());
         final cached = await localDataSource.getCachedCustomerInvoices(userId, customerId);
         if (cached.isNotEmpty) return Right(cached);
-        return Left(NetworkFailure.noConnection());
+        return const Right([]);
       } catch (_) {
-        return Left(NetworkFailure.noConnection());
+        return const Right([]);
       }
     }
   }
@@ -157,9 +241,9 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
         if (userId == null) return Left(CacheFailure.notFound());
         final cached = await localDataSource.getCachedCustomerPayments(userId, customerId);
         if (cached.isNotEmpty) return Right(cached);
-        return Left(NetworkFailure.noConnection());
+        return const Right([]);
       } catch (_) {
-        return Left(NetworkFailure.noConnection());
+        return const Right([]);
       }
     }
   }
@@ -181,13 +265,12 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
     }
   }
 
-  // دStream لمتابعة تغييرات رصيد العملاء
   @override
   Stream<Either<Failure, List<CustomerDebtModel>>> watchCustomerDebts() {
     return remoteDataSource.watchCustomerDebts().map(
       (debts) => Right<Failure, List<CustomerDebtModel>>(debts),
     ).handleError(
-      (error) => Left<Failure, List<CustomerDebtModel>>(ServerFailure(error.toString())),
+      (_) => null,
     );
   }
 }

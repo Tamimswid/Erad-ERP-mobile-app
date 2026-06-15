@@ -20,16 +20,15 @@ class _InvoicesPageState extends State<InvoicesPage> {
   @override
   void initState() {
     super.initState();
-    // Real-time stream automatically loads data when cubit is created
-    // No need to manually call getAllInvoices
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      floatingActionButton: FloatingActionButton.extended(
-        label: Text('إضافة فاتورة جديدة',style: TextStyle(color: AppColors.background),),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 80),
+        child: FloatingActionButton.extended(
+        label: Text('إضافة فاتورة جديدة',style: TextStyle(color: AppColors.surface),),
         backgroundColor: AppColors.primary,
         onPressed: () {
           Navigator.push(
@@ -39,6 +38,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
             ),
           );
         },
+      ),
       ),
       body: BlocConsumer<InvoiceCubit, InvoiceState>(
         listener: (context, state) {
@@ -98,6 +98,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height: 25),
                   // Filters
                   InvoiceFiltersWidget(
                     selectedType: context.read<InvoiceCubit>().selectedType,
@@ -129,6 +130,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                   const SizedBox(height: 12),
                   // Invoice Cards Grid
                   _buildInvoiceGrid(state),
+                  SizedBox(height: 100),
                 ],
               ),
             );

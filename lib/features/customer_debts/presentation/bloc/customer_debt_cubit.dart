@@ -29,8 +29,7 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
         if (isClosed) return;
         result.fold(
           (failure) {
-            log('CustomerDebtCubit: Stream error - ${failure.message}');
-            emit(CustomerDebtError(failure.message));
+            log('CustomerDebtCubit: Stream warning - ${failure.message}');
           },
           (debts) {
             log('CustomerDebtCubit: Received ${debts.length} customers with debt');
@@ -41,9 +40,6 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
       },
       onError: (error) {
         log('CustomerDebtCubit: Stream error - $error');
-        if (!isClosed) {
-          emit(CustomerDebtError('Stream error: $error'));
-        }
       },
     );
   }
@@ -104,8 +100,12 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
     final result = await repository.addPayment(customerId, amount, note, paymentDate);
     if (isClosed) return;
     result.fold(
-      (failure) => emit(CustomerDebtError(failure.message)),
+      (failure) {
+        log('addPayment failed: ${failure.runtimeType} - ${failure.message}');
+        emit(CustomerDebtError(failure.message));
+      },
       (_) async {
+        log('addPayment succeeded');
         if (!isClosed) {
           emit(PaymentSuccess('تم تسجيل الدفعة: ${amount.toStringAsFixed(2)}'));
         }

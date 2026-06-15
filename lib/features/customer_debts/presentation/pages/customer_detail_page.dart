@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
@@ -157,7 +158,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
             }
           },
           onError: (error) {
-            _showError('خطأ في تحديث الفواتير: $error');
+            dev.log('CustomerDetail: invoice stream error - $error');
           },
         );
 
@@ -178,12 +179,16 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
           (payments) {
             if (mounted) {
               setState(() {
-                _payments = payments;
+                final streamIds = payments.map((p) => p['id']).toSet();
+                final keptLocals = _payments.where((p) =>
+                    (p['id'] as String).startsWith('pending_') &&
+                    !streamIds.contains(p['id']));
+                _payments = [...keptLocals, ...payments];
               });
             }
           },
           onError: (error) {
-            _showError('خطأ في تحديث المدفوعات: $error');
+            dev.log('CustomerDetail: payment stream error - $error');
           },
         );
   }
@@ -283,8 +288,15 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
           }
         },
         (_) {
-          // 4. نجاح - سيتم تحديث البيانات تلقائياً عبر البث الفوري
+          // 4. نجاح - إزالة علامة المعلقة
           if (mounted) {
+            setState(() {
+              final idx = _payments.indexWhere((p) => p['id'] == tempPaymentId);
+              if (idx != -1) {
+                _payments[idx] = Map<String, dynamic>.from(_payments[idx])
+                  ..remove('isPending');
+              }
+            });
             _showSuccess('تم تسجيل المدفوعة بنجاح: ${amount.toStringAsFixed(2)}');
           }
         },

@@ -51,6 +51,15 @@ class AppDatabase extends GeneratedDatabase {
             'PRIMARY KEY (customer_id, user_id))',
           );
         },
+        beforeOpen: (details) async {
+          await customInsert(
+            'CREATE TABLE IF NOT EXISTS pending_payments ('
+            'id TEXT PRIMARY KEY, user_id TEXT NOT NULL, '
+            'customer_id TEXT NOT NULL, amount REAL NOT NULL, '
+            'notes TEXT, payment_date TEXT NOT NULL, '
+            'created_at TEXT NOT NULL)',
+          );
+        },
       );
 
   Future<void> upsertJson(String table, String id, String userId, Map<String, dynamic> data) async {
@@ -105,5 +114,66 @@ class AppDatabase extends GeneratedDatabase {
     ).get();
     if (rows.isEmpty) return [];
     return (jsonDecode(rows.first.read<String>('data')) as List).cast<Map<String, dynamic>>();
+  }
+
+  Future<void> insertPendingPayment(Map<String, dynamic> payment) async {
+    await customInsert(
+      'CREATE TABLE IF NOT EXISTS pending_payments ('
+      'id TEXT PRIMARY KEY, user_id TEXT NOT NULL, '
+      'customer_id TEXT NOT NULL, amount REAL NOT NULL, '
+      'notes TEXT, payment_date TEXT NOT NULL, '
+      'created_at TEXT NOT NULL)',
+    );
+    await customInsert(
+      'INSERT OR REPLACE INTO pending_payments '
+      '(id, user_id, customer_id, amount, notes, payment_date, created_at) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?)',
+      variables: [
+        Variable(payment['id']),
+        Variable(payment['user_id']),
+        Variable(payment['customer_id']),
+        Variable(payment['amount']),
+        Variable(payment['notes']),
+        Variable(payment['payment_date']),
+        Variable(payment['created_at']),
+      ],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getPendingPayments(String userId) async {
+    await customInsert(
+      'CREATE TABLE IF NOT EXISTS pending_payments ('
+      'id TEXT PRIMARY KEY, user_id TEXT NOT NULL, '
+      'customer_id TEXT NOT NULL, amount REAL NOT NULL, '
+      'notes TEXT, payment_date TEXT NOT NULL, '
+      'created_at TEXT NOT NULL)',
+    );
+    final rows = await customSelect(
+      'SELECT * FROM pending_payments WHERE user_id = ? ORDER BY created_at ASC',
+      variables: [Variable(userId)],
+    ).get();
+    return rows.map((row) => {
+      'id': row.read<String>('id'),
+      'user_id': row.read<String>('user_id'),
+      'customer_id': row.read<String>('customer_id'),
+      'amount': row.read<double>('amount'),
+      'notes': row.read<String?>('notes'),
+      'payment_date': row.read<String>('payment_date'),
+      'created_at': row.read<String>('created_at'),
+    }).toList();
+  }
+
+  Future<void> deletePendingPayment(String id) async {
+    await customUpdate('DELETE FROM pending_payments WHERE id = ?', variables: [Variable(id)]);
+  }
+
+  Future<void> ensurePendingPaymentsTable() async {
+    await customInsert(
+      'CREATE TABLE IF NOT EXISTS pending_payments ('
+      'id TEXT PRIMARY KEY, user_id TEXT NOT NULL, '
+      'customer_id TEXT NOT NULL, amount REAL NOT NULL, '
+      'notes TEXT, payment_date TEXT NOT NULL, '
+      'created_at TEXT NOT NULL)',
+    );
   }
 }

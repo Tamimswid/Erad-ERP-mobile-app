@@ -1,3 +1,21 @@
+// import 'dart:async';
+
+// abstract class NetworkInfo {
+//   Future<bool> get isConnected;
+//   Stream<bool> get connectionStream;
+// }
+
+// class NetworkInfoImpl implements NetworkInfo {
+//   NetworkInfoImpl();
+
+//   @override
+//   Future<bool> get isConnected => Future.value(false);
+
+//   @override
+//   Stream<bool> get connectionStream => Stream.value(false);
+// }
+
+
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 abstract class NetworkInfo {

@@ -24,25 +24,20 @@ class InvoiceCardWidget extends StatelessWidget {
     final isSale = type == 'sale';
     final invoiceStatus = _getInvoiceStatus();
     final paymentStatus = _getPaymentStatus();
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Card(
-        elevation: 4,
-        shadowColor: Colors.black.withValues(alpha: 0.05),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
+
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.white.withValues(alpha: 0.95)],
-              ),
+              border: Border.all(color: AppColors.border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,8 +135,7 @@ class InvoiceCardWidget extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                   
-                         AppUtils.formatDate(_getInvoiceDate()),
+                          AppUtils.formatDate(_getInvoiceDate()),
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -163,7 +157,7 @@ class InvoiceCardWidget extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${ AppUtils.formatNumber(_getTotalAmount())} ${NumberFormatter.getCurrencySymbol()}',
+                          '${AppUtils.formatNumber(_getTotalAmount())} ${NumberFormatter.getCurrencySymbol()}',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -236,13 +230,16 @@ class InvoiceCardWidget extends StatelessWidget {
     return PaymentStatus.cash;
   }
 
-  Widget _buildStatusBadge(InvoiceStatus invoiceStatus, PaymentStatus paymentStatus) {
+  Widget _buildStatusBadge(
+    InvoiceStatus invoiceStatus,
+    PaymentStatus paymentStatus,
+  ) {
     // Use payment status to determine display - cash = paid, debt = pending
     final bool isPaid = paymentStatus == PaymentStatus.cash;
     final Color color = isPaid ? AppColors.success : AppColors.warning;
     final String label = isPaid ? 'مدفوعة' : 'مديون';
     final IconData icon = isPaid ? Icons.check_circle : Icons.access_time;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
