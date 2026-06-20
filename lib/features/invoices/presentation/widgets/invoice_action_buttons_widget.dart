@@ -31,7 +31,7 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
                   icon: Icons.payments,
                   label: 'الدفع',
                   onPressed: onUpdatePaymentStatus,
-                  color: AppColors.warning,
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 8),
@@ -81,7 +81,7 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: AppColors.primary,
         border: Border.all(color: color.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -96,14 +96,14 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 18, color: color),
+                Icon(icon, size: 18, color: AppColors.surface),
                 const SizedBox(width: 6),
                 Text(
                   label,
                   style: TextStyle(
                     fontSize: AppFonts.fontSizeSmall,
                     fontWeight: AppFonts.fontWeightSemiBold,
-                    color: color,
+                    color: AppColors.surface,
                   ),
                 ),
               ],
