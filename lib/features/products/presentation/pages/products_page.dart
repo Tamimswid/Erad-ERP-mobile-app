@@ -77,7 +77,6 @@ class _ProductsPageState extends State<ProductsPage>
       value: _productCubit,
       child: SafeArea(
         child: Scaffold(
-          backgroundColor: AppColors.background,
           body: BlocConsumer<ProductCubit, ProductState>(
             listener: (context, state) {
               if (state is CategoriesLoaded) {

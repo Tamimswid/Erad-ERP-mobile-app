@@ -113,6 +113,9 @@ class CustomerDebtsPage extends StatelessWidget {
                         );
                       }).toList(),
                     ),
+                    SizedBox(
+                      height: 100,
+                    ),
                   ],
                 ),
               );

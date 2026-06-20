@@ -53,7 +53,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.background,
                         ),
-                        child: const Text('Retry'),
+                        child: const Text('أعد المحاولة'),
                       ),
                     ],
                   ),

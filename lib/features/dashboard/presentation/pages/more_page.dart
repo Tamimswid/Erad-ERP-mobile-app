@@ -80,7 +80,7 @@ class _NavCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: AppColors.divider,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -88,23 +88,22 @@ class _NavCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            // border: Border.all(color: AppColors.primary),
-            color: AppColors.primary,
+            border: Border.all(color: AppColors.primary),
+            color: AppColors.surface,
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-             Spacer(),
-
-              Icon(icon, color: AppColors.surface, size: 44),
-             Spacer(),
+              Spacer(),
+              Icon(icon, color: AppColors.primary, size: 40),
+              Spacer(),
               Text(
                 title,
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.surface,
+                  color: AppColors.primary,
                 ),
                 textAlign: TextAlign.center,
               ),

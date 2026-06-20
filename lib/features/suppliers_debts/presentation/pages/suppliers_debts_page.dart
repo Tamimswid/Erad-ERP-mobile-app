@@ -21,9 +21,9 @@ class SuppliersDebtsPage extends StatelessWidget {
         body: BlocConsumer<SupplierDebtCubit, SupplierDebtState>(
           listener: (context, state) {
             if (state is SupplierDebtError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
             }
             if (state is SupplierPaymentSuccess) {
               context.read<SupplierDebtCubit>().getSupplierDebts();
@@ -97,18 +97,19 @@ class SuppliersDebtsPage extends StatelessWidget {
                     if (debts.isEmpty)
                       _buildEmptyState()
                     else
-                 
-                    Column(
-                      children: debts.map((debt) {
-                        return DebtCardWidget(
-                          debt: debt,
-                          onTap: () => _showSupplierDetails(context, debt),
-                          onPaymentTap: () => _showPaymentDialog(context, debt),
-                          isEnd: debts.indexOf(debt) == debts.length - 1,
-                          index: debts.indexOf(debt),
-                        );
-                      }).toList(),
-                    ),
+                      Column(
+                        children: debts.map((debt) {
+                          return DebtCardWidget(
+                            debt: debt,
+                            onTap: () => _showSupplierDetails(context, debt),
+                            onPaymentTap: () =>
+                                _showPaymentDialog(context, debt),
+                            isEnd: debts.indexOf(debt) == debts.length - 1,
+                            index: debts.indexOf(debt),
+                          );
+                        }).toList(),
+                      ),
+                    SizedBox(height: 100),
                   ],
                 ),
               );
@@ -162,7 +163,12 @@ class SuppliersDebtsPage extends StatelessWidget {
       builder: (dialogContext) => PaymentDialogWidget(
         debt: debt,
         onPaymentSubmit: (amount, note, paymentDate) async {
-          await context.read<SupplierDebtCubit>().addPayment(debt.id, amount, note, paymentDate);
+          await context.read<SupplierDebtCubit>().addPayment(
+            debt.id,
+            amount,
+            note,
+            paymentDate,
+          );
           if (context.mounted) {
             _showSuccessMessage(context, 'تم تسجيل الدفعة بنجاح');
           }
