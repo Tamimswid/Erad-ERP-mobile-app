@@ -1,3 +1,4 @@
+import 'package:erad/features/invoices/presentation/widgets/product_add_fullscreen_widget.dart';
 import 'package:erad/features/invoices/presentation/widgets/product_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -149,7 +150,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
     final unitPrice = isSale ? existingProduct!.salePrice : existingProduct!.purchasePrice;
 
     final invoiceItem = InvoiceItem(
-      measurement: existingProduct!.measurement ,
+      measurement: existingProduct.measurement ,
       
       unit: existingProduct.unit ,
       productId: existingProduct.id,
@@ -227,6 +228,8 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 4),
+                      _buildExpandButton(),
                     ],
                   ),
                   const SizedBox(height: AppConstants.spacingMd),
@@ -265,6 +268,41 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildExpandButton() {
+    return InkWell(
+      onTap: _openFullscreen,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Icon(
+          Icons.fullscreen,
+          size: 18,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+
+  void _openFullscreen() {
+    final invoiceCubit = context.read<InvoiceCubit>();
+    final productCubit = context.read<ProductCubit>();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: invoiceCubit),
+            BlocProvider.value(value: productCubit),
+          ],
+          child: const ProductAddFullscreenPage(),
+        ),
       ),
     );
   }
