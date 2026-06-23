@@ -23,7 +23,7 @@ import 'core/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await sl.initServicesLocator();
-  NumberFormatter.initialize();
+  await NumberFormatter.initialize();
   await NumberFormatter.setArabicFormat(true);
   await initializeDateFormatting('en');
 
@@ -42,14 +42,31 @@ class ERADApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+
       theme: AppTheme.lightTheme.copyWith(
         textTheme: GoogleFonts.changaTextTheme(),
       ),
       locale: const Locale('ar'),
-      builder: (context, child) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: child!,
-      ),
+      builder: (context, child) {
+        final MediaQueryData data = MediaQuery.of(context);
+
+        // 1. Önce font ölçeğini güncelliyoruz
+        final MediaQuery updatedMediaQuery = MediaQuery(
+          data: data.copyWith(
+            textScaler: data.textScaler.clamp(
+              minScaleFactor: 0.8, // En fazla %20 küçülebilir
+              maxScaleFactor: 0.85, // En fazla %10 büyüyebilir
+            ),
+          ),
+          child: child!,
+        );
+
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: updatedMediaQuery,
+        );
+      },
+
       home: const MainWrapper(),
       // home: LoginPage() ,
       onGenerateRoute: _generateRoute,
@@ -59,13 +76,9 @@ class ERADApp extends StatelessWidget {
   Route<dynamic>? _generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.products:
-        return MaterialPageRoute(
-          builder: (_) => const ProductsPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const ProductsPage());
       case AppRoutes.customers:
-        return MaterialPageRoute(
-          builder: (_) => const CustomersPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const CustomersPage());
       case AppRoutes.invoices:
         return MaterialPageRoute(
           builder: (context) => BlocProvider(
@@ -74,17 +87,11 @@ class ERADApp extends StatelessWidget {
           ),
         );
       case AppRoutes.suppliers:
-        return MaterialPageRoute(
-          builder: (_) => const SuppliersPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const SuppliersPage());
       case AppRoutes.expenses:
-        return MaterialPageRoute(
-          builder: (_) => const ExpensesPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const ExpensesPage());
       case AppRoutes.withdrawals:
-        return MaterialPageRoute(
-          builder: (_) => const WithdrawalsPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const WithdrawalsPage());
       case AppRoutes.settings:
         return MaterialPageRoute(
           builder: (context) => BlocProvider.value(
@@ -93,13 +100,9 @@ class ERADApp extends StatelessWidget {
           ),
         );
       case AppRoutes.customerDebts:
-        return MaterialPageRoute(
-          builder: (_) => const CustomerDebtsPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const CustomerDebtsPage());
       default:
-        return MaterialPageRoute(
-          builder: (_) => const DashboardPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const DashboardPage());
     }
   }
 }

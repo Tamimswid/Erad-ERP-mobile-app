@@ -71,8 +71,12 @@ class NumberFormatter {
   static List<String> get availableCurrencies => _currencySymbols.keys.toList();
 
   static String format(num number) {
-    if (_useArabicFormat) {
-      return _formatArabic(number);
+    if (_useShortFormat) {
+      if (_useArabicFormat) {
+        return _formatArabic(number);
+      } else {
+        return _formatShortStandard(number);
+      }
     } else {
       return _formatStandard(number);
     }
