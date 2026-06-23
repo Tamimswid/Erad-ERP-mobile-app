@@ -80,76 +80,78 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 16,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'اسم العميل *',
-              prefixIcon: Icon(Icons.person),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'اسم العميل *',
+                prefixIcon: Icon(Icons.person),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'اسم العميل مطلوب';
+                }
+                return null;
+              },
             ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'اسم العميل مطلوب';
-              }
-              return null;
-            },
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'رقم الهاتف',
-                    prefixIcon: Icon(Icons.phone),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: 'رقم الهاتف',
+                      prefixIcon: Icon(Icons.phone),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  controller: _cityController,
-                  decoration: const InputDecoration(
-                    labelText: 'المدينة',
-                    prefixIcon: Icon(Icons.location_city),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    controller: _cityController,
+                    decoration: const InputDecoration(
+                      labelText: 'المدينة',
+                      prefixIcon: Icon(Icons.location_city),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          TextFormField(
-            controller: _addressController,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'العنوان',
-              prefixIcon: Icon(Icons.location_on),
+              ],
             ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  child: Text(widget.customerModel == null ? 'إضافة' : 'تحديث'),
-                ),
+            TextFormField(
+              controller: _addressController,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'العنوان',
+                prefixIcon: Icon(Icons.location_on),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    _formKey.currentState?.reset();
-                  },
-                  child: const Text('مسح'),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _submitForm,
+                    child: Text(widget.customerModel == null ? 'إضافة' : 'تحديث'),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      _formKey.currentState?.reset();
+                    },
+                    child: const Text('مسح'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

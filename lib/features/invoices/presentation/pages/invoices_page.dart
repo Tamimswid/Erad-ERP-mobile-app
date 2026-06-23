@@ -25,10 +25,11 @@ class _InvoicesPageState extends State<InvoicesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 80),
-        child: FloatingActionButton.extended(
-        label: Text('إضافة فاتورة جديدة',style: TextStyle(color: AppColors.surface),),
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text(
+          'إضافة فاتورة جديدة',
+          style: TextStyle(color: AppColors.surface),
+        ),
         backgroundColor: AppColors.primary,
         onPressed: () {
           Navigator.push(
@@ -39,20 +40,17 @@ class _InvoicesPageState extends State<InvoicesPage> {
           );
         },
       ),
-      ),
       body: BlocConsumer<InvoiceCubit, InvoiceState>(
         listener: (context, state) {
           if (state is InvoiceError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
           if (state is InvoiceLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state is InvoiceError) {
@@ -126,7 +124,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                     pendingCount: state.pendingCount,
                     totalAmount: state.totalAmount,
                   ),
-                  
+
                   const SizedBox(height: 12),
                   // Invoice Cards Grid
                   _buildInvoiceGrid(state),
@@ -137,9 +135,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
           }
 
           // Show loading for any other state (including InvoiceInitial)
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -161,13 +157,15 @@ class _InvoicesPageState extends State<InvoicesPage> {
         crossAxisCount: 1,
         crossAxisSpacing: 20,
         mainAxisSpacing: 16,
-        childAspectRatio: 1.5,
+        childAspectRatio: 1.35,
       ),
       itemCount: allInvoices.length,
       itemBuilder: (context, index) {
         final invoice = allInvoices[index];
-        final type = invoice.runtimeType.toString().contains('Sales') ? 'sale' : 'purchase';
-        
+        final type = invoice.runtimeType.toString().contains('Sales')
+            ? 'sale'
+            : 'purchase';
+
         return InvoiceCardWidget(
           invoice: invoice,
           type: type,
@@ -175,10 +173,8 @@ class _InvoicesPageState extends State<InvoicesPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => InvoiceDetailPage(
-                  invoiceId: invoice.id,
-                  type: type,
-                ),
+                builder: (context) =>
+                    InvoiceDetailPage(invoiceId: invoice.id, type: type),
               ),
             );
           },

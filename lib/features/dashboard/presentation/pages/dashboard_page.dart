@@ -106,15 +106,14 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         BlocProvider(create: (context) => sl.sl<SupplierCubit>(), lazy: true),
       ],
       child: Scaffold(
-        body: Stack(
+        resizeToAvoidBottomInset: false,
+        body: Column(
           children: [
-            _buildContent(),
+            Expanded(
+              child: _buildContent(),
+            ),
             if (!_isKeyboardVisible)
-              Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
+              Container(
                 margin: EdgeInsets.fromLTRB(12, 0, 12, MediaQuery.of(context).padding.bottom > 0 ? 8 : 12),
                 decoration: BoxDecoration(
                   color: AppColors.primary,
@@ -158,7 +157,6 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),
