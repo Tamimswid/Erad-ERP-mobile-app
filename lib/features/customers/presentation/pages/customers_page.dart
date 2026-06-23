@@ -9,7 +9,9 @@ import '../widgets/customer_list_widget.dart';
 import '../widgets/customer_form_widget.dart';
 
 class CustomersPage extends StatefulWidget {
-  const CustomersPage({super.key});
+  final bool isLocal;
+
+  const CustomersPage({super.key, this.isLocal = false});
 
   @override
   State<CustomersPage> createState() => _CustomersPageState();
@@ -84,16 +86,18 @@ class _CustomersPageState extends State<CustomersPage> {
             },
           ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          label: Text(
-            'إضافة عميل جديد',
-            style: TextStyle(color: AppColors.background),
+        floatingActionButton: widget.isLocal
+            ? null
+            : FloatingActionButton.extended(
+            label: Text(
+              'إضافة عميل جديد',
+              style: TextStyle(color: AppColors.background),
+            ),
+            backgroundColor: AppColors.primary,
+            onPressed: () {
+              _showAddCustomerDialog(context: context);
+            },
           ),
-          backgroundColor: AppColors.primary,
-          onPressed: () {
-            _showAddCustomerDialog(context: context);
-          },
-        ),
       ),
     );
   }

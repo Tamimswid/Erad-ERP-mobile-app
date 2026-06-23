@@ -18,10 +18,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// تعرض الفواتير المستحقة والمدفوعات مع تحديثات فورية
 class CustomerDetailPage extends StatefulWidget {
   final CustomerDebtModel customer;
+  final bool isLocal;
 
   const CustomerDetailPage({
     super.key,
     required this.customer,
+    this.isLocal = false,
   });
 
   @override
@@ -517,7 +519,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
         children: [
           UnpaidInvoicesWidget(
             invoices: _displayedInvoices,
-            onQuickPay: (invoiceId) => _showPaymentModal(),
+            onQuickPay: widget.isLocal ? (_) {} : (invoiceId) => _showPaymentModal(),
           ),
           if (_hasMoreInvoices)
             _buildShowMoreButton(
@@ -539,7 +541,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
         children: [
           PaymentHistoryWidget(
             payments: _displayedPayments,
-            onAddPayment: _showPaymentModal,
+            onAddPayment: widget.isLocal ? null : _showPaymentModal,
             onDeletePayment: _deletePayment,
           ),
           if (_hasMorePayments)

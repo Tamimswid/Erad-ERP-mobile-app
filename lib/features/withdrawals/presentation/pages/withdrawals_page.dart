@@ -12,7 +12,9 @@ import '../widgets/add_user_dialog.dart';
 import '../widgets/add_withdrawal_dialog.dart';
 
 class WithdrawalsPage extends StatefulWidget {
-  const WithdrawalsPage({super.key});
+  final bool isLocal;
+
+  const WithdrawalsPage({super.key, this.isLocal = false});
 
   @override
   State<WithdrawalsPage> createState() => _WithdrawalsPageState();
@@ -27,6 +29,7 @@ class _WithdrawalsPageState extends State<WithdrawalsPage> {
     return BlocProvider(
       create: (_) => sl.sl<WithdrawalCubit>(),
       child: _WithdrawalsPageBody(
+        isLocal: widget.isLocal,
         selectedYear: _selectedYear,
         customDateRange: _customDateRange,
         onYearChanged: (year) => setState(() => _selectedYear = year),
@@ -44,6 +47,7 @@ class _WithdrawalsPageState extends State<WithdrawalsPage> {
 }
 
 class _WithdrawalsPageBody extends StatefulWidget {
+  final bool isLocal;
   final String? selectedYear;
   final DateTimeRange? customDateRange;
   final ValueChanged<String?> onYearChanged;
@@ -52,6 +56,7 @@ class _WithdrawalsPageBody extends StatefulWidget {
   final List<String> availableYears;
 
   const _WithdrawalsPageBody({
+    required this.isLocal,
     required this.selectedYear,
     required this.customDateRange,
     required this.onYearChanged,
@@ -83,6 +88,7 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
         title: const Text('السحوبات'),
         backgroundColor: AppColors.background,
         actions: [ 
+          if (!widget.isLocal)
            Builder(
             builder: (context) {
               final cubit = context.read<WithdrawalCubit>();
@@ -198,7 +204,9 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
           },
         ),
       ),
-      floatingActionButton: Builder(
+      floatingActionButton: widget.isLocal
+          ? null
+          : Builder(
         builder: (context) {
           final partners = context.watch<WithdrawalCubit>().state;
           final partnerList = partners is WithdrawalsLoaded 
@@ -248,7 +256,9 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
               color: AppColors.textSecondary,
             ),
           ),
+          if (!widget.isLocal)
           const SizedBox(height: 24),
+          if (!widget.isLocal)
           ElevatedButton.icon(
             onPressed: () => _showAddPartnerDialog(context),
             icon: const Icon(Icons.add),

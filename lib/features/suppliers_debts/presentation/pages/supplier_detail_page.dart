@@ -15,10 +15,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupplierDetailPage extends StatefulWidget {
   final SupplierDebtModel supplier;
+  final bool isLocal;
 
   const SupplierDetailPage({
     super.key,
     required this.supplier,
+    this.isLocal = false,
   });
 
   @override
@@ -470,7 +472,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
         children: [
           UnpaidInvoicesWidget(
             invoices: _displayedInvoices,
-            onQuickPay: (invoiceId) => _showPaymentModal(),
+            onQuickPay: widget.isLocal ? (_) {} : (invoiceId) => _showPaymentModal(),
           ),
           if (_hasMoreInvoices)
             _buildShowMoreButton(
@@ -488,12 +490,11 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
 
   Widget _buildPaymentsTab() {
     return SingleChildScrollView(
-      // physics: NeverScrollableScrollPhysics(),
       child: Column(
         children: [
           PaymentHistoryWidget(
             payments: _displayedPayments,
-            onAddPayment: _showPaymentModal,
+            onAddPayment: widget.isLocal ? null : _showPaymentModal,
             onDeletePayment: _deletePayment,
           ),
           if (_hasMorePayments)

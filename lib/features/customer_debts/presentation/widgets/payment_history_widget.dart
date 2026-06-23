@@ -9,14 +9,14 @@ export 'package:erad/features/customer_debts/data/models/payment_model.dart';
 /// واجهة سجل المدفوعات
 class PaymentHistoryWidget extends StatelessWidget {
   final List<PaymentModel> payments;
-  final VoidCallback onAddPayment;
+  final VoidCallback? onAddPayment;
   final Function(String paymentId) onDeletePayment;
   final Function(PaymentModel payment)? onPaymentTap;
 
   const PaymentHistoryWidget({
     super.key,
     required this.payments,
-    required this.onAddPayment,
+    this.onAddPayment,
     required this.onDeletePayment,
     this.onPaymentTap,
   });
@@ -166,6 +166,7 @@ class PaymentHistoryWidget extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
+                if (onAddPayment != null)
                 ElevatedButton.icon(
                   onPressed: onAddPayment,
                   icon: const Icon(Icons.add, size: 14),

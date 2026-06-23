@@ -9,6 +9,7 @@ class DebtCardWidget extends StatelessWidget {
   final VoidCallback onPaymentTap;
   final bool isEnd;
   final int index;
+  final bool showPaymentButton;
 
   const DebtCardWidget({
     super.key,
@@ -17,6 +18,7 @@ class DebtCardWidget extends StatelessWidget {
     required this.onPaymentTap,
     this.isEnd = false,
     this.index = 0,
+    this.showPaymentButton = true,
   });
 
   @override
@@ -99,7 +101,7 @@ class DebtCardWidget extends StatelessWidget {
                     _buildStatItem('الديون', '${NumberFormatter.format(remaining)} ${NumberFormatter.getCurrencySymbol()}'),
                   ],
                 ),
-                if (hasDebt) ...[
+                if (hasDebt && showPaymentButton) ...[
                   const SizedBox(height: 12),
                   SizedBox(
                     height: 40,

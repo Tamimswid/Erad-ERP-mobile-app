@@ -50,6 +50,17 @@ class AppDatabase extends GeneratedDatabase {
             'data TEXT NOT NULL, updated_at TEXT NOT NULL, '
             'PRIMARY KEY (customer_id, user_id))',
           );
+          await customInsert(
+            'CREATE TABLE IF NOT EXISTS dashboard_financials_cache ('
+            'id TEXT NOT NULL, user_id TEXT NOT NULL, '
+            'data TEXT NOT NULL, updated_at TEXT NOT NULL, '
+            'PRIMARY KEY (id, user_id))',
+          );
+          await customInsert(
+            'CREATE TABLE IF NOT EXISTS dashboard_product_stock_cache ('
+            'id TEXT PRIMARY KEY, user_id TEXT NOT NULL, '
+            'data TEXT NOT NULL, updated_at TEXT NOT NULL)',
+          );
         },
         beforeOpen: (details) async {
           await customInsert(
@@ -58,6 +69,17 @@ class AppDatabase extends GeneratedDatabase {
             'customer_id TEXT NOT NULL, amount REAL NOT NULL, '
             'notes TEXT, payment_date TEXT NOT NULL, '
             'created_at TEXT NOT NULL)',
+          );
+          await customInsert(
+            'CREATE TABLE IF NOT EXISTS dashboard_financials_cache ('
+            'id TEXT NOT NULL, user_id TEXT NOT NULL, '
+            'data TEXT NOT NULL, updated_at TEXT NOT NULL, '
+            'PRIMARY KEY (id, user_id))',
+          );
+          await customInsert(
+            'CREATE TABLE IF NOT EXISTS dashboard_product_stock_cache ('
+            'id TEXT PRIMARY KEY, user_id TEXT NOT NULL, '
+            'data TEXT NOT NULL, updated_at TEXT NOT NULL)',
           );
         },
       );

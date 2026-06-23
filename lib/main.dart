@@ -54,8 +54,8 @@ class ERADApp extends StatelessWidget {
         final MediaQuery updatedMediaQuery = MediaQuery(
           data: data.copyWith(
             textScaler: data.textScaler.clamp(
-              minScaleFactor: 0.9,
-              maxScaleFactor: 0.95,
+              minScaleFactor: 0.8,
+              maxScaleFactor: 1.0,
             ),
           ),
           child: child!,

@@ -14,7 +14,9 @@ import '../widgets/expense_summary_cards_widget.dart';
 import '../widgets/expense_table_widget.dart';
 
 class ExpensesPage extends StatefulWidget {
-  const ExpensesPage({super.key});
+  final bool isLocal;
+
+  const ExpensesPage({super.key, this.isLocal = false});
 
   @override
   State<ExpensesPage> createState() => _ExpensesPageState();
@@ -30,6 +32,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
     return BlocProvider(
       create: (_) => sl.sl<ExpenseCubit>(),
       child: _ExpensesPageBody(
+        isLocal: widget.isLocal,
         periodMode: _periodMode,
         selectedYear: _selectedYear,
         customDateRange: _customDateRange,
@@ -49,6 +52,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
 }
 
 class _ExpensesPageBody extends StatefulWidget {
+  final bool isLocal;
   final PeriodMode periodMode;
   final String? selectedYear;
   final DateTimeRange? customDateRange;
@@ -59,6 +63,7 @@ class _ExpensesPageBody extends StatefulWidget {
   final List<String> availableYears;
 
   const _ExpensesPageBody({
+    required this.isLocal,
     required this.periodMode,
     required this.selectedYear,
     required this.customDateRange,
@@ -95,7 +100,8 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
         title: const Text('المصروفات'),
         backgroundColor: AppColors.background,
         actions: [
-          Padding(
+          if (!widget.isLocal)
+            Padding(
             padding: const EdgeInsets.only(right: 8),
             child: Builder(
               builder: (context) {
@@ -227,7 +233,9 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
           },
         ),
       ),
-      floatingActionButton: Builder(
+      floatingActionButton: widget.isLocal
+          ? null
+          : Builder(
         builder: (context) {
           final categories = context.watch<ExpenseCubit>().categories;
           return FloatingActionButton.extended(
@@ -241,7 +249,7 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
               categories: categories,
             ),
             backgroundColor: AppColors.primary,
-          
+           
           );
         },
       ),

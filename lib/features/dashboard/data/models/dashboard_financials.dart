@@ -40,6 +40,21 @@ class DashboardFinancialsModel extends Equatable {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'user_id': userId,
+      'total_profit': totalProfit,
+      'total_expenses': totalExpenses,
+      'net_profit': netProfit,
+      'total_customer_debt': totalCustomerDebt,
+      'total_supplier_debt': totalSupplierDebt,
+      'cash_in_hand': cashInHand,
+      'total_withdrawals': totalWithdrawals,
+      'total_sales_revenue': totalSalesRevenue,
+      'total_purchase_cost': totalPurchaseCost,
+    };
+  }
+
   static double _toDouble(dynamic value) {
     if (value == null) return 0;
     if (value is double) return value;

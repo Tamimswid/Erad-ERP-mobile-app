@@ -31,6 +31,18 @@ class DashboardProductStockModel extends Equatable {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'user_id': userId,
+      'product_id': productId,
+      'product_display_name': productName,
+      'system_stock': systemStock,
+      'total_purchased_qty': totalPurchasedQty,
+      'total_sold_qty': totalSoldQty,
+      'calculated_remaining_stock': calculatedRemainingStock,
+    };
+  }
+
   static int _toInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;

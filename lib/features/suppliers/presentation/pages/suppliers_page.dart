@@ -11,7 +11,9 @@ import '../widgets/supplier_list_widget.dart';
 import '../../data/repositories/supplier_repository.dart';
 
 class SuppliersPage extends StatefulWidget {
-  const SuppliersPage({super.key});
+  final bool isLocal;
+
+  const SuppliersPage({super.key, this.isLocal = false});
 
   @override
   State<SuppliersPage> createState() => _SuppliersPageState();
@@ -85,7 +87,9 @@ class _SuppliersPageState extends State<SuppliersPage> {
           },
         ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
+        floatingActionButton: widget.isLocal
+            ? null
+            : FloatingActionButton.extended(
           onPressed: () {
             _showAddSupplierDialog(context, (supplier) {
               context.read<SupplierCubit>().createSupplier(supplier);

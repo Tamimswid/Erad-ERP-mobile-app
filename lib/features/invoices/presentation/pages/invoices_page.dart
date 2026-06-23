@@ -10,7 +10,9 @@ import 'invoice_detail_page.dart';
 import 'create_invoice_page.dart';
 
 class InvoicesPage extends StatefulWidget {
-  const InvoicesPage({super.key});
+  final bool isLocal;
+
+  const InvoicesPage({super.key, this.isLocal = false});
 
   @override
   State<InvoicesPage> createState() => _InvoicesPageState();
@@ -25,7 +27,9 @@ class _InvoicesPageState extends State<InvoicesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: widget.isLocal
+          ? null
+          : FloatingActionButton.extended(
         label: Text(
           'إضافة فاتورة جديدة',
           style: TextStyle(color: AppColors.surface),

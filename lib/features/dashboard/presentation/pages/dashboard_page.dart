@@ -48,8 +48,9 @@ class _DashboardPageState extends State<DashboardPage>
       ];
     }
     return [
-      const MenuItem(title: 'الفواتير', index: 0),
-      const MenuItem(title: 'ديون', index: 1),
+      const MenuItem(title: 'الرئيسية', index: 0),
+      const MenuItem(title: 'الفواتير', index: 1),
+      const MenuItem(title: 'ديون', index: 2),
     ];
   }
 
@@ -112,7 +113,7 @@ class _DashboardPageState extends State<DashboardPage>
             borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
             child: Row(
               children: List.generate(_menuItems.length, (index) {
                 final isSelected = index == _selectedIndex;
@@ -161,11 +162,11 @@ class _DashboardPageState extends State<DashboardPage>
         case 0:
           return const DashboardOverview();
         case 1:
-          return const InvoicesPage();
+          return const InvoicesPage(isLocal: false);
         case 2:
-          return const CustomerDebtsPage();
+          return const CustomerDebtsPage(isLocal: false);
         case 3:
-          return SuppliersDebtsPage();
+          return SuppliersDebtsPage(isLocal: false);
         case 4:
           return MorePage();
         default:
@@ -174,11 +175,13 @@ class _DashboardPageState extends State<DashboardPage>
     }
     switch (_selectedIndex) {
       case 0:
-        return const InvoicesPage();
+        return const DashboardOverview();
       case 1:
-        return const CustomerDebtsPage();
+        return const InvoicesPage(isLocal: true);
+      case 2:
+        return const CustomerDebtsPage(isLocal: true);
       default:
-        return const InvoicesPage();
+        return const DashboardOverview();
     }
   }
 }

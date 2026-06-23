@@ -11,7 +11,9 @@ import '../bloc/product_cubit.dart';
 import '../widgets/product_list_widget.dart';
 
 class ProductsPage extends StatefulWidget {
-  const ProductsPage({super.key});
+  final bool isLocal;
+
+  const ProductsPage({super.key, this.isLocal = false});
 
   @override
   State<ProductsPage> createState() => _ProductsPageState();
@@ -133,7 +135,9 @@ class _ProductsPageState extends State<ProductsPage>
               );
             },
           ),
-          floatingActionButton: FloatingActionButton.extended(
+          floatingActionButton: widget.isLocal
+              ? null
+              : FloatingActionButton.extended(
             label: Text(
               'إنشاء المنتج',
               style: TextStyle(color: AppColors.background),
@@ -233,7 +237,8 @@ class _ProductsPageState extends State<ProductsPage>
                     value: _productCubit,
                     child: Column(
                       children: [
-                        Padding(
+                        if (!widget.isLocal)
+                          Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Align(
                             alignment: Alignment.centerLeft,

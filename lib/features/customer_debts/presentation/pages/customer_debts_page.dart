@@ -10,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CustomerDebtsPage extends StatelessWidget {
-  const CustomerDebtsPage({super.key});
+  final bool isLocal;
+
+  const CustomerDebtsPage({super.key, this.isLocal = false});
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +112,7 @@ class CustomerDebtsPage extends StatelessWidget {
                           onPaymentTap: () => _showPaymentDialog(context, debt),
                           isEnd: debts.indexOf(debt) == debts.length - 1,
                           index: debts.indexOf(debt),
+                          showPaymentButton: !isLocal,
                         );
                       }).toList(),
                     ),
@@ -158,7 +161,7 @@ class CustomerDebtsPage extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CustomerDetailPage(customer: debt),
+        builder: (context) => CustomerDetailPage(customer: debt, isLocal: isLocal),
       ),
     );
   }

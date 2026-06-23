@@ -45,6 +45,7 @@ import '../../features/withdrawals/data/datasource/withdrawal_remote_datasource.
 import '../../features/withdrawals/data/repositories/withdrawal_repository.dart';
 import '../../features/withdrawals/presentation/bloc/withdrawal_cubit.dart';
 import '../../features/dashboard/data/datasource/dashboard_remote_datasource.dart';
+import '../../features/dashboard/data/datasource/dashboard_local_datasource.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
 
@@ -201,8 +202,12 @@ Future<void> initServicesLocator() async {
     () => DashboardRemoteDataSourceImpl(sl()),
   );
 
+  sl.registerLazySingleton<DashboardLocalDataSource>(
+    () => DashboardLocalDataSourceImpl(sl()),
+  );
+
   sl.registerLazySingleton<DashboardRepository>(
-    () => DashboardRepository(sl(), sl()),
+    () => DashboardRepository(sl(), sl(), sl()),
   );
 
   sl.registerFactory(() => DashboardCubit(
