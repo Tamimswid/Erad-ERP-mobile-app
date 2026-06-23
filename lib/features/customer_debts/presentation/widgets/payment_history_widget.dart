@@ -31,28 +31,40 @@ class PaymentHistoryWidget extends StatelessWidget {
           textAlign: TextAlign.right,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: Text(
-          'هل أنت متأكد من حذف هذه الدفعة بمبلغ ${NumberFormatter.formatCurrency(payment.amount)}؟',
-          textAlign: TextAlign.right,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'هل أنت متأكد من حذف هذه الدفعة بمبلغ ${NumberFormatter.formatCurrency(payment.amount)}؟',
+                textAlign: TextAlign.right,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onDeletePayment(payment.id);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actionsAlignment: MainAxisAlignment.start,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onDeletePayment(payment.id);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('حذف'),
-          ),
-        ],
       ),
     );
   }
@@ -67,28 +79,33 @@ class PaymentHistoryWidget extends StatelessWidget {
           textAlign: TextAlign.right,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDetailRow('المبلغ', '${AppUtils.formatNumber(payment.amount)} ${NumberFormatter.getCurrencySymbol()}'),
-            const SizedBox(height: 12),
-            _buildDetailRow('التاريخ', payment.paymentDate),
-            const SizedBox(height: 12),
-            _buildDetailRow('طريقة الدفع', payment.paymentMethod),
-            if (payment.notes != null && payment.notes!.isNotEmpty) ...[
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildDetailRow('المبلغ', '${AppUtils.formatNumber(payment.amount)} ${NumberFormatter.getCurrencySymbol()}'),
               const SizedBox(height: 12),
-              _buildDetailRow('الملاحظة', payment.notes!),
+              _buildDetailRow('التاريخ', payment.paymentDate),
+              const SizedBox(height: 12),
+              _buildDetailRow('طريقة الدفع', payment.paymentMethod),
+              if (payment.notes != null && payment.notes!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _buildDetailRow('الملاحظة', payment.notes!),
+              ],
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إغلاق'),
+                  ),
+                ],
+              ),
             ],
-          ],
-        ),
-        actionsAlignment: MainAxisAlignment.start,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إغلاق'),
           ),
-        ],
+        ),
       ),
     );
   }

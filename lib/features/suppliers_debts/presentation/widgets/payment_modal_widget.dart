@@ -52,7 +52,8 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
       child: Container(
         width: 400,
         padding: const EdgeInsets.all(24),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
@@ -274,7 +275,9 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
 }
+

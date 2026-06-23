@@ -710,41 +710,54 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تعديل الكمية'),
-        content: TextField(
-          controller: quantityController,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'الكمية'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'الكمية'),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      final newQuantity = int.tryParse(quantityController.text);
+                      if (newQuantity != null && newQuantity > 0) {
+                        final updatedItem = InvoiceItem(
+                          id: item.id,
+                          productId: item.productId,
+                          productName: item.productName,
+                          quantity: newQuantity,
+                          unitPrice: item.unitPrice,
+                          purchasePrice: item.purchasePrice,
+                          discountAmount: item.discountAmount,
+                          totalPrice: newQuantity * item.unitPrice,
+                          unit: item.unit,
+                          measurement: item.measurement,
+                          createdAt: item.createdAt,
+                        );
+                        this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
+                      }
+                      Navigator.pop(context);
+                    },
+                    child: const Text('حفظ'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final newQuantity = int.tryParse(quantityController.text);
-              if (newQuantity != null && newQuantity > 0) {
-                final updatedItem = InvoiceItem(
-                  id: item.id,
-                  productId: item.productId,
-                  productName: item.productName,
-                  quantity: newQuantity,
-                  unitPrice: item.unitPrice,
-                  purchasePrice: item.purchasePrice,
-                  discountAmount: item.discountAmount,
-                  totalPrice: newQuantity * item.unitPrice,
-                  unit: item.unit,
-                  measurement: item.measurement,
-                  createdAt: item.createdAt,
-                );
-                this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('حفظ'),
-          ),
-        ],
       ),
     );
   }
@@ -756,41 +769,54 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تعديل السعر'),
-        content: TextField(
-          controller: priceController,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'السعر'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: priceController,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'السعر'),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      final newPrice = double.tryParse(priceController.text);
+                      if (newPrice != null && newPrice > 0) {
+                        final updatedItem = InvoiceItem(
+                          id: item.id,
+                          productId: item.productId,
+                          productName: item.productName,
+                          quantity: item.quantity,
+                          unitPrice: newPrice,
+                          purchasePrice: item.purchasePrice,
+                          discountAmount: item.discountAmount,
+                          totalPrice: item.quantity * newPrice,
+                          unit: item.unit,
+                          measurement: item.measurement,
+                          createdAt: item.createdAt,
+                        );
+                        this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
+                      }
+                      Navigator.pop(context);
+                    },
+                    child: const Text('حفظ'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final newPrice = double.tryParse(priceController.text);
-              if (newPrice != null && newPrice > 0) {
-                final updatedItem = InvoiceItem(
-                  id: item.id,
-                  productId: item.productId,
-                  productName: item.productName,
-                  quantity: item.quantity,
-                  unitPrice: newPrice,
-                  purchasePrice: item.purchasePrice,
-                  discountAmount: item.discountAmount,
-                  totalPrice: item.quantity * newPrice,
-                  unit: item.unit,
-                  measurement: item.measurement,
-                  createdAt: item.createdAt,
-                );
-                this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('حفظ'),
-          ),
-        ],
       ),
     );
   }

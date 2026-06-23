@@ -28,39 +28,46 @@ class _InvoiceStatusDialogState extends State<InvoiceStatusDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('تحديث حالة الفاتورة'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('اختر الحالة الجديدة:'),
-          const SizedBox(height: 16),
-          ...InvoiceStatus.values.map((status) {
-            return RadioListTile<String>(
-              title: Text(status.getArabicName),
-              value: status.name,
-              groupValue: selectedStatus,
-              onChanged: (value) {
-                setState(() {
-                  selectedStatus = value!;
-                });
-              },
-              activeColor: status.getColor,
-            );
-          }).toList(),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('اختر الحالة الجديدة:'),
+            const SizedBox(height: 16),
+            ...InvoiceStatus.values.map((status) {
+              return RadioListTile<String>(
+                title: Text(status.getArabicName),
+                value: status.name,
+                groupValue: selectedStatus,
+                onChanged: (value) {
+                  setState(() {
+                    selectedStatus = value!;
+                  });
+                },
+                activeColor: status.getColor,
+              );
+            }).toList(),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('إلغاء'),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () {
+                    widget.onUpdate(selectedStatus);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('تحديث'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('إلغاء'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            widget.onUpdate(selectedStatus);
-            Navigator.pop(context);
-          },
-          child: const Text('تحديث'),
-        ),
-      ],
     );
   }
 }

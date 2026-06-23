@@ -54,8 +54,8 @@ class ERADApp extends StatelessWidget {
         final MediaQuery updatedMediaQuery = MediaQuery(
           data: data.copyWith(
             textScaler: data.textScaler.clamp(
-              minScaleFactor: 0.65, 
-              maxScaleFactor: 0.75, 
+              minScaleFactor: 0.9,
+              maxScaleFactor: 0.95,
             ),
           ),
           child: child!,
@@ -68,7 +68,6 @@ class ERADApp extends StatelessWidget {
       },
 
       home: const MainWrapper(),
-      // home: LoginPage() ,
       onGenerateRoute: _generateRoute,
     );
   }

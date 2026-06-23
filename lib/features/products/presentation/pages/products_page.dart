@@ -159,30 +159,43 @@ class _ProductsPageState extends State<ProductsPage>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('بحث عن منتج'),
-        content: TextField(
-          controller: searchController,
-          decoration: const InputDecoration(
-            labelText: 'اسم المنتج أو الكود',
-            prefixIcon: Icon(Icons.search),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: searchController,
+                decoration: const InputDecoration(
+                  labelText: 'اسم المنتج أو الكود',
+                  prefixIcon: Icon(Icons.search),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (searchController.text.trim().isNotEmpty) {
+                        context.read<ProductCubit>().searchProducts(
+                          searchController.text.trim(),
+                        );
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text('بحث'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (searchController.text.trim().isNotEmpty) {
-                context.read<ProductCubit>().searchProducts(
-                  searchController.text.trim(),
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('بحث'),
-          ),
-        ],
       ),
     );
   }
@@ -330,9 +343,10 @@ class _ProductsPageState extends State<ProductsPage>
               const Text('تأكيد الحذف'),
             ],
           ),
-          content: Column(
+          content: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text('هل أنت متأكد من حذف هذا المنتج؟'),
               const SizedBox(height: 12),
@@ -348,22 +362,28 @@ class _ProductsPageState extends State<ProductsPage>
                 'هذا الإجراء لا يمكن التراجع عنه',
                 style: TextStyle(color: Colors.red, fontSize: 12),
               ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onDelete(productId);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red[600]),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('إلغاء'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                onDelete(productId);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[600]),
-              child: const Text('حذف'),
-            ),
-          ],
+        ),
         );
       },
     );

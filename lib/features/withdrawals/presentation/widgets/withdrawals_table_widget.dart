@@ -151,23 +151,36 @@ class WithdrawalsTableWidget extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('تأكيد الحذف'),
-        content: Text('هل أنت متأكد من حذف هذا السحب؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('إلغاء'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('هل أنت متأكد من حذف هذا السحب؟'),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext);
+                      onDelete(withdrawal);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                    ),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              onDelete(withdrawal);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text('حذف'),
-          ),
-        ],
+        ),
       ),
     );
   }

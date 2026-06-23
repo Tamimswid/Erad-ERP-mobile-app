@@ -280,38 +280,44 @@ class SalesInvoiceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text('ملاحظات: ${invoice.notes}'),
               ],
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إغلاق'),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditInvoicePage(
+                            invoiceId: invoice.id,
+                            isSales: true,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('تعديل'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showDeleteConfirmation(context, invoice);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إغلاق'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditInvoicePage(
-                    invoiceId: invoice.id,
-                    isSales: true,
-                  ),
-                ),
-              );
-            },
-            child: const Text('تعديل'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showDeleteConfirmation(context, invoice);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف'),
-          ),
-        ],
       ),
     );
   }
@@ -327,39 +333,46 @@ class SalesInvoiceCard extends StatelessWidget {
             const Text('تأكيد الحذف'),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('هل أنت متأكد من حذف الفاتورة ${invoice.invoiceNumber}؟'),
-            const SizedBox(height: 12),
-            const Text(
-              'سيتم حذف جميع البيانات المرتبطة بهذه الفاتورة:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('• عناصر الفاتورة'),
-            const SizedBox(height: 8),
-            const Text(
-              'هذا الإجراء لا يمكن التراجع عنه',
-              style: TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('هل أنت متأكد من حذف الفاتورة ${invoice.invoiceNumber}؟'),
+              const SizedBox(height: 12),
+              const Text(
+                'سيتم حذف جميع البيانات المرتبطة بهذه الفاتورة:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('• عناصر الفاتورة'),
+              const SizedBox(height: 8),
+              const Text(
+                'هذا الإجراء لا يمكن التراجع عنه',
+                style: TextStyle(color: Colors.red, fontSize: 12),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.read<InvoiceCubit>().deleteSalesInvoice(invoice.id);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<InvoiceCubit>().deleteSalesInvoice(invoice.id);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف'),
-          ),
-        ],
       ),
     );
   }

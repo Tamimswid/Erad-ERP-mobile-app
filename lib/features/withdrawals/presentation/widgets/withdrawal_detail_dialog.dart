@@ -36,7 +36,8 @@ class WithdrawalDetailDialog extends StatelessWidget {
       ),
       child: Container(
         padding: const EdgeInsets.all(24),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -135,6 +136,7 @@ class WithdrawalDetailDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

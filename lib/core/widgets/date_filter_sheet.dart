@@ -29,7 +29,8 @@ class DateFilterSheet {
                 width: double.infinity,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-                  child: Column(
+                  child: SingleChildScrollView(
+                    child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -183,6 +184,7 @@ class DateFilterSheet {
                       ],
                     ],
                   ),
+                ),
                 ),
               ),
             );

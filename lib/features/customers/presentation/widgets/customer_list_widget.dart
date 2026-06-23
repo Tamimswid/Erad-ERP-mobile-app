@@ -224,34 +224,35 @@ class CustomerCard extends StatelessWidget {
           height: MediaQuery.of(context).size.height * 0.45,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'تعديل العميل',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'تعديل العميل',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: CustomerFormWidget(
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  CustomerFormWidget(
                     customerModel: customer,
                     onTap: (customerModel) {
                       onCustomerEdit(customerModel);
                     },
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -274,41 +275,48 @@ class CustomerCard extends StatelessWidget {
             const Text('تأكيد الحذف'),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('هل أنت متأكد من حذف العميل ${customer.name}؟'),
-            const SizedBox(height: 12),
-            const Text(
-              'سيتم حذف جميع البيانات المرتبطة بهذا العميل:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('• فواتير البيع'),
-            const Text('• عناصر فواتير البيع'),
-            const Text('• الدفعات'),
-            const SizedBox(height: 8),
-            const Text(
-              'هذا الإجراء لا يمكن التراجع عنه',
-              style: TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('هل أنت متأكد من حذف العميل ${customer.name}؟'),
+              const SizedBox(height: 12),
+              const Text(
+                'سيتم حذف جميع البيانات المرتبطة بهذا العميل:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('• فواتير البيع'),
+              const Text('• عناصر فواتير البيع'),
+              const Text('• الدفعات'),
+              const SizedBox(height: 8),
+              const Text(
+                'هذا الإجراء لا يمكن التراجع عنه',
+                style: TextStyle(color: Colors.red, fontSize: 12),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onCustomerDeleted(customer.id);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onCustomerDeleted(customer.id);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف'),
-          ),
-        ],
       ),
     );
   }

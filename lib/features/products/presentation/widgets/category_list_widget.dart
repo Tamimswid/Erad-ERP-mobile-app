@@ -119,22 +119,27 @@ class CategoryCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(category.name),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (category.description != null) Text('الوصف: ${category.description}'),
-            Text('تم الإنشاء: ${category.createdAt.toString().split(' ')[0]}'),
-          
-            Text('الحالة: ${category.isActive ? 'نشطة' : 'غير نشطة'}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إغلاق'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (category.description != null) Text('الوصف: ${category.description}'),
+              Text('تم الإنشاء: ${category.createdAt.toString().split(' ')[0]}'),
+              Text('الحالة: ${category.isActive ? 'نشطة' : 'غير نشطة'}'),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إغلاق'),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -151,21 +156,34 @@ class CategoryCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تأكيد الحذف'),
-        content: Text('هل أنت متأكد من حذف الفئة ${category.name}؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('هل أنت متأكد من حذف الفئة ${category.name}؟'),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.read<ProductCubit>().deleteCategory(category.id);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<ProductCubit>().deleteCategory(category.id);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف'),
-          ),
-        ],
+        ),
       ),
     );
   }

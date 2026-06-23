@@ -53,7 +53,8 @@ class _PaymentDialogWidgetState extends State<PaymentDialogWidget> {
       child: Container(
         width: 400,
         padding: const EdgeInsets.all(24),
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
@@ -297,7 +298,9 @@ class _PaymentDialogWidgetState extends State<PaymentDialogWidget> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
 }
+

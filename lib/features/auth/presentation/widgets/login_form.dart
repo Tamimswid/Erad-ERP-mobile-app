@@ -198,37 +198,45 @@ class _LoginFormState extends State<LoginForm> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('استعادة كلمة المرور'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('أدخل بريدك الإلكتروني لإرسال رابط استعادة كلمة المرور'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'البريد الإلكتروني',
-                prefixIcon: Icon(Icons.email),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('أدخل بريدك الإلكتروني لإرسال رابط استعادة كلمة المرور'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: 'البريد الإلكتروني',
+                  prefixIcon: Icon(Icons.email),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (emailController.text.trim().isNotEmpty) {
+                        context.read<AuthCubit>().forgotPassword(
+                          emailController.text.trim(),
+                        );
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text('إرسال'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (emailController.text.trim().isNotEmpty) {
-                context.read<AuthCubit>().forgotPassword(
-                  emailController.text.trim(),
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('إرسال'),
-          ),
-        ],
       ),
     );
   }

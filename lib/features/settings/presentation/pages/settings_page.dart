@@ -424,18 +424,31 @@ class _SettingsPageState extends State<SettingsPage> {
             const Text('تأكيد تسجيل الخروج'),
           ],
         ),
-        content: const Text('هل أنت متأكد من تسجيل الخروج؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('هل أنت متأكد من تسجيل الخروج؟'),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => logout(),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                    child: const Text('تسجيل الخروج'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => logout(),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('تسجيل الخروج'),
-          ),
-        ],
+        ),
       ),
     );
   }

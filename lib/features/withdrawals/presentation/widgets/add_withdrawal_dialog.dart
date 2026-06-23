@@ -91,7 +91,8 @@ class _AddWithdrawalDialogState extends State<AddWithdrawalDialog> {
         padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -384,6 +385,7 @@ class _AddWithdrawalDialogState extends State<AddWithdrawalDialog> {
                 ],
               ),
             ],
+          ),
           ),
         ),
       ),

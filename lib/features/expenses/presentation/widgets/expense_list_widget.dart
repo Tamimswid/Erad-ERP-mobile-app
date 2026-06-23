@@ -317,21 +317,34 @@ class ExpenseCard extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('تأكيد الحذف'),
-        content: const Text('هل أنت متأكد من حذف هذا المصروف؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('إلغاء'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text('هل أنت متأكد من حذف هذا المصروف؟'),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      cubit.deleteExpense(expense.id);
+                      Navigator.pop(dialogContext);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              cubit.deleteExpense(expense.id);
-              Navigator.pop(dialogContext);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('حذف'),
-          ),
-        ],
+        ),
       ),
     );
   }

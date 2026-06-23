@@ -18,10 +18,7 @@ class MenuItem {
   final String title;
   final int index;
 
-  const MenuItem({
-    required this.title,
-    required this.index,
-  });
+  const MenuItem({required this.title, required this.index});
 }
 
 class DashboardPage extends StatefulWidget {
@@ -33,7 +30,8 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
+class _DashboardPageState extends State<DashboardPage>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
   bool _isConnected = true;
   bool _isKeyboardVisible = false;
@@ -106,59 +104,53 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
         BlocProvider(create: (context) => sl.sl<SupplierCubit>(), lazy: true),
       ],
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: Column(
-          children: [
-            Expanded(
-              child: _buildContent(),
-            ),
-            if (!_isKeyboardVisible)
-              Container(
-                margin: EdgeInsets.fromLTRB(12, 0, 12, MediaQuery.of(context).padding.bottom > 0 ? 8 : 12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                  child: Row(
-                    children: List.generate(_menuItems.length, (index) {
-                      final isSelected = index == _selectedIndex;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _selectedIndex = index),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              color: isSelected ? AppColors.surface : Colors.transparent,
-                              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-                            ),
-                            child: Text(
-                              _menuItems[index].title,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: isSelected ? AppColors.primary : AppColors.surface,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
+        // resizeToAvoidBottomInset: false,
+        bottomNavigationBar: Container(
+          // margin: EdgeInsets.fromLTRB(12, 0, 12, MediaQuery.of(context).padding.bottom > 0 ? 8 : 12),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+            child: Row(
+              children: List.generate(_menuItems.length, (index) {
+                final isSelected = index == _selectedIndex;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedIndex = index),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.surface
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadiusMd,
                         ),
-                      );
-                    }),
+                      ),
+                      child: Text(
+                        _menuItems[index].title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.surface,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-          ],
+                );
+              }),
+            ),
+          ),
         ),
+        body: Column(children: [Expanded(child: _buildContent())]),
       ),
     );
   }

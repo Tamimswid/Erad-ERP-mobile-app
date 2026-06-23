@@ -109,33 +109,34 @@ class _CustomersPageState extends State<CustomersPage> {
           height: MediaQuery.of(dialogContext).size.height * 0.55,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'إضافة عميل جديد',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'إضافة عميل جديد',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.pop(dialogContext),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: CustomerFormWidget(
+                      IconButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  CustomerFormWidget(
                     cubit: _customerCubit,
                     customerModel: customerModel,
                     onTap: (customerModel) {},
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

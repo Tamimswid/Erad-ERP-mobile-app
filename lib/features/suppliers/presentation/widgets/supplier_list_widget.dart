@@ -178,22 +178,34 @@ class SupplierCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تعديل المورد'),
-        content: SizedBox(
-          width: 500,
-          child: SupplierFormWidget(
-            supplier: supplier,
-            onSubmit: (updatedSupplier) {
-              onSupplierUpdated(updatedSupplier);
-              Navigator.pop(context);
-            },
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 500,
+                child: SupplierFormWidget(
+                  supplier: supplier,
+                  onSubmit: (updatedSupplier) {
+                    onSupplierUpdated(updatedSupplier);
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-        ],
       ),
     );
   }
@@ -209,40 +221,47 @@ class SupplierCard extends StatelessWidget {
             const Text('تأكيد الحذف'),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('هل أنت متأكد من حذف المورد ${supplier.name}؟'),
-            const SizedBox(height: 12),
-            const Text(
-              'سيتم حذف جميع البيانات المرتبطة بهذا المورد:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('• فواتير الشراء'),
-            const Text('• عناصر فواتير الشراء'),
-            const SizedBox(height: 8),
-            const Text(
-              'هذا الإجراء لا يمكن التراجع عنه',
-              style: TextStyle(color: Colors.red, fontSize: 12),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('هل أنت متأكد من حذف المورد ${supplier.name}؟'),
+              const SizedBox(height: 12),
+              const Text(
+                'سيتم حذف جميع البيانات المرتبطة بهذا المورد:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text('• فواتير الشراء'),
+              const Text('• عناصر فواتير الشراء'),
+              const SizedBox(height: 8),
+              const Text(
+                'هذا الإجراء لا يمكن التراجع عنه',
+                style: TextStyle(color: Colors.red, fontSize: 12),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('إلغاء'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onSupplierDeleted(supplier.id);
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: const Text('حذف'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              onSupplierDeleted(supplier.id);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('حذف'),
-          ),
-        ],
       ),
     );
   }

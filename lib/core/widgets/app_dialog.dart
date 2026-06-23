@@ -26,20 +26,33 @@ class AppDialog {
             Text(title),
           ],
         ),
-        content: Text(message),
-        actions: [
-          OutlinedButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(cancelText),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(message),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text(cancelText),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDangerous ? AppColors.error : AppColors.primary,
+                    ),
+                    child: Text(confirmText),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isDangerous ? AppColors.error : AppColors.primary,
-            ),
-            child: Text(confirmText),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -63,13 +76,20 @@ class AppDialog {
             Text(title),
           ],
         ),
-        content: Text(message),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(buttonText),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(message),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(buttonText),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -93,14 +113,21 @@ class AppDialog {
             Text(title),
           ],
         ),
-        content: Text(message),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
-            child: Text(buttonText),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(message),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
+                child: Text(buttonText),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -124,14 +151,21 @@ class AppDialog {
             Text(title),
           ],
         ),
-        content: Text(message),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: Text(buttonText),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(message),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                child: Text(buttonText),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -151,8 +185,19 @@ class AppDialog {
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         ),
         title: Text(title),
-        content: content,
-        actions: actions,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              content,
+              if (actions != null) ...[
+                const SizedBox(height: 24),
+                ...actions,
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -165,12 +210,14 @@ class AppDialog {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         ),
-        content: Row(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(width: 20),
-            Text(message),
-          ],
+        content: SingleChildScrollView(
+          child: Row(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Text(message),
+            ],
+          ),
         ),
       ),
     );

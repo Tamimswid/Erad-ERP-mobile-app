@@ -531,49 +531,62 @@ class InvoiceDetailsWidget extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('تأكيد الحذف'),
-        content: Text('هل أنت متأكد من حذف فاتورة ${invoice.invoiceNumber}؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('إلغاء'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (loadingContext) => const PopScope(
-                  canPop: false,
-                  child: AlertDialog(
-                    content: Row(
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(width: 16),
-                        Text('جاري حذف الفاتورة...'),
-                      ],
-                    ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('هل أنت متأكد من حذف فاتورة ${invoice.invoiceNumber}؟'),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('إلغاء'),
                   ),
-                ),
-              );
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () async {
+                      Navigator.pop(dialogContext);
 
-              try {
-                if (invoice is SalesInvoice) {
-                  await context.read<InvoiceCubit>().deleteSalesInvoiceWithBalanceAdjustment(invoice as SalesInvoice);
-                } else if (invoice is PurchaseInvoice) {
-                  await context.read<InvoiceCubit>().deletePurchaseInvoice(invoice.id);
-                }
-              } finally {
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(true);
-                }
-              }
-            },
-            child: const Text('حذف', style: TextStyle(color: Colors.red)),
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (loadingContext) => const PopScope(
+                          canPop: false,
+                          child: AlertDialog(
+                            content: Row(
+                              children: [
+                                CircularProgressIndicator(),
+                                SizedBox(width: 16),
+                                Text('جاري حذف الفاتورة...'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+
+                      try {
+                        if (invoice is SalesInvoice) {
+                          await context.read<InvoiceCubit>().deleteSalesInvoiceWithBalanceAdjustment(invoice as SalesInvoice);
+                        } else if (invoice is PurchaseInvoice) {
+                          await context.read<InvoiceCubit>().deletePurchaseInvoice(invoice.id);
+                        }
+                      } finally {
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(true);
+                        }
+                      }
+                    },
+                    child: const Text('حذف', style: TextStyle(color: Colors.red)),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
