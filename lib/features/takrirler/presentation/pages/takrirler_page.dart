@@ -1,4 +1,5 @@
 import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/features/takrirler/presentation/pages/customer_invoices_page.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -28,13 +29,23 @@ class TakrirlerPage extends StatelessWidget {
               icon: Iconsax.receipt_text,
               title: 'فواتير مشتري',
               color: const Color(0xFF3B82F6),
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CustomerInvoicesPage(isSupplier: false),
+                ),
+              ),
             ),
             _ReportCard(
               icon: Iconsax.receipt_disscount,
               title: 'فواتير مورد',
               color: const Color(0xFF10B981),
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CustomerInvoicesPage(isSupplier: true),
+                ),
+              ),
             ),
             _ReportCard(
               icon: Iconsax.money_recive,

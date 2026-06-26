@@ -43,6 +43,136 @@ class PdfInvoiceService {
     return pdf;
   }
 
+  Future<pw.Document> generateInvoiceListPdf({
+    required String companyName,
+    required String partyName,
+    required String dateRangeLabel,
+    required List<dynamic> invoices,
+    required String type,
+  }) async {
+    final pdf = pw.Document();
+    final arabicFont = await PdfGoogleFonts.amiriRegular();
+    final arabicBoldFont = await PdfGoogleFonts.amiriBold();
+    final total = invoices.fold<double>(0, (sum, inv) => sum + _getTotalAmount(inv));
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        build: (pw.Context context) {
+          return [
+            _buildReportHeader(companyName, partyName, dateRangeLabel, type, arabicBoldFont, arabicFont),
+            pw.SizedBox(height: 16),
+            _buildInvoiceTable(invoices, arabicBoldFont, arabicFont),
+            pw.SizedBox(height: 16),
+            _buildReportTotal(total, arabicBoldFont, arabicFont),
+          ];
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  pw.Widget _buildReportHeader(
+    String companyName,
+    String partyName,
+    String dateRangeLabel,
+    String type,
+    pw.Font boldFont,
+    pw.Font font,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.fromLTRB(0, 0, 0, 8),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                _processArabicText(companyName),
+                style: pw.TextStyle(font: boldFont, fontSize: 14),
+              ),
+              pw.Text(
+                _processArabicText(type == 'purchase' ? 'تقرير فواتير مورد' : 'تقرير فواتير مشتري'),
+                style: pw.TextStyle(font: font, fontSize: 11, color: PdfColors.grey700),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 4),
+          pw.Row(
+            children: [
+              pw.Text(
+                _processArabicText(partyName),
+                style: pw.TextStyle(font: font, fontSize: 11),
+              ),
+            ],
+          ),
+          if (dateRangeLabel.isNotEmpty) ...[
+            pw.SizedBox(height: 2),
+            pw.Text(
+              _processArabicText(dateRangeLabel),
+              style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey600),
+            ),
+          ],
+          pw.Divider(thickness: 0.5),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildInvoiceTable(List<dynamic> invoices, pw.Font boldFont, pw.Font font) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(3),
+        1: const pw.FlexColumnWidth(2),
+        2: const pw.FlexColumnWidth(2),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+          children: [
+            _buildTableCell(_processArabicText('رقم الفاتورة'), boldFont, isHeader: true),
+            _buildTableCell(_processArabicText('تاريخ الفاتورة'), boldFont, isHeader: true),
+            _buildTableCell(_processArabicText('إجمالي الفاتورة'), boldFont, isHeader: true),
+          ],
+        ),
+        ...invoices.map((inv) => pw.TableRow(
+          children: [
+            _buildTableCell(_getInvoiceNumber(inv), font),
+            _buildTableCell(DateFormat('yyyy-MM-dd').format(_getInvoiceDate(inv)), font),
+            _buildTableCell(_getTotalAmount(inv).toStringAsFixed(2), font),
+          ],
+        )),
+      ],
+    );
+  }
+
+  pw.Widget _buildReportTotal(double total, pw.Font boldFont, pw.Font font) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(6),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            _processArabicText('الإجمالي العام'),
+            style: pw.TextStyle(font: boldFont, fontSize: 13),
+          ),
+          pw.Text(
+            '${total.toStringAsFixed(2)} ل.س',
+            style: pw.TextStyle(font: boldFont, fontSize: 13, color: PdfColors.blue),
+          ),
+        ],
+      ),
+    );
+  }
+
   pw.Widget _buildHeader(dynamic invoice, String type, pw.Font boldFont, pw.Font font) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
