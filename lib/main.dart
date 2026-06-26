@@ -12,6 +12,7 @@ import 'package:erad/features/invoices/presentation/bloc/invoice_cubit.dart';
 import 'package:erad/features/invoices/presentation/pages/invoices_page.dart';
 import 'package:erad/features/products/presentation/pages/products_page.dart';
 import 'package:erad/features/settings/presentation/pages/settings_page.dart';
+import 'package:erad/features/takrirler/presentation/pages/takrirler_page.dart';
 import 'package:erad/features/suppliers/presentation/pages/suppliers_page.dart';
 import 'package:erad/features/withdrawals/presentation/pages/withdrawals_page.dart';
 import 'package:flutter/material.dart';
@@ -100,6 +101,8 @@ class ERADApp extends StatelessWidget {
         );
       case AppRoutes.customerDebts:
         return MaterialPageRoute(builder: (_) => const CustomerDebtsPage());
+      case AppRoutes.takrirler:
+        return MaterialPageRoute(builder: (_) => const TakrirlerPage());
       default:
         return MaterialPageRoute(builder: (_) => const DashboardPage());
     }

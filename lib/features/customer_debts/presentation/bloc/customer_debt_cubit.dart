@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:erad/core/errors/failures.dart';
 import 'package:erad/features/customer_debts/data/models/customer_debt_model.dart';
+import 'package:erad/features/customer_debts/data/models/customer_debt_totals_model.dart';
 import 'package:erad/features/customer_debts/data/repositories/customer_debt_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -20,6 +21,7 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
 
   List<CustomerDebtModel> _allDebts = [];
   List<CustomerDebtModel> _filteredDebts = [];
+  CustomerDebtTotalsModel _totals = const CustomerDebtTotalsModel();
   String _searchQuery = '';
 
   void _startRealtimeListener() {
@@ -55,12 +57,17 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
     }
 
     if (!isClosed) {
-      emit(CustomerDebtLoaded(debts: _allDebts, filteredDebts: _filteredDebts));
+      emit(CustomerDebtLoaded(
+        debts: _allDebts,
+        filteredDebts: _filteredDebts,
+        totals: _totals,
+      ));
     }
   }
 
   Future<void> getCustomerDebts() async {
     if (isClosed) return;
+    emit(CustomerDebtLoading());
     final result = await repository.getCustomerDebts();
     if (isClosed) return;
     result.fold(
@@ -70,6 +77,32 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
         _applySearchFilter();
       },
     );
+    await _loadTotals();
+  }
+
+  Future<void> _loadTotals() async {
+    final result = await repository.getCustomerDebtTotals();
+    if (isClosed) return;
+    result.fold(
+      (failure) {
+        log('Failed to load customer totals: ${failure.message}');
+        _totals = CustomerDebtTotalsModel(
+          totalDebtAll:
+              _filteredDebts.fold(0.0, (sum, d) => sum + d.remainingDebt),
+          totalInvoicesAll:
+              _filteredDebts.fold(0.0, (sum, d) => sum + d.totalInvoices),
+          totalPaidAll:
+              _filteredDebts.fold(0.0, (sum, d) => sum + d.totalPaid),
+        );
+      },
+      (totals) {
+        log('Customer totals loaded');
+        _totals = totals;
+      },
+    );
+    if (state is CustomerDebtLoaded) {
+      emit((state as CustomerDebtLoaded).copyWith(totals: _totals));
+    }
   }
 
   Future<void> searchCustomerDebts(String query) async {
@@ -119,17 +152,11 @@ class CustomerDebtCubit extends Cubit<CustomerDebtState> {
     emit(CustomerDebtInitial());
   }
 
-  double get totalDebt {
-    return _filteredDebts.fold(0.0, (sum, debt) => sum + debt.remainingDebt);
-  }
+  double get totalDebt => _totals.totalDebtAll;
 
-  double get totalInvoices {
-    return _filteredDebts.fold(0.0, (sum, debt) => sum + debt.totalInvoices);
-  }
+  double get totalInvoices => _totals.totalInvoicesAll;
 
-  double get totalPaid {
-    return _filteredDebts.fold(0.0, (sum, debt) => sum + debt.totalPaid);
-  }
+  double get totalPaid => _totals.totalPaidAll;
 
   int get debtorCount {
     return _filteredDebts.length;

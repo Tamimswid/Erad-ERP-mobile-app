@@ -69,13 +69,30 @@ class SupplierDebtModel extends Equatable {
       id: map['supplier_id'] ?? map['id'] ?? '',
       name: map['supplier_name'] ?? map['name'] ?? '',
       phone: map['phone'],
-      totalInvoices: (map['total_invoices'] ?? 0.0).toDouble(),
-      totalPaid: (map['total_paid'] ?? 0.0).toDouble(),
+      totalInvoices: _parseDouble(map['total_invoices'] ?? map['total_debt']),
+      totalPaid: _parseDouble(map['total_paid']),
       totalInvoicesCount: map['total_invoices_count'] ?? 0,
       pendingInvoicesCount: map['pending_invoices_count'] ?? 0,
       overdueInvoicesCount: map['overdue_invoices_count'] ?? 0,
       latestDueDate: map['latest_due_date'],
     );
+  }
+
+  factory SupplierDebtModel.fromViewMap(Map<String, dynamic> map) {
+    return SupplierDebtModel(
+      id: map['supplier_id'] ?? '',
+      name: map['supplier_name'] ?? '',
+      phone: null,
+      totalInvoices: _parseDouble(map['total_debt']),
+      totalPaid: _parseDouble(map['total_paid']),
+    );
+  }
+
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   @override

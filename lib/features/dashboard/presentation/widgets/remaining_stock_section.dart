@@ -88,7 +88,7 @@ class RemainingStockSection extends StatelessWidget {
               ),
 
               const SizedBox(height: 16),
-              ...productStock.take(10).map((product) {
+              ...productStock.map((product) {
                 final isNegative = product.calculatedRemainingStock < 0;
 
                 return Padding(

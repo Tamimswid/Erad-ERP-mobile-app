@@ -8,6 +8,7 @@ import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/customer_debts/data/datasource/customer_debt_remote_datasource.dart';
 import 'package:erad/features/customer_debts/data/datasource/customer_debt_local_datasource.dart';
 import 'package:erad/features/customer_debts/data/models/customer_debt_model.dart';
+import 'package:erad/features/customer_debts/data/models/customer_debt_totals_model.dart';
 import 'package:erad/features/customer_debts/data/repositories/customer_debt_repository.dart';
 
 // تنفيذ مستودع ديون العملاء - يتحقق من الاتصال ويعالج الأخطاء
@@ -56,6 +57,20 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
         dev.log('getCustomerDebts offline error: $e');
         return Left(NetworkFailure.noConnection());
       }
+    }
+  }
+
+  @override
+  Future<Either<Failure, CustomerDebtTotalsModel>> getCustomerDebtTotals() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final totals = await remoteDataSource.getCustomerDebtTotals();
+        return Right(totals);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      return Left(NetworkFailure.noConnection());
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:erad/core/errors/failures.dart';
 import 'package:erad/core/network/network_info.dart';
 import 'package:erad/features/suppliers_debts/data/datasource/supplier_debt_remote_datasource.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.dart';
+import 'package:erad/features/suppliers_debts/data/models/supplier_debt_totals_model.dart';
 import 'package:erad/features/suppliers_debts/data/repositories/supplier_debt_repository.dart';
 
 class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
@@ -19,6 +20,20 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
         return Right(debts);
       } on Failure catch (failure) {
         return Left(failure);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      return Left(NetworkFailure.noConnection());
+    }
+  }
+
+  @override
+  Future<Either<Failure, SupplierDebtTotalsModel>> getSupplierDebtTotals() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final totals = await remoteDataSource.getSupplierDebtTotals();
+        return Right(totals);
       } catch (e) {
         return Left(exceptionToFailure(e));
       }

@@ -13,7 +13,7 @@ class MorePage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingMd),
         child: GridView(
-          physics: const NeverScrollableScrollPhysics(),
+          physics: const BouncingScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             mainAxisSpacing: 12,
@@ -50,6 +50,12 @@ class MorePage extends StatelessWidget {
               title: 'المنتجات',
               color: const Color(0xFFDE24C8),
               onTap: () => Navigator.pushNamed(context, AppRoutes.products),
+            ),
+            _NavCard(
+              icon: Iconsax.chart_2,
+              title: 'التقارير',
+              color: const Color(0xFF8B5CF6),
+              onTap: () => Navigator.pushNamed(context, AppRoutes.takrirler),
             ),
             _NavCard(
               icon: Iconsax.setting_2,

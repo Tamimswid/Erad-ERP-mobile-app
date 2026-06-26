@@ -6,5 +6,6 @@
 /// - [PaymentModel]: نموذج المدفوعة
 
 export 'customer_debt_model.dart';
+export 'customer_debt_totals_model.dart';
 export 'invoice_model.dart';
 export 'payment_model.dart';

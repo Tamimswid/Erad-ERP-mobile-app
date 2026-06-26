@@ -158,6 +158,7 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String profile = '/profile';
   static const String customerDebts = '/customer-debts';
+  static const String takrirler = '/takrirler';
 }
 
 class AppFonts {

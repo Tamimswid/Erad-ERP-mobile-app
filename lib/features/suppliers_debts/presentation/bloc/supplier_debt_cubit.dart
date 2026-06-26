@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:erad/core/errors/failures.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.dart';
+import 'package:erad/features/suppliers_debts/data/models/supplier_debt_totals_model.dart';
 import 'package:erad/features/suppliers_debts/data/repositories/supplier_debt_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,22 +23,26 @@ class SupplierDebtLoading extends SupplierDebtState {}
 class SupplierDebtLoaded extends SupplierDebtState {
   final List<SupplierDebtModel> debts;
   final List<SupplierDebtModel> filteredDebts;
+  final SupplierDebtTotalsModel totals;
 
   const SupplierDebtLoaded({
     required this.debts,
     required this.filteredDebts,
+    this.totals = const SupplierDebtTotalsModel(),
   });
 
   @override
-  List<Object?> get props => [debts, filteredDebts];
+  List<Object?> get props => [debts, filteredDebts, totals];
 
   SupplierDebtLoaded copyWith({
     List<SupplierDebtModel>? debts,
     List<SupplierDebtModel>? filteredDebts,
+    SupplierDebtTotalsModel? totals,
   }) {
     return SupplierDebtLoaded(
       debts: debts ?? this.debts,
       filteredDebts: filteredDebts ?? this.filteredDebts,
+      totals: totals ?? this.totals,
     );
   }
 }
@@ -81,6 +86,7 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
 
   List<SupplierDebtModel> _allDebts = [];
   List<SupplierDebtModel> _filteredDebts = [];
+  SupplierDebtTotalsModel _totals = const SupplierDebtTotalsModel();
   String _searchQuery = '';
 
   void _startRealtimeListener() {
@@ -120,12 +126,17 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
     }
 
     if (!isClosed) {
-      emit(SupplierDebtLoaded(debts: _allDebts, filteredDebts: _filteredDebts));
+      emit(SupplierDebtLoaded(
+        debts: _allDebts,
+        filteredDebts: _filteredDebts,
+        totals: _totals,
+      ));
     }
   }
 
   Future<void> getSupplierDebts() async {
     if (isClosed) return;
+    emit(SupplierDebtLoading());
     final result = await repository.getSupplierDebts();
     if (isClosed) return;
     result.fold(
@@ -135,6 +146,32 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
         _applySearchFilter();
       },
     );
+    await _loadTotals();
+  }
+
+  Future<void> _loadTotals() async {
+    final result = await repository.getSupplierDebtTotals();
+    if (isClosed) return;
+    result.fold(
+      (failure) {
+        log('Failed to load supplier totals: ${failure.message}');
+        _totals = SupplierDebtTotalsModel(
+          totalDebtAll:
+              _filteredDebts.fold(0.0, (sum, d) => sum + d.remainingDebt),
+          totalInvoicesAll:
+              _filteredDebts.fold(0.0, (sum, d) => sum + d.totalInvoices),
+          totalPaidAll:
+              _filteredDebts.fold(0.0, (sum, d) => sum + d.totalPaid),
+        );
+      },
+      (totals) {
+        log('Supplier totals loaded');
+        _totals = totals;
+      },
+    );
+    if (state is SupplierDebtLoaded) {
+      emit((state as SupplierDebtLoaded).copyWith(totals: _totals));
+    }
   }
 
   Future<void> searchSupplierDebts(String query) async {
@@ -180,17 +217,11 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
     emit(SupplierDebtInitial());
   }
 
-  double get totalDebt {
-    return _filteredDebts.fold(0.0, (sum, debt) => sum + debt.remainingDebt);
-  }
+  double get totalDebt => _totals.totalDebtAll;
 
-  double get totalInvoices {
-    return _filteredDebts.fold(0.0, (sum, debt) => sum + debt.totalInvoices);
-  }
+  double get totalInvoices => _totals.totalInvoicesAll;
 
-  double get totalPaid {
-    return _filteredDebts.fold(0.0, (sum, debt) => sum + debt.totalPaid);
-  }
+  double get totalPaid => _totals.totalPaidAll;
 
   int get debtorCount {
     return _filteredDebts.length;

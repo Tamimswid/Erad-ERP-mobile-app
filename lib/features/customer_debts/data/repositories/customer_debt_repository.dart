@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:erad/core/errors/failures.dart';
 import 'package:erad/features/customer_debts/data/models/customer_debt_model.dart';
+import 'package:erad/features/customer_debts/data/models/customer_debt_totals_model.dart';
 
 abstract class CustomerDebtRepository {
   Future<Either<Failure, List<CustomerDebtModel>>> getCustomerDebts();
+  Future<Either<Failure, CustomerDebtTotalsModel>> getCustomerDebtTotals();
   Future<Either<Failure, List<CustomerDebtModel>>> searchCustomerDebts(String query);
   Future<Either<Failure, void>> addPayment(String customerId, double amount, String? note, String paymentDate);
   Future<Either<Failure, CustomerDebtModel>> getCustomerDebt(String customerId);
