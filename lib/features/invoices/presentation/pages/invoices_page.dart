@@ -121,16 +121,6 @@ class _InvoicesPageState extends State<InvoicesPage> {
                       context.read<InvoiceCubit>().setDateRange(from, to);
                     },
                   ),
-                  // Stats
-                  InvoiceStatsWidget(
-                    totalCount: state.totalCount,
-                    paidCount: state.paidCount,
-                    pendingCount: state.pendingCount,
-                    totalAmount: state.totalAmount,
-                  ),
-
-                  const SizedBox(height: 12),
-                  // Invoice Cards Grid
                   _buildInvoiceGrid(state),
                   SizedBox(height: 100),
                 ],
@@ -161,7 +151,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
         crossAxisCount: 1,
         crossAxisSpacing: 20,
         mainAxisSpacing: 16,
-        childAspectRatio: 1.35,
+        childAspectRatio: 1.5,
       ),
       itemCount: allInvoices.length,
       itemBuilder: (context, index) {

@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
+import 'package:erad/core/services/pdf_invoice_service.dart';
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/customer_debts/data/models/customer_debt_model.dart';
 import 'package:erad/features/customer_debts/data/repositories/customer_debt_repository.dart';
@@ -12,6 +13,7 @@ import 'package:erad/features/customer_debts/presentation/widgets/unpaid_invoice
 import 'package:erad/features/customer_debts/presentation/widgets/payment_history_widget.dart';
 import 'package:erad/features/customer_debts/presentation/widgets/payment_modal_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// صفحة تفاصيل العميل - نظام الديون والمدفوعات
@@ -38,6 +40,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
   List<Map<String, dynamic>> _invoices = [];
   List<Map<String, dynamic>> _payments = [];
   bool _isLoading = true;
+  bool _isGeneratingPdf = false;
 
   bool _showAllInvoices = false;
   bool _showAllPayments = false;
@@ -109,6 +112,49 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
 
   /// إجمالي المتبقي (إجمالي الفواتير - إجمالي المدفوعات)
   double get _remainingDebt => _totalInvoices - _totalPaid;
+
+  Future<void> _generateDebtPdf() async {
+    if (_invoices.isEmpty && _payments.isEmpty) return;
+    setState(() => _isGeneratingPdf = true);
+    try {
+      String companyName = '';
+      final userId = await UserService.getUserId();
+      if (userId != null) {
+        final profile = await _supabase
+            .from('profiles')
+            .select('business_name')
+            .eq('id', userId)
+            .maybeSingle();
+        if (profile != null) {
+          companyName = (profile['business_name'] as String?) ?? '';
+        }
+      }
+
+      final pdfService = PdfInvoiceService();
+      final pdf = await pdfService.generateDebtPdf(
+        companyName: companyName,
+        partyName: widget.customer.name,
+        dateRangeLabel: '',
+        invoices: _invoices,
+        payments: _payments,
+        isSupplier: false,
+      );
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: 'debt_${widget.customer.id}.pdf',
+      );
+    } catch (e) {
+      dev.log('Debt PDF generation failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل إنشاء PDF: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGeneratingPdf = false);
+    }
+  }
 
   /// تبديل عرض جميع الفواتير/المدفوعات
   void _toggleShowAllInvoices() {
@@ -460,6 +506,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> with SingleTick
                     customerName: widget.customer.name,
                     customerPhone: widget.customer.phone ?? '',
                     onBackPressed: () => Navigator.pop(context),
+                    onPdfPressed: _isGeneratingPdf ? null : _generateDebtPdf,
                   ),
                   const SizedBox(height: 16),
                   CustomerSummaryCardsWidget(

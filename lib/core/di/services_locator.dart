@@ -1,5 +1,4 @@
 import 'package:erad/core/constants/api_constans.dart';
-import 'package:erad/core/services/stock_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -72,9 +71,6 @@ Future<void> initServicesLocator() async {
 
   sl.registerLazySingleton(() => AppUtils());
   sl.registerLazySingleton(() => UserService());
-
-  sl.registerLazySingleton(() => StockService(sl()));
-
   // Database
   final db = await AppDatabase.create();
   sl.registerSingleton<AppDatabase>(db);

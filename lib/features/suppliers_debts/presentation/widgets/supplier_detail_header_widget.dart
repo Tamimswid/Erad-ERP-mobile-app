@@ -5,12 +5,14 @@ class SupplierDetailHeaderWidget extends StatelessWidget {
   final String supplierName;
   final String supplierPhone;
   final VoidCallback onBackPressed;
+  final VoidCallback? onPdfPressed;
 
   const SupplierDetailHeaderWidget({
     super.key,
     required this.supplierName,
     required this.supplierPhone,
     required this.onBackPressed,
+    this.onPdfPressed,
   });
 
   @override
@@ -67,6 +69,15 @@ class SupplierDetailHeaderWidget extends StatelessWidget {
               ],
             ),
           ),
+          if (onPdfPressed != null)
+            IconButton(
+              icon: Icon(
+                Icons.picture_as_pdf,
+                color: AppColors.error,
+                size: 24,
+              ),
+              onPressed: onPdfPressed,
+            ),
         ],
       ),
     );

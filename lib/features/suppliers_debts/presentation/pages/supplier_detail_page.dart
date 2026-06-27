@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
+import 'package:erad/core/services/pdf_invoice_service.dart';
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.dart';
 import 'package:erad/features/suppliers_debts/data/repositories/supplier_debt_repository.dart';
@@ -11,6 +13,7 @@ import 'package:erad/features/suppliers_debts/presentation/widgets/unpaid_invoic
 import 'package:erad/features/suppliers_debts/presentation/widgets/payment_history_widget.dart';
 import 'package:erad/features/suppliers_debts/presentation/widgets/payment_modal_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupplierDetailPage extends StatefulWidget {
@@ -35,6 +38,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
   List<Map<String, dynamic>> _invoices = [];
   List<Map<String, dynamic>> _payments = [];
   bool _isLoading = true;
+  bool _isGeneratingPdf = false;
 
   bool _showAllInvoices = false;
   bool _showAllPayments = false;
@@ -98,6 +102,49 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
       _paymentModels.fold(0.0, (sum, p) => sum + p.amount);
 
   double get _remainingDebt => _totalInvoices - _totalPaid;
+
+  Future<void> _generateDebtPdf() async {
+    if (_invoices.isEmpty && _payments.isEmpty) return;
+    setState(() => _isGeneratingPdf = true);
+    try {
+      String companyName = '';
+      final userId = await UserService.getUserId();
+      if (userId != null) {
+        final profile = await _supabase
+            .from('profiles')
+            .select('business_name')
+            .eq('id', userId)
+            .maybeSingle();
+        if (profile != null) {
+          companyName = (profile['business_name'] as String?) ?? '';
+        }
+      }
+
+      final pdfService = PdfInvoiceService();
+      final pdf = await pdfService.generateDebtPdf(
+        companyName: companyName,
+        partyName: widget.supplier.name,
+        dateRangeLabel: '',
+        invoices: _invoices,
+        payments: _payments,
+        isSupplier: true,
+      );
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: 'debt_${widget.supplier.id}.pdf',
+      );
+    } catch (e) {
+      dev.log('Debt PDF generation failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('فشل إنشاء PDF: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGeneratingPdf = false);
+    }
+  }
 
   void _toggleShowAllInvoices() {
     if (mounted) {
@@ -413,6 +460,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
                     supplierName: widget.supplier.name,
                     supplierPhone: widget.supplier.phone ?? '',
                     onBackPressed: () => Navigator.pop(context),
+                    onPdfPressed: _isGeneratingPdf ? null : _generateDebtPdf,
                   ),
                   const SizedBox(height: 16),
                   CustomerSummaryCardsWidget(

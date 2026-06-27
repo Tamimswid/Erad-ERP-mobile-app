@@ -6,6 +6,7 @@ import 'package:arabic_reshaper/arabic_reshaper.dart';
 import 'package:bidi/bidi.dart' as bidi;
 import '../../features/invoices/data/models/sales_invoice.dart';
 import '../../features/invoices/data/models/purchase_invoice.dart';
+import '../utils/number_formatter.dart';
 import '../../features/invoices/data/models/payment_status.dart';
 
 class PdfInvoiceService {
@@ -72,6 +73,368 @@ class PdfInvoiceService {
     );
 
     return pdf;
+  }
+
+  Future<pw.Document> generateStockPdf({
+    required String companyName,
+    required String dateRangeLabel,
+    required List<Map<String, dynamic>> products,
+  }) async {
+    final pdf = pw.Document();
+    final arabicFont = await PdfGoogleFonts.amiriRegular();
+    final arabicBoldFont = await PdfGoogleFonts.amiriBold();
+    final totalQty = products.fold<int>(0, (sum, p) => sum + ((p['total_purchased_qty'] ?? 0) as int));
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        build: (pw.Context context) {
+          return [
+            _buildStockHeader(companyName, dateRangeLabel, arabicBoldFont, arabicFont),
+            pw.SizedBox(height: 16),
+            _buildStockTable(products, arabicBoldFont, arabicFont),
+            pw.SizedBox(height: 16),
+            _buildStockTotal(totalQty, arabicBoldFont, arabicFont),
+          ];
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  pw.Widget _buildStockHeader(
+    String companyName,
+    String dateRangeLabel,
+    pw.Font boldFont,
+    pw.Font font,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.fromLTRB(0, 0, 0, 8),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.end,
+        children: [
+          pw.Text(
+            _processArabicText(companyName.isNotEmpty ? companyName : 'تقرير تتبع المخزون'),
+            style: pw.TextStyle(font: boldFont, fontSize: 14),
+          ),
+          if (dateRangeLabel.isNotEmpty) ...[
+            pw.SizedBox(height: 4),
+            pw.Text(
+              _processArabicText(dateRangeLabel),
+              style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey600),
+            ),
+          ],
+          pw.Divider(thickness: 0.5),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildStockTable(
+    List<Map<String, dynamic>> products,
+    pw.Font boldFont,
+    pw.Font font,
+  ) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(4),
+        1: const pw.FlexColumnWidth(2),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+          children: [
+            _buildStockCell(_processArabicText('الكمية المشتراة'), boldFont, isHeader: true),
+            _buildStockCell(_processArabicText('اسم المنتج'), boldFont, isHeader: true),
+          ],
+        ),
+        ...products.map((p) => pw.TableRow(
+          children: [
+            _buildStockCell('${p['total_purchased_qty'] ?? 0}', font),
+            _buildStockCell(_processArabicText(p['product_display_name'] ?? ''), font),
+          ],
+        )),
+      ],
+    );
+  }
+
+  pw.Widget _buildStockCell(String text, pw.Font font, {bool isHeader = false}) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(8),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: font,
+          fontSize: 11,
+          fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
+        ),
+        textAlign: isHeader ? pw.TextAlign.center : pw.TextAlign.right,
+      ),
+    );
+  }
+
+  pw.Widget _buildStockTotal(int totalQty, pw.Font boldFont, pw.Font font) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(6),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            '$totalQty',
+            style: pw.TextStyle(font: boldFont, fontSize: 13),
+          ),
+          pw.Text(
+            _processArabicText('الإجمالي'),
+            style: pw.TextStyle(font: boldFont, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<pw.Document> generateDebtPdf({
+    required String companyName,
+    required String partyName,
+    required String dateRangeLabel,
+    required List<Map<String, dynamic>> invoices,
+    required List<Map<String, dynamic>> payments,
+    required bool isSupplier,
+  }) async {
+    final pdf = pw.Document();
+    final arabicFont = await PdfGoogleFonts.amiriRegular();
+    final arabicBoldFont = await PdfGoogleFonts.amiriBold();
+
+    final totalInvoices =
+        invoices.fold<double>(0, (sum, inv) => sum + ((inv['total_amount'] ?? 0).toDouble()));
+    final totalPayments =
+        payments.fold<double>(0, (sum, p) => sum + ((p['amount'] ?? 0).toDouble()));
+    final remaining = totalInvoices - totalPayments;
+    final rowCount = invoices.length > payments.length ? invoices.length : payments.length;
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(24),
+        build: (pw.Context context) {
+          return [
+            _buildDebtHeader(companyName, partyName, dateRangeLabel, isSupplier, arabicBoldFont, arabicFont),
+            pw.SizedBox(height: 16),
+            _buildDebtTable(invoices, payments, rowCount, arabicBoldFont, arabicFont),
+            pw.SizedBox(height: 16),
+            _buildDebtTotal(totalInvoices, totalPayments, remaining, arabicBoldFont, arabicFont),
+          ];
+        },
+      ),
+    );
+
+    return pdf;
+  }
+
+  pw.Widget _buildDebtHeader(
+    String companyName,
+    String partyName,
+    String dateRangeLabel,
+    bool isSupplier,
+    pw.Font boldFont,
+    pw.Font font,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.fromLTRB(0, 0, 0, 8),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.end,
+        children: [
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                _processArabicText(isSupplier ? 'تقرير ديون مورد' : 'تقرير ديون مشتري'),
+                style: pw.TextStyle(font: font, fontSize: 11, color: PdfColors.grey700),
+              ),
+              pw.Text(
+                _processArabicText(companyName),
+                style: pw.TextStyle(font: boldFont, fontSize: 14),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            _processArabicText(partyName),
+            style: pw.TextStyle(font: font, fontSize: 11),
+          ),
+          if (dateRangeLabel.isNotEmpty) ...[
+            pw.SizedBox(height: 2),
+            pw.Text(
+              _processArabicText(dateRangeLabel),
+              style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey600),
+            ),
+          ],
+          pw.Divider(thickness: 0.5),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildDebtTable(
+    List<Map<String, dynamic>> invoices,
+    List<Map<String, dynamic>> payments,
+    int rowCount,
+    pw.Font boldFont,
+    pw.Font font,
+  ) {
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.grey300),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(2),
+        1: const pw.FlexColumnWidth(2.5),
+        2: const pw.FlexColumnWidth(2),
+        3: const pw.FlexColumnWidth(2.5),
+        4: const pw.FlexColumnWidth(3),
+      },
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+          children: [
+            _buildTableCellRtl(_processArabicText('مبلغ الدفع'), boldFont, isHeader: true),
+            _buildTableCellRtl(_processArabicText('تاريخ الدفع'), boldFont, isHeader: true),
+            _buildTableCellRtl(_processArabicText('مبلغ الفاتورة'), boldFont, isHeader: true),
+            _buildTableCellRtl(_processArabicText('تاريخ الفاتورة'), boldFont, isHeader: true),
+            _buildTableCellRtl(_processArabicText('رقم الفاتورة'), boldFont, isHeader: true),
+          ],
+        ),
+        ...List.generate(rowCount, (i) {
+          final inv = i < invoices.length ? invoices[i] : null;
+          final pay = i < payments.length ? payments[i] : null;
+
+          return pw.TableRow(
+            children: [
+              _buildTableCellRtl(
+                pay != null ? (pay['amount'] ?? 0).toDouble().toStringAsFixed(2) : '',
+                font,
+              ),
+              _buildTableCellRtl(
+                pay != null ? _formatDateStr('${pay['payment_date'] ?? pay['created_at'] ?? ''}') : '',
+                font,
+              ),
+              _buildTableCellRtl(
+                inv != null ? (inv['total_amount'] ?? 0).toDouble().toStringAsFixed(2) : '',
+                font,
+              ),
+              _buildTableCellRtl(
+                inv != null ? _formatDateStr('${inv['invoice_date'] ?? ''}') : '',
+                font,
+              ),
+              _buildTableCellRtl(
+                inv != null ? '${inv['invoice_number'] ?? ''}' : '',
+                font,
+              ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  pw.Widget _buildTableCellRtl(String text, pw.Font font, {bool isHeader = false}) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(6),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: font,
+          fontSize: 10,
+          fontWeight: isHeader ? pw.FontWeight.bold : pw.FontWeight.normal,
+        ),
+        textAlign: isHeader ? pw.TextAlign.center : pw.TextAlign.right,
+      ),
+    );
+  }
+
+  pw.Widget _buildDebtTotal(
+    double totalInvoices,
+    double totalPayments,
+    double remaining,
+    pw.Font boldFont,
+    pw.Font font,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(12),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.grey300),
+        borderRadius: pw.BorderRadius.circular(6),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.end,
+        children: [
+          _buildDebtTotalRow(
+            _processArabicText('إجمالي الفواتير'),
+            '${totalInvoices.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
+            font,
+          ),
+          pw.SizedBox(height: 4),
+          _buildDebtTotalRow(
+            _processArabicText('إجمالي المدفوعات'),
+            '${totalPayments.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
+            font,
+            valueColor: PdfColors.green,
+          ),
+          pw.Divider(thickness: 0.5),
+          pw.SizedBox(height: 4),
+          _buildDebtTotalRow(
+            _processArabicText('المتبقي'),
+            '${remaining.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
+            boldFont,
+            isBold: true,
+            valueColor: remaining > 0 ? PdfColors.red : PdfColors.green,
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildDebtTotalRow(
+    String label, String value, pw.Font font, {
+    bool isBold = false,
+    PdfColor? valueColor,
+  }) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text(
+          value,
+          style: pw.TextStyle(
+            font: font,
+            fontSize: isBold ? 14 : 13,
+            fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            color: valueColor,
+          ),
+        ),
+        pw.Text(
+          label,
+          style: pw.TextStyle(
+            font: font,
+            fontSize: 13,
+            fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDateStr(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(dateStr);
+      return DateFormat('yyyy-MM-dd').format(dt);
+    } catch (_) {
+      return dateStr.length >= 10 ? dateStr.substring(0, 10) : dateStr;
+    }
   }
 
   pw.Widget _buildReportHeader(
@@ -165,7 +528,7 @@ class PdfInvoiceService {
             style: pw.TextStyle(font: boldFont, fontSize: 13),
           ),
           pw.Text(
-            '${total.toStringAsFixed(2)} ل.س',
+            '${total.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
             style: pw.TextStyle(font: boldFont, fontSize: 13, color: PdfColors.blue),
           ),
         ],
@@ -281,14 +644,14 @@ class PdfInvoiceService {
         children: [
           _buildTotalRow(
             _processArabicText('المجموع الفرعي'),
-            '${subtotal.toStringAsFixed(2)} ل.س',
+            '${subtotal.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
             font,
           ),
           pw.SizedBox(height: 4),
           if (discount > 0) ...[
             _buildTotalRow(
               _processArabicText('الخصم'),
-              '- ${discount.toStringAsFixed(2)} ل.س',
+              '- ${discount.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
               font,
               valueColor: PdfColors.red,
             ),
@@ -298,7 +661,7 @@ class PdfInvoiceService {
           pw.SizedBox(height: 4),
           _buildTotalRow(
             _processArabicText('المجموع الكلي'),
-            '${total.toStringAsFixed(2)} ل.س',
+            '${total.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
             boldFont,
             isBold: true,
             valueColor: PdfColors.blue,

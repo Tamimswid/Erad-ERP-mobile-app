@@ -25,8 +25,10 @@ class SupplierDebtRemoteDataSource {
           .eq('user_id', userId);
 
       return (response as List)
-          .map((json) =>
-              SupplierDebtModel.fromViewMap(json as Map<String, dynamic>))
+          .map(
+            (json) =>
+                SupplierDebtModel.fromViewMap(json as Map<String, dynamic>),
+          )
           .toList();
     } catch (e) {
       log(e.toString());
@@ -68,8 +70,10 @@ class SupplierDebtRemoteDataSource {
           .ilike('supplier_name', '%$query%');
 
       return (response as List)
-          .map((json) =>
-              SupplierDebtModel.fromViewMap(json as Map<String, dynamic>))
+          .map(
+            (json) =>
+                SupplierDebtModel.fromViewMap(json as Map<String, dynamic>),
+          )
           .toList();
     } catch (e) {
       throw exceptionToFailure(e);
@@ -185,10 +189,10 @@ class SupplierDebtRemoteDataSource {
           .eq('id', paymentId)
           .eq('user_id', userId);
 
-      await supabaseClient.rpc('update_supplier_balance', params: {
-        'p_supplier_id': supplierId,
-        'p_amount': amount,
-      });
+      await supabaseClient.rpc(
+        'update_supplier_balance',
+        params: {'p_supplier_id': supplierId, 'p_amount': amount},
+      );
     } catch (e) {
       log(e.toString());
       throw exceptionToFailure(e);
@@ -217,9 +221,11 @@ class SupplierDebtRemoteDataSource {
           .eq('user_id', uid);
 
       subscriptions.add(
-          invoiceStream.listen((_) => _fetchAndEmitSupplierDebts(controller)));
+        invoiceStream.listen((_) => _fetchAndEmitSupplierDebts(controller)),
+      );
       subscriptions.add(
-          paymentStream.listen((_) => _fetchAndEmitSupplierDebts(controller)));
+        paymentStream.listen((_) => _fetchAndEmitSupplierDebts(controller)),
+      );
     });
 
     controller.onCancel = () {
@@ -245,8 +251,10 @@ class SupplierDebtRemoteDataSource {
           .eq('user_id', userId);
 
       final debts = (response as List)
-          .map((json) =>
-              SupplierDebtModel.fromViewMap(json as Map<String, dynamic>))
+          .map(
+            (json) =>
+                SupplierDebtModel.fromViewMap(json as Map<String, dynamic>),
+          )
           .toList();
 
       if (!controller.isClosed) {

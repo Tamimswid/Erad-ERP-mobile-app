@@ -1,5 +1,6 @@
 import 'package:erad/core/constants/app_constants.dart';
-import 'package:erad/features/takrirler/presentation/pages/customer_invoices_page.dart';
+import 'package:erad/features/reports/presentation/pages/customer_invoices_page.dart';
+import 'package:erad/features/reports/presentation/pages/stock_tracking_page.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -48,22 +49,15 @@ class TakrirlerPage extends StatelessWidget {
               ),
             ),
             _ReportCard(
-              icon: Iconsax.money_recive,
-              title: 'ديون مشتري',
-              color: const Color(0xFFEF4444),
-              onTap: () {},
-            ),
-            _ReportCard(
-              icon: Iconsax.money_send,
-              title: 'ديون مورد',
-              color: const Color(0xFFF59E0B),
-              onTap: () {},
-            ),
-            _ReportCard(
               icon: Iconsax.box_search,
               title: 'تتبع المخزون',
               color: const Color(0xFFDE24C8),
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const StockTrackingPage(),
+                ),
+              ),
             ),
           ],
         ),
