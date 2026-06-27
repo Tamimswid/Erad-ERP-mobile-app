@@ -25,7 +25,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   StreamSubscription<Either<Failure, List<PurchaseInvoice>>>? _purchaseSubscription;
 
   // New filtering state
-  String _selectedType = 'all';
+  String _selectedType = 'sale';
   String _selectedStatus = 'all';
   String _searchQuery = '';
   DateTime? _dateFrom;
