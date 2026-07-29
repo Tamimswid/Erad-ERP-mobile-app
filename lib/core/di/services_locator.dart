@@ -47,6 +47,9 @@ import '../../features/dashboard/data/datasource/dashboard_remote_datasource.dar
 import '../../features/dashboard/data/datasource/dashboard_local_datasource.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
+import '../../features/reports/data/datasources/report_remote_datasource.dart';
+import '../../features/reports/data/repositories/report_repository.dart';
+import '../../features/reports/presentation/bloc/party_invoice_cubit.dart';
 
 
 final GetIt sl = GetIt.instance;
@@ -212,5 +215,16 @@ Future<void> initServicesLocator() async {
     customerRepository: sl(),
     productRepository: sl(),
   ));
+
+  // Reports
+  sl.registerLazySingleton<ReportRemoteDataSource>(
+    () => ReportRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<ReportRepository>(
+    () => ReportRepositoryImpl(sl()),
+  );
+
+  sl.registerFactory(() => PartyInvoiceCubit(sl()));
 
 }

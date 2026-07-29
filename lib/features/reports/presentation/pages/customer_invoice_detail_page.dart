@@ -1,18 +1,19 @@
 import 'dart:developer';
 
-import 'package:erad/core/constants/app_constants.dart';
-import 'package:erad/core/services/pdf_invoice_service.dart';
-import 'package:erad/core/services/user_service.dart';
-import 'package:erad/core/widgets/date_filter_sheet.dart';
-import 'package:erad/core/widgets/invoice_card_widget.dart';
-import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
-import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:printing/printing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/di/services_locator.dart';
+import '../../../../core/services/pdf_invoice_service.dart';
+import '../../../../core/services/user_service.dart';
+import '../../../../core/widgets/date_filter_sheet.dart';
+import '../../../../core/widgets/invoice_card_widget.dart';
+import '../bloc/party_invoice_cubit.dart';
 
-class CustomerInvoiceDetailPage extends StatefulWidget {
+class CustomerInvoiceDetailPage extends StatelessWidget {
   final String partyId;
   final String partyName;
   final bool isSupplier;
@@ -25,186 +26,78 @@ class CustomerInvoiceDetailPage extends StatefulWidget {
   });
 
   @override
-  State<CustomerInvoiceDetailPage> createState() =>
-      _CustomerInvoiceDetailPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider<PartyInvoiceCubit>(
+      create: (_) =>
+          sl<PartyInvoiceCubit>()..loadInvoices(partyId, isSupplier),
+      child: _DetailPageBody(
+        partyName: partyName,
+        isSupplier: isSupplier,
+        partyId: partyId,
+      ),
+    );
+  }
 }
 
-class _CustomerInvoiceDetailPageState
-    extends State<CustomerInvoiceDetailPage> {
-  final _supabase = Supabase.instance.client;
+class _DetailPageBody extends StatefulWidget {
+  final String partyName;
+  final bool isSupplier;
+  final String partyId;
 
-  List<dynamic> _invoices = [];
-  List<dynamic> _filteredInvoices = [];
-  bool _isLoading = true;
-  bool _isGeneratingPdf = false;
-
-  DateTimeRange? _customDateRange;
-  bool _isCustomDateRange = false;
-  String? _selectedYear;
-  List<String> _availableYears = [];
+  const _DetailPageBody({
+    required this.partyName,
+    required this.isSupplier,
+    required this.partyId,
+  });
 
   @override
-  void initState() {
-    super.initState();
-    _loadInvoices();
-  }
+  State<_DetailPageBody> createState() => _DetailPageBodyState();
+}
 
-  DateTime _getInvoiceDate(dynamic inv) {
-    if (inv is SalesInvoice) return inv.invoiceDate;
-    if (inv is PurchaseInvoice) return inv.invoiceDate;
-    return DateTime.now();
-  }
-
-  Future<void> _loadInvoices() async {
-    try {
-      final userId = await UserService.getUserId();
-      if (userId == null) return;
-
-      final String table =
-          widget.isSupplier ? 'purchase_invoices' : 'sales_invoices';
-      final String idField =
-          widget.isSupplier ? 'supplier_id' : 'customer_id';
-
-      final response = await _supabase
-          .from(table)
-          .select()
-          .eq('user_id', userId)
-          .eq(idField, widget.partyId)
-          .isFilter('deleted_at', null)
-          .order('invoice_date', ascending: false);
-
-      if (mounted) {
-        final List<dynamic> invoices;
-
-        if (widget.isSupplier) {
-          invoices = (response as List).map((json) {
-            final map = Map<String, dynamic>.from(json);
-            map['supplier_name'] = widget.partyName;
-            return PurchaseInvoice.fromJson(map);
-          }).toList();
-        } else {
-          invoices = (response as List).map((json) {
-            final map = Map<String, dynamic>.from(json);
-            map['customer_name'] = widget.partyName;
-            return SalesInvoice.fromJson(map);
-          }).toList();
-        }
-
-        final years = invoices
-            .map((inv) => _getInvoiceDate(inv).year.toString())
-            .toSet()
-            .toList()
-          ..sort((a, b) => b.compareTo(a));
-
-        setState(() {
-          _invoices = invoices;
-          _filteredInvoices = invoices;
-          _availableYears = years;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      log('Failed to load invoices: $e');
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  void _applyFilter() {
-    List<dynamic> filtered = List.from(_invoices);
-
-    if (_isCustomDateRange && _customDateRange != null) {
-      filtered = filtered.where((inv) {
-        final date = _getInvoiceDate(inv);
-        return !date.isBefore(_customDateRange!.start) &&
-            !date.isAfter(_customDateRange!.end);
-      }).toList();
-    } else if (_selectedYear != null) {
-      filtered = filtered
-          .where(
-              (inv) => _getInvoiceDate(inv).year.toString() == _selectedYear)
-          .toList();
-    }
-
-    setState(() => _filteredInvoices = filtered);
-  }
+class _DetailPageBodyState extends State<_DetailPageBody> {
+  bool _isGeneratingPdf = false;
 
   Future<void> _showDateFilter() async {
-    final now = DateTime.now();
-    final years = _availableYears.isEmpty ? [now.year.toString()] : _availableYears;
+    final cubit = context.read<PartyInvoiceCubit>();
+    final years = cubit.availableYears;
 
     await DateFilterSheet.show(
       context: context,
-      selectedYear: _selectedYear,
+      selectedYear: cubit.selectedYear,
       availableYears: years,
-      customDateRange: _customDateRange,
-      isCustomDateRange: _isCustomDateRange,
-      onYearSelected: (year) {
-        setState(() {
-          _selectedYear = year;
-          _isCustomDateRange = false;
-          _customDateRange = null;
-        });
-        _applyFilter();
-      },
-      onDateRangeSelected: (range) {
-        setState(() {
-          _customDateRange = range;
-          _isCustomDateRange = true;
-          _selectedYear = null;
-        });
-        _applyFilter();
-      },
-      onClearFilter: () {
-        setState(() {
-          _selectedYear = null;
-          _customDateRange = null;
-          _isCustomDateRange = false;
-        });
-        _applyFilter();
-      },
+      customDateRange: cubit.customDateRange,
+      isCustomDateRange: cubit.isCustomDateRange,
+      onYearSelected: (year) => cubit.setYear(year),
+      onDateRangeSelected: (range) => cubit.setCustomDateRange(range),
+      onClearFilter: () => cubit.clearFilter(),
       onDateRangePickerTap: () async {
         final picked = await showDateRangePicker(
           context: context,
           firstDate: DateTime(2020),
           lastDate: DateTime.now().add(const Duration(days: 365)),
-          initialDateRange: _customDateRange,
+          initialDateRange: cubit.customDateRange,
           locale: const Locale('ar'),
         );
         if (picked != null && mounted) {
           Navigator.pop(context);
-          setState(() {
-            _customDateRange = picked;
-            _isCustomDateRange = true;
-            _selectedYear = null;
-          });
-          _applyFilter();
+          cubit.setCustomDateRange(picked);
         }
       },
     );
   }
 
-  String _dateRangeLabel() {
-    if (_isCustomDateRange && _customDateRange != null) {
-      final start = _customDateRange!.start;
-      final end = _customDateRange!.end;
-      return 'من ${start.day}/${start.month}/${start.year} إلى ${end.day}/${end.month}/${end.year}';
-    }
-    if (_selectedYear != null) {
-      return 'السنة: $_selectedYear';
-    }
-    return '';
-  }
-
   Future<void> _generatePdf() async {
-    if (_filteredInvoices.isEmpty) return;
+    final state = context.read<PartyInvoiceCubit>().state;
+    if (state is! PartyInvoiceLoaded || state.invoices.isEmpty) return;
+
     setState(() => _isGeneratingPdf = true);
     try {
+      final cubit = context.read<PartyInvoiceCubit>();
+
       String companyName = '';
       final userId = await UserService.getUserId();
       if (userId != null) {
-        final profile = await _supabase
+        final profile = await Supabase.instance.client
             .from('profiles')
             .select('business_name')
             .eq('id', userId)
@@ -214,12 +107,18 @@ class _CustomerInvoiceDetailPageState
         }
       }
 
+      final dateRangeLabel = cubit.isCustomDateRange && cubit.customDateRange != null
+          ? 'من ${cubit.customDateRange!.start.day}/${cubit.customDateRange!.start.month}/${cubit.customDateRange!.start.year} إلى ${cubit.customDateRange!.end.day}/${cubit.customDateRange!.end.month}/${cubit.customDateRange!.end.year}'
+          : cubit.selectedYear != null
+              ? 'السنة: ${cubit.selectedYear}'
+              : '';
+
       final pdfService = PdfInvoiceService();
       final pdf = await pdfService.generateInvoiceListPdf(
         companyName: companyName,
         partyName: widget.partyName,
-        dateRangeLabel: _dateRangeLabel(),
-        invoices: _filteredInvoices,
+        dateRangeLabel: dateRangeLabel,
+        invoices: state.invoices,
         type: widget.isSupplier ? 'purchase' : 'sale',
       );
 
@@ -241,8 +140,11 @@ class _CustomerInvoiceDetailPageState
 
   @override
   Widget build(BuildContext context) {
-    final hasFilter = _selectedYear != null ||
-        (_isCustomDateRange && _customDateRange != null);
+    final cubit = context.watch<PartyInvoiceCubit>();
+    final state = cubit.state;
+    final type = widget.isSupplier ? 'purchase' : 'sale';
+    final hasFilter = cubit.selectedYear != null ||
+        (cubit.isCustomDateRange && cubit.customDateRange != null);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -262,7 +164,9 @@ class _CustomerInvoiceDetailPageState
           else ...[
             IconButton(
               icon: const Icon(Iconsax.document_download),
-              onPressed: _filteredInvoices.isEmpty ? null : _generatePdf,
+              onPressed: state is PartyInvoiceLoaded && state.invoices.isNotEmpty
+                  ? _generatePdf
+                  : null,
             ),
             Stack(
               children: [
@@ -271,15 +175,17 @@ class _CustomerInvoiceDetailPageState
                   onPressed: _showDateFilter,
                 ),
                 if (hasFilter)
-                  Positioned(
+                  const Positioned(
                     right: 8,
                     top: 8,
-                    child: Container(
+                    child: SizedBox(
                       width: 8,
                       height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
                   ),
@@ -288,38 +194,65 @@ class _CustomerInvoiceDetailPageState
           ],
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _filteredInvoices.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Iconsax.receipt_disscount,
-                          size: 64, color: AppColors.textSecondary),
-                      const SizedBox(height: 16),
-                      Text(
-                        'لا توجد فواتير',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _filteredInvoices.length,
-                  itemBuilder: (context, index) {
-                    final invoice = _filteredInvoices[index];
-                    return InvoiceCardWidget(
-                      invoice: invoice,
-                      type: widget.isSupplier ? 'purchase' : 'sale',
-                      onTap: () {},
-                    );
-                  },
-                ),
+      body: _buildBody(context, state, type),
     );
+  }
+
+  Widget _buildBody(BuildContext context, PartyInvoiceState state, String type) {
+    if (state is PartyInvoiceLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state is PartyInvoiceError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Iconsax.receipt_disscount,
+                size: 64, color: AppColors.textSecondary),
+            const SizedBox(height: 16),
+            Text(
+              state.message,
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state is PartyInvoiceLoaded) {
+      if (state.invoices.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Iconsax.receipt_disscount,
+                  size: 64, color: AppColors.textSecondary),
+              const SizedBox(height: 16),
+              const Text(
+                'لا توجد فواتير',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: state.invoices.length,
+        itemBuilder: (context, index) {
+          final invoice = state.invoices[index];
+          return InvoiceCardWidget(
+            invoice: invoice,
+            type: type,
+            onTap: () {},
+          );
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }
