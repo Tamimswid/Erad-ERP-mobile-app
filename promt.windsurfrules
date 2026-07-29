@@ -1,0 +1,36 @@
+
+### Real-time Implementation Pattern
+```dart
+// Datasource - Real-time streams
+Stream<List<Model>> watchData() async* {
+  yield* client
+      .from('table_name')
+      .select('*')
+      .eq('user_id', userId)
+      .asStream()
+      .map((response) => response.map((item) => Model.fromMap(item)).toList());
+}
+
+// Repository - Stream wrapper
+Stream<Either<Failure, List<Model>>> watchData() {
+  try {
+    return remoteDataSource.watchData().map((data) => Right(data));
+  } catch (e) {
+    return Stream.value(Left(exceptionToFailure(e)));
+  }
+}
+
+// UI - BlocConsumer for real-time updates
+BlocConsumer<FeatureCubit, FeatureState>(
+  listener: (context, state) {
+    if (state is FeatureError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.message)),
+      );
+    }
+  },
+  builder: (context, state) {
+    // Build UI based on state
+  },
+)
+```
