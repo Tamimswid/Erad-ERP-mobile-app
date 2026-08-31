@@ -18,9 +18,6 @@ class DashboardLoading extends DashboardState {
 class DashboardLoaded extends DashboardState {
   final DashboardFinancialsModel financials;
   final List<DashboardProductStockModel> productStock;
-  final int totalCustomers;
-  final int totalProducts;
-  final List<Map<String, dynamic>> recentInvoices;
   final String selectedYear;
   final DateTimeRange? customDateRange;
   final bool isCustomDateRange;
@@ -28,9 +25,6 @@ class DashboardLoaded extends DashboardState {
   const DashboardLoaded({
     required this.financials,
     this.productStock = const [],
-    this.totalCustomers = 0,
-    this.totalProducts = 0,
-    this.recentInvoices = const [],
     required this.selectedYear,
     this.customDateRange,
     this.isCustomDateRange = false,
@@ -49,9 +43,6 @@ class DashboardLoaded extends DashboardState {
   DashboardLoaded copyWith({
     DashboardFinancialsModel? financials,
     List<DashboardProductStockModel>? productStock,
-    int? totalCustomers,
-    int? totalProducts,
-    List<Map<String, dynamic>>? recentInvoices,
     String? selectedYear,
     DateTimeRange? customDateRange,
     bool? isCustomDateRange,
@@ -59,9 +50,6 @@ class DashboardLoaded extends DashboardState {
     return DashboardLoaded(
       financials: financials ?? this.financials,
       productStock: productStock ?? this.productStock,
-      totalCustomers: totalCustomers ?? this.totalCustomers,
-      totalProducts: totalProducts ?? this.totalProducts,
-      recentInvoices: recentInvoices ?? this.recentInvoices,
       selectedYear: selectedYear ?? this.selectedYear,
       customDateRange: customDateRange ?? this.customDateRange,
       isCustomDateRange: isCustomDateRange ?? this.isCustomDateRange,
@@ -72,9 +60,6 @@ class DashboardLoaded extends DashboardState {
   List<Object?> get props => [
         financials,
         productStock,
-        totalCustomers,
-        totalProducts,
-        recentInvoices,
         selectedYear,
         customDateRange,
         isCustomDateRange,

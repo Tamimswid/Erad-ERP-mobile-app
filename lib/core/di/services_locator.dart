@@ -211,9 +211,6 @@ Future<void> initServicesLocator() async {
 
   sl.registerFactory(() => DashboardCubit(
     dashboardRepository: sl(),
-    invoiceRepository: sl(),
-    customerRepository: sl(),
-    productRepository: sl(),
   ));
 
   // Reports

@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../invoices/data/models/sales_invoice.dart';
-import '../../../invoices/data/models/invoice_status.dart';
-
 import 'package:intl/intl.dart';
 
 /// Dashboard tarih filtresi için yardımcı sınıf.
@@ -17,15 +14,11 @@ class DashboardFilterHelper {
   }
 
   /// Verilen tarihin belirtilen aralık içinde (dahil) olup olmadığını kontrol eder.
-  /// 
-  /// Başlangıç ve bitiş tarihleri dahildir (!isBefore / !isAfter kullanır).
   static bool isInDateRange(DateTime date, DateTimeRange range) {
     return !date.isBefore(range.start) && !date.isAfter(range.end);
   }
 
   /// Belirtilen yıl için varsayılan tarih aralığını döndürür.
-  /// 
-  /// Yıl başından yıl sonuna kadar (1 Ocak - 31 Aralık) aralık döndürür.
   static DateTimeRange getDefaultDateRangeForYear(String year) {
     final yearInt = int.tryParse(year) ?? DateTime.now().year;
     return DateTimeRange(
@@ -35,8 +28,6 @@ class DashboardFilterHelper {
   }
 
   /// Aktif tarih aralığını belirler.
-  /// 
-  /// Custom date range varsa onu, yoksa yıl bazlı varsayılan aralığı döndürür.
   static DateTimeRange getActiveDateRange({
     required String selectedYear,
     DateTimeRange? customDateRange,
@@ -45,37 +36,6 @@ class DashboardFilterHelper {
       return customDateRange;
     }
     return getDefaultDateRangeForYear(selectedYear);
-  }
-
-  /// Satış faturalarını tarih aralığına göre filtreler.
-  /// 
-  /// Yalnızca tamamlanmış (completed) faturaları dahil eder.
-  static List<SalesInvoice> filterSalesInvoices({
-    required List<SalesInvoice> invoices,
-    required DateTimeRange dateRange,
-  }) {
-    return invoices
-        .where((invoice) =>
-            invoice.status == InvoiceStatus.completed &&
-            isInDateRange(invoice.invoiceDate, dateRange))
-        .toList()
-      ..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
-  }
-
-  /// Filtrelenmiş faturalardan son N tanesini formatlanmış data olarak döndürür.
-  static List<Map<String, dynamic>> getRecentInvoicesData({
-    required List<SalesInvoice> invoices,
-    required DateTimeRange dateRange,
-    int limit = 5,
-  }) {
-    final filtered = filterSalesInvoices(invoices: invoices, dateRange: dateRange);
-    return filtered.take(limit).map((i) => {
-      'invoiceNumber': i.invoiceNumber,
-      'customerName': i.customerName ?? 'غير معروف',
-      'totalAmount': i.totalAmount,
-      'date': i.invoiceDate,
-      'status': i.paymentStatus.name,
-    }).toList();
   }
 
   /// Kullanılabilir yılları döndürür (mevcut yıl ve önceki 2 yıl).
