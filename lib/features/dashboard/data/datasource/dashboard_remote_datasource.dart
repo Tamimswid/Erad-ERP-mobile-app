@@ -5,7 +5,10 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/services/user_service.dart';
 
 abstract class DashboardRemoteDataSource {
-  Future<DashboardFinancialsModel> getFinancials();
+  Future<DashboardFinancialsModel> getFinancials({
+    required String startDate,
+    required String endDate,
+  });
   Future<List<DashboardProductStockModel>> getProductStock();
 }
 
@@ -15,22 +18,27 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   DashboardRemoteDataSourceImpl(this.client);
 
   @override
-  Future<DashboardFinancialsModel> getFinancials() async {
+  Future<DashboardFinancialsModel> getFinancials({
+    required String startDate,
+    required String endDate,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final response = await client
-          .from('dashboard_financials')
-          .select()
-          .eq('user_id', userId)
-          .maybeSingle();
+      final response = await client.rpc('get_dashboard_financials', params: {
+        'p_user_id': userId,
+        'p_start_date': startDate,
+        'p_end_date': endDate,
+      });
 
       if (response == null) {
         return DashboardFinancialsModel(userId: userId);
       }
 
-      return DashboardFinancialsModel.fromMap(response);
+      // RPC tek bir obje döndürebilir veya listede olabilir
+      final data = response is List ? response.first : response;
+      return DashboardFinancialsModel.fromMap(data as Map<String, dynamic>);
     } catch (e) {
       throw exceptionToFailure(e);
     }

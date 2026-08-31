@@ -14,10 +14,16 @@ class DashboardRepository {
 
   DashboardRepository(this.remoteDataSource, this.localDataSource, this.networkInfo);
 
-  Future<Either<Failure, DashboardFinancialsModel>> getFinancials() async {
+  Future<Either<Failure, DashboardFinancialsModel>> getFinancials({
+    required String startDate,
+    required String endDate,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final financials = await remoteDataSource.getFinancials();
+        final financials = await remoteDataSource.getFinancials(
+          startDate: startDate,
+          endDate: endDate,
+        );
         final userId = await UserService.getUserId();
         if (userId != null) {
           await localDataSource.cacheFinancials(userId, financials);

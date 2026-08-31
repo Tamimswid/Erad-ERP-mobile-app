@@ -385,8 +385,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           return false;
         }
 
-        if (_dateFrom != null && invoiceDate.isBefore(_dateFrom!)) return false;
-        if (_dateTo != null && invoiceDate.isAfter(_dateTo!)) return false;
+        if (_dateFrom != null && !invoiceDate.isAfter(_dateFrom!)) return false;
+        if (_dateTo != null && !invoiceDate.isBefore(_dateTo!)) return false;
       }
 
       return true;

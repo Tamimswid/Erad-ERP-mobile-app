@@ -3,7 +3,6 @@ import 'package:erad/core/di/services_locator.dart' as sl;
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:erad/features/auth/presentation/pages/login_page.dart';
-
 import 'package:erad/features/customers/presentation/pages/customers_page.dart';
 import 'package:erad/features/customer_debts/presentation/pages/customer_debts_page.dart';
 import 'package:erad/features/dashboard/presentation/pages/dashboard_page.dart';

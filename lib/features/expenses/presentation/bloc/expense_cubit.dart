@@ -99,9 +99,13 @@ class ExpenseCubit extends Cubit<ExpenseState> {
   List<Expense> _getFilteredExpenses() {
     final filtered = _expenses.where((expense) {
       // Date filter
-      if (_startDate != null && _endDate != null) {
-        final expenseDate = expense.expenseDate;
-        if (expenseDate.isBefore(_startDate!) || expenseDate.isAfter(_endDate!)) {
+      if (_startDate != null) {
+        if (expense.expenseDate.isBefore(_startDate!)) {
+          return false;
+        }
+      }
+      if (_endDate != null) {
+        if (expense.expenseDate.isAfter(_endDate!)) {
           return false;
         }
       }

@@ -85,13 +85,13 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
 
     if (_startDate != null) {
       filteredWithdrawals = filteredWithdrawals
-          .where((w) => w.withdrawalDate.isAfter(_startDate!))
+          .where((w) => !w.withdrawalDate.isBefore(_startDate!))
           .toList();
     }
 
     if (_endDate != null) {
       filteredWithdrawals = filteredWithdrawals
-          .where((w) => w.withdrawalDate.isBefore(_endDate!))
+          .where((w) => !w.withdrawalDate.isAfter(_endDate!))
           .toList();
     }
 
