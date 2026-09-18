@@ -540,11 +540,11 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         measurement: item.measurement,
         unit: item.unit,
         productId: item.productId,
-        productName: item.productName,
-        quantity: item.quantity,
+        productName: item.productName ?? 'null_data',
+        quantity: item.quantity ?? 0,
         unitPrice: newPrice,
-        purchasePrice: item.purchasePrice,
-        totalPrice: newPrice * item.quantity,
+        purchasePrice: item.purchasePrice ?? 0.0,
+        totalPrice: newPrice * (item.quantity ?? 0).toDouble(),
       );
       _calculateAndUpdateTotals();
       emit(InvoiceFormUpdated(updateType: 'updatePrice'));
@@ -655,7 +655,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   // Calculation methods
   double calculateSubtotal() {
-    return _invoiceItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
+    return _invoiceItems.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0.0));
   }
 
   double calculateDiscountAmount() {
@@ -723,7 +723,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
       print('DEBUG: Payment Status: ${_getPaymentStatus()}');
       print('DEBUG: Invoice Number: $invoiceNumber');
       print('DEBUG: Items count: ${_invoiceItems.length}');
-      print('DEBUG: Items total purchase: ${_invoiceItems.fold(0.0, (sum, item) => sum + (item.purchasePrice * item.quantity))}');
+      print('DEBUG: Items total purchase: ${_invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0)))}');
 
       if (_invoiceType == 'sale') {
         final salesInvoice = SalesInvoice(
@@ -763,8 +763,8 @@ items: _invoiceItems
                 ),
               )
               .toList(),
-          totalPurchaseAmount: _invoiceItems.fold(0.0, (sum, item) => sum + (item.purchasePrice * item.quantity)),
-          profit: calculateGrandTotal() - _invoiceItems.fold(0.0, (sum, item) => sum + (item.purchasePrice * item.quantity)),
+          totalPurchaseAmount: _invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0))),
+          profit: calculateGrandTotal() - _invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0))),
         );
 
         print('DEBUG: Creating sales invoice: ${salesInvoice.toJson()}');

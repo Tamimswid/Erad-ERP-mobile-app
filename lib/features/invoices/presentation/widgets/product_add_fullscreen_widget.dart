@@ -503,7 +503,7 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
                                 Row(
                                   children: [
                                     Text(
-                                      'السعر: ${NumberFormatter.format(item.unitPrice)} ${NumberFormatter.getCurrencySymbol()}',
+                                       'السعر: ${NumberFormatter.format(item.unitPrice?.toDouble() ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
                                       style: TextStyle(
                                         color: AppColors.textSecondary,
                                         fontSize: 12,
@@ -515,7 +515,7 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
                             ),
                           ),
                           Text(
-                            '${NumberFormatter.format(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
+                             '${NumberFormatter.format(item.totalPrice?.toDouble() ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
                             style: const TextStyle(
                               fontWeight: AppFonts.fontWeightBold,
                               color: AppColors.primary,

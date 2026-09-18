@@ -40,10 +40,6 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
   bool _isLoading = true;
   bool _isGeneratingPdf = false;
 
-  bool _showAllInvoices = false;
-  bool _showAllPayments = false;
-  static const int _initialDisplayCount = 5;
-
   StreamSubscription<List<Map<String, dynamic>>>? _invoicesSubscription;
   StreamSubscription<List<Map<String, dynamic>>>? _paymentsSubscription;
 
@@ -69,31 +65,11 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
         .toList();
   }
 
-  List<PurchaseInvoiceModel> get _displayedInvoices {
-    final all = _invoiceModels;
-    if (_showAllInvoices || all.length <= _initialDisplayCount) {
-      return all;
-    }
-    return all.take(_initialDisplayCount).toList();
-  }
-
-  bool get _hasMoreInvoices => _invoiceModels.length > _initialDisplayCount;
-
   List<SupplierPaymentModel> get _paymentModels {
     return _payments
         .map((payment) => SupplierPaymentModel.fromMap(payment))
         .toList();
   }
-
-  List<SupplierPaymentModel> get _displayedPayments {
-    final all = _paymentModels;
-    if (_showAllPayments || all.length <= _initialDisplayCount) {
-      return all;
-    }
-    return all.take(_initialDisplayCount).toList();
-  }
-
-  bool get _hasMorePayments => _paymentModels.length > _initialDisplayCount;
 
   double get _totalInvoices =>
       _invoiceModels.fold(0.0, (sum, inv) => sum + inv.totalAmount);
@@ -143,22 +119,6 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
       }
     } finally {
       if (mounted) setState(() => _isGeneratingPdf = false);
-    }
-  }
-
-  void _toggleShowAllInvoices() {
-    if (mounted) {
-      setState(() {
-        _showAllInvoices = !_showAllInvoices;
-      });
-    }
-  }
-
-  void _toggleShowAllPayments() {
-    if (mounted) {
-      setState(() {
-        _showAllPayments = !_showAllPayments;
-      });
     }
   }
 
@@ -519,17 +479,9 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
       child: Column(
         children: [
           UnpaidInvoicesWidget(
-            invoices: _displayedInvoices,
+            invoices: _invoiceModels,
             onQuickPay: widget.isLocal ? (_) {} : (invoiceId) => _showPaymentModal(),
           ),
-          if (_hasMoreInvoices)
-            _buildShowMoreButton(
-              isShowingAll: _showAllInvoices,
-              totalCount: _invoiceModels.length,
-              displayedCount: _displayedInvoices.length,
-              onToggle: _toggleShowAllInvoices,
-              itemType: 'فاتورة',
-            ),
           const SizedBox(height: 16),
         ],
       ),
@@ -541,57 +493,12 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> with SingleTick
       child: Column(
         children: [
           PaymentHistoryWidget(
-            payments: _displayedPayments,
+            payments: _paymentModels,
             onAddPayment: widget.isLocal ? null : _showPaymentModal,
             onDeletePayment: _deletePayment,
           ),
-          if (_hasMorePayments)
-            _buildShowMoreButton(
-              isShowingAll: _showAllPayments,
-              totalCount: _paymentModels.length,
-              displayedCount: _displayedPayments.length,
-              onToggle: _toggleShowAllPayments,
-              itemType: 'دفعة',
-            ),
           const SizedBox(height: 16),
         ],
-      ),
-    );
-  }
-
-  Widget _buildShowMoreButton({
-    required bool isShowingAll,
-    required int totalCount,
-    required int displayedCount,
-    required VoidCallback onToggle,
-    required String itemType,
-  }) {
-    final remainingCount = totalCount - displayedCount;
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: TextButton.icon(
-        onPressed: onToggle,
-        icon: Icon(
-          isShowingAll ? Icons.expand_less : Icons.expand_more,
-          color: AppColors.primary,
-        ),
-        label: Text(
-          isShowingAll
-              ? 'إظهار أقل'
-              : 'عرض $remainingCount $itemType أخرى',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
       ),
     );
   }

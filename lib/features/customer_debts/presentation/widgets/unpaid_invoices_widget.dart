@@ -23,10 +23,8 @@ class UnpaidInvoicesWidget extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => InvoiceDetailPage(
-          invoiceId: invoice.id,
-          type: 'sale',
-        ),
+        builder: (context) =>
+            InvoiceDetailPage(invoiceId: invoice.id, type: 'sale'),
       ),
     );
   }
@@ -92,49 +90,47 @@ class UnpaidInvoicesWidget extends StatelessWidget {
           ),
 
           // Content
-          SizedBox(
-            height: 420,
-            child: unpaidInvoices.isEmpty
-                ? Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle_outline,
-                            color: AppColors.success,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'لا توجد فواتير ديون',
-                            style: TextStyle(
-                              fontSize: AppFonts.fontSizeMedium,
-                              color: AppColors.success,
-                              fontWeight: AppFonts.fontWeightMedium,
-                            ),
-                          ),
-                        ],
+          unpaidInvoices.isEmpty
+              ? Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
                       ),
                     ),
-                  )
-                : ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: unpaidInvoices.length,
-                    itemBuilder: (context, index) {
-                      final invoice = unpaidInvoices[index];
-                      return _buildInvoiceItem(context, invoice, index);
-                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: AppColors.success,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'لا توجد فواتير ديون',
+                          style: TextStyle(
+                            fontSize: AppFonts.fontSizeMedium,
+                            color: AppColors.success,
+                            fontWeight: AppFonts.fontWeightMedium,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-          ),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  itemCount: unpaidInvoices.length,
+                  itemBuilder: (context, index) {
+                    final invoice = unpaidInvoices[index];
+                    return _buildInvoiceItem(context, invoice, index);
+                  },
+                ),
         ],
       ),
     );

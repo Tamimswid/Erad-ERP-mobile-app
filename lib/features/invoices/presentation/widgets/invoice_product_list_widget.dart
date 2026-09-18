@@ -195,7 +195,7 @@ class InvoiceProductListWidget extends StatelessWidget {
           // Unit Price
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(item.unitPrice)} ${NumberFormatter.getCurrencySymbol()}',
+              '${AppUtils.formatNumber(item.unitPrice??0.0)} ${NumberFormatter.getCurrencySymbol()}',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
@@ -207,7 +207,7 @@ class InvoiceProductListWidget extends StatelessWidget {
           // Total
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()} ',
+              '${AppUtils.formatNumber(item.totalPrice??0.0)} ${NumberFormatter.getCurrencySymbol()} ',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,

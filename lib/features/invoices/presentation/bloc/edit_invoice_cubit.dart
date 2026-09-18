@@ -219,7 +219,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
   }
 
   double _calculateSubtotal() {
-    return _items.fold<double>(0, (sum, item) => sum + item.totalPrice);
+    return _items.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0.0));
   }
 
   double _calculateTotal() {

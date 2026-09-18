@@ -198,39 +198,37 @@ class PaymentHistoryWidget extends StatelessWidget {
           ),
 
           // Content
-          SizedBox(
-            height: 420,
-            child: payments.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inbox_outlined,
-                          size: 32,
-                          color: AppColors.textSecondary.withOpacity(0.4),
+          payments.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.inbox_outlined,
+                        size: 32,
+                        color: AppColors.textSecondary.withOpacity(0.4),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'لا توجد مدفوعات',
+                        style: TextStyle(
+                          fontSize: AppFonts.fontSizeMedium,
+                          color: AppColors.textSecondary,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'لا توجد مدفوعات',
-                          style: TextStyle(
-                            fontSize: AppFonts.fontSizeMedium,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
-                    itemCount: payments.length,
-                    itemBuilder: (context, index) {
-                      final payment = payments[index];
-                      return _buildPaymentItem(context, payment, index);
-                    },
+                      ),
+                    ],
                   ),
-          ),
+                )
+              : ListView.builder(
+                shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  itemCount: payments.length,
+                  itemBuilder: (context, index) {
+                    final payment = payments[index];
+                    return _buildPaymentItem(context, payment, index);
+                  },
+                ),
         ],
       ),
     );

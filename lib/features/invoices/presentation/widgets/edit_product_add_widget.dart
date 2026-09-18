@@ -552,7 +552,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
 
     for (int i = 0; i < items.length; i++) {
       if (!_priceControllers.containsKey(i)) {
-        _priceControllers[i] = TextEditingController(text: items[i].unitPrice.toStringAsFixed(2));
+        _priceControllers[i] = TextEditingController(text: items[i].unitPrice?.toStringAsFixed(2) ?? "0.00");
       }
     }
 
@@ -581,7 +581,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        Text(item.productName??'', style: const TextStyle(fontWeight: FontWeight.w600)),
                         Text(item.unit ?? '', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                       ],
                     ),
@@ -662,15 +662,15 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                                 final updatedItem = InvoiceItem(
                                   id: item.id,
                                   productId: item.productId,
-                                  productName: item.productName,
-                                  quantity: item.quantity,
-                                  unitPrice: newPrice,
-                                  purchasePrice: item.purchasePrice,
-                                  discountAmount: item.discountAmount,
-                                  totalPrice: item.quantity * newPrice,
-                                  unit: item.unit,
-                                  measurement: item.measurement,
-                                  createdAt: item.createdAt,
+                                   productName: item.productName ?? 'null_data',
+                                   quantity: item.quantity ?? 0,
+                                   unitPrice: newPrice,
+                                   purchasePrice: item.purchasePrice ?? 0.0,
+                                   discountAmount: item.discountAmount ?? 0.0,
+                                   totalPrice: (item.quantity?.toDouble() ?? 0.0) * newPrice,
+                                   unit: item.unit ?? 'null_data',
+                                   measurement: item.measurement ?? 'null_data',
+                                   createdAt: item.createdAt,
                                 );
                                 context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
                               }
@@ -688,7 +688,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                         Text('الإجمالي', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         const SizedBox(height: 4),
                         Text(
-                          '${item.totalPrice.toStringAsFixed(2)} ${NumberFormatter.getCurrencySymbol()}',
+                          '${item.totalPrice?.toStringAsFixed(2) ?? "0.00"} ${NumberFormatter.getCurrencySymbol()}',
                           style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
                         ),
                       ],
@@ -737,15 +737,15 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                         final updatedItem = InvoiceItem(
                           id: item.id,
                           productId: item.productId,
-                          productName: item.productName,
-                          quantity: newQuantity,
-                          unitPrice: item.unitPrice,
-                          purchasePrice: item.purchasePrice,
-                          discountAmount: item.discountAmount,
-                          totalPrice: newQuantity * item.unitPrice,
-                          unit: item.unit,
-                          measurement: item.measurement,
-                          createdAt: item.createdAt,
+                           productName: item.productName ?? 'null_data',
+                           quantity: newQuantity,
+                           unitPrice: item.unitPrice ?? 0.0,
+                           purchasePrice: item.purchasePrice ?? 0.0,
+                           discountAmount: item.discountAmount ?? 0.0,
+                           totalPrice: newQuantity.toDouble() * (item.unitPrice ?? 0.0),
+                           unit: item.unit ?? 'null_data',
+                           measurement: item.measurement ?? 'null_data',
+                           createdAt: item.createdAt,
                         );
                         this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
                       }
@@ -763,7 +763,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
   }
 
   void _showEditPriceDialog(int index, InvoiceItem item) {
-    final priceController = TextEditingController(text: item.unitPrice.toString());
+    final priceController = TextEditingController(text: item.unitPrice?.toStringAsFixed(2) ?? "0.00");
     
     showDialog(
       context: context,
@@ -796,15 +796,15 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                         final updatedItem = InvoiceItem(
                           id: item.id,
                           productId: item.productId,
-                          productName: item.productName,
-                          quantity: item.quantity,
-                          unitPrice: newPrice,
-                          purchasePrice: item.purchasePrice,
-                          discountAmount: item.discountAmount,
-                          totalPrice: item.quantity * newPrice,
-                          unit: item.unit,
-                          measurement: item.measurement,
-                          createdAt: item.createdAt,
+                           productName: item.productName ?? 'null_data',
+                           quantity: item.quantity ?? 0,
+                           unitPrice: newPrice,
+                           purchasePrice: item.purchasePrice ?? 0.0,
+                           discountAmount: item.discountAmount ?? 0.0,
+                           totalPrice: (item.quantity?.toDouble() ?? 0.0) * newPrice,
+                           unit: item.unit ?? 'null_data',
+                           measurement: item.measurement ?? 'null_data',
+                           createdAt: item.createdAt,
                         );
                         this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
                       }

@@ -418,10 +418,10 @@ class _QuickProductAddCardSimpleState extends State<QuickProductAddCardSimple> {
               ),
               child: Row(
                 children: [
-                  Expanded(flex: 3, child: Text(item.productName)),
-                  Expanded(flex: 1, child: Text(item.quantity.toString(), textAlign: TextAlign.center)),
-                  Expanded(flex: 1, child: Text(item.unitPrice.toStringAsFixed(2), textAlign: TextAlign.right)),
-                  Expanded(flex: 1, child: Text(item.totalPrice.toStringAsFixed(2), textAlign: TextAlign.right)),
+                  Expanded(flex: 3, child: Text(item.productName ?? 'null_data')),
+                  Expanded(flex: 1, child: Text((item.quantity ?? 0).toString(), textAlign: TextAlign.center)),
+                  Expanded(flex: 1, child: Text((item.unitPrice ?? 0.0).toStringAsFixed(2), textAlign: TextAlign.right)),
+                  Expanded(flex: 1, child: Text((item.totalPrice ?? 0.0).toStringAsFixed(2), textAlign: TextAlign.right)),
                   Expanded(
                     flex: 1,
                     child: Row(
@@ -452,7 +452,7 @@ class _QuickProductAddCardSimpleState extends State<QuickProductAddCardSimple> {
                 Expanded(
                   flex: 1,
                   child: Text(
-                    widget.items.fold<double>(0, (sum, item) => sum + item.totalPrice).toStringAsFixed(2),
+                     widget.items.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0.0)).toStringAsFixed(2),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.right,
                   ),

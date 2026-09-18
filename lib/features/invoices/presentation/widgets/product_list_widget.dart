@@ -91,11 +91,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
               color: AppColors.error,
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
-              child: const Icon(
-                Icons.delete,
-                color: Colors.white,
-                size: 24,
-              ),
+              child: const Icon(Icons.delete, color: Colors.white, size: 24),
             ),
             onDismissed: (direction) {
               _removeItem(index);
@@ -124,7 +120,10 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
@@ -140,7 +139,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${AppUtils.formatNumber(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
+                         '${AppUtils.formatNumber(item.totalPrice?.toDouble() ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
                         style: const TextStyle(
                           fontWeight: AppFonts.fontWeightBold,
                           color: AppColors.primary,
@@ -172,7 +171,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
               ),
             ),
           );
-        }).toList(),
+        }),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -205,12 +204,14 @@ class _ProductListWidgetState extends State<ProductListWidget> {
     );
   }
 
-
-
-  Widget _buildEditablePrice(int index, InvoiceItem item, {bool isMobile = false}) {
+  Widget _buildEditablePrice(
+    int index,
+    InvoiceItem item, {
+    bool isMobile = false,
+  }) {
     if (!_priceControllers.containsKey(index)) {
       _priceControllers[index] = TextEditingController(
-        text: item.unitPrice.toStringAsFixed(2),
+        text: item.unitPrice?.toStringAsFixed(2) ?? '0.00',
       );
     }
 
@@ -228,7 +229,10 @@ class _ProductListWidgetState extends State<ProductListWidget> {
         ),
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 8,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(6),
             borderSide: BorderSide(color: AppColors.primary),
@@ -264,7 +268,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
           border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
         ),
         child: Text(
-          NumberFormatter.format(item.unitPrice),
+          NumberFormatter.format(item.unitPrice?.toDouble() ?? 0.0),
           style: const TextStyle(
             fontWeight: AppFonts.fontWeightSemiBold,
             color: AppColors.text,

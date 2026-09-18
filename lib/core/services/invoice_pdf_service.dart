@@ -128,10 +128,10 @@ class InvoicePdfService {
                   // Items
                   ...invoice.items.map((item) => pw.TableRow(
                     children: [
-                      _buildTableCell(item.productName),
-                      _buildTableCell(item.quantity.toString()),
-                      _buildTableCell('${item.unitPrice.toStringAsFixed(2)}'),
-                      _buildTableCell('${item.totalPrice.toStringAsFixed(2)}'),
+                       _buildTableCell(item.productName ?? 'null_data'),
+                       _buildTableCell((item.quantity ?? 0).toString()),
+                       _buildTableCell('${(item.unitPrice ?? 0.0).toStringAsFixed(2)}'),
+                       _buildTableCell('${(item.totalPrice ?? 0.0).toStringAsFixed(2)}'),
                     ],
                   ))
                 ],

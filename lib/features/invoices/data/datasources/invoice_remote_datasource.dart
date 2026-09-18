@@ -148,15 +148,15 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
             .map(
               (item) => {
                 'invoice_id': response['id'],
-                'product_id': item.productId,
-                'product_name': item.productName,
-                'quantity': item.quantity,
-                'unit_price': item.unitPrice.toDouble(),
-                'purchase_price': item.purchasePrice.toDouble(),
-                'discount_amount': item.discountAmount.toDouble(),
-                'total_price': item.totalPrice.toDouble(),
-                'measurement': item.measurement,
-                'unit': item.unit,
+                'product_id': item.productId ?? 'null_data',
+                'product_name': item.productName ?? 'null_data',
+                'quantity': item.quantity ?? 0,
+                'unit_price': item.unitPrice?.toDouble() ?? 0.0,
+                'purchase_price': item.purchasePrice?.toDouble() ?? 0.0,
+                'discount_amount': item.discountAmount?.toDouble() ?? 0.0,
+                'total_price': item.totalPrice?.toDouble() ?? 0.0,
+                'measurement': item.measurement ?? 'null_data',
+                'unit': item.unit ?? 'null_data',
               },
             )
             .toList();
@@ -166,11 +166,8 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
 
       log('Stock şimdilik donduruldu - Invoice status = ${invoice.status}');
 
-      final completeInvoice = await _supabaseClient
-          .from('sales_invoices')
-          .select('*, customers(name), sales_invoice_items(*)')
-          .eq('id', response['id'])
-          .single();
+      final completeInvoice = Map<String, dynamic>.from(response);
+      completeInvoice['items'] = itemsData;
 
       return _mapJsonToSalesInvoice(completeInvoice);
     } catch (e) {
@@ -201,14 +198,14 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
             .map(
               (item) => {
                 'invoice_id': response['id'],
-                'product_id': item.productId,
-                'product_name': item.productName,
-                'quantity': item.quantity,
-                'unit_price': item.unitPrice.toDouble(),
-                'purchase_price': item.purchasePrice.toDouble(),
-                'total_price': item.totalPrice.toDouble(),
-                'measurement': item.measurement,
-                'unit': item.unit,
+                'product_id': item.productId ?? 'null_data',
+                'product_name': item.productName ?? 'null_data',
+                'quantity': item.quantity ?? 0,
+                'unit_price': item.unitPrice?.toDouble() ?? 0.0,
+                'purchase_price': item.purchasePrice?.toDouble() ?? 0.0,
+                'total_price': item.totalPrice?.toDouble() ?? 0.0,
+                'measurement': item.measurement ?? 'null_data',
+                'unit': item.unit ?? 'null_data',
               },
             )
             .toList();
@@ -222,11 +219,8 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
 
       log('Stock şimdilik donduruldu - Creating purchase invoice');
 
-      final completeInvoice = await _supabaseClient
-          .from('purchase_invoices')
-          .select('*, suppliers(name), purchase_invoice_items(*)')
-          .eq('id', response['id'])
-          .single();
+      final completeInvoice = Map<String, dynamic>.from(response);
+      completeInvoice['items'] = itemsData;
 
       return _mapJsonToPurchaseInvoice(completeInvoice);
     } catch (e) {

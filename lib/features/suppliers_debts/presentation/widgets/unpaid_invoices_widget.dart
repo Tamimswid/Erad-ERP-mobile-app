@@ -73,42 +73,40 @@ class UnpaidInvoicesWidget extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
-            height: 420,
-            child: unpaidInvoices.isEmpty
-                ? Center(
-                    child: Container(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.check_circle_outline,
-                            size: 48,
-                            color: AppColors.success,
+          unpaidInvoices.isEmpty
+              ? Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 48,
+                          color: AppColors.success,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'لا توجد فواتير مستحقة',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: AppFonts.fontSizeMedium,
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'لا توجد فواتير مستحقة',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: AppFonts.fontSizeMedium,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  )
-                : ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemCount: unpaidInvoices.length,
-                    itemBuilder: (context, index) {
-                      final invoice = unpaidInvoices[index];
-                      return _buildInvoiceItem(context, invoice);
-                    },
                   ),
-          ),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.zero,
+                  itemCount: unpaidInvoices.length,
+                  itemBuilder: (context, index) {
+                    final invoice = unpaidInvoices[index];
+                    return _buildInvoiceItem(context, invoice);
+                  },
+                ),
         ],
       ),
     );
@@ -116,11 +114,13 @@ class UnpaidInvoicesWidget extends StatelessWidget {
 
   Widget _buildInvoiceItem(BuildContext context, PurchaseInvoiceModel invoice) {
     final currencySymbol = NumberFormatter.getCurrencySymbol();
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border.withValues(alpha: 0.5))),
+        border: Border(
+          bottom: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+        ),
       ),
       child: Row(
         children: [
@@ -131,7 +131,10 @@ class UnpaidInvoicesWidget extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
@@ -147,9 +150,14 @@ class UnpaidInvoicesWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(invoice.paymentStatus).withValues(alpha: 0.1),
+                        color: _getStatusColor(
+                          invoice.paymentStatus,
+                        ).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(

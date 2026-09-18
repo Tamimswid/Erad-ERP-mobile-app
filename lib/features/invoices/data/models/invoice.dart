@@ -144,7 +144,7 @@ class Invoice extends Equatable {
       ),
       customerId: json['customer_id'] ?? '',
       supplierId: json['supplier_id'],
-      issueDate: DateTime.parse(json['issue_date']),
+      issueDate: json['issue_date'] != null ? DateTime.parse(json['issue_date']) : DateTime.now(),
       dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => InvoiceItem.fromJson(item))
@@ -159,8 +159,8 @@ class Invoice extends Equatable {
       remainingAmount: json['remaining_amount']?.toDouble(),
       notes: json['notes'],
       terms: json['terms'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : DateTime.now(),
       customerName: json['customer_name'],
       supplierName: json['supplier_name'],
     );

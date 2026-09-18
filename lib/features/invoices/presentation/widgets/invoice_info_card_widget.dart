@@ -194,7 +194,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(unitPrice)} ${NumberFormatter.getCurrencySymbol()}',
+              '${AppUtils.formatNumber(unitPrice??0.0)} ${NumberFormatter.getCurrencySymbol()}',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeSmall,
@@ -204,7 +204,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(total)} ${NumberFormatter.getCurrencySymbol()} ',
+              '${AppUtils.formatNumber(total??0.0)} ${NumberFormatter.getCurrencySymbol()} ',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeSmall,
