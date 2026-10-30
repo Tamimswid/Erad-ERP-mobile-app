@@ -1,0 +1,3749 @@
+<!-- Motion Graphics Studio - Step 1: Idea -->
+
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+
+<meta charset="utf-8"/>
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+<title>Motion Graphics Studio - Step 1: Idea</title>
+
+<!-- Google Fonts: Inter -->
+
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+
+<!-- Tailwind CSS v3 -->
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<!-- Tailwind Custom Config -->
+
+<script>
+
+    tailwind.config = {
+
+      darkMode: 'class',
+
+      theme: {
+
+        extend: {
+
+          colors: {
+
+            background: '#141518',
+
+            surface: '#1E2025',
+
+            'surface-light': '#262930',
+
+            'surface-border': 'rgba(255, 255, 255, 0.08)',
+
+          },
+
+          fontFamily: {
+
+            sans: ['Inter', 'sans-serif'],
+
+          }
+
+        }
+
+      }
+
+    }
+
+  </script>
+
+<!-- Custom Styles for Scrollbars and Form Utilities -->
+
+<style data-purpose="custom-resets">
+
+    body {
+
+      background-color: #141518;
+
+      color: #FFFFFF;
+
+      font-family: 'Inter', sans-serif;
+
+      overflow-x: hidden;
+
+    }
+
+    textarea:focus, input:focus, select:focus, button:focus {
+
+      outline: none;
+
+      box-shadow: none;
+
+    }
+
+    ::-webkit-scrollbar {
+
+      width: 6px;
+
+      height: 6px;
+
+    }
+
+    ::-webkit-scrollbar-track {
+
+      background: #141518;
+
+    }
+
+    ::-webkit-scrollbar-thumb {
+
+      background: rgba(255, 255, 255, 0.15);
+
+      border-radius: 9999px;
+
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+
+      background: rgba(255, 255, 255, 0.25);
+
+    }
+
+  </style>
+
+</head>
+
+<body class="min-h-screen bg-background text-white antialiased selection:bg-white selection:text-black">
+
+<!-- BEGIN: CompactTopBar -->
+
+<!-- Ultra-compact, sleek minimalist navigation bar (height 48px / h-12) -->
+
+<header class="h-12 border-b border-surface-border bg-surface px-6 flex items-center justify-between sticky top-0 z-50">
+
+<!-- Brand & Project Breadcrumb -->
+
+<div class="flex items-center space-x-6">
+
+<div class="flex items-center space-x-2">
+
+<div class="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></div>
+
+<span class="text-xs font-semibold tracking-wider uppercase text-white">Motion Studio</span>
+
+</div>
+
+<div class="h-3 w-[1px] bg-white/10"></div>
+
+<div class="flex items-center space-x-2 text-xs text-white/50">
+
+<span>Project</span>
+
+<span class="text-white/30">/</span>
+
+<span class="text-white font-medium">Untitled Concept Storyboard</span>
+
+</div>
+
+</div>
+
+<!-- Right Controls: Status, Language toggle, Profile -->
+
+<div class="flex items-center space-x-4">
+
+<div class="flex items-center space-x-2 px-2.5 py-1 rounded bg-white/5 text-[11px] text-white/60 border border-white/5">
+
+<span class="w-1.5 h-1.5 rounded-full bg-white/70"></span>
+
+<span>Auto-saved</span>
+
+</div>
+
+<!-- AR / EN switch -->
+
+<div class="flex items-center rounded bg-white/5 p-0.5 border border-white/5 text-[11px]">
+
+<button class="px-2 py-0.5 rounded text-white/60 hover:text-white transition">AR</button>
+
+<button class="px-2 py-0.5 rounded bg-white text-black font-semibold">EN</button>
+
+</div>
+
+<!-- Minimal Avatar Icon -->
+
+<div class="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-medium text-white">
+
+        M
+
+      </div>
+
+</div>
+
+</header>
+
+<!-- END: CompactTopBar -->
+
+<!-- BEGIN: StepperHeader -->
+
+<!-- 4-step minimal creation workflow indicator -->
+
+<nav class="border-b border-surface-border bg-surface/40 py-3.5 px-6">
+
+<div class="max-w-7xl mx-auto flex items-center justify-center">
+
+<div class="flex items-center space-x-8 text-xs font-medium">
+
+<!-- Step 1: Active -->
+
+<div class="flex items-center space-x-2.5 text-white">
+
+<span class="flex items-center justify-center w-5 h-5 rounded-full bg-white text-black font-bold text-[11px]">1</span>
+
+<span class="tracking-wide">Idea &amp; Storyboard</span>
+
+</div>
+
+<div class="w-12 h-[1px] bg-white/20"></div>
+
+<!-- Step 2 -->
+
+<div class="flex items-center space-x-2.5 text-white/40 hover:text-white/70 transition cursor-pointer">
+
+<span class="flex items-center justify-center w-5 h-5 rounded-full border border-white/20 text-[11px]">2</span>
+
+<span>Scenes</span>
+
+</div>
+
+<div class="w-12 h-[1px] bg-white/10"></div>
+
+<!-- Step 3 -->
+
+<div class="flex items-center space-x-2.5 text-white/40 hover:text-white/70 transition cursor-pointer">
+
+<span class="flex items-center justify-center w-5 h-5 rounded-full border border-white/20 text-[11px]">3</span>
+
+<span>Style</span>
+
+</div>
+
+<div class="w-12 h-[1px] bg-white/10"></div>
+
+<!-- Step 4 -->
+
+<div class="flex items-center space-x-2.5 text-white/40 hover:text-white/70 transition cursor-pointer">
+
+<span class="flex items-center justify-center w-5 h-5 rounded-full border border-white/20 text-[11px]">4</span>
+
+<span>Export</span>
+
+</div>
+
+</div>
+
+</div>
+
+</nav>
+
+<!-- END: StepperHeader -->
+
+<!-- BEGIN: MainWorkspace -->
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+<div class="grid grid-cols-12 gap-8">
+
+<!-- LEFT SIDEBAR: Parameters & Actions -->
+
+<aside class="col-span-12 lg:col-span-3 space-y-6">
+
+<div class="bg-surface rounded-xl p-5 border border-surface-border space-y-5">
+
+<h2 class="text-xs font-semibold tracking-wider uppercase text-white/60">Composition Setup</h2>
+
+<!-- Duration Setting -->
+
+<div class="space-y-1.5">
+
+<label class="text-xs text-white/50 block">Target Duration</label>
+
+<div class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-surface-light border border-white/10 text-sm">
+
+<span class="font-medium text-white">30 Seconds</span>
+
+<span class="text-xs text-white/40 font-mono">00:30</span>
+
+</div>
+
+</div>
+
+<!-- Format / Aspect Ratio Setting -->
+
+<div class="space-y-1.5">
+
+<label class="text-xs text-white/50 block">Aspect Ratio</label>
+
+<div class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-surface-light border border-white/10 text-sm">
+
+<span class="text-white font-medium">16:9 Landscape</span>
+
+<span class="text-xs text-white/40 font-mono">1920×1080</span>
+
+</div>
+
+</div>
+
+<!-- Output Audio & Language -->
+
+<div class="space-y-1.5">
+
+<label class="text-xs text-white/50 block">Voiceover Language</label>
+
+<div class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-surface-light border border-white/10 text-sm">
+
+<span class="text-white">Arabic + English</span>
+
+<span class="text-xs px-1.5 py-0.5 rounded bg-white/10 text-white/60">Dual</span>
+
+</div>
+
+</div>
+
+<!-- Primary Trigger Action Button -->
+
+<button class="w-full py-3 px-4 rounded-lg bg-white text-black font-semibold text-xs tracking-wide uppercase hover:bg-white/90 active:scale-[0.99] transition duration-150 flex items-center justify-center space-x-2 shadow-lg">
+
+<svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+<span>Generate Storyboard</span>
+
+</button>
+
+<div class="text-[11px] text-white/40 text-center flex items-center justify-center space-x-1">
+
+<svg class="w-3 h-3 text-white/30" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+<span>Secured Motion Render Pipeline</span>
+
+</div>
+
+</div>
+
+<!-- Render Process / Pipeline History status card -->
+
+<div class="bg-surface rounded-xl p-5 border border-surface-border space-y-4">
+
+<div class="flex items-center justify-between text-xs">
+
+<span class="text-white/60 font-medium">Generation Status</span>
+
+<span class="text-white font-mono">40%</span>
+
+</div>
+
+<!-- Progress bar -->
+
+<div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+
+<div class="bg-white h-full rounded-full w-[40%] transition-all"></div>
+
+</div>
+
+<div class="space-y-2 pt-1 text-xs">
+
+<div class="flex items-center justify-between text-white/90">
+
+<span class="flex items-center space-x-1.5">
+
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+
+<span>Scene Keyframing</span>
+
+</span>
+
+<span class="text-white/40 text-[11px]">Ready</span>
+
+</div>
+
+<div class="flex items-center justify-between text-white/40">
+
+<span class="flex items-center space-x-1.5">
+
+<span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+
+<span>Motion Asset Vectoring</span>
+
+</span>
+
+<span class="text-[11px]">Processing...</span>
+
+</div>
+
+</div>
+
+</div>
+
+</aside>
+
+<!-- MAIN CONTENT: Preview, Script, Timing, Tones, Styles -->
+
+<section class="col-span-12 lg:col-span-9 space-y-6">
+
+<!-- Top Motion Hero Canvas / Concept Wireframe -->
+
+<div class="bg-surface rounded-2xl border border-surface-border p-6 relative overflow-hidden">
+
+<div class="flex flex-col md:flex-row items-center gap-6">
+
+<!-- Video Mockup Frame -->
+
+<div class="w-full md:w-64 aspect-video bg-black/40 rounded-xl border border-white/10 flex flex-col items-center justify-center p-4 relative group cursor-pointer">
+
+<!-- Play Button Outline -->
+
+<div class="w-10 h-10 rounded-full border border-white/60 flex items-center justify-center pl-0.5 group-hover:scale-110 transition duration-200">
+
+<svg class="w-4 h-4 text-white" fill="currentColor" viewbox="0 0 24 24">
+
+<path d="M8 5v14l11-7z"></path>
+
+</svg>
+
+</div>
+
+<div class="w-full mt-4 space-y-1.5">
+
+<div class="h-1 bg-white/20 rounded-full w-full overflow-hidden">
+
+<div class="h-full bg-white w-2/5"></div>
+
+</div>
+
+<div class="flex justify-between text-[10px] text-white/40 font-mono">
+
+<span>00:12</span>
+
+<span>00:30</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Banner Text / Description -->
+
+<div class="flex-1 space-y-2">
+
+<div class="inline-flex items-center space-x-2 px-2 py-0.5 rounded bg-white/5 text-[11px] text-white/70 border border-white/10">
+
+<span>Vector Motion v2.4</span>
+
+</div>
+
+<h1 class="text-lg md:text-xl font-bold tracking-tight text-white leading-snug">
+
+                AI Driven Dynamic Motion Graphics &amp; Kinetic Typography
+
+              </h1>
+
+<p class="text-xs text-white/50 leading-relaxed max-w-xl">
+
+                Convert your raw concept text, corporate brief, or story script into structured scene segments, transitions, and vector compositions with synchronized audio rhythm.
+
+              </p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Script Input Section -->
+
+<div class="bg-surface rounded-2xl border border-surface-border p-6 space-y-4">
+
+<div class="flex items-center justify-between text-xs">
+
+<span class="font-medium text-white/80">Motion Script / Creative Brief</span>
+
+<span class="font-mono text-white/40">500 / 142</span>
+
+</div>
+
+<textarea class="w-full bg-surface-light border border-surface-border rounded-xl p-4 text-xs md:text-sm text-white placeholder-white/20 focus:border-white/40 focus:ring-0 leading-relaxed resize-none transition" placeholder="Type your idea, storyboard outline, or key narrative points here... e.g. Introduce cloud software, show team collaboration hurdles, highlight real-time sync with abstract kinetic geometry..." rows="4">Introducing our next-generation cloud infrastructure: fast, reliable, and designed for global creators. Abstract geometry expands into structured UI scenes, highlighting micro-interactions and ending on our signature call-to-action.</textarea>
+
+<div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+
+<div class="text-xs text-white/40 flex items-center space-x-1.5">
+
+<svg class="w-3.5 h-3.5 text-white/30" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<circle cx="12" cy="12" r="10"></circle>
+
+<path d="M12 16v-4m0-4h.01"></path>
+
+</svg>
+
+<span>Tip: Separate multiple scene concepts with a period or hyphen.</span>
+
+</div>
+
+<button class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium border border-white/10 flex items-center space-x-2 transition">
+
+<svg class="w-3.5 h-3.5 text-white/80" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+<span>Auto-refine Script with AI</span>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Target Timing & Scene Cut Selection -->
+
+<div class="space-y-3">
+
+<h3 class="text-xs font-semibold tracking-wider uppercase text-white/50">Scene Pacing &amp; Structure</h3>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+<div class="bg-surface rounded-xl p-4 border border-surface-border hover:border-white/20 cursor-pointer transition">
+
+<div class="text-xs text-white/50">Micro Story</div>
+
+<div class="mt-2 flex items-baseline justify-between">
+
+<span class="text-sm font-semibold text-white">3 Scenes</span>
+
+<span class="text-xs text-white/40 font-mono">15s</span>
+
+</div>
+
+</div>
+
+<div class="bg-surface rounded-xl p-4 border border-surface-border hover:border-white/20 cursor-pointer transition">
+
+<div class="text-xs text-white/50">Standard Explainer</div>
+
+<div class="mt-2 flex items-baseline justify-between">
+
+<span class="text-sm font-semibold text-white">5 Scenes</span>
+
+<span class="text-xs text-white/40 font-mono">30s</span>
+
+</div>
+
+</div>
+
+<!-- Active Selection Card -->
+
+<div class="bg-surface rounded-xl p-4 border-2 border-white relative cursor-pointer shadow-sm">
+
+<div class="flex items-center justify-between text-xs text-white">
+
+<span class="font-medium">Extended Narrative</span>
+
+<span class="w-2 h-2 rounded-full bg-white"></span>
+
+</div>
+
+<div class="mt-2 flex items-baseline justify-between">
+
+<span class="text-sm font-bold text-white">8 Scenes</span>
+
+<span class="text-xs text-white font-mono">60s</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Motion Mood / Emotional Pace Selector -->
+
+<div class="space-y-3">
+
+<h3 class="text-xs font-semibold tracking-wider uppercase text-white/50">Tone &amp; Motion Dynamics</h3>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+<div class="bg-surface rounded-xl p-3 border border-surface-border hover:border-white/20 text-center cursor-pointer transition">
+
+<span class="text-xs font-medium text-white/70">Calm &amp; Smooth</span>
+
+</div>
+
+<div class="bg-surface rounded-xl p-3 border border-surface-border hover:border-white/20 text-center cursor-pointer transition">
+
+<span class="text-xs font-medium text-white/70">High Energy</span>
+
+</div>
+
+<div class="bg-surface rounded-xl p-3 border border-surface-border hover:border-white/20 text-center cursor-pointer transition">
+
+<span class="text-xs font-medium text-white/70">Professional</span>
+
+</div>
+
+<!-- Active Selected Tone -->
+
+<div class="bg-white text-black rounded-xl p-3 border border-white text-center cursor-pointer font-semibold shadow">
+
+<span class="text-xs">Kinetic Friendly</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Visual Style Presets -->
+
+<div class="space-y-3 pt-2">
+
+<div class="flex items-center justify-between">
+
+<h3 class="text-xs font-semibold tracking-wider uppercase text-white/50">Graphic Aesthetic Presets</h3>
+
+<span class="text-xs text-white/40">4 Available</span>
+
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+<!-- Preset 1 -->
+
+<div class="bg-surface rounded-xl border border-surface-border p-4 hover:border-white/20 cursor-pointer space-y-3 transition">
+
+<div class="h-20 bg-surface-light rounded-lg border border-white/5 flex items-center justify-center space-x-2">
+
+<div class="w-6 h-6 rounded-md bg-white/20"></div>
+
+<div class="w-4 h-4 rounded-full bg-white/30"></div>
+
+<div class="w-7 h-5 rounded bg-white/10"></div>
+
+</div>
+
+<div class="space-y-1">
+
+<div class="text-xs font-semibold text-white">Monochrome Bauhaus</div>
+
+<div class="text-[11px] text-white/40">Minimal geometric lines</div>
+
+</div>
+
+</div>
+
+<!-- Preset 2 -->
+
+<div class="bg-surface rounded-xl border border-surface-border p-4 hover:border-white/20 cursor-pointer space-y-3 transition">
+
+<div class="h-20 bg-surface-light rounded-lg border border-white/5 flex items-center justify-center space-x-2">
+
+<div class="w-7 h-5 rounded bg-white/25"></div>
+
+<div class="w-5 h-5 rounded-full bg-white/15"></div>
+
+<div class="w-6 h-6 rounded-lg bg-white/35"></div>
+
+</div>
+
+<div class="space-y-1">
+
+<div class="text-xs font-semibold text-white">Isometric Vectors</div>
+
+<div class="text-[11px] text-white/40">Corporate tech 3D angles</div>
+
+</div>
+
+</div>
+
+<!-- Preset 3 -->
+
+<div class="bg-surface rounded-xl border border-surface-border p-4 hover:border-white/20 cursor-pointer space-y-3 transition">
+
+<div class="h-20 bg-surface-light rounded-lg border border-white/5 flex items-center justify-center space-x-2">
+
+<div class="w-8 h-4 rounded bg-white/20"></div>
+
+<div class="w-4 h-6 rounded bg-white/40"></div>
+
+<div class="w-5 h-5 rounded-full bg-white/10"></div>
+
+</div>
+
+<div class="space-y-1">
+
+<div class="text-xs font-semibold text-white">Kinetic Typo</div>
+
+<div class="text-[11px] text-white/40">Bold typography focus</div>
+
+</div>
+
+</div>
+
+<!-- Preset 4: Active -->
+
+<div class="bg-surface rounded-xl border-2 border-white p-4 cursor-pointer space-y-3 shadow-lg relative">
+
+<div class="h-20 bg-surface-light rounded-lg border border-white/20 flex items-center justify-center space-x-2 relative overflow-hidden">
+
+<div class="w-6 h-6 rounded-md bg-white"></div>
+
+<div class="w-4 h-4 rounded-full bg-white/60"></div>
+
+<div class="w-8 h-5 rounded bg-white/30"></div>
+
+</div>
+
+<div class="space-y-1">
+
+<div class="flex items-center justify-between">
+
+<span class="text-xs font-bold text-white">Dark Minimal High-End</span>
+
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+
+</div>
+
+<div class="text-[11px] text-white/50">Monochrome luxury contrast</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+</main>
+
+<!-- END: MainWorkspace -->
+
+</body></html>
+
+<!-- Motion Graphics Studio - Step 2: Scenes -->
+
+<!DOCTYPE html>
+
+<html class="dark" dir="ltr" lang="en"><head>
+
+<meta charset="utf-8"/>
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+<title>Motion Graphics Studio - Scenes Editor</title>
+
+<!-- Tailwind CSS CDN with forms and container queries -->
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<script>
+
+    tailwind.config = {
+
+      darkMode: 'class',
+
+      theme: {
+
+        extend: {
+
+          colors: {
+
+            app: {
+
+              bg: '#141518',
+
+              surface: '#1E2025',
+
+              card: '#24272E',
+
+              border: 'rgba(255, 255, 255, 0.1)',
+
+              'border-subtle': 'rgba(255, 255, 255, 0.06)',
+
+            }
+
+          },
+
+          fontFamily: {
+
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+
+            mono: ['JetBrains Mono', 'monospace'],
+
+          }
+
+        }
+
+      }
+
+    }
+
+  </script>
+
+<!-- BEGIN: Custom CSS -->
+
+<style data-purpose="base-layout">
+
+    body {
+
+      background-color: #141518;
+
+      color: #FFFFFF;
+
+      min-height: 100vh;
+
+      display: flex;
+
+      flex-direction: column;
+
+      overflow-x: hidden;
+
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+
+    }
+
+    /* Custom scrollbar for timeline and scene list */
+
+    ::-webkit-scrollbar {
+
+      width: 5px;
+
+      height: 5px;
+
+    }
+
+    ::-webkit-scrollbar-track {
+
+      background: rgba(255, 255, 255, 0.02);
+
+    }
+
+    ::-webkit-scrollbar-thumb {
+
+      background: rgba(255, 255, 255, 0.15);
+
+      border-radius: 9999px;
+
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+
+      background: rgba(255, 255, 255, 0.25);
+
+    }
+
+  </style>
+
+<style data-purpose="canvas-preview">
+
+    .canvas-dot-grid {
+
+      background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+
+      background-size: 20px 20px;
+
+    }
+
+  </style>
+
+<!-- END: Custom CSS -->
+
+</head>
+
+<body class="bg-[#141518] text-white selection:bg-white/20">
+
+<!-- BEGIN: TopBar -->
+
+<header class="h-12 border-b border-white/10 bg-[#1E2025] px-4 flex items-center justify-between text-xs sticky top-0 z-50" data-purpose="top-navigation">
+
+<!-- Left: Profile and Quick Help -->
+
+<div class="flex items-center gap-3">
+
+<div class="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-medium text-white/90 text-xs">
+
+        JD
+
+      </div>
+
+<div class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-md px-2.5 py-1 text-white/70 hover:text-white transition cursor-pointer">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<circle cx="12" cy="12" r="9" stroke-width="2"></circle>
+
+<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke-width="2"></path>
+
+<line stroke-width="2" x1="12" x2="12.01" y1="17" y2="17"></line>
+
+</svg>
+
+<span>Docs &amp; Shortcuts</span>
+
+</div>
+
+<button class="bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1 rounded-md text-white/80 transition flex items-center gap-1.5 font-mono text-[11px]">
+
+<span>AR / EN</span>
+
+<svg class="w-3 h-3 text-white/50" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</button>
+
+</div>
+
+<!-- Center: Project Title -->
+
+<div class="flex items-center gap-2 text-white/70">
+
+<span class="w-2 h-2 rounded-full bg-white"></span>
+
+<span class="font-medium text-white tracking-wide">Brand Explainer v2.0</span>
+
+<span class="text-white/40">/ Scene Editor</span>
+
+</div>
+
+<!-- Right: Studio Branding and Actions -->
+
+<div class="flex items-center gap-3">
+
+<button class="flex items-center gap-1.5 px-3 py-1 rounded bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition">
+
+<svg class="w-3.5 h-3.5 text-white/70" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<span>Auto-Save active</span>
+
+</button>
+
+<div class="h-4 w-px bg-white/10"></div>
+
+<div class="flex items-center gap-2">
+
+<div class="text-right">
+
+<div class="font-semibold text-white leading-none text-xs tracking-wider uppercase">Motion Studio</div>
+
+<div class="text-[10px] text-white/40 leading-none mt-0.5">Professional Suite</div>
+
+</div>
+
+<div class="w-7 h-7 bg-white text-[#141518] rounded flex items-center justify-center font-bold">
+
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+
+<polygon points="5 3 19 12 5 21 5 3"></polygon>
+
+</svg>
+
+</div>
+
+</div>
+
+</div>
+
+</header>
+
+<!-- END: TopBar -->
+
+<!-- BEGIN: StepperHeader -->
+
+<nav class="w-full bg-[#1E2025]/50 border-b border-white/10 py-3 px-6 flex justify-center items-center" data-purpose="wizard-stepper">
+
+<div class="max-w-4xl w-full flex items-center justify-between">
+
+<!-- Step 1: Idea (Done) -->
+
+<div class="flex items-center gap-3 group cursor-pointer opacity-70 hover:opacity-100 transition">
+
+<div class="w-7 h-7 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-white">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+
+</svg>
+
+</div>
+
+<div class="text-left">
+
+<p class="text-[10px] uppercase tracking-wider text-white/50 font-mono">Step 1</p>
+
+<p class="text-xs font-medium text-white">Idea &amp; Concept</p>
+
+</div>
+
+</div>
+
+<!-- Connector line -->
+
+<div class="flex-1 mx-4 h-px bg-white/20"></div>
+
+<!-- Step 2: Scenes (Active) -->
+
+<div class="flex items-center gap-3">
+
+<div class="w-7 h-7 rounded-full bg-white text-[#141518] font-bold text-xs flex items-center justify-center shadow-md shadow-white/10">
+
+          2
+
+        </div>
+
+<div class="text-left">
+
+<p class="text-[10px] uppercase tracking-wider text-white font-mono font-semibold">Active</p>
+
+<p class="text-xs font-semibold text-white">Scenes Composition</p>
+
+</div>
+
+</div>
+
+<!-- Connector line -->
+
+<div class="flex-1 mx-4 h-px bg-white/10"></div>
+
+<!-- Step 3: Style (Pending) -->
+
+<div class="flex items-center gap-3 opacity-40">
+
+<div class="w-7 h-7 rounded-full border border-white/30 flex items-center justify-center text-white/70 font-medium text-xs">
+
+          3
+
+        </div>
+
+<div class="text-left">
+
+<p class="text-[10px] uppercase tracking-wider text-white/50 font-mono">Step 3</p>
+
+<p class="text-xs font-normal text-white/60">Style &amp; Design</p>
+
+</div>
+
+</div>
+
+<!-- Connector line -->
+
+<div class="flex-1 mx-4 h-px bg-white/10"></div>
+
+<!-- Step 4: Export (Pending) -->
+
+<div class="flex items-center gap-3 opacity-40">
+
+<div class="w-7 h-7 rounded-full border border-white/30 flex items-center justify-center text-white/70 font-medium text-xs">
+
+          4
+
+        </div>
+
+<div class="text-left">
+
+<p class="text-[10px] uppercase tracking-wider text-white/50 font-mono">Step 4</p>
+
+<p class="text-xs font-normal text-white/60">Render &amp; Export</p>
+
+</div>
+
+</div>
+
+</div>
+
+</nav>
+
+<!-- END: StepperHeader -->
+
+<!-- BEGIN: MainWorkspace -->
+
+<main class="flex-1 p-5 max-w-[1720px] w-full mx-auto grid grid-cols-12 gap-5">
+
+<!-- LEFT PANEL: Scene Controls & Sequencing (3 Cols) -->
+
+<section class="col-span-12 lg:col-span-3 flex flex-col gap-4" data-purpose="scene-navigation-and-tools">
+
+<!-- Top Action Group -->
+
+<div class="bg-[#1E2025] border border-white/10 rounded-xl p-4 flex flex-col gap-4">
+
+<!-- Scene Pagination Navigation -->
+
+<div class="flex items-center justify-between pb-3 border-b border-white/10">
+
+<div class="flex items-center gap-1.5">
+
+<button class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition" title="More Options">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<circle cx="5" cy="12" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle>
+
+</svg>
+
+</button>
+
+<button class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition" title="Previous Scene">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</button>
+
+<button class="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition" title="Next Scene">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</button>
+
+</div>
+
+<div class="text-right">
+
+<span class="text-xs font-mono font-semibold text-white px-2.5 py-1 bg-white/10 rounded border border-white/15">
+
+              Scene 2 / 5
+
+            </span>
+
+</div>
+
+</div>
+
+<!-- Scene Duration & Quick Adjust -->
+
+<div class="space-y-2">
+
+<div class="flex items-center justify-between text-xs text-white/70">
+
+<span class="font-medium flex items-center gap-1.5">
+
+<svg class="w-3.5 h-3.5 text-white/40" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+
+<polyline points="12 6 12 12 16 14" stroke-width="2"></polyline>
+
+</svg>
+
+              Duration Control
+
+            </span>
+
+<span class="text-[11px] text-white/40 font-mono">0:08 Sec</span>
+
+</div>
+
+<div class="grid grid-cols-3 gap-2 items-center">
+
+<button class="h-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-lg font-bold text-white transition">
+
+              -
+
+            </button>
+
+<div class="h-9 bg-white/10 rounded-lg border border-white/20 flex items-center justify-center font-mono font-bold text-sm tracking-wider">
+
+              08s
+
+            </div>
+
+<button class="h-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-lg font-bold text-white transition">
+
+              +
+
+            </button>
+
+</div>
+
+<!-- Progress Indicator Bar -->
+
+<div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-2">
+
+<div class="bg-white h-full w-[40%] rounded-full"></div>
+
+</div>
+
+</div>
+
+<!-- Scene Mutation Tools -->
+
+<div class="grid grid-cols-2 gap-2 pt-2">
+
+<button class="h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-1.5 text-xs text-white/80 hover:text-white transition">
+
+<svg class="w-3.5 h-3.5 text-white/60" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+            Delete Scene
+
+          </button>
+
+<button class="h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-1.5 text-xs text-white/80 hover:text-white transition">
+
+<svg class="w-3.5 h-3.5 text-white/60" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<rect height="13" rx="2" ry="2" stroke-width="2" width="13" x="9" y="9"></rect>
+
+<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2"></path>
+
+</svg>
+
+            Duplicate
+
+          </button>
+
+</div>
+
+<!-- Reorder Buttons -->
+
+<div class="grid grid-cols-2 gap-2">
+
+<button class="h-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-1.5 text-xs text-white/70 hover:text-white transition">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+            Move Down
+
+          </button>
+
+<button class="h-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-1.5 text-xs text-white/70 hover:text-white transition">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+            Move Up
+
+          </button>
+
+</div>
+
+</div>
+
+<!-- Quick Scene Specs Card -->
+
+<div class="bg-[#1E2025] border border-white/10 rounded-xl p-4 space-y-3">
+
+<h4 class="text-xs font-semibold text-white tracking-wide uppercase">Scene Blueprint</h4>
+
+<div class="space-y-2 text-xs">
+
+<div class="flex justify-between py-1.5 border-b border-white/5">
+
+<span class="text-white/50">Graphic Type</span>
+
+<span class="font-mono text-white/90">SVG Vector Path</span>
+
+</div>
+
+<div class="flex justify-between py-1.5 border-b border-white/5">
+
+<span class="text-white/50">Transition</span>
+
+<span class="font-mono text-white/90">Linear Wipe (0.4s)</span>
+
+</div>
+
+<div class="flex justify-between py-1.5 border-b border-white/5">
+
+<span class="text-white/50">Framerate</span>
+
+<span class="font-mono text-white/90">60 FPS Native</span>
+
+</div>
+
+<div class="flex justify-between py-1.5">
+
+<span class="text-white/50">Resolution</span>
+
+<span class="font-mono text-white/90">1920 × 1080</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Bottom Step Back Action -->
+
+<div class="mt-auto">
+
+<button class="w-full h-11 bg-white/5 hover:bg-white/10 border border-white/20 rounded-xl flex items-center justify-center gap-2 text-xs font-medium text-white transition group">
+
+<svg class="w-4 h-4 text-white/60 group-hover:-translate-x-0.5 transition" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+          Back to Idea Phase
+
+        </button>
+
+</div>
+
+</section>
+
+<!-- CENTER PANEL: Canvas Preview & Prompt/Voiceover (6 Cols) -->
+
+<section class="col-span-12 lg:col-span-6 flex flex-col gap-4" data-purpose="preview-and-editor">
+
+<!-- Video / Motion Canvas Player Viewport -->
+
+<div class="bg-[#1E2025] border border-white/15 rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+
+<!-- Canvas Screen Frame -->
+
+<div class="relative w-full aspect-video bg-[#141518] canvas-dot-grid flex flex-col justify-between p-5 border-b border-white/10">
+
+<!-- Viewport Header Overlay -->
+
+<div class="flex items-center justify-between text-xs">
+
+<div class="flex items-center gap-2 bg-[#1E2025]/90 border border-white/15 backdrop-blur-md px-2.5 py-1 rounded-full">
+
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+
+<span class="font-mono text-[11px] font-semibold tracking-wider text-white">SVG ANIMATION • 0:08</span>
+
+</div>
+
+<div class="text-[11px] font-mono text-white/50 bg-[#1E2025]/60 px-2 py-0.5 rounded border border-white/10">
+
+              LAYER 02 : GRAPHIC FLOW
+
+            </div>
+
+</div>
+
+<!-- Canvas Visual Elements (Simulated Motion Graphics) -->
+
+<div class="w-full flex flex-col items-center justify-center my-auto py-8">
+
+<div class="w-full max-w-md flex items-center justify-between relative px-6">
+
+<!-- Animated origin node -->
+
+<div class="w-12 h-12 rounded-xl bg-white/10 border-2 border-white flex items-center justify-center shadow-lg relative z-10">
+
+<div class="w-4 h-4 bg-white rounded-sm"></div>
+
+</div>
+
+<!-- Dashed dynamic connector vector -->
+
+<div class="flex-1 mx-3 border-t-2 border-dashed border-white/40 relative">
+
+<div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white rounded-full border-2 border-[#141518]"></div>
+
+</div>
+
+<!-- Animated target node -->
+
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg relative z-10">
+
+<div class="w-4 h-4 rounded-full bg-[#141518]"></div>
+
+</div>
+
+</div>
+
+<!-- Central Scene Visual Label -->
+
+<div class="mt-6 px-4 py-1.5 rounded-md bg-[#1E2025] border border-white/20 text-xs font-mono tracking-widest text-white/80">
+
+              [ VECTOR_TRANSITION_STEP_02 ]
+
+            </div>
+
+</div>
+
+<!-- Canvas Player Control Bar -->
+
+<div class="flex flex-col gap-2 pt-2 bg-[#141518]/80 backdrop-blur-sm -mx-5 -mb-5 px-5 py-3 border-t border-white/10">
+
+<div class="flex items-center justify-between text-xs font-mono text-white/70 mb-1">
+
+<span>0:03 / 0:08</span>
+
+<span class="text-white/40">Scene 2 Total: 0:08</span>
+
+</div>
+
+<!-- Scrubber Track -->
+
+<div class="relative w-full h-2 bg-white/15 rounded-full cursor-pointer flex items-center">
+
+<div class="h-full bg-white rounded-full w-[38%] relative">
+
+<div class="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-[#1E2025] rounded-full shadow-md"></div>
+
+</div>
+
+</div>
+
+<!-- Playback Action Buttons -->
+
+<div class="flex items-center justify-between pt-2">
+
+<div class="flex items-center gap-2">
+
+<button class="w-7 h-7 rounded bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/80 hover:text-white transition" title="Rewind 1s">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</button>
+
+<button class="w-8 h-8 rounded-full bg-white text-[#141518] flex items-center justify-center font-bold hover:bg-white/90 transition shadow">
+
+<svg class="w-4 h-4 fill-current ml-0.5" viewbox="0 0 24 24">
+
+<polygon points="5 3 19 12 5 21 5 3"></polygon>
+
+</svg>
+
+</button>
+
+<button class="w-7 h-7 rounded bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/80 hover:text-white transition" title="Forward 1s">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M11.934 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.334-4zM19.934 12.8a1 1 0 000-1.6l-5.334-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.334-4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</button>
+
+</div>
+
+<!-- Extra viewport utilities -->
+
+<div class="flex items-center gap-2">
+
+<span class="text-[11px] font-mono text-white/40">100% Zoom</span>
+
+<button class="p-1 rounded hover:bg-white/10 text-white/70">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Scene Script & Voiceover Descriptor Card -->
+
+<div class="bg-[#1E2025] border border-white/10 rounded-xl p-4 flex flex-col gap-3">
+
+<div class="flex items-center justify-between">
+
+<div class="flex items-center gap-2 text-xs">
+
+<span class="px-2 py-0.5 rounded bg-white/10 font-mono text-white">Scene 2 Script</span>
+
+<span class="text-white/40 font-mono text-[11px]">Duration: 8s • 28 Words</span>
+
+</div>
+
+<span class="text-xs text-white/60 font-medium">Voiceover &amp; Animation Cue</span>
+
+</div>
+
+<!-- Editable Script Box -->
+
+<div class="bg-[#141518] border border-white/10 rounded-lg p-3 text-xs leading-relaxed text-white/90">
+
+          "Our core engine transforms raw product data into high-converting visual assets within seconds. Seamless SVG animation ensures sharp, responsive vector playback across all devices and resolutions."
+
+        </div>
+
+<!-- Script Actions -->
+
+<div class="flex items-center justify-between pt-1">
+
+<button class="h-8 px-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center gap-1.5 text-xs text-white/80 transition">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+            Regenerate Script
+
+          </button>
+
+<button class="h-8 px-4 rounded-lg bg-white text-[#141518] hover:bg-white/90 font-medium flex items-center gap-2 text-xs transition">
+
+<span>Apply &amp; Render Cue</span>
+
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Notice Banner -->
+
+<div class="bg-white/5 border border-white/10 rounded-lg p-3 flex items-start gap-2.5 text-[11px] text-white/60">
+
+<svg class="w-4 h-4 text-white/80 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+
+<line stroke-width="2" x1="12" x2="12" y1="8" y2="12"></line>
+
+<line stroke-width="2" x1="12" x2="12.01" y1="16" y2="16"></line>
+
+</svg>
+
+<span>Note: Changes in this scene will automatically adapt overall pacing. Keep narration under 30 words to retain ideal 8-second motion cadence.</span>
+
+</div>
+
+</section>
+
+<!-- RIGHT PANEL: Scenes Timeline List (3 Cols) -->
+
+<section class="col-span-12 lg:col-span-3 flex flex-col gap-3" data-purpose="scenes-timeline-list">
+
+<!-- List Header with Total Summary -->
+
+<div class="flex items-center justify-between pb-1">
+
+<div class="flex items-center gap-2">
+
+<span class="text-xs font-mono font-semibold px-2 py-0.5 bg-white text-[#141518] rounded">
+
+            0:32
+
+          </span>
+
+<span class="text-xs text-white/70 font-medium">Total Runtime</span>
+
+</div>
+
+<span class="text-xs font-mono text-white/50">5 Scenes</span>
+
+</div>
+
+<!-- Scenes Cards Scroll Container -->
+
+<div class="flex flex-col gap-2.5 overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
+
+<!-- Scene Card 1 -->
+
+<article class="bg-[#1E2025] hover:bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between transition cursor-pointer group" data-purpose="scene-card">
+
+<div class="flex items-center gap-2.5">
+
+<div class="flex flex-col gap-0.5 text-white/30 group-hover:text-white/60">
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</div>
+
+<div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/80">0:06</span>
+
+<span class="text-xs font-semibold text-white/90">Intro — Hook Concept</span>
+
+</div>
+
+<p class="text-[11px] text-white/50 truncate max-w-[160px] mt-0.5">Logo reveal &amp; problem statement</p>
+
+</div>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono text-white/40">22w</span>
+
+<div class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white/80">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</div>
+
+</div>
+
+</article>
+
+<!-- Scene Card 2 (ACTIVE) -->
+
+<article class="bg-[#1E2025] border-2 border-white rounded-xl p-3 flex items-center justify-between shadow-lg relative" data-purpose="scene-card-active">
+
+<!-- Active Indicator Badge -->
+
+<div class="absolute -top-2 -right-1 bg-white text-[#141518] text-[9px] font-bold px-1.5 py-0.2 rounded-full uppercase tracking-tighter">
+
+            Editing
+
+          </div>
+
+<div class="flex items-center gap-2.5">
+
+<div class="flex flex-col gap-0.5 text-white">
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</div>
+
+<div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white text-[#141518]">0:08</span>
+
+<span class="text-xs font-bold text-white">Core Solution Engine</span>
+
+</div>
+
+<p class="text-[11px] text-white/80 truncate max-w-[160px] mt-0.5">Vector path SVG transition demo</p>
+
+</div>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono text-white font-medium">28w</span>
+
+<div class="w-6 h-6 rounded-full bg-white text-[#141518] font-bold text-xs flex items-center justify-center">
+
+              2
+
+            </div>
+
+</div>
+
+</article>
+
+<!-- Scene Card 3 -->
+
+<article class="bg-[#1E2025] hover:bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between transition cursor-pointer group" data-purpose="scene-card">
+
+<div class="flex items-center gap-2.5">
+
+<div class="flex flex-col gap-0.5 text-white/30 group-hover:text-white/60">
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</div>
+
+<div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/80">0:06</span>
+
+<span class="text-xs font-semibold text-white/90">Feature Breakdown</span>
+
+</div>
+
+<p class="text-[11px] text-white/50 truncate max-w-[160px] mt-0.5">3 Pillar highlights with metric popups</p>
+
+</div>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono text-white/40">19w</span>
+
+<div class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-xs font-medium text-white/60">
+
+              3
+
+            </div>
+
+</div>
+
+</article>
+
+<!-- Scene Card 4 -->
+
+<article class="bg-[#1E2025] hover:bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between transition cursor-pointer group" data-purpose="scene-card">
+
+<div class="flex items-center gap-2.5">
+
+<div class="flex flex-col gap-0.5 text-white/30 group-hover:text-white/60">
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</div>
+
+<div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/80">0:07</span>
+
+<span class="text-xs font-semibold text-white/90">Market Proof &amp; Results</span>
+
+</div>
+
+<p class="text-[11px] text-white/50 truncate max-w-[160px] mt-0.5">15% Conversion lift showcase</p>
+
+</div>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono text-white/40">24w</span>
+
+<div class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-xs font-medium text-white/60">
+
+              4
+
+            </div>
+
+</div>
+
+</article>
+
+<!-- Scene Card 5 -->
+
+<article class="bg-[#1E2025] hover:bg-white/5 border border-white/10 rounded-xl p-3 flex items-center justify-between transition cursor-pointer group" data-purpose="scene-card">
+
+<div class="flex items-center gap-2.5">
+
+<div class="flex flex-col gap-0.5 text-white/30 group-hover:text-white/60">
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M5 15l7-7 7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</div>
+
+<div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/80">0:05</span>
+
+<span class="text-xs font-semibold text-white/90">CTA + Outro</span>
+
+</div>
+
+<p class="text-[11px] text-white/50 truncate max-w-[160px] mt-0.5">Action button &amp; URL prompt</p>
+
+</div>
+
+</div>
+
+<div class="flex items-center gap-2">
+
+<span class="text-[10px] font-mono text-white/40">14w</span>
+
+<div class="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center text-xs font-medium text-white/60">
+
+              5
+
+            </div>
+
+</div>
+
+</article>
+
+</div>
+
+<!-- Action Buttons for Timeline -->
+
+<div class="pt-2 flex flex-col gap-2 mt-auto">
+
+<button class="w-full h-10 border-2 border-dashed border-white/25 hover:border-white/50 hover:bg-white/5 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold text-white/90 transition">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+          Add New Scene
+
+        </button>
+
+<div class="flex items-center gap-2">
+
+<button class="flex-1 h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-white/70 hover:text-white flex items-center justify-center gap-1.5 transition">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+            Auto-Rebalance
+
+          </button>
+
+<button class="h-9 px-4 bg-white text-[#141518] hover:bg-white/90 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+
+            Next: Style
+
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+<!-- END: MainWorkspace -->
+
+</body></html>
+
+<!-- Motion Graphics Studio - Step 3: Style -->
+
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+
+<meta charset="utf-8"/>
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+<title>Motion Graphics Studio - Step 3: Style &amp; Audio</title>
+
+<!-- Tailwind CSS v3 CDN -->
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<!-- Tailwind Custom Configuration -->
+
+<script data-purpose="tailwind-config">
+
+    tailwind.config = {
+
+      darkMode: 'class',
+
+      theme: {
+
+        extend: {
+
+          colors: {
+
+            studio: {
+
+              bg: '#141518',
+
+              surface: '#1E2025',
+
+              card: '#24272E',
+
+              border: 'rgba(255, 255, 255, 0.1)',
+
+              'border-subtle': 'rgba(255, 255, 255, 0.05)',
+
+              'border-active': 'rgba(255, 255, 255, 0.9)'
+
+            }
+
+          },
+
+          fontFamily: {
+
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+
+          }
+
+        }
+
+      }
+
+    };
+
+  </script>
+
+<!-- Custom Scrollbar & Utility Styles -->
+
+<style data-purpose="custom-utilities">
+
+    /* Custom subtle scrollbar */
+
+    ::-webkit-scrollbar {
+
+      width: 6px;
+
+      height: 6px;
+
+    }
+
+    ::-webkit-scrollbar-track {
+
+      background: #141518;
+
+    }
+
+    ::-webkit-scrollbar-thumb {
+
+      background: rgba(255, 255, 255, 0.15);
+
+      border-radius: 9999px;
+
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+
+      background: rgba(255, 255, 255, 0.25);
+
+    }
+
+    /* Sound waveform animation */
+
+    .waveform-bar {
+
+      transition: height 0.2s ease-in-out;
+
+    }
+
+  </style>
+
+</head>
+
+<body class="bg-[#141518] text-white font-sans min-h-screen antialiased flex flex-col selection:bg-white selection:text-black">
+
+<!-- BEGIN: TopHeader -->
+
+<header class="h-12 border-b border-white/10 bg-[#141518] px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 select-none">
+
+<!-- Left Navigation / Breadcrumbs -->
+
+<div class="flex items-center space-x-3 text-xs">
+
+<div class="flex items-center space-x-2">
+
+<div class="w-6 h-6 rounded bg-white text-black flex items-center justify-center font-bold text-xs tracking-wider">
+
+          M
+
+        </div>
+
+<span class="font-medium text-white/90 hidden sm:inline">Motion Graphics Studio</span>
+
+</div>
+
+<span class="text-white/20">/</span>
+
+<div class="flex items-center space-x-1.5 bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[11px] text-white/70">
+
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+
+<span class="font-mono text-white/90 truncate max-w-[130px] sm:max-w-xs">Project_Campaign_V3.mgs</span>
+
+</div>
+
+</div>
+
+<!-- Center Status / Notice -->
+
+<div class="hidden md:flex items-center space-x-2 text-xs text-white/50">
+
+<svg class="w-3.5 h-3.5 text-white/60" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<span>Auto-saved 2m ago</span>
+
+</div>
+
+<!-- Right Controls -->
+
+<div class="flex items-center space-x-3 text-xs">
+
+<div class="flex items-center bg-white/5 border border-white/10 rounded p-0.5">
+
+<button class="px-2 py-0.5 rounded text-[11px] font-medium bg-white text-black transition-all">EN</button>
+
+<button class="px-2 py-0.5 rounded text-[11px] font-medium text-white/60 hover:text-white transition-all">AR</button>
+
+</div>
+
+<div class="h-4 w-[1px] bg-white/10"></div>
+
+<button class="p-1.5 text-white/60 hover:text-white hover:bg-white/5 rounded transition-colors" title="Documentation &amp; Help">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+</button>
+
+<!-- Account Avatar -->
+
+<div class="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-medium text-white ring-1 ring-white/10 cursor-pointer">
+
+        JD
+
+      </div>
+
+</div>
+
+</header>
+
+<!-- END: TopHeader -->
+
+<!-- BEGIN: StepperHeader -->
+
+<section class="border-b border-white/10 bg-[#1E2025]/50 px-4 py-3" data-purpose="workflow-stepper">
+
+<div class="max-w-6xl mx-auto flex items-center justify-center">
+
+<ol class="flex items-center w-full max-w-3xl justify-between relative">
+
+<!-- Connecting Line -->
+
+<div class="absolute left-6 right-6 top-4 -translate-y-1/2 h-[2px] bg-white/10 z-0"></div>
+
+<!-- Step 1: Idea (Completed) -->
+
+<li class="relative z-10 flex flex-col items-center group cursor-pointer">
+
+<div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-semibold text-xs transition-transform group-hover:scale-105">
+
+<svg class="w-4 h-4 text-black stroke-[3]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+</div>
+
+<span class="mt-1.5 text-xs font-medium text-white/80">Idea</span>
+
+</li>
+
+<!-- Step 2: Scenes (Completed) -->
+
+<li class="relative z-10 flex flex-col items-center group cursor-pointer">
+
+<div class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-semibold text-xs transition-transform group-hover:scale-105">
+
+<svg class="w-4 h-4 text-black stroke-[3]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+</div>
+
+<span class="mt-1.5 text-xs font-medium text-white/80">Scenes</span>
+
+</li>
+
+<!-- Step 3: Style & Audio (Active) -->
+
+<li class="relative z-10 flex flex-col items-center">
+
+<div class="w-8 h-8 rounded-full bg-[#1E2025] border-2 border-white text-white flex items-center justify-center font-bold text-xs ring-4 ring-white/10 shadow-[0_0_15px_rgba(255,255,255,0.15)]">
+
+            3
+
+          </div>
+
+<span class="mt-1.5 text-xs font-bold text-white tracking-wide">Style &amp; Sound</span>
+
+</li>
+
+<!-- Step 4: Export (Pending) -->
+
+<li class="relative z-10 flex flex-col items-center group cursor-not-allowed opacity-40">
+
+<div class="w-8 h-8 rounded-full bg-[#141518] border border-white/20 text-white/60 flex items-center justify-center text-xs">
+
+            4
+
+          </div>
+
+<span class="mt-1.5 text-xs font-medium text-white/40">Export</span>
+
+</li>
+
+</ol>
+
+</div>
+
+</section>
+
+<!-- END: StepperHeader -->
+
+<!-- BEGIN: MainStudioWorkspace -->
+
+<main class="flex-1 max-w-[1500px] w-full mx-auto p-4 md:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" data-purpose="workspace-content">
+
+<!-- BEGIN: LeftPreviewColumn -->
+
+<div class="lg:col-span-4 xl:col-span-4 flex flex-col space-y-4 lg:sticky lg:top-16" data-purpose="preview-column">
+
+<!-- Video Canvas Stage Card -->
+
+<div class="bg-[#1E2025] rounded-xl border border-white/10 p-4 shadow-xl flex flex-col space-y-4">
+
+<div class="flex items-center justify-between border-b border-white/10 pb-3">
+
+<div class="flex items-center space-x-2">
+
+<span class="w-2 h-2 rounded-full bg-white"></span>
+
+<h2 class="text-xs font-semibold uppercase tracking-wider text-white">Live Style Preview</h2>
+
+</div>
+
+<span class="font-mono text-[11px] text-white/40">1080 × 1920 (9:16)</span>
+
+</div>
+
+<!-- Preview Viewport Canvas -->
+
+<div class="relative aspect-[9/13] w-full bg-[#141518] rounded-lg border border-white/10 overflow-hidden flex flex-col items-center justify-between p-5">
+
+<!-- Subtle Grid Background -->
+
+<div class="absolute inset-0 opacity-15" style="background-image: radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px); background-size: 16px 16px;"></div>
+
+<!-- Top Stage Elements -->
+
+<div class="relative w-full flex justify-between items-center z-10">
+
+<div class="px-2.5 py-1 rounded bg-white text-black font-semibold text-[11px] tracking-tight">
+
+              SCENE 01 / INTRO
+
+            </div>
+
+<div class="flex items-center space-x-1 text-white/50 text-[11px]">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<span>60 FPS</span>
+
+</div>
+
+</div>
+
+<!-- Center Stage Mockup Graphic -->
+
+<div class="relative z-10 w-full flex flex-col items-center space-y-4 my-auto">
+
+<!-- Animated Graphic Sample -->
+
+<div class="w-28 h-28 rounded-2xl bg-white/5 border border-white/20 p-2 flex items-center justify-center relative shadow-2xl">
+
+<div class="w-16 h-16 rounded-full border border-dashed border-white/40 flex items-center justify-center">
+
+<div class="w-8 h-8 rounded-full bg-white"></div>
+
+</div>
+
+<span class="absolute -top-1.5 -right-1.5 flex h-3 w-3">
+
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+
+<span class="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+
+</span>
+
+</div>
+
+<!-- Stylized Motion Text Mockup -->
+
+<div class="w-full space-y-2 text-center">
+
+<div class="h-3 w-3/4 bg-white/90 rounded-full mx-auto"></div>
+
+<div class="h-2 w-1/2 bg-white/40 rounded-full mx-auto"></div>
+
+</div>
+
+<!-- Style Swatch Indicators Inside Stage -->
+
+<div class="flex items-center space-x-2 pt-2">
+
+<span class="w-4 h-4 rounded-full bg-white border border-white/20"></span>
+
+<span class="w-4 h-4 rounded-full bg-white/70 border border-white/20"></span>
+
+<span class="w-4 h-4 rounded-full bg-white/30 border border-white/20"></span>
+
+<span class="w-4 h-4 rounded-full bg-white/10 border border-white/20"></span>
+
+</div>
+
+</div>
+
+<!-- Bottom Stage Player bar -->
+
+<div class="relative w-full z-10 space-y-2">
+
+<div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+
+<div class="bg-white h-full w-2/5"></div>
+
+</div>
+
+<div class="flex items-center justify-between text-[10px] text-white/50 font-mono">
+
+<span>00:03.20</span>
+
+<span>00:08.00</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Action Control Buttons -->
+
+<div class="flex flex-col space-y-2 pt-1">
+
+<button class="w-full py-2.5 bg-white text-black font-semibold text-xs tracking-wide rounded-lg hover:bg-white/90 active:scale-[0.99] transition-all flex items-center justify-center space-x-2" type="button">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<span>Apply Selected Theme</span>
+
+</button>
+
+<button class="w-full py-2 bg-transparent text-white/60 hover:text-white border border-white/10 hover:border-white/30 text-xs font-medium rounded-lg transition-all flex items-center justify-center space-x-2" type="button">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<span>Back to Scene Editor</span>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- END: LeftPreviewColumn -->
+
+<!-- BEGIN: RightControlsColumn -->
+
+<div class="lg:col-span-8 xl:col-span-8 flex flex-col space-y-6" data-purpose="options-column">
+
+<!-- ============================================== -->
+
+<!-- SECTION 1: COLOR PALETTE SELECTOR             -->
+
+<!-- ============================================== -->
+
+<section class="bg-[#1E2025] rounded-xl border border-white/10 p-5 shadow-lg space-y-5" data-purpose="palette-selector-section">
+
+<!-- Section Header -->
+
+<div class="flex items-center justify-between border-b border-white/10 pb-3">
+
+<div class="flex items-center space-x-2.5">
+
+<div class="w-7 h-7 rounded bg-white/10 flex items-center justify-center border border-white/10">
+
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M7 21a4 4 0 01-4-4 4 4 0 014-4h4a4 4 0 014 4 0 114 4h-4a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+</div>
+
+<div>
+
+<h3 class="text-sm font-semibold text-white tracking-wide">Color System &amp; Palette</h3>
+
+<p class="text-xs text-white/50">Select brand tones or configure a customized aesthetic scheme</p>
+
+</div>
+
+</div>
+
+<!-- Palette Mode Toggle -->
+
+<div class="flex items-center space-x-2 text-xs bg-white/5 border border-white/10 rounded-lg p-1">
+
+<button class="px-2.5 py-1 rounded bg-white text-black font-semibold text-[11px] transition-all">Curated</button>
+
+<button class="px-2.5 py-1 rounded text-white/60 hover:text-white text-[11px] transition-all">Custom</button>
+
+</div>
+
+</div>
+
+<!-- Curated Palette Cards Grid -->
+
+<div>
+
+<label class="block text-xs font-semibold text-white/60 uppercase tracking-wider mb-2.5">Curated Studio Presets</label>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+
+<!-- Preset Card 1: Monochrome Obsidian (Active) -->
+
+<div class="group relative bg-[#24272E] border-2 border-white rounded-lg p-3 cursor-pointer transition-all">
+
+<div class="flex items-center justify-between mb-2">
+
+<span class="text-xs font-semibold text-white">Obsidian Monochrome</span>
+
+<span class="w-2 h-2 rounded-full bg-white"></span>
+
+</div>
+
+<div class="h-7 w-full rounded flex overflow-hidden border border-white/20">
+
+<div class="flex-1 bg-white"></div>
+
+<div class="flex-1 bg-white/70"></div>
+
+<div class="flex-1 bg-white/40"></div>
+
+<div class="flex-1 bg-white/10"></div>
+
+<div class="flex-1 bg-black"></div>
+
+</div>
+
+</div>
+
+<!-- Preset Card 2: Slate Minimal -->
+
+<div class="group relative bg-[#24272E] border border-white/10 hover:border-white/30 rounded-lg p-3 cursor-pointer transition-all">
+
+<div class="flex items-center justify-between mb-2">
+
+<span class="text-xs font-medium text-white/80">Slate &amp; Platinum</span>
+
+<span class="w-1.5 h-1.5 rounded-full bg-transparent"></span>
+
+</div>
+
+<div class="h-7 w-full rounded flex overflow-hidden border border-white/10">
+
+<div class="flex-1 bg-white/90"></div>
+
+<div class="flex-1 bg-white/50"></div>
+
+<div class="flex-1 bg-white/20"></div>
+
+<div class="flex-1 bg-zinc-800"></div>
+
+<div class="flex-1 bg-zinc-950"></div>
+
+</div>
+
+</div>
+
+<!-- Preset Card 3: Deep Graphite -->
+
+<div class="group relative bg-[#24272E] border border-white/10 hover:border-white/30 rounded-lg p-3 cursor-pointer transition-all">
+
+<div class="flex items-center justify-between mb-2">
+
+<span class="text-xs font-medium text-white/80">Deep Graphite</span>
+
+<span class="w-1.5 h-1.5 rounded-full bg-transparent"></span>
+
+</div>
+
+<div class="h-7 w-full rounded flex overflow-hidden border border-white/10">
+
+<div class="flex-1 bg-zinc-100"></div>
+
+<div class="flex-1 bg-zinc-400"></div>
+
+<div class="flex-1 bg-zinc-600"></div>
+
+<div class="flex-1 bg-zinc-800"></div>
+
+<div class="flex-1 bg-black"></div>
+
+</div>
+
+</div>
+
+<!-- Preset Card 4: Stark Contrast -->
+
+<div class="group relative bg-[#24272E] border border-white/10 hover:border-white/30 rounded-lg p-3 cursor-pointer transition-all">
+
+<div class="flex items-center justify-between mb-2">
+
+<span class="text-xs font-medium text-white/80">Stark Bauhaus</span>
+
+<span class="w-1.5 h-1.5 rounded-full bg-transparent"></span>
+
+</div>
+
+<div class="h-7 w-full rounded flex overflow-hidden border border-white/10">
+
+<div class="flex-1 bg-white"></div>
+
+<div class="flex-1 bg-white/80"></div>
+
+<div class="flex-1 bg-white/30"></div>
+
+<div class="flex-1 bg-zinc-900"></div>
+
+<div class="flex-1 bg-black"></div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Custom Palette Swatches Builder Strip -->
+
+<div class="pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+<div class="flex items-center space-x-2">
+
+<span class="text-xs text-white/60">Active Swatches:</span>
+
+<!-- Color Swatch Dots -->
+
+<div class="flex items-center space-x-2 bg-[#141518] px-3 py-1.5 rounded-lg border border-white/10">
+
+<button class="w-5 h-5 rounded-full bg-white ring-2 ring-white/30 hover:scale-110 transition-transform" title="#FFFFFF"></button>
+
+<button class="w-5 h-5 rounded-full bg-white/70 ring-1 ring-white/20 hover:scale-110 transition-transform" title="#B3B3B3"></button>
+
+<button class="w-5 h-5 rounded-full bg-white/40 ring-1 ring-white/20 hover:scale-110 transition-transform" title="#666666"></button>
+
+<button class="w-5 h-5 rounded-full bg-white/10 ring-1 ring-white/20 hover:scale-110 transition-transform" title="#1A1A1A"></button>
+
+<button class="w-5 h-5 rounded-full bg-black ring-1 ring-white/20 hover:scale-110 transition-transform" title="#000000"></button>
+
+<!-- Add Swatch Button -->
+
+<button class="w-5 h-5 rounded-full border border-dashed border-white/40 flex items-center justify-center text-white/60 hover:text-white hover:border-white transition-colors" title="Add Swatch">
+
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Color Balance / Theme Mode Toggle -->
+
+<div class="flex items-center space-x-3 text-xs text-white/70">
+
+<span class="text-[11px] uppercase tracking-wide">Surface Balance:</span>
+
+<div class="flex items-center bg-[#141518] border border-white/10 rounded-md p-0.5">
+
+<button class="px-2 py-0.5 rounded text-[11px] text-white/50 hover:text-white">Dark</button>
+
+<button class="px-2 py-0.5 rounded text-[11px] bg-white text-black font-semibold">Adaptive</button>
+
+<button class="px-2 py-0.5 rounded text-[11px] text-white/50 hover:text-white">Light</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ============================================== -->
+
+<!-- SECTION 2: VOICEOVER & TALENT                 -->
+
+<!-- ============================================== -->
+
+<section class="bg-[#1E2025] rounded-xl border border-white/10 p-5 shadow-lg space-y-4" data-purpose="narration-talent-section">
+
+<!-- Section Header -->
+
+<div class="flex items-center justify-between border-b border-white/10 pb-3">
+
+<div class="flex items-center space-x-2.5">
+
+<div class="w-7 h-7 rounded bg-white/10 flex items-center justify-center border border-white/10">
+
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+</div>
+
+<div>
+
+<h3 class="text-sm font-semibold text-white tracking-wide">Voiceover &amp; AI Narration Talent</h3>
+
+<p class="text-xs text-white/50">Preview and designate narration timbre, language, and pacing</p>
+
+</div>
+
+</div>
+
+<span class="text-[11px] font-mono text-white/60 bg-white/5 border border-white/10 px-2.5 py-1 rounded">
+
+            3 Voices Loaded
+
+          </span>
+
+</div>
+
+<!-- Voice Option Cards List -->
+
+<div class="space-y-3">
+
+<!-- Voice Track 1: Active Selected -->
+
+<div class="group bg-[#24272E] border-2 border-white rounded-lg p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all shadow-md">
+
+<!-- Left Info & Avatar -->
+
+<div class="flex items-center space-x-3.5 min-w-[200px]">
+
+<div class="w-10 h-10 rounded-full bg-white text-black font-bold flex items-center justify-center text-sm shadow">
+
+                SA
+
+              </div>
+
+<div>
+
+<div class="flex items-center space-x-2">
+
+<h4 class="text-sm font-semibold text-white">Sami Al-Mansoor</h4>
+
+<span class="px-1.5 py-0.5 rounded bg-white/20 text-white text-[10px] font-mono">SELECTED</span>
+
+</div>
+
+<div class="flex items-center space-x-2 text-xs text-white/60 mt-0.5">
+
+<span>Friendly &amp; Warm</span>
+
+<span>•</span>
+
+<span>Arabic (Saudi Gulf)</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Middle Audio Waveform Visualization -->
+
+<div class="flex-1 flex items-center space-x-1 h-8 px-4 bg-[#141518]/60 rounded-md border border-white/5 max-w-md">
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+<span class="w-1 bg-white/60 h-4 rounded-full"></span>
+
+<span class="w-1 bg-white h-6 rounded-full"></span>
+
+<span class="w-1 bg-white/80 h-3 rounded-full"></span>
+
+<span class="w-1 bg-white h-7 rounded-full"></span>
+
+<span class="w-1 bg-white h-5 rounded-full"></span>
+
+<span class="w-1 bg-white/90 h-8 rounded-full"></span>
+
+<span class="w-1 bg-white/70 h-4 rounded-full"></span>
+
+<span class="w-1 bg-white h-6 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+<span class="w-1 bg-white/60 h-5 rounded-full"></span>
+
+<span class="w-1 bg-white h-7 rounded-full"></span>
+
+<span class="w-1 bg-white/80 h-4 rounded-full"></span>
+
+<span class="w-1 bg-white/30 h-2 rounded-full"></span>
+
+</div>
+
+<!-- Play & Selection Action -->
+
+<div class="flex items-center space-x-2 justify-end">
+
+<button class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-all shadow" title="Pause Preview">
+
+<svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+
+<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"></path>
+
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Voice Track 2: Professional Neutral -->
+
+<div class="group bg-[#24272E] border border-white/10 hover:border-white/30 rounded-lg p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
+
+<!-- Left Info & Avatar -->
+
+<div class="flex items-center space-x-3.5 min-w-[200px]">
+
+<div class="w-10 h-10 rounded-full bg-white/10 text-white font-semibold flex items-center justify-center text-sm border border-white/10">
+
+                NM
+
+              </div>
+
+<div>
+
+<div class="flex items-center space-x-2">
+
+<h4 class="text-sm font-medium text-white">Nour Malek</h4>
+
+</div>
+
+<div class="flex items-center space-x-2 text-xs text-white/50 mt-0.5">
+
+<span>Professional • Corporate</span>
+
+<span>•</span>
+
+<span>Modern Standard AR</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Middle Audio Waveform Visualization (Inactive) -->
+
+<div class="flex-1 flex items-center space-x-1 h-8 px-4 bg-[#141518]/30 rounded-md border border-white/5 max-w-md opacity-40">
+
+<span class="w-1 bg-white/40 h-3 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-5 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-6 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-4 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-5 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-3 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-6 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-4 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-3 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+</div>
+
+<!-- Play & Selection Action -->
+
+<div class="flex items-center space-x-2 justify-end">
+
+<button class="w-8 h-8 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all" title="Play Preview">
+
+<svg class="w-3.5 h-3.5 fill-current ml-0.5" viewbox="0 0 24 24">
+
+<path d="M8 5v14l11-7z"></path>
+
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Voice Track 3: Energetic Commercial -->
+
+<div class="group bg-[#24272E] border border-white/10 hover:border-white/30 rounded-lg p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
+
+<!-- Left Info & Avatar -->
+
+<div class="flex items-center space-x-3.5 min-w-[200px]">
+
+<div class="w-10 h-10 rounded-full bg-white/10 text-white font-semibold flex items-center justify-center text-sm border border-white/10">
+
+                KR
+
+              </div>
+
+<div>
+
+<div class="flex items-center space-x-2">
+
+<h4 class="text-sm font-medium text-white">Karim Rayan</h4>
+
+</div>
+
+<div class="flex items-center space-x-2 text-xs text-white/50 mt-0.5">
+
+<span>Energetic • Promo</span>
+
+<span>•</span>
+
+<span>Bilingual AR/EN</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Middle Audio Waveform Visualization (Inactive) -->
+
+<div class="flex-1 flex items-center space-x-1 h-8 px-4 bg-[#141518]/30 rounded-md border border-white/5 max-w-md opacity-40">
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-6 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-7 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-4 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-5 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-8 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-4 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-5 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-3 rounded-full"></span>
+
+<span class="w-1 bg-white/40 h-2 rounded-full"></span>
+
+</div>
+
+<!-- Play & Selection Action -->
+
+<div class="flex items-center space-x-2 justify-end">
+
+<button class="w-8 h-8 rounded-full bg-white/10 border border-white/20 text-white flex items-center justify-center hover:bg-white hover:text-black transition-all" title="Play Preview">
+
+<svg class="w-3.5 h-3.5 fill-current ml-0.5" viewbox="0 0 24 24">
+
+<path d="M8 5v14l11-7z"></path>
+
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ============================================== -->
+
+<!-- SECTION 3: BACKGROUND MUSIC & AUDIO DESIGN    -->
+
+<!-- ============================================== -->
+
+<section class="bg-[#1E2025] rounded-xl border border-white/10 p-5 shadow-lg space-y-4" data-purpose="audio-design-section">
+
+<!-- Section Header -->
+
+<div class="flex items-center justify-between border-b border-white/10 pb-3">
+
+<div class="flex items-center space-x-2.5">
+
+<div class="w-7 h-7 rounded bg-white/10 flex items-center justify-center border border-white/10">
+
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+</div>
+
+<div>
+
+<h3 class="text-sm font-semibold text-white tracking-wide">Background Music &amp; Sound Design</h3>
+
+<p class="text-xs text-white/50">Curate background acoustic score and motion sound effects</p>
+
+</div>
+
+</div>
+
+<button class="text-xs text-white/60 hover:text-white flex items-center space-x-1">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<span>Upload Track</span>
+
+</button>
+
+</div>
+
+<!-- Music Track Row Card -->
+
+<div class="bg-[#24272E] border border-white/15 rounded-lg p-4 space-y-3">
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+
+<div class="flex items-center space-x-3">
+
+<button class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-all">
+
+<svg class="w-3.5 h-3.5 fill-current ml-0.5" viewbox="0 0 24 24">
+
+<path d="M8 5v14l11-7z"></path>
+
+</svg>
+
+</button>
+
+<div>
+
+<h4 class="text-xs font-semibold text-white">Minimal Cinematic Ambient Pulse</h4>
+
+<p class="text-[11px] text-white/50">Electronic • 118 BPM • 01:45 Duration</p>
+
+</div>
+
+</div>
+
+<!-- Volume Slider Group -->
+
+<div class="flex items-center space-x-3 bg-[#141518] px-3 py-1.5 rounded-lg border border-white/10 self-start sm:self-auto">
+
+<svg class="w-3.5 h-3.5 text-white/60" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M15.536 8.464a5 5 0 010 7.072M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<input class="w-24 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-white" max="100" min="0" type="range" value="40"/>
+
+<span class="font-mono text-xs text-white/80 w-8 text-right">40%</span>
+
+</div>
+
+</div>
+
+<!-- Sound Scrubber Wave Bar -->
+
+<div class="relative w-full h-7 bg-[#141518] rounded border border-white/10 overflow-hidden flex items-center px-2">
+
+<!-- Simulated Track Peaks -->
+
+<div class="w-full flex items-center justify-between space-x-0.5 opacity-60">
+
+<span class="w-1 bg-white h-2 rounded-full"></span>
+
+<span class="w-1 bg-white h-4 rounded-full"></span>
+
+<span class="w-1 bg-white h-5 rounded-full"></span>
+
+<span class="w-1 bg-white h-3 rounded-full"></span>
+
+<span class="w-1 bg-white h-6 rounded-full"></span>
+
+<span class="w-1 bg-white h-4 rounded-full"></span>
+
+<span class="w-1 bg-white h-2 rounded-full"></span>
+
+<span class="w-1 bg-white h-5 rounded-full"></span>
+
+<span class="w-1 bg-white h-6 rounded-full"></span>
+
+<span class="w-1 bg-white h-3 rounded-full"></span>
+
+<span class="w-1 bg-white h-2 rounded-full"></span>
+
+<span class="w-1 bg-white h-4 rounded-full"></span>
+
+<span class="w-1 bg-white h-6 rounded-full"></span>
+
+<span class="w-1 bg-white h-5 rounded-full"></span>
+
+<span class="w-1 bg-white h-3 rounded-full"></span>
+
+<span class="w-1 bg-white h-1 rounded-full"></span>
+
+<span class="w-1 bg-white h-4 rounded-full"></span>
+
+<span class="w-1 bg-white h-5 rounded-full"></span>
+
+<span class="w-1 bg-white h-3 rounded-full"></span>
+
+<span class="w-1 bg-white h-2 rounded-full"></span>
+
+<span class="w-1 bg-white h-5 rounded-full"></span>
+
+<span class="w-1 bg-white h-6 rounded-full"></span>
+
+<span class="w-1 bg-white h-4 rounded-full"></span>
+
+<span class="w-1 bg-white h-2 rounded-full"></span>
+
+</div>
+
+<!-- Progress indicator pin -->
+
+<div class="absolute left-1/3 top-0 bottom-0 w-[1.5px] bg-white shadow-[0_0_8px_white]"></div>
+
+</div>
+
+</div>
+
+<!-- SFX & Motion Foley Toggle Strip -->
+
+<div class="flex items-center justify-between p-3 bg-[#24272E] border border-white/10 rounded-lg">
+
+<div class="flex items-center space-x-3">
+
+<div class="w-5 h-5 rounded bg-white/10 flex items-center justify-center">
+
+<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+</div>
+
+<div>
+
+<p class="text-xs font-semibold text-white">Keyframe Sound Effects (SFX / Foley)</p>
+
+<p class="text-[11px] text-white/50">Auto-align whoosh and hit accents to motion graphics transitions</p>
+
+</div>
+
+</div>
+
+<!-- Switch Input -->
+
+<label class="relative inline-flex items-center cursor-pointer">
+
+<input checked="" class="sr-only peer" type="checkbox"/>
+
+<div class="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-black after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white/90"></div>
+
+</label>
+
+</div>
+
+</section>
+
+<!-- Bottom Step Navigation Actions -->
+
+<div class="flex items-center justify-between pt-2">
+
+<button class="px-4 py-2 text-xs font-medium text-white/60 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-colors flex items-center space-x-2" type="button">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+<span>Previous: Scenes</span>
+
+</button>
+
+<button class="px-5 py-2.5 bg-white text-black text-xs font-semibold rounded-lg hover:bg-white/90 shadow-lg active:scale-95 transition-all flex items-center space-x-2" type="button">
+
+<span>Continue to Final Export</span>
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- END: RightControlsColumn -->
+
+</main>
+
+<!-- END: MainStudioWorkspace -->
+
+<!-- BEGIN: MinimalFooter -->
+
+<footer class="border-t border-white/5 py-3 px-6 text-center text-[11px] text-white/40 select-none">
+
+<span>Motion Graphics Studio • Clean Studio Engine v2.4 • Monochromatic UI</span>
+
+</footer>
+
+<!-- END: MinimalFooter -->
+
+</body></html>
+
+<!-- Motion Graphics Studio - Step 4: Export -->
+
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+
+<meta charset="utf-8"/>
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+<title>Motion Graphics Studio - Export &amp; Render</title>
+
+<!-- Tailwind CSS CDN with forms and container queries -->
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<script>
+
+    tailwind.config = {
+
+      theme: {
+
+        extend: {
+
+          colors: {
+
+            app: {
+
+              bg: '#141518',
+
+              surface: '#1E2025',
+
+              border: 'rgba(255, 255, 255, 0.1)',
+
+              borderActive: '#FFFFFF',
+
+              muted: 'rgba(255, 255, 255, 0.45)',
+
+              subtle: 'rgba(255, 255, 255, 0.08)'
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+  </script>
+
+<style data-purpose="custom-scrollbars">
+
+    ::-webkit-scrollbar {
+
+      width: 6px;
+
+      height: 6px;
+
+    }
+
+    ::-webkit-scrollbar-track {
+
+      background: #141518;
+
+    }
+
+    ::-webkit-scrollbar-thumb {
+
+      background: rgba(255, 255, 255, 0.2);
+
+      border-radius: 3px;
+
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+
+      background: rgba(255, 255, 255, 0.4);
+
+    }
+
+  </style>
+
+</head>
+
+<body class="bg-[#141518] text-white antialiased h-full flex flex-col font-sans select-none overflow-x-hidden">
+
+<!-- BEGIN: MainHeader -->
+
+<header class="h-12 border-b border-white/10 px-6 flex items-center justify-between bg-[#141518] shrink-0 z-20" data-purpose="top-navigation-bar">
+
+<!-- Left branding & status -->
+
+<div class="flex items-center gap-4">
+
+<div class="flex items-center gap-2">
+
+<div class="w-6 h-6 rounded bg-white flex items-center justify-center text-black font-bold text-xs">M</div>
+
+<span class="text-sm font-semibold tracking-wide text-white">Motion Graphics Studio</span>
+
+</div>
+
+<div class="h-4 w-[1px] bg-white/20"></div>
+
+<span class="text-xs text-white/50 flex items-center gap-1.5 font-mono">
+
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+
+        Project: Brand_Showcase_v4
+
+      </span>
+
+</div>
+
+<!-- Center Compact Stepper (Steps 1, 2, 3 Done, Step 4 Active) -->
+
+<nav class="hidden md:flex items-center gap-3" data-purpose="workflow-stepper">
+
+<!-- Step 1 Done -->
+
+<div class="flex items-center gap-1.5 text-xs text-white">
+
+<span class="w-5 h-5 rounded-full bg-white/10 border border-white/40 flex items-center justify-center text-[10px]">✓</span>
+
+<span class="text-white/60">Idea</span>
+
+</div>
+
+<div class="w-5 h-[1px] bg-white/30"></div>
+
+<!-- Step 2 Done -->
+
+<div class="flex items-center gap-1.5 text-xs text-white">
+
+<span class="w-5 h-5 rounded-full bg-white/10 border border-white/40 flex items-center justify-center text-[10px]">✓</span>
+
+<span class="text-white/60">Scenes</span>
+
+</div>
+
+<div class="w-5 h-[1px] bg-white/30"></div>
+
+<!-- Step 3 Done -->
+
+<div class="flex items-center gap-1.5 text-xs text-white">
+
+<span class="w-5 h-5 rounded-full bg-white/10 border border-white/40 flex items-center justify-center text-[10px]">✓</span>
+
+<span class="text-white/60">Style</span>
+
+</div>
+
+<div class="w-5 h-[1px] bg-white/30"></div>
+
+<!-- Step 4 Active -->
+
+<div class="flex items-center gap-1.5 text-xs text-white font-medium">
+
+<span class="w-5 h-5 rounded-full bg-white text-black font-bold flex items-center justify-center text-[10px]">4</span>
+
+<span class="text-white">Export &amp; Render</span>
+
+</div>
+
+</nav>
+
+<!-- Right user / quick actions -->
+
+<div class="flex items-center gap-3">
+
+<div class="text-[11px] font-mono px-2 py-0.5 rounded border border-white/20 text-white/70">
+
+        EN / AR
+
+      </div>
+
+<div class="w-7 h-7 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-xs font-semibold text-white">
+
+        JD
+
+      </div>
+
+</div>
+
+</header>
+
+<!-- END: MainHeader -->
+
+<!-- BEGIN: MainContentArea -->
+
+<main class="flex-1 flex flex-col lg:flex-row gap-5 p-5 min-h-0 overflow-y-auto lg:overflow-hidden" data-purpose="workspace-container">
+
+<!-- BEGIN: LeftControlPanel -->
+
+<aside class="w-full lg:w-[380px] shrink-0 flex flex-col gap-4 overflow-y-auto" data-purpose="render-export-settings">
+
+<!-- Panel 1: Render Quality & Aspect Ratio Options -->
+
+<section class="bg-[#1E2025] rounded-xl border border-white/10 p-5 flex flex-col gap-5">
+
+<div class="flex items-center justify-between pb-3 border-b border-white/10">
+
+<div>
+
+<h2 class="text-sm font-semibold tracking-wide text-white">Export Settings</h2>
+
+<p class="text-xs text-white/50 mt-0.5">Customize output format &amp; sizing</p>
+
+</div>
+
+<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider border border-white/20 text-white/70">H.264 / AAC</span>
+
+</div>
+
+<!-- Resolution Selector -->
+
+<div>
+
+<label class="block text-xs font-medium text-white/70 mb-2">Resolution</label>
+
+<div class="grid grid-cols-3 gap-2" data-purpose="resolution-buttons">
+
+<button class="py-2.5 rounded-lg border border-white/15 bg-white/5 text-xs font-medium text-white/70 hover:border-white/40 hover:text-white transition" type="button">
+
+              720p
+
+            </button>
+
+<button class="py-2.5 rounded-lg border-2 border-white bg-white/15 text-xs font-bold text-white shadow-[0_0_12px_rgba(255,255,255,0.15)] flex items-center justify-center gap-1.5" type="button">
+
+<span>1080p</span>
+
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+
+</button>
+
+<button class="py-2.5 rounded-lg border border-white/15 bg-white/5 text-xs font-medium text-white/70 hover:border-white/40 hover:text-white transition" type="button">
+
+              4K Ultra
+
+            </button>
+
+</div>
+
+</div>
+
+<!-- Aspect Ratio Selector -->
+
+<div>
+
+<label class="block text-xs font-medium text-white/70 mb-2">Aspect Ratio</label>
+
+<div class="grid grid-cols-3 gap-2" data-purpose="ratio-buttons">
+
+<button class="py-2.5 rounded-lg border border-white/15 bg-white/5 text-xs font-medium text-white/70 hover:border-white/40 hover:text-white flex flex-col items-center gap-0.5 transition" type="button">
+
+<span class="font-semibold">9:16</span>
+
+<span class="text-[9px] text-white/40">Vertical</span>
+
+</button>
+
+<button class="py-2.5 rounded-lg border border-white/15 bg-white/5 text-xs font-medium text-white/70 hover:border-white/40 hover:text-white flex flex-col items-center gap-0.5 transition" type="button">
+
+<span class="font-semibold">1:1</span>
+
+<span class="text-[9px] text-white/40">Square</span>
+
+</button>
+
+<button class="py-2.5 rounded-lg border-2 border-white bg-white/15 text-xs font-bold text-white shadow-[0_0_12px_rgba(255,255,255,0.15)] flex flex-col items-center gap-0.5" type="button">
+
+<span class="font-bold">16:9</span>
+
+<span class="text-[9px] text-white/70">Widescreen</span>
+
+</button>
+
+</div>
+
+</div>
+
+<!-- Advanced Render Settings Dropdown Toggle -->
+
+<div class="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-white/60">
+
+<span>Bitrate &amp; Color Depth</span>
+
+<span class="font-mono text-[11px] text-white/80">ProRes HQ · 60 FPS</span>
+
+</div>
+
+<!-- Primary Action Button: Solid White CTA -->
+
+<button class="w-full py-3 px-4 bg-white hover:bg-white/90 text-black font-semibold rounded-lg text-sm flex items-center justify-center gap-2 transition duration-150 shadow-md" data-purpose="primary-export-cta" type="button">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24">
+
+<path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+          Start Full Render &amp; Export
+
+        </button>
+
+</section>
+
+<!-- Panel 2: Live Progress Card -->
+
+<section class="bg-[#1E2025] rounded-xl border border-white/10 p-5 flex flex-col gap-3" data-purpose="render-progress-card">
+
+<div class="flex items-center justify-between text-xs font-medium">
+
+<span class="text-white flex items-center gap-2">
+
+<span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+
+            Rendering in Progress
+
+          </span>
+
+<span class="font-mono text-white/90 font-bold">62%</span>
+
+</div>
+
+<!-- High Contrast White Progress Bar -->
+
+<div class="w-full h-2 rounded-full bg-white/10 overflow-hidden p-[1px]">
+
+<div class="h-full bg-white rounded-full transition-all duration-300" style="width: 62%;"></div>
+
+</div>
+
+<div class="flex items-center justify-between text-[11px] text-white/50 font-mono mt-1">
+
+<span>Processing: 3 of 5 scenes</span>
+
+<span>ETA ~ 00:14s</span>
+
+</div>
+
+</section>
+
+<!-- Panel 3: Completed Ready for Download Card -->
+
+<section class="bg-[#1E2025] rounded-xl border border-white/20 p-5 flex flex-col gap-4 mt-auto" data-purpose="export-ready-card">
+
+<div class="flex items-start justify-between">
+
+<div>
+
+<span class="text-[10px] uppercase font-bold tracking-wider text-white/40">Latest Exported File</span>
+
+<h3 class="text-sm font-semibold text-white mt-0.5">Brand_Showcase_Final.mp4</h3>
+
+<p class="text-xs text-white/60 font-mono mt-1">1080p • 0:32 Duration • 18.4 MB</p>
+
+</div>
+
+<div class="w-7 h-7 rounded-full bg-white/10 border border-white/40 flex items-center justify-center text-white text-xs">
+
+            ✓
+
+          </div>
+
+</div>
+
+<div class="grid grid-cols-2 gap-2 pt-1">
+
+<button class="py-2 px-3 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-xs font-medium text-white transition text-center" type="button">
+
+            Copy Link
+
+          </button>
+
+<button class="py-2 px-3 rounded-lg bg-white hover:bg-white/90 text-black text-xs font-bold transition flex items-center justify-center gap-1.5 shadow" type="button">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+
+<path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+            Download
+
+          </button>
+
+</div>
+
+</section>
+
+</aside>
+
+<!-- END: LeftControlPanel -->
+
+<!-- BEGIN: RightVideoPlayerArea -->
+
+<section class="flex-1 bg-[#1E2025] rounded-xl border border-white/10 p-5 flex flex-col min-h-[500px]" data-purpose="video-workspace">
+
+<!-- Video Player Header Details -->
+
+<div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+
+<div class="flex items-center gap-3">
+
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-white/10 text-white border border-white/15">
+
+            1080p • 60fps
+
+          </span>
+
+<span class="text-xs font-mono text-white/60">
+
+            Current: 0:32 / Total: 0:45
+
+          </span>
+
+</div>
+
+<!-- Scene position badge -->
+
+<div class="flex items-center gap-2">
+
+<span class="text-xs font-mono text-white/70">Scene Sequence: 3 / 5</span>
+
+<span class="w-2 h-2 rounded-full bg-white"></span>
+
+</div>
+
+</div>
+
+<!-- Main Video Canvas / Viewport -->
+
+<div class="flex-1 relative rounded-lg border border-white/10 bg-[#141518] flex items-center justify-center overflow-hidden group" data-purpose="player-canvas">
+
+<!-- Aspect Ratio Tag (Top Right) -->
+
+<div class="absolute top-4 right-4 z-10 px-2 py-1 rounded bg-black/60 backdrop-blur-md border border-white/20 text-[11px] font-mono text-white">
+
+          16:9
+
+        </div>
+
+<!-- Graphic Preview Representation (Reflecting Motion Graphics elements) -->
+
+<div class="relative w-full max-w-lg aspect-video flex items-center justify-center pointer-events-none">
+
+<!-- Stylized overlay elements mimicking screen 04 -->
+
+<div class="absolute inset-0 flex items-center justify-center">
+
+<!-- Connecting dashed line -->
+
+<div class="w-64 h-[2px] border-b-2 border-dashed border-white/30"></div>
+
+</div>
+
+<!-- Element Left (Dark Rounded Shape) -->
+
+<div class="absolute left-16 w-14 h-14 rounded-2xl bg-white/10 border border-white/20 backdrop-blur flex items-center justify-center">
+
+<span class="text-[10px] text-white/40 font-mono">01</span>
+
+</div>
+
+<!-- Element Center-Top: Text pill badge -->
+
+<div class="absolute top-8 px-4 py-1.5 rounded-full bg-white/15 border border-white/30 text-xs font-medium text-white tracking-wide shadow-lg">
+
+            Headline Animation Scene
+
+          </div>
+
+<!-- Element Right: Stylized Circle -->
+
+<div class="absolute right-16 w-16 h-16 rounded-full bg-white/10 border border-white/30 flex items-center justify-center">
+
+<div class="w-8 h-8 rounded-full border border-white/40"></div>
+
+</div>
+
+</div>
+
+<!-- Center Play Overlay Button -->
+
+<button class="absolute z-10 w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition pointer-events-auto" data-purpose="play-pause-toggle" type="button">
+
+<svg class="w-6 h-6 ml-1" fill="currentColor" viewbox="0 0 24 24">
+
+<path d="M8 5v14l11-7z"></path>
+
+</svg>
+
+</button>
+
+<!-- Scrub overlay gradient -->
+
+<div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+
+</div>
+
+<!-- BEGIN: MultiSceneTimeline -->
+
+<div class="mt-4 pt-3 flex flex-col gap-3" data-purpose="timeline-and-controls">
+
+<!-- Multi-segment scene bar -->
+
+<div class="flex flex-col gap-1.5">
+
+<div class="flex items-center justify-between text-[11px] text-white/50 font-mono">
+
+<span>TIMELINE TRACKS</span>
+
+<span>00:00 - 00:45</span>
+
+</div>
+
+<div class="w-full h-8 flex gap-1.5 p-1 bg-[#141518] rounded-lg border border-white/10" data-purpose="scene-segments">
+
+<!-- Scene 1 -->
+
+<div class="flex-1 bg-white/15 hover:bg-white/25 border border-white/20 rounded flex items-center justify-center cursor-pointer transition">
+
+<span class="text-[10px] font-mono text-white/70">Scene 1</span>
+
+</div>
+
+<!-- Scene 2 -->
+
+<div class="flex-1 bg-white/15 hover:bg-white/25 border border-white/20 rounded flex items-center justify-center cursor-pointer transition">
+
+<span class="text-[10px] font-mono text-white/70">Scene 2</span>
+
+</div>
+
+<!-- Scene 3 (Active) -->
+
+<div class="flex-[1.4] bg-white text-black font-bold border border-white rounded flex items-center justify-center cursor-pointer shadow-sm">
+
+<span class="text-[10px] font-mono">Scene 3 [Active]</span>
+
+</div>
+
+<!-- Scene 4 -->
+
+<div class="flex-1 bg-white/15 hover:bg-white/25 border border-white/20 rounded flex items-center justify-center cursor-pointer transition">
+
+<span class="text-[10px] font-mono text-white/70">Scene 4</span>
+
+</div>
+
+<!-- Scene 5 -->
+
+<div class="flex-1 bg-white/15 hover:bg-white/25 border border-white/20 rounded flex items-center justify-center cursor-pointer transition">
+
+<span class="text-[10px] font-mono text-white/70">Scene 5</span>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Playback Control Toolbar -->
+
+<div class="flex items-center justify-between pt-2">
+
+<!-- Left Secondary Actions (Loop, Reset) -->
+
+<div class="flex items-center gap-2">
+
+<button class="px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:border-white/30 text-xs text-white/80 flex items-center gap-1.5 transition" type="button">
+
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+<span>Loop Preview</span>
+
+</button>
+
+<button class="px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:border-white/30 text-xs text-white/80 transition" type="button">
+
+              Reset View
+
+            </button>
+
+</div>
+
+<!-- Right Audio, Step & Transport Controls -->
+
+<div class="flex items-center gap-4">
+
+<!-- Volume slider widget -->
+
+<div class="flex items-center gap-2">
+
+<svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<path d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.21-1.616.58-2.316.234-.847 1.058-1.354 1.938-1.354h2.24z" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+<div class="w-16 h-1 rounded-full bg-white/20 overflow-hidden">
+
+<div class="h-full bg-white w-2/3"></div>
+
+</div>
+
+</div>
+
+<div class="h-4 w-[1px] bg-white/20"></div>
+
+<!-- Frame Back -->
+
+<button class="p-1.5 text-white/70 hover:text-white transition" type="button">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<path d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+</button>
+
+<!-- Transport Play/Pause Pill -->
+
+<button class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 transition shadow" type="button">
+
+<svg class="w-4 h-4 ml-0.5" fill="currentColor" viewbox="0 0 24 24">
+
+<path d="M8 5v14l11-7z"></path>
+
+</svg>
+
+</button>
+
+<!-- Frame Forward -->
+
+<button class="p-1.5 text-white/70 hover:text-white transition" type="button">
+
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+
+<path d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+
+</svg>
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- END: MultiSceneTimeline -->
+
+</section>
+
+<!-- END: RightVideoPlayerArea -->
+
+</main>
+
+<!-- END: MainContentArea -->
+
+</body></html>
