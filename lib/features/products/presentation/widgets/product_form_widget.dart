@@ -1,11 +1,10 @@
-import 'dart:developer';
-
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/products/data/models/product.dart';
 import 'package:erad/features/products/data/models/product_category.dart';
 import 'package:erad/features/products/data/models/product_unit_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class ProductFormWidget extends StatefulWidget {
   final ProductModel? product;
@@ -136,7 +135,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(sc.LucideIcons.x),
                   ),
                 ],
               ),
@@ -144,7 +143,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'اسم المنتج *',
-                  prefixIcon: Icon(Icons.inventory),
+                  prefixIcon: Icon(sc.LucideIcons.package),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -157,7 +156,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 value: _selectedCategoryId,
                 decoration: const InputDecoration(
                   labelText: 'الفئة',
-                  prefixIcon: Icon(Icons.category),
+                  prefixIcon: Icon(sc.LucideIcons.tag),
                 ),
                 items: [
                   const DropdownMenuItem<String?>(
@@ -185,7 +184,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: 'سعر البيع *',
-                        prefixIcon: Icon(Icons.attach_money),
+                        prefixIcon: Icon(sc.LucideIcons.banknote),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -205,7 +204,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: 'أقل سعر بيع',
-                        prefixIcon: Icon(Icons.money_off),
+                        prefixIcon: Icon(sc.LucideIcons.banknote),
                       ),
                     ),
                   ),
@@ -216,7 +215,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'شراء*',
-                  prefixIcon: Icon(Icons.shopping_cart),
+                  prefixIcon: Icon(sc.LucideIcons.shoppingCart),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -233,7 +232,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                       controller: _measurementController,
                       decoration: const InputDecoration(
                         labelText: 'حجم',
-                        prefixIcon: Icon(Icons.straighten),
+                        prefixIcon: Icon(sc.LucideIcons.ruler),
                         hintText: 'حجم ',
                       ),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -243,7 +242,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                     initialValue: ProductUnitData.unitItems.first.value,
                     decoration: const InputDecoration(
                       labelText: 'القياس',
-                      prefixIcon: Icon(Icons.straighten),
+                      prefixIcon: Icon(sc.LucideIcons.ruler),
                     ),
                     items: ProductUnitData.unitItems,
                     onChanged: (value) {
@@ -262,7 +261,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                       keyboardType: TextInputType.number,
                       decoration: const InputDecoration(
                         labelText: 'الحد الأدنى للمخزون',
-                        prefixIcon: Icon(Icons.inventory_2_outlined),
+                        prefixIcon: Icon(sc.LucideIcons.package),
                         hintText: '0',
                       ),
                     ),
@@ -274,7 +273,8 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 spacing: 20,
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: sc.Button(
+                      style: sc.ButtonStyle.primary(),
                       onPressed: () {
                         _submitForm();
                         Navigator.pop(context);
@@ -283,7 +283,8 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                     ),
                   ),
                   Expanded(
-                    child: OutlinedButton(
+                    child: sc.Button(
+                      style: sc.ButtonStyle.outline(),
                       onPressed: () {
                         _formKey.currentState?.reset();
                       },

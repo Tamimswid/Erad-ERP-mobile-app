@@ -1,6 +1,7 @@
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/utils/number_formatter.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceStatsWidget extends StatelessWidget {
   final int totalCount;
@@ -24,7 +25,7 @@ class InvoiceStatsWidget extends StatelessWidget {
         //   context,
         //   'الاجمالي',
         //   totalCount.toString(),
-        //   Icons.description,
+        //   sc.LucideIcons.fileText,
         //   const Color(0xFF1D4ED8),
         //   const Color(0xFFEFF6FF),
         // ),
@@ -48,9 +49,9 @@ class InvoiceStatsWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          color: AppColors.muted,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
+          border: Border.all(color: AppColors.divider),
         ),
         child: Row(
           children: [
@@ -62,17 +63,17 @@ class InvoiceStatsWidget extends StatelessWidget {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.surface,
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w400,
-                      fontSize: 11,
+                      fontSize: 12,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.surface,
-                      fontWeight: FontWeight.bold,
+                      color: AppColors.text,
+                      fontWeight: FontWeight.w700,
                       fontSize: 20,
                     ),
                   ),
@@ -80,7 +81,7 @@ class InvoiceStatsWidget extends StatelessWidget {
                     currencySymbol,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w200,
+                      fontWeight: FontWeight.w400,
                       fontSize: 12,
                     ),
                   ),

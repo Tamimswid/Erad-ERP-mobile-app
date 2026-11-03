@@ -1,29 +1,22 @@
-import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/utils/app_utils.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/suppliers_debts/data/models/payment_model.dart';
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 export 'package:erad/features/suppliers_debts/data/models/payment_model.dart';
 
-class PaymentHistoryWidget extends StatelessWidget {
-  final List<SupplierPaymentModel> payments;
-  final VoidCallback? onAddPayment;
+class PaymentHistoryRow extends StatelessWidget {
+  final SupplierPaymentModel payment;
   final Function(String paymentId) onDeletePayment;
-  final Function(SupplierPaymentModel payment)? onPaymentTap;
 
-  const PaymentHistoryWidget({
+  const PaymentHistoryRow({
     super.key,
-    required this.payments,
-    this.onAddPayment,
+    required this.payment,
     required this.onDeletePayment,
-    this.onPaymentTap,
   });
 
-  void _showDeleteConfirmation(
-    BuildContext context,
-    SupplierPaymentModel payment,
-  ) {
+  void _showDeleteConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -45,20 +38,18 @@ class PaymentHistoryWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       Navigator.pop(context);
                       onDeletePayment(payment.id);
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error,
-                      foregroundColor: Colors.white,
-                    ),
                     child: const Text('حذف'),
                   ),
                 ],
@@ -70,7 +61,7 @@ class PaymentHistoryWidget extends StatelessWidget {
     );
   }
 
-  void _showPaymentDetails(BuildContext context, SupplierPaymentModel payment) {
+  void _showPaymentDetails(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -100,7 +91,8 @@ class PaymentHistoryWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إغلاق'),
                   ),
@@ -134,176 +126,75 @@ class PaymentHistoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.border)),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.history_outlined,
-                  size: 16,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'سجل المدفوعات',
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeMedium,
-                    fontWeight: AppFonts.fontWeightSemiBold,
-                    color: AppColors.text,
-                  ),
-                ),
-                const Spacer(),
-                if (onAddPayment != null)
-                  ElevatedButton.icon(
-                    onPressed: onAddPayment,
-                    icon: const Icon(Icons.add, size: 14),
-                    label: Text(
-                      'إضافة',
-                      style: TextStyle(
-                        fontSize: AppFonts.fontSizeSmall,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      foregroundColor: AppColors.primary,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                        side: BorderSide(
-                          color: AppColors.primary.withValues(alpha: 0.2),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          payments.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.inbox_outlined,
-                        size: 32,
-                        color: AppColors.textSecondary.withValues(alpha: 0.4),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'لا توجد مدفوعات',
-                        style: TextStyle(
-                          fontSize: AppFonts.fontSizeMedium,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
-                  itemCount: payments.length,
-                  itemBuilder: (context, index) {
-                    final payment = payments[index];
-                    return _buildPaymentItem(context, payment, index);
-                  },
-                ),
-        ],
-      ),
-    );
-  }
+    final theme = sc.Theme.of(context);
+    final scheme = theme.colorScheme;
 
-  Widget _buildPaymentItem(
-    BuildContext context,
-    SupplierPaymentModel payment,
-    int index,
-  ) {
-    return GestureDetector(
-      onTap: () {
-        if (onPaymentTap != null) {
-          onPaymentTap!(payment);
-        } else {
-          _showPaymentDetails(context, payment);
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-          border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+    return sc.Card(
+      padding: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: sc.Clickable(
+        onPressed: () => _showPaymentDetails(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: scheme.muted,
+                  borderRadius: theme.borderRadiusSm,
+                ),
+                child: Icon(
+                  sc.LucideIcons.arrowDown,
+                  size: 16,
+                  color: scheme.foreground,
+                ),
               ),
-              child: Icon(
-                Icons.arrow_downward_outlined,
-                color: AppColors.primary,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    NumberFormatter.formatCurrency(payment.amount),
-                    style: TextStyle(
-                      fontSize: AppFonts.fontSizeMedium,
-                      fontWeight: AppFonts.fontWeightBold,
-                      color: AppColors.text,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      NumberFormatter.formatCurrency(payment.amount),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: scheme.foreground,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${payment.paymentDate} · ${payment.paymentMethod}',
-                    style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      color: AppColors.textSecondary,
+                    const SizedBox(height: 2),
+                    Text(
+                      '${payment.paymentDate} · ${payment.paymentMethod}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: scheme.mutedForeground,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              onPressed: () => _showDeleteConfirmation(context, payment),
-              icon: Icon(
-                Icons.delete_outline,
-                color: AppColors.error,
-                size: 20,
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => _showDeleteConfirmation(context),
+                icon: Icon(
+                  sc.LucideIcons.trash2,
+                  color: scheme.destructive,
+                  size: 18,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: scheme.destructive.withValues(alpha: 0.1),
+                  padding: const EdgeInsets.all(6),
+                  minimumSize: const Size(32, 32),
+                ),
               ),
-              style: IconButton.styleFrom(
-                backgroundColor: AppColors.error.withValues(alpha: 0.1),
-                padding: const EdgeInsets.all(6),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -30,6 +30,8 @@ class ExpensesLoaded extends ExpenseState {
   final int totalCount;
   final double averageAmount;
   final Map<String, double> monthlyData;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const ExpensesLoaded({
     required this.expenses,
@@ -41,6 +43,8 @@ class ExpensesLoaded extends ExpenseState {
     this.totalCount = 0,
     this.averageAmount = 0,
     this.monthlyData = const {},
+    this.hasMore = false,
+    this.isLoadingMore = false,
   });
 
   @override
@@ -54,6 +58,8 @@ class ExpensesLoaded extends ExpenseState {
         totalCount,
         averageAmount,
         monthlyData,
+        hasMore,
+        isLoadingMore,
       ];
 
   ExpensesLoaded copyWith({
@@ -66,6 +72,8 @@ class ExpensesLoaded extends ExpenseState {
     int? totalCount,
     double? averageAmount,
     Map<String, double>? monthlyData,
+    bool? hasMore,
+    bool? isLoadingMore,
   }) {
     return ExpensesLoaded(
       expenses: expenses ?? this.expenses,
@@ -77,6 +85,8 @@ class ExpensesLoaded extends ExpenseState {
       totalCount: totalCount ?? this.totalCount,
       averageAmount: averageAmount ?? this.averageAmount,
       monthlyData: monthlyData ?? this.monthlyData,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 }

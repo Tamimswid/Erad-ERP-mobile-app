@@ -4,6 +4,7 @@ import '../bloc/withdrawal_cubit.dart';
 import 'empty_state_widget.dart';
 import 'withdrawal_card.dart';
 import 'withdrawal_details_dialog.dart';
+import 'package:erad/core/constants/app_constants.dart';
 
 class WithdrawalListWidget extends StatefulWidget {
   const WithdrawalListWidget({super.key});
@@ -23,7 +24,7 @@ class _WithdrawalListWidgetState extends State<WithdrawalListWidget> {
           );
         } else if (state is WithdrawalError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            SnackBar(content: Text(state.message), backgroundColor: AppColors.error),
           );
         }
       },

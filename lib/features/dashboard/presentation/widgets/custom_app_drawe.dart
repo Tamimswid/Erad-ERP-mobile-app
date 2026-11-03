@@ -1,7 +1,7 @@
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../auth/presentation/bloc/auth_cubit.dart';
 
 class CustomAppDrawer extends StatelessWidget {
@@ -20,58 +20,58 @@ class CustomAppDrawer extends StatelessWidget {
                 _buildHeader(context),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.home,
+                  icon: sc.LucideIcons.house,
                   title: 'لوحة المعلومات',
                   route: AppRoutes.dashboard,
                 ),
                 _buildDivider(),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.receipt,
+                  icon: sc.LucideIcons.receipt,
                   title: 'الفواتير',
                   route: AppRoutes.invoices,
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.box,
+                  icon: sc.LucideIcons.package,
                   title: 'المنتجات',
                   route: AppRoutes.products,
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.profile_2user,
+                  icon: sc.LucideIcons.users,
                   title: 'العملاء',
                   route: AppRoutes.customers,
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.shop,
+                  icon: sc.LucideIcons.store,
                   title: 'الموردون',
                   route: AppRoutes.suppliers,
                 ),
                 _buildDivider(),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.money_recive,
+                  icon: sc.LucideIcons.download,
                   title: 'الانسحابات',
                   route: AppRoutes.withdrawals,
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.money_send,
+                  icon: sc.LucideIcons.send,
                   title: 'النفقات',
                   route: AppRoutes.expenses,
                 ),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.money,
-                  title: 'ديون العملاء',
-                  route: AppRoutes.customerDebts,
+                  icon: sc.LucideIcons.wallet,
+                  title: 'الديون',
+                  route: AppRoutes.debts,
                 ),
                 _buildDivider(),
                 _buildMenuItem(
                   context,
-                  icon: Iconsax.setting_2,
+                  icon: sc.LucideIcons.settings,
                   title: 'الإعدادات',
                   route: AppRoutes.settings,
                 ),
@@ -110,15 +110,15 @@ class CustomAppDrawer extends StatelessWidget {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: AppColors.surface.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Center(
                       child: Text(
                         'E',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
+                          color: AppColors.surface,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -131,7 +131,7 @@ class CustomAppDrawer extends StatelessWidget {
                       Text(
                         AppStrings.appName,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -140,7 +140,7 @@ class CustomAppDrawer extends StatelessWidget {
                       Text(
                         AppStrings.appSubtitle,
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: AppColors.onPrimaryMuted,
                           fontSize: 12,
                         ),
                       ),
@@ -154,13 +154,13 @@ class CustomAppDrawer extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor: Colors.white.withValues(alpha: 0.2),
+                      backgroundColor: AppColors.surface.withValues(alpha: 0.2),
                       child: Text(
                         state.user.email.isNotEmpty
                             ? state.user.email[0].toUpperCase()
                             : 'U',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -174,7 +174,7 @@ class CustomAppDrawer extends StatelessWidget {
                           Text(
                             state.user.fullName ?? state.user.email,
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: AppColors.surface,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
@@ -183,8 +183,8 @@ class CustomAppDrawer extends StatelessWidget {
                           Text(
                             state.user.email,
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 11,
+                              color: AppColors.onPrimaryMuted,
+                              fontSize: 12,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -226,12 +226,10 @@ class CustomAppDrawer extends StatelessWidget {
           style: TextStyle(
             color: isActive ? AppColors.primary : AppColors.text,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-            fontSize: 15,
+            fontSize: 16,
           ),
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         dense: true,
         horizontalTitleGap: 8,
         onTap: () {
@@ -256,25 +254,25 @@ class CustomAppDrawer extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
       decoration: BoxDecoration(
         color: AppColors.background,
-        border: Border(
-          top: BorderSide(color: AppColors.divider),
-        ),
+        border: Border(top: BorderSide(color: AppColors.divider)),
       ),
       child: ListTile(
-        leading: const Icon(Iconsax.logout, size: 22, color: AppColors.error),
+        leading: const Icon(
+          sc.LucideIcons.logOut,
+          size: 22,
+          color: AppColors.error,
+        ),
         title: const Text(
           AppStrings.logout,
           style: TextStyle(
             color: AppColors.error,
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
         ),
         dense: true,
         horizontalTitleGap: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         onTap: () {
           Navigator.pop(context);
           context.read<AuthCubit>().logout();

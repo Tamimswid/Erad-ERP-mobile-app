@@ -1,54 +1,110 @@
-import 'dart:async';
-
-import 'package:dartz/dartz.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
 import 'package:erad/features/customers/data/repositories/customer_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'dart:developer';
-import '../../../../core/errors/failures.dart';
 
 part 'customer_state.dart';
 
 class CustomerCubit extends Cubit<CustomerState> {
-  final CustomerRepository customerRepository;
-  StreamSubscription<Either<Failure, List<CustomerModel>>>? _customersSubscription;
+  static const int pageSize = 10;
 
-  CustomerCubit({required this.customerRepository}) : super(CustomerInitial()) {
-    _startRealtimeListener();
+  final CustomerRepository customerRepository;
+
+  CustomerCubit({required this.customerRepository}) : super(CustomerInitial());
+
+  final List<CustomerModel> _customers = [];
+  int _offset = 0;
+  int _requestId = 0;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  bool _pagedMode = false;
+  String _searchQuery = '';
+
+  /// Loads the full customer list (used by invoice pickers and reports).
+  Future<void> getCustomers() async {
+    _pagedMode = false;
+    _searchQuery = '';
+    final requestId = ++_requestId;
+    if (!isClosed) emit(CustomerLoading());
+
+    final result = await customerRepository.getCustomers();
+    if (isClosed || requestId != _requestId) return;
+    result.fold(
+      (failure) => emit(CustomerError(failure.message)),
+      (customers) => emit(CustomerLoaded(customers, hasMore: false)),
+    );
   }
 
-  void _startRealtimeListener() {
-    log('CustomerCubit: Starting realtime listener...');
-    // Listen to customers real-time stream
-    _customersSubscription = customerRepository.watchCustomers().listen(
-      (result) {
-        log('CustomerCubit: Received data from stream');
-        if (isClosed) return;
-        result.fold(
-          (failure) {
-            log('CustomerCubit: Stream error - ${failure.message}');
-            emit(CustomerError(failure.message));
-          },
-          (customers) {
-            log('CustomerCubit: Loaded ${customers.length} customers');
-            emit(CustomerLoaded(customers));
-          },
-        );
+  /// Loads the first page for the paginated customers page.
+  Future<void> loadFirstPage({bool showLoading = true}) async {
+    _pagedMode = true;
+    final requestId = ++_requestId;
+    _offset = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _customers.clear();
+
+    if (showLoading && !isClosed) emit(CustomerLoading());
+
+    final result = await customerRepository.getCustomersPage(
+      offset: 0,
+      limit: pageSize,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+    );
+    if (isClosed || requestId != _requestId) return;
+
+    result.fold((failure) => emit(CustomerError(failure.message)), (page) {
+      _customers.addAll(page.items);
+      _offset = page.items.length;
+      _hasMore = page.hasMore;
+      _emitLoaded();
+    });
+  }
+
+  Future<void> loadMore() async {
+    if (!_pagedMode || isClosed || !_hasMore || _isLoadingMore) return;
+
+    final requestId = _requestId;
+    _isLoadingMore = true;
+    _emitLoaded();
+
+    final result = await customerRepository.getCustomersPage(
+      offset: _offset,
+      limit: pageSize,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+    );
+    if (isClosed || requestId != _requestId) return;
+
+    result.fold(
+      (_) {
+        _isLoadingMore = false;
+        _hasMore = false;
+        _emitLoaded();
       },
-      onError: (error) {
-        log('CustomerCubit: Stream error - $error');
-        if (!isClosed) {
-          emit(CustomerError('Stream error: $error'));
-        }
+      (page) {
+        _customers.addAll(page.items);
+        _offset += page.items.length;
+        _hasMore = page.hasMore;
+        _isLoadingMore = false;
+        _emitLoaded();
       },
     );
   }
 
-  // For backward compatibility - stream auto-loads data
-  Future<void> getCustomers() async {
-    // Real-time stream already loads data automatically
-    // This method is kept for backward compatibility
+  void _emitLoaded() {
+    if (isClosed) return;
+    emit(
+      CustomerLoaded(
+        List<CustomerModel>.unmodifiable(_customers),
+        hasMore: _hasMore,
+        isLoadingMore: _isLoadingMore,
+      ),
+    );
+  }
+
+  Future<void> searchCustomers(String query) async {
+    _searchQuery = query.trim();
+    await loadFirstPage(showLoading: false);
   }
 
   Future<void> createCustomer(CustomerModel customer) async {
@@ -57,9 +113,7 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
-      (createdCustomer) {
-        // Real-time stream will automatically update the UI
-      },
+      (_) => _refreshAfterMutation(),
     );
   }
 
@@ -69,9 +123,7 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
-      (updatedCustomer) {
-        // Real-time stream will automatically update the UI
-      },
+      (_) => _refreshAfterMutation(),
     );
   }
 
@@ -81,21 +133,16 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
-      (_) {
-        // Real-time stream will automatically update the UI
-      },
+      (_) => _refreshAfterMutation(),
     );
   }
 
-  Future<void> searchCustomers(String query) async {
-    if (isClosed) return;
-    emit(CustomerLoading());
-    final result = await customerRepository.searchCustomers(query);
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(CustomerError(failure.message)),
-      (customers) => emit(CustomerLoaded(customers)),
-    );
+  void _refreshAfterMutation() {
+    if (_pagedMode) {
+      loadFirstPage(showLoading: false);
+    } else {
+      getCustomers();
+    }
   }
 
   void clearError() {
@@ -103,11 +150,5 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (state is CustomerError) {
       emit(CustomerInitial());
     }
-  }
-
-  @override
-  Future<void> close() {
-    _customersSubscription?.cancel();
-    return super.close();
   }
 }

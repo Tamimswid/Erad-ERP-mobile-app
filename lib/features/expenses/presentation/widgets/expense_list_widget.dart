@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/expense.dart';
@@ -31,7 +32,7 @@ class ExpenseListWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.receipt_long_outlined,
+            sc.LucideIcons.receiptText,
             size: 64,
             color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
@@ -85,16 +86,11 @@ class ExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
+    return sc.Card(
+      padding: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () => _showExpenseDetails(context),
           child: Padding(
@@ -106,12 +102,12 @@ class ExpenseCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.error.withValues(alpha: 0.1),
+                    color: AppColors.muted,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    Icons.money_off_outlined,
-                    color: AppColors.error,
+                  child: const Icon(
+                    sc.LucideIcons.receiptText,
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -140,21 +136,21 @@ class ExpenseCard extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
+                                color: AppColors.muted,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 expense.categoryName!,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.primary,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
                           ],
                           Icon(
-                            Icons.calendar_today_outlined,
+                            sc.LucideIcons.calendar,
                             size: 12,
                             color: AppColors.textSecondary,
                           ),
@@ -177,10 +173,10 @@ class ExpenseCard extends StatelessWidget {
                   children: [
                     Text(
                       NumberFormatter.format(expense.amount),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.error,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -216,14 +212,14 @@ class ExpenseCard extends StatelessWidget {
                     Navigator.pop(dialogContext);
                     _showEditDialog(context);
                   },
-                  icon: Icon(Icons.edit_outlined, color: AppColors.primary),
+                  icon: Icon(sc.LucideIcons.pencil, color: AppColors.primary),
                 ),
                 IconButton(
                   onPressed: () {
                     Navigator.pop(dialogContext);
                     _showDeleteConfirmation(context);
                   },
-                  icon: Icon(Icons.delete_outline, color: AppColors.error),
+                  icon: Icon(sc.LucideIcons.trash2, color: AppColors.error),
                 ),
               ],
             ),
@@ -247,7 +243,8 @@ class ExpenseCard extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(
+          sc.Button(
+            style: sc.ButtonStyle.ghost(),
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text('إغلاق'),
           ),
@@ -327,17 +324,18 @@ class ExpenseCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(dialogContext),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       cubit.deleteExpense(expense.id);
                       Navigator.pop(dialogContext);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
                     child: const Text('حذف'),
                   ),
                 ],

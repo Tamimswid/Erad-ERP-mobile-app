@@ -7,6 +7,7 @@ import 'package:erad/features/products/presentation/widgets/category_form_widget
 import 'package:erad/features/products/presentation/widgets/product_form_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../bloc/product_cubit.dart';
 import '../widgets/product_list_widget.dart';
 
@@ -23,7 +24,6 @@ class _ProductsPageState extends State<ProductsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<ProductCategory> _categories = [];
-  bool _isLoading = false;
   late ProductCubit _productCubit;
 
   @override
@@ -45,32 +45,8 @@ class _ProductsPageState extends State<ProductsPage>
   }
 
   Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // تحميل المنتجات والفئات بالتوازي
-      await Future.wait([
-        _productCubit.getProducts(),
-        _productCubit.getCategories(),
-      ]);
-
-      // الاستماع لحالة تحميل الفئات
-      if (mounted) {
-        final state = _productCubit.state;
-        if (state is CategoriesLoaded) {
-          setState(() {
-            _categories = state.categories;
-            _isLoading = false;
-          });
-        }
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    await _productCubit.getCategories();
+    await _productCubit.loadFirstPage();
   }
 
   @override
@@ -79,19 +55,34 @@ class _ProductsPageState extends State<ProductsPage>
       value: _productCubit,
       child: SafeArea(
         child: Scaffold(
+          appBar: AppBar(
+            title: const Text('المنتجات'),
+            leading: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(sc.LucideIcons.arrowRight, size: 22),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () => _showSearchDialog(context),
+                icon: const Icon(sc.LucideIcons.search, size: 20),
+              ),
+              IconButton(
+                onPressed: () => _showCategoriesDialog(context),
+                icon: const Icon(sc.LucideIcons.folderOpen, size: 20),
+              ),
+            ],
+          ),
           body: BlocConsumer<ProductCubit, ProductState>(
             listener: (context, state) {
               if (state is CategoriesLoaded) {
                 setState(() {
                   _categories = state.categories;
-                  _isLoading = false;
                 });
               } else if (state is ProductError) {
-                // Show error for real-time updates
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppColors.error,
                     duration: const Duration(seconds: 2),
                   ),
                 );
@@ -100,7 +91,6 @@ class _ProductsPageState extends State<ProductsPage>
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
-                    backgroundColor: Colors.green,
                     duration: const Duration(seconds: 2),
                   ),
                 );
@@ -109,8 +99,11 @@ class _ProductsPageState extends State<ProductsPage>
             builder: (context, state) {
               return Column(
                 children: [
-                  // Header with search, categories and category chips
-                  _buildHeader(context, state),
+                  // Category chips
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                    child: _buildCategoryChips(context, state),
+                  ),
                   // Products list
                   Expanded(
                     child: Container(
@@ -138,11 +131,7 @@ class _ProductsPageState extends State<ProductsPage>
           floatingActionButton: widget.isLocal
               ? null
               : FloatingActionButton.extended(
-            label: Text(
-              'إنشاء المنتج',
-              style: TextStyle(color: AppColors.background),
-            ),
-            backgroundColor: AppColors.primary,
+            label: const Text('إنشاء المنتج'),
             onPressed: () {
               _showAddProductDialog(
                 context: context,
@@ -172,19 +161,21 @@ class _ProductsPageState extends State<ProductsPage>
                 controller: searchController,
                 decoration: const InputDecoration(
                   labelText: 'اسم المنتج أو الكود',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: Icon(sc.LucideIcons.search),
                 ),
               ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: () {
                       if (searchController.text.trim().isNotEmpty) {
                         context.read<ProductCubit>().searchProducts(
@@ -225,9 +216,10 @@ class _ProductsPageState extends State<ProductsPage>
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
+                    sc.IconButton(
+                      variance: sc.ButtonStyle.ghost(),
                       onPressed: () => Navigator.pop(dialogContext),
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(sc.LucideIcons.x),
                     ),
                   ],
                 ),
@@ -242,11 +234,12 @@ class _ProductsPageState extends State<ProductsPage>
                           padding: const EdgeInsets.all(8.0),
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: ElevatedButton.icon(
+                            child: sc.Button(
+                              style: sc.ButtonStyle.primary(),
                               onPressed: () =>
                                   _showAddCategoryDialog(dialogContext),
-                              icon: const Icon(Icons.add),
-                              label: const Text('إضافة فئة جديدة'),
+                              leading: const Icon(sc.LucideIcons.plus, size: 18),
+                              child: const Text('إضافة فئة جديدة'),
                             ),
                           ),
                         ),
@@ -311,9 +304,10 @@ class _ProductsPageState extends State<ProductsPage>
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
+                    sc.IconButton(
+                      variance: sc.ButtonStyle.ghost(),
                       onPressed: () => Navigator.pop(dialogContext),
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(sc.LucideIcons.x),
                     ),
                   ],
                 ),
@@ -343,7 +337,7 @@ class _ProductsPageState extends State<ProductsPage>
         return AlertDialog(
           title: Row(
             children: [
-              Icon(Icons.warning_outlined, color: Colors.orange[600]),
+              Icon(sc.LucideIcons.triangleAlert, color: AppColors.textSecondary),
               const SizedBox(width: 8),
               const Text('تأكيد الحذف'),
             ],
@@ -365,23 +359,24 @@ class _ProductsPageState extends State<ProductsPage>
               const SizedBox(height: 8),
               const Text(
                 'هذا الإجراء لا يمكن التراجع عنه',
-                style: TextStyle(color: Colors.red, fontSize: 12),
+                style: TextStyle(color: AppColors.error, fontSize: 12),
               ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       Navigator.pop(context);
                       onDelete(productId);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red[600]),
                     child: const Text('حذف'),
                   ),
                 ],
@@ -391,78 +386,6 @@ class _ProductsPageState extends State<ProductsPage>
         ),
         );
       },
-    );
-  }
-
-  Widget _buildHeader(BuildContext context, ProductState state) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.divider)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title row with search and categories buttons
-
-          Row(
-            children: [
-              IconButton(
-                color: Colors.black,
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.navigate_before, size: 30),
-              ),
-              const Text(
-                'المنتجات',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.text,
-                ),
-              ),
-              const Spacer(),
-              // Search button
-              _buildIconButton(
-                icon: Icons.search,
-                onTap: () => _showSearchDialog(context),
-              ),
-              const SizedBox(width: 8),
-              // Categories button
-              _buildIconButton(
-                icon: Icons.category_outlined,
-                onTap: () => _showCategoriesDialog(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Category chips
-          _buildCategoryChips(context, state),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(8),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        hoverColor: AppColors.primary.withValues(alpha: 0.05),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.divider),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 20, color: AppColors.textSecondary),
-        ),
-      ),
     );
   }
 
@@ -519,7 +442,7 @@ class _ProductsPageState extends State<ProductsPage>
   }) {
     return Material(
       color: isSelected ? AppColors.primary : Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(999),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -529,14 +452,14 @@ class _ProductsPageState extends State<ProductsPage>
             border: Border.all(
               color: isSelected ? AppColors.primary : AppColors.divider,
             ),
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             label,
             style: TextStyle(
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+              color: isSelected ? AppColors.surface : AppColors.textSecondary,
             ),
           ),
         ),

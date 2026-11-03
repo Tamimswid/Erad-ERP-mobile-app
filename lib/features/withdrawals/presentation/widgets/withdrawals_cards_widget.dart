@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../data/models/withdrawal.dart';
 import '../../data/models/partner.dart';
@@ -78,16 +79,11 @@ class WithdrawalsCardsWidget extends StatelessWidget {
     final phone = partner?.phone ?? '-';
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.divider),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.all(18),
+    return sc.Card(
+      padding: const EdgeInsets.all(18),
+      clipBehavior: Clip.antiAlias,
+      child: sc.Clickable(
+        onPressed: onTap,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -97,8 +93,8 @@ class WithdrawalsCardsWidget extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(9),
+                    color: AppColors.muted,
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
                     child: Text(
@@ -106,7 +102,7 @@ class WithdrawalsCardsWidget extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -155,7 +151,7 @@ class WithdrawalsCardsWidget extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+                    color: AppColors.text,
                   ),
                 ),
               ],
@@ -175,7 +171,7 @@ class WithdrawalsCardsWidget extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             ClipRRect(
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: percentage / 100,
                 minHeight: 6,
@@ -190,17 +186,12 @@ class WithdrawalsCardsWidget extends StatelessWidget {
   }
 
   Widget _buildEmptyState() {
-    return Container(
+    return sc.Card(
       padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: const Column(
         children: [
           Icon(
-            Icons.receipt_long_outlined,
+            sc.LucideIcons.receipt,
             size: 40,
             color: AppColors.textSecondary,
           ),

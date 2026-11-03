@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/expense.dart';
@@ -54,9 +55,9 @@ class ExpenseDetailDialog extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(sc.LucideIcons.x),
                   style: IconButton.styleFrom(
-                    backgroundColor: AppColors.background,
+                    backgroundColor: AppColors.muted,
                   ),
                 ),
               ],
@@ -68,7 +69,7 @@ class ExpenseDetailDialog extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.muted,
                 borderRadius: BorderRadius.circular(AppConstants.borderRadius),
               ),
               child: Column(
@@ -86,7 +87,7 @@ class ExpenseDetailDialog extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: AppFonts.fontSizeXXLarge,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: AppColors.text,
                     ),
                   ),
                 ],
@@ -96,7 +97,7 @@ class ExpenseDetailDialog extends StatelessWidget {
 
             // Date
             _buildInfoRow(
-              icon: Icons.calendar_today,
+              icon: sc.LucideIcons.calendar,
               label: 'التاريخ',
               value: dateFormat.format(expense.expenseDate),
             ),
@@ -105,7 +106,7 @@ class ExpenseDetailDialog extends StatelessWidget {
             // Category
             if (category != null) ...[
               _buildInfoRow(
-                icon: Icons.category,
+                icon: sc.LucideIcons.tag,
                 label: 'الفئة',
                 value: category!.name,
               ),
@@ -114,7 +115,7 @@ class ExpenseDetailDialog extends StatelessWidget {
 
             // Description
             _buildInfoRow(
-              icon: Icons.description,
+              icon: sc.LucideIcons.fileText,
               label: 'الوصف',
               value: expense.description?.isNotEmpty == true 
                   ? expense.description! 
@@ -124,16 +125,10 @@ class ExpenseDetailDialog extends StatelessWidget {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: sc.Button(
+                style: sc.ButtonStyle.primary(),
                 onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                child: const Text(
-                  'إغلاق',
-                  style: TextStyle(color: Colors.white),
-                ),
+                child: const Text('إغلاق'),
               ),
             ),
           ],

@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'package:dartz/dartz.dart';
-import 'package:erad/core/errors/failures.dart';
 import 'package:erad/features/products/data/models/product.dart';
 import 'package:erad/features/products/data/models/product_category.dart';
 import 'package:erad/features/products/data/repositories/product_repository.dart';
@@ -10,42 +7,47 @@ import 'package:equatable/equatable.dart';
 part 'product_state.dart';
 
 class ProductCubit extends Cubit<ProductState> {
+  static const int pageSize = 10;
+
   final ProductRepository _repository;
-  List<ProductModel> _allProducts = [];
-  List<ProductCategory> _categories = [];
+
+  ProductCubit({required ProductRepository productRepository})
+      : _repository = productRepository,
+        super(ProductInitial());
+
+  final List<ProductModel> _products = [];
+  final List<ProductModel> _fullProducts = [];
+  final List<ProductCategory> _categories = [];
   String _selectedCategoryId = 'all';
-  
-  // Real-time stream subscriptions
-  StreamSubscription<Either<Failure, List<ProductModel>>>? _productsSubscription;
-  StreamSubscription<Either<Failure, List<ProductCategory>>>? _categoriesSubscription;
+  String _searchQuery = '';
+  int _offset = 0;
+  int _requestId = 0;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  bool _pagedMode = false;
 
-  ProductCubit({required ProductRepository productRepository}) 
-      : _repository = productRepository, 
-        super(ProductInitial()) {
-    _startRealtimeListeners();
-  }
-
-  // Getters
   String get selectedCategoryId => _selectedCategoryId;
   List<ProductCategory> get categories => _categories;
-  List<ProductModel> get filteredProducts {
-    if (_selectedCategoryId == 'all') {
-      return _allProducts;
-    }
-    return _allProducts.where((product) => product.categoryId?.toString() == _selectedCategoryId).toList();
-  }
 
-  // Products
+  /// Loads the full product list (used by invoice product pickers).
   Future<void> getProducts() async {
-    if (isClosed) return;
-    emit(ProductLoading());
+    _pagedMode = false;
+    _searchQuery = '';
+    final requestId = ++_requestId;
+    if (!isClosed) emit(ProductLoading());
+
     final result = await _repository.getProducts();
-    if (isClosed) return;
+    if (isClosed || requestId != _requestId) return;
     result.fold(
       (failure) => emit(ProductError(failure.message)),
       (products) {
-        _allProducts = products;
-        emit(ProductsLoaded(products));
+        _fullProducts
+          ..clear()
+          ..addAll(products);
+        _products
+          ..clear()
+          ..addAll(_filterByCategory(_fullProducts));
+        emit(ProductsLoaded(List<ProductModel>.unmodifiable(_products)));
       },
     );
   }
@@ -61,39 +63,110 @@ class ProductCubit extends Cubit<ProductState> {
     );
   }
 
+  /// Loads the first page for the paginated products page.
+  Future<void> loadFirstPage({bool showLoading = true}) async {
+    _pagedMode = true;
+    final requestId = ++_requestId;
+    _offset = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _products.clear();
+
+    if (showLoading && !isClosed) emit(ProductLoading());
+
+    final result = await _repository.getProductsPage(
+      offset: 0,
+      limit: pageSize,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+      categoryId: _selectedCategoryId,
+    );
+    if (isClosed || requestId != _requestId) return;
+
+    result.fold((failure) => emit(ProductError(failure.message)), (page) {
+      _products.addAll(page.items);
+      _offset = page.items.length;
+      _hasMore = page.hasMore;
+      _emitLoaded();
+    });
+  }
+
+  Future<void> loadMore() async {
+    if (!_pagedMode || isClosed || !_hasMore || _isLoadingMore) return;
+
+    final requestId = _requestId;
+    _isLoadingMore = true;
+    _emitLoaded();
+
+    final result = await _repository.getProductsPage(
+      offset: _offset,
+      limit: pageSize,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+      categoryId: _selectedCategoryId,
+    );
+    if (isClosed || requestId != _requestId) return;
+
+    result.fold(
+      (_) {
+        _isLoadingMore = false;
+        _hasMore = false;
+        _emitLoaded();
+      },
+      (page) {
+        _products.addAll(page.items);
+        _offset += page.items.length;
+        _hasMore = page.hasMore;
+        _isLoadingMore = false;
+        _emitLoaded();
+      },
+    );
+  }
+
+  void _emitLoaded() {
+    if (isClosed) return;
+    emit(
+      ProductsLoaded(
+        List<ProductModel>.unmodifiable(_products),
+        hasMore: _hasMore,
+        isLoadingMore: _isLoadingMore,
+      ),
+    );
+  }
+
+  Future<void> searchProducts(String query) async {
+    _searchQuery = query.trim();
+    await loadFirstPage(showLoading: false);
+  }
+
   Future<void> createProduct(ProductModel product) async {
     if (isClosed) return;
-    emit(ProductLoading());
     final result = await _repository.createProduct(product);
     if (isClosed) return;
     result.fold(
       (failure) => emit(ProductError(failure.message)),
-      (createdProduct) {
+      (_) {
         if (isClosed) return;
         emit(ProductSuccess('Product created successfully'));
-        getProducts(); // Refresh list
+        _refreshAfterMutation();
       },
     );
   }
 
   Future<void> updateProduct(ProductModel product) async {
     if (isClosed) return;
-    emit(ProductLoading());
     final result = await _repository.updateProduct(product);
     if (isClosed) return;
     result.fold(
       (failure) => emit(ProductError(failure.message)),
-      (updatedProduct) {
+      (_) {
         if (isClosed) return;
         emit(ProductSuccess('Product updated successfully'));
-        getProducts(); // Refresh list
+        _refreshAfterMutation();
       },
     );
   }
 
   Future<void> deleteProduct(String id) async {
     if (isClosed) return;
-    emit(ProductLoading());
     final result = await _repository.deleteProduct(id);
     if (isClosed) return;
     result.fold(
@@ -101,20 +174,17 @@ class ProductCubit extends Cubit<ProductState> {
       (_) {
         if (isClosed) return;
         emit(ProductSuccess('Product deleted successfully'));
-        getProducts(); // Refresh list
+        _refreshAfterMutation();
       },
     );
   }
 
-  Future<void> searchProducts(String query) async {
-    if (isClosed) return;
-    emit(ProductLoading());
-    final result = await _repository.searchProducts(query);
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (products) => emit(ProductsLoaded(products)),
-    );
+  void _refreshAfterMutation() {
+    if (_pagedMode) {
+      loadFirstPage(showLoading: false);
+    } else {
+      getProducts();
+    }
   }
 
   // Categories
@@ -126,7 +196,9 @@ class ProductCubit extends Cubit<ProductState> {
     result.fold(
       (failure) => emit(ProductError(failure.message)),
       (categories) {
-        _categories = categories;
+        _categories
+          ..clear()
+          ..addAll(categories);
         emit(CategoriesLoaded(categories));
       },
     );
@@ -177,74 +249,27 @@ class ProductCubit extends Cubit<ProductState> {
     );
   }
 
-  // Filter methods
-  void setCategoryFilter(String categoryId) {
+  Future<void> setCategoryFilter(String categoryId) async {
     _selectedCategoryId = categoryId;
-    // Emit current products with new filter
-    emit(ProductsLoaded(filteredProducts));
+    if (_pagedMode) {
+      await loadFirstPage(showLoading: false);
+    } else if (!isClosed) {
+      _products
+        ..clear()
+        ..addAll(_filterByCategory(_fullProducts));
+      emit(ProductsLoaded(List<ProductModel>.unmodifiable(_products)));
+    }
   }
 
-  void clearCategoryFilter() {
-    _selectedCategoryId = 'all';
-    emit(ProductsLoaded(_allProducts));
-  }
+  Future<void> clearCategoryFilter() => setCategoryFilter('all');
 
-  // Get products by category (for backward compatibility)
-  Future<void> getProductsByCategory(String categoryId) async {
-    setCategoryFilter(categoryId);
-  }
+  Future<void> getProductsByCategory(String categoryId) =>
+      setCategoryFilter(categoryId);
 
-  // Load initial data
-  Future<void> loadInitialData() async {
-    await Future.wait([
-      getProducts(),
-      getCategories(),
-    ]);
-  }
-
-  // Real-time listeners
-  void _startRealtimeListeners() {
-    // Listen to products changes
-    _productsSubscription = _repository.watchProducts().listen(
-      (result) {
-        if (isClosed) return;
-        result.fold(
-          (failure) => emit(ProductError(failure.message)),
-          (products) {
-            _allProducts = products;
-            emit(ProductsLoaded(products));
-          },
-        );
-      },
-      onError: (error) {
-        if (isClosed) return;
-        emit(ProductError('Real-time products error: ${error.toString()}'));
-      },
-    );
-
-    // Listen to categories changes
-    _categoriesSubscription = _repository.watchCategories().listen(
-      (result) {
-        if (isClosed) return;
-        result.fold(
-          (failure) => emit(ProductError(failure.message)),
-          (categories) {
-            _categories = categories;
-            emit(CategoriesLoaded(categories));
-          },
-        );
-      },
-      onError: (error) {
-        if (isClosed) return;
-        emit(ProductError('Real-time categories error: ${error.toString()}'));
-      },
-    );
-  }
-
-  @override
-  Future<void> close() {
-    _productsSubscription?.cancel();
-    _categoriesSubscription?.cancel();
-    return super.close();
+  List<ProductModel> _filterByCategory(List<ProductModel> products) {
+    if (_selectedCategoryId == 'all') return List<ProductModel>.of(products);
+    return products
+        .where((product) => product.categoryId == _selectedCategoryId)
+        .toList();
   }
 }

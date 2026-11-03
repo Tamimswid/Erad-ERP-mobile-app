@@ -63,15 +63,16 @@ class InvoiceInfoCardWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
+              color: AppColors.muted,
               borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: AppColors.divider),
             ),
             child: Text(
               '${products.length} منتج',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: AppFonts.fontSizeSmall,
                 fontWeight: AppFonts.fontWeightMedium,
-                color: AppColors.primary,
+                color: AppColors.text,
               ),
             ),
           ),
@@ -89,7 +90,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: AppColors.background,
+            color: AppColors.muted,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(

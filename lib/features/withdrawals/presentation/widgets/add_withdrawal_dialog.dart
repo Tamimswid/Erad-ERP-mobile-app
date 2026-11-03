@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../data/models/withdrawal.dart';
 
@@ -110,7 +111,7 @@ class _AddWithdrawalDialogState extends State<AddWithdrawalDialog> {
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(
-                      Icons.close,
+                      sc.LucideIcons.x,
                       size: 20,
                       color: AppColors.textSecondary,
                     ),
@@ -242,7 +243,7 @@ class _AddWithdrawalDialogState extends State<AddWithdrawalDialog> {
                             ),
                           ),
                           const Icon(
-                            Icons.calendar_today,
+                            sc.LucideIcons.calendar,
                             size: 16,
                             color: AppColors.textSecondary,
                           ),
@@ -342,19 +343,13 @@ class _AddWithdrawalDialogState extends State<AddWithdrawalDialog> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: sc.Button(
+                      style: sc.ButtonStyle.outline(),
                       onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        side: const BorderSide(color: AppColors.divider),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
                       child: const Text(
                         'إلغاء',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -362,21 +357,13 @@ class _AddWithdrawalDialogState extends State<AddWithdrawalDialog> {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: ElevatedButton(
+                    child: sc.Button(
+                      style: sc.ButtonStyle.primary(),
                       onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
                       child: const Text(
                         'حفظ',
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

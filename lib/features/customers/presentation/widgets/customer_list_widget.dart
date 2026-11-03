@@ -1,7 +1,9 @@
-import 'package:erad/core/widgets/common_widgets.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/widgets/app_pagination_list.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../bloc/customer_cubit.dart';
 import 'customer_form_widget.dart';
 
@@ -20,7 +22,11 @@ class CustomerListWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.people, size: 64, color: Colors.grey),
+                  Icon(
+                    sc.LucideIcons.users,
+                    size: 64,
+                    color: AppColors.textSecondary,
+                  ),
                   SizedBox(height: 16),
                   Text('لا يوجد عملاء'),
                   SizedBox(height: 8),
@@ -30,15 +36,18 @@ class CustomerListWidget extends StatelessWidget {
             );
           }
 
-          return GridView.builder(
+          return AppPaginationGrid(
             padding: const EdgeInsets.all(20),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 1,
               childAspectRatio: 1.7,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
             ),
             itemCount: state.customers.length,
+            hasMore: state.hasMore,
+            isLoadingMore: state.isLoadingMore,
+            onLoadMore: context.read<CustomerCubit>().loadMore,
             itemBuilder: (context, index) {
               final customer = state.customers[index];
               return CustomerCard(
@@ -76,138 +85,135 @@ class CustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomCard(
+    return sc.Card(
       padding: const EdgeInsets.all(16),
-
-    child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  radius: 24,
-                  child: Text(
-                    customer.name.isNotEmpty
-                        ? customer.name[0].toUpperCase()
-                        : 'C',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Theme.of(context).primaryColor,
+                radius: 24,
+                child: Text(
+                  customer.name.isNotEmpty
+                      ? customer.name[0].toUpperCase()
+                      : 'C',
+                  style: const TextStyle(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        customer.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (customer.phone != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          customer.phone!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, size: 20),
-                      onPressed: () => _showEditCustomerDialog(
-                        context: context,
-                        customer: customer,
-                        onCustomerEdit: (customerModel) =>
-                            onCustomerEdit(customerModel),
-                      ),
-                      tooltip: 'يحرر',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, size: 20),
-                      onPressed: () => _showDeleteConfirmation(
-                        context: context,
-                        customer: customer,
-                        onCustomerDeleted: (customerId) =>
-                            onCustomerDeleted(customerId),
-                      ),
-                      tooltip: 'سيل',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            if (customer.city != null || customer.address != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(8),
-                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (customer.city != null)
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_city,
-                            size: 16,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            customer.city!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ],
+                    Text(
+                      customer.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                    if (customer.city != null && customer.address != null)
+                    ),
+                    if (customer.phone != null) ...[
                       const SizedBox(height: 4),
-                    if (customer.address != null)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 16,
-                            color: Colors.grey[600],
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              customer.address!,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        customer.phone!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
+                    ],
                   ],
                 ),
               ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(sc.LucideIcons.pencil, size: 20),
+                    onPressed: () => _showEditCustomerDialog(
+                      context: context,
+                      customer: customer,
+                      onCustomerEdit: (customerModel) =>
+                          onCustomerEdit(customerModel),
+                    ),
+                    tooltip: 'يحرر',
+                  ),
+                  IconButton(
+                    icon: const Icon(sc.LucideIcons.trash2, size: 20),
+                    onPressed: () => _showDeleteConfirmation(
+                      context: context,
+                      customer: customer,
+                      onCustomerDeleted: (customerId) =>
+                          onCustomerDeleted(customerId),
+                    ),
+                    tooltip: 'سيل',
+                  ),
+                ],
+              ),
             ],
+          ),
+          if (customer.city != null || customer.address != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.muted,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (customer.city != null)
+                    Row(
+                      children: [
+                        Icon(
+                          sc.LucideIcons.building2,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          customer.city!,
+                          style: TextStyle(fontSize: 14, color: AppColors.text),
+                        ),
+                      ],
+                    ),
+                  if (customer.city != null && customer.address != null)
+                    const SizedBox(height: 4),
+                  if (customer.address != null)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          sc.LucideIcons.mapPin,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            customer.address!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.text,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
           ],
-        ),
+        ],
+      ),
     );
   }
 
@@ -240,7 +246,7 @@ class CustomerCard extends StatelessWidget {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(sc.LucideIcons.x),
                       ),
                     ],
                   ),
@@ -270,7 +276,7 @@ class CustomerCard extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning_outlined, color: Colors.orange[600]),
+            Icon(sc.LucideIcons.triangleAlert, color: AppColors.textSecondary),
             const SizedBox(width: 8),
             const Text('تأكيد الحذف'),
           ],
@@ -293,23 +299,24 @@ class CustomerCard extends StatelessWidget {
               const SizedBox(height: 8),
               const Text(
                 'هذا الإجراء لا يمكن التراجع عنه',
-                style: TextStyle(color: Colors.red, fontSize: 12),
+                style: TextStyle(color: AppColors.error, fontSize: 12),
               ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       Navigator.pop(context);
                       onCustomerDeleted(customer.id);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     child: const Text('حذف'),
                   ),
                 ],

@@ -18,17 +18,21 @@ class DashboardLoading extends DashboardState {
 class DashboardLoaded extends DashboardState {
   final DashboardFinancialsModel financials;
   final List<DashboardProductStockModel> productStock;
+  final DashboardPeriod period;
   final String selectedYear;
+  final DateTime selectedMonth;
   final DateTimeRange? customDateRange;
-  final bool isCustomDateRange;
 
   const DashboardLoaded({
     required this.financials,
     this.productStock = const [],
+    this.period = DashboardPeriod.year,
     required this.selectedYear,
+    required this.selectedMonth,
     this.customDateRange,
-    this.isCustomDateRange = false,
   });
+
+  bool get isCustomDateRange => period == DashboardPeriod.custom;
 
   double get totalProfit => financials.totalProfit;
   double get totalExpenses => financials.totalExpenses;
@@ -43,16 +47,18 @@ class DashboardLoaded extends DashboardState {
   DashboardLoaded copyWith({
     DashboardFinancialsModel? financials,
     List<DashboardProductStockModel>? productStock,
+    DashboardPeriod? period,
     String? selectedYear,
+    DateTime? selectedMonth,
     DateTimeRange? customDateRange,
-    bool? isCustomDateRange,
   }) {
     return DashboardLoaded(
       financials: financials ?? this.financials,
       productStock: productStock ?? this.productStock,
+      period: period ?? this.period,
       selectedYear: selectedYear ?? this.selectedYear,
+      selectedMonth: selectedMonth ?? this.selectedMonth,
       customDateRange: customDateRange ?? this.customDateRange,
-      isCustomDateRange: isCustomDateRange ?? this.isCustomDateRange,
     );
   }
 
@@ -60,9 +66,10 @@ class DashboardLoaded extends DashboardState {
   List<Object?> get props => [
         financials,
         productStock,
+        period,
         selectedYear,
+        selectedMonth,
         customDateRange,
-        isCustomDateRange,
       ];
 }
 

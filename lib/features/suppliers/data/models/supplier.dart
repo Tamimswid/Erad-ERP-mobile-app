@@ -72,11 +72,11 @@ class SupplierModel extends Equatable {
       name: map['name'] ?? '',
       phone: map['phone'],
       city: map['city'],
-      currentBalance: (map['current_balance'] is String 
-          ? double.tryParse(map['current_balance']) ?? 0.0 
+      currentBalance: (map['current_balance'] is String
+          ? double.tryParse(map['current_balance']) ?? 0.0
           : (map['current_balance'] as num?)?.toDouble() ?? 0.0),
-      totalPurchases: (map['total_purchases'] is String 
-          ? double.tryParse(map['total_purchases']) ?? 0.0 
+      totalPurchases: (map['total_purchases'] is String
+          ? double.tryParse(map['total_purchases']) ?? 0.0
           : (map['total_purchases'] as num?)?.toDouble() ?? 0.0),
       isActive: map['is_active'] ?? true,
       createdAt: DateTime.parse(map['created_at']),
@@ -86,15 +86,15 @@ class SupplierModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        name,
-        phone,
-        city,
-        currentBalance,
-        totalPurchases,
-        isActive,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    userId,
+    name,
+    phone,
+    city,
+    currentBalance,
+    totalPurchases,
+    isActive,
+    createdAt,
+    updatedAt,
+  ];
 }

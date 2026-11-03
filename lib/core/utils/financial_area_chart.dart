@@ -15,7 +15,7 @@ class ChartCategory {
     required this.monthlyValues,
     required this.lineColor,
     Color? fillColor,
-  }) : fillColor = fillColor ?? lineColor.withOpacity(0.15),
+  }) : fillColor = fillColor ?? lineColor.withValues(alpha: 0.15),
        assert(
          monthlyValues.length == 12,
          'يجب أن تحتوي القيم الشهرية على 12 عنصرًا',
@@ -126,7 +126,7 @@ class _FinancialAreaChartState extends State<FinancialAreaChart> {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1a1a2e),
+                      color: AppColors.text,
                     ),
                   ),
                 const Spacer(),
@@ -231,8 +231,8 @@ class _FinancialAreaChartState extends State<FinancialAreaChart> {
                 Text(
                   c.name,
                   style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF666666),
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -265,7 +265,7 @@ class _FilterButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isActive ? AppColors.accent : Colors.transparent,
           border: Border.all(
-            color: isActive ? AppColors.accent : const Color(0xFFE0E0E0),
+            color: isActive ? AppColors.accent : AppColors.border,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(6),
@@ -274,9 +274,9 @@ class _FilterButton extends StatelessWidget {
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isActive ? Colors.white : const Color(0xFF666666),
+            color: isActive ? AppColors.surface : AppColors.textSecondary,
           ),
         ),
       ),
@@ -321,10 +321,10 @@ class _AreaChartPainter extends CustomPainter {
     double maxVal,
   ) {
     final paint = Paint()
-      ..color = const Color(0xFFE5E5E5)
+      ..color = AppColors.border
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
-    const style = TextStyle(fontSize: 11, color: Color(0xFF999999));
+    const style = TextStyle(fontSize: 12, color: AppColors.textSecondary);
 
     for (int i = 0; i <= 5; i++) {
       final y = p.top + ch - (i * ch / 5);
@@ -408,8 +408,8 @@ class _AreaChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          cat.fillColor.withOpacity(0.6),
-          cat.fillColor.withOpacity(0.1),
+          cat.fillColor.withValues(alpha: 0.6),
+          cat.fillColor.withValues(alpha: 0.1),
         ],
       ).createShader(Rect.fromLTRB(p.left, p.top, p.left + cw, p.top + ch))
       ..style = PaintingStyle.fill;

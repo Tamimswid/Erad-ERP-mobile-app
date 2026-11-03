@@ -92,15 +92,15 @@
 //   static CalendarTheme _getDefaultTheme() {
 //     return CalendarTheme(
 //       selectedColor: const Color(0xFF1D4ED8),
-//       dayNameTextStyle: const TextStyle(color: Colors.black45, fontSize: 10),
+//       dayNameTextStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
 //       inRangeColor: const Color(0xFFD9EDFA),
 //       inRangeTextStyle: const TextStyle(color: Color(0xFF1D4ED8)),
-//       selectedTextStyle: const TextStyle(color: Colors.white),
+//       selectedTextStyle: const TextStyle(color: AppColors.surface),
 //       todayTextStyle: const TextStyle(fontWeight: FontWeight.bold),
-//       defaultTextStyle: const TextStyle(color: Colors.black, fontSize: 12),
+//       defaultTextStyle: const TextStyle(color: AppColors.text, fontSize: 12),
 //       radius: 10,
 //       tileSize: 40,
-//       disabledTextStyle: const TextStyle(color: Colors.grey),
+//       disabledTextStyle: const TextStyle(color: AppColors.textSecondary),
 //     );
 //   }
 
@@ -121,7 +121,7 @@
 //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
 //         decoration: BoxDecoration(
 //           border: Border.all(
-//             color: borderColor ?? const Color(0xFFE5E7EB),
+//             color: borderColor ?? AppColors.border,
 //             width: 1,
 //           ),
 //           borderRadius: BorderRadius.circular(borderRadius ?? 8),
@@ -131,7 +131,7 @@
 //             Icon(
 //               Icons.calendar_today,
 //               size: 16,
-//               color: textStyle?.color ?? const Color(0xFF6B7280),
+//               color: textStyle?.color ?? AppColors.textSecondary,
 //             ),
 //             const SizedBox(width: 8),
 //             Expanded(
@@ -141,7 +141,7 @@
 //                     : (placeholder ?? 'اختر نطاق التاريخ'),
 //                 style:
 //                     textStyle ??
-//                     const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+//                     const TextStyle(fontSize: 14, color: AppColors.textSecondary),
 //                 overflow: TextOverflow.ellipsis,
 //               ),
 //             ),
@@ -200,17 +200,17 @@
 //       cancelText: cancelText ?? 'إلغاء',
 //       theme: CalendarTheme(
 //         selectedColor: primaryColor ?? const Color(0xFF1D4ED8),
-//         dayNameTextStyle: const TextStyle(color: Colors.black45, fontSize: 10),
+//         dayNameTextStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
 //         inRangeColor: const Color(0xFFD9EDFA),
 //         inRangeTextStyle: TextStyle(
 //           color: primaryColor ?? const Color(0xFF1D4ED8),
 //         ),
-//         selectedTextStyle: const TextStyle(color: Colors.white),
+//         selectedTextStyle: const TextStyle(color: AppColors.surface),
 //         todayTextStyle: const TextStyle(fontWeight: FontWeight.bold),
-//         defaultTextStyle: const TextStyle(color: Colors.black, fontSize: 12),
+//         defaultTextStyle: const TextStyle(color: AppColors.text, fontSize: 12),
 //         radius: 10,
 //         tileSize: 40,
-//         disabledTextStyle: const TextStyle(color: Colors.grey),
+//         disabledTextStyle: const TextStyle(color: AppColors.textSecondary),
 //       ),
 //     );
 //   }

@@ -17,11 +17,17 @@ class ProductLoading extends ProductState {
 
 class ProductsLoaded extends ProductState {
   final List<ProductModel> products;
+  final bool hasMore;
+  final bool isLoadingMore;
 
-  const ProductsLoaded(this.products);
+  const ProductsLoaded(
+    this.products, {
+    this.hasMore = false,
+    this.isLoadingMore = false,
+  });
 
   @override
-  List<Object?> get props => [products];
+  List<Object?> get props => [products, hasMore, isLoadingMore];
 }
 
 class ProductSingleLoaded extends ProductState {

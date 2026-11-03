@@ -7,7 +7,7 @@ class CustomLoadingAnimation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: AppColors.surface,
       height: 300,
       width: 300,
       child: Column(

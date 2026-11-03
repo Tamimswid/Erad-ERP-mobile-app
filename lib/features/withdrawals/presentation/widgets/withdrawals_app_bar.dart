@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class WithdrawalsAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onFilterPressed;
@@ -14,7 +15,7 @@ class WithdrawalsAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: const Text('السحوبات'),
       actions: [
         IconButton(
-          icon: const Icon(Icons.filter_list),
+          icon: const Icon(sc.LucideIcons.filter),
           onPressed: onFilterPressed,
         ),
       ],

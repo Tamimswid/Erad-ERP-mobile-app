@@ -6,6 +6,7 @@ import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/payment_status.dart';
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceCardWidget extends StatelessWidget {
   final dynamic invoice;
@@ -25,19 +26,15 @@ class InvoiceCardWidget extends StatelessWidget {
     final invoiceStatus = _getInvoiceStatus();
     final paymentStatus = _getPaymentStatus();
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: sc.Card(
+        padding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: sc.Clickable(
+          onPressed: onTap,
+          child: Padding(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
-            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -49,28 +46,27 @@ class InvoiceCardWidget extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.15),
+                        color: AppColors.muted,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppColors.primary,
-                          width: 0.5,
-                        ),
+                        border: Border.all(color: AppColors.divider),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            isSale ? Icons.trending_up : Icons.trending_down,
+                            isSale
+                                ? sc.LucideIcons.trendingUp
+                                : sc.LucideIcons.trendingDown,
                             size: 16,
-                            color: AppColors.primary,
+                            color: AppColors.text,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             isSale ? 'sale' : 'purchase',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.text,
                             ),
                           ),
                         ],
@@ -88,8 +84,8 @@ class InvoiceCardWidget extends StatelessWidget {
                       _getInvoiceNumber(),
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1F2937),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -98,16 +94,16 @@ class InvoiceCardWidget extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF6B7280),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Divider(
-                  color: AppColors.secondary,
-                  thickness: 0.3,
-                  height: 0.5,
+                  color: AppColors.divider,
+                  thickness: 1,
+                  height: 1,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -116,12 +112,12 @@ class InvoiceCardWidget extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'تاريخ',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF9CA3AF),
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -130,7 +126,7 @@ class InvoiceCardWidget extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
+                            color: AppColors.text,
                           ),
                         ),
                       ],
@@ -138,21 +134,21 @@ class InvoiceCardWidget extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
+                        const Text(
                           'المجموع',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF9CA3AF),
+                            color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${AppUtils.formatNumber(_getTotalAmount())} ${NumberFormatter.getCurrencySymbol()}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                            color: AppColors.text,
                           ),
                         ),
                       ],
@@ -226,28 +222,35 @@ class InvoiceCardWidget extends StatelessWidget {
     PaymentStatus paymentStatus,
   ) {
     final bool isPaid = paymentStatus == PaymentStatus.cash;
-    final Color color = isPaid ? AppColors.success : AppColors.warning;
     final String label = isPaid ? 'مدفوعة' : 'مديون';
-    final IconData icon = isPaid ? Icons.check_circle : Icons.access_time;
+    final IconData icon = isPaid
+        ? sc.LucideIcons.circleCheck
+        : sc.LucideIcons.clock;
+    final Color background = isPaid ? AppColors.primary : AppColors.muted;
+    final Color foreground = isPaid
+        ? AppColors.onPrimary
+        : AppColors.textSecondary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: background,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color, width: 0.5),
+        border: Border.all(
+          color: isPaid ? AppColors.primary : AppColors.divider,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          Icon(icon, size: 14, color: foreground),
           const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: color,
+              color: foreground,
             ),
           ),
         ],

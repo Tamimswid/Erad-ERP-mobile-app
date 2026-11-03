@@ -22,6 +22,8 @@ class WithdrawalsLoaded extends WithdrawalState {
   final DateTime? startDate;
   final DateTime? endDate;
   final String? selectedYear;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const WithdrawalsLoaded({
     required this.withdrawals,
@@ -34,6 +36,8 @@ class WithdrawalsLoaded extends WithdrawalState {
     this.startDate,
     this.endDate,
     this.selectedYear,
+    this.hasMore = false,
+    this.isLoadingMore = false,
   });
 
   WithdrawalsLoaded copyWith({
@@ -47,6 +51,8 @@ class WithdrawalsLoaded extends WithdrawalState {
     DateTime? startDate,
     DateTime? endDate,
     String? selectedYear,
+    bool? hasMore,
+    bool? isLoadingMore,
     bool clearSelectedPartner = false,
     bool clearDates = false,
   }) {
@@ -61,6 +67,8 @@ class WithdrawalsLoaded extends WithdrawalState {
       startDate: clearDates ? null : (startDate ?? this.startDate),
       endDate: clearDates ? null : (endDate ?? this.endDate),
       selectedYear: selectedYear ?? this.selectedYear,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 
@@ -76,6 +84,8 @@ class WithdrawalsLoaded extends WithdrawalState {
         startDate,
         endDate,
         selectedYear,
+        hasMore,
+        isLoadingMore,
       ];
 }
 

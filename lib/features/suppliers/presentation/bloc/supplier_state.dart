@@ -13,11 +13,17 @@ class SupplierLoading extends SupplierState {}
 
 class SuppliersLoaded extends SupplierState {
   final List<SupplierModel> suppliers;
+  final bool hasMore;
+  final bool isLoadingMore;
 
-  const SuppliersLoaded(this.suppliers);
+  const SuppliersLoaded(
+    this.suppliers, {
+    this.hasMore = false,
+    this.isLoadingMore = false,
+  });
 
   @override
-  List<Object?> get props => [suppliers];
+  List<Object?> get props => [suppliers, hasMore, isLoadingMore];
 }
 
 class SupplierSingleLoaded extends SupplierState {

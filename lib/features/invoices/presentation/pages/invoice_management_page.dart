@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../bloc/invoice_cubit.dart';
 import '../widgets/discount_widget.dart';
 import '../widgets/payment_status_dialog.dart';
@@ -7,6 +8,7 @@ import '../widgets/delete_invoice_dialog.dart';
 import '../widgets/cancel_invoice_dialog.dart';
 import '../../data/models/sales_invoice.dart';
 import '../../data/models/purchase_invoice.dart';
+import 'package:erad/core/constants/app_constants.dart';
 
 class InvoiceManagementPage extends StatefulWidget {
   final dynamic invoice;
@@ -38,18 +40,20 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('إدارة الفاتورة #${_getInvoiceNumber()}'),
-        actions: [
-          IconButton(
-            icon: Icon(_isEditing ? Icons.save : Icons.edit),
-            onPressed: _toggleEditMode,
-            tooltip: _isEditing ? 'حفظ' : 'تعديل',
-          ),
-        ],
-      ),
-      body: BlocListener<InvoiceCubit, InvoiceState>(
+    return sc.Scaffold(
+      headers: [
+        sc.AppBar(
+          title: Text('إدارة الفاتورة #${_getInvoiceNumber()}'),
+          trailing: [
+            sc.IconButton(
+              variance: sc.ButtonStyle.ghost(),
+              icon: Icon(_isEditing ? sc.LucideIcons.save : sc.LucideIcons.pencil),
+              onPressed: _toggleEditMode,
+            ),
+          ],
+        ),
+      ],
+      child: BlocListener<InvoiceCubit, InvoiceState>(
         listener: (context, state) {
           if (state is SalesInvoiceUpdated || state is PurchaseInvoiceUpdated) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -82,41 +86,39 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
   }
 
   Widget _buildInvoiceSummary() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'ملخص الفاتورة',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+    return sc.Card(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ملخص الفاتورة',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: 16),
-            _buildSummaryRow('رقم الفاتورة', _getInvoiceNumber()),
-            _buildSummaryRow('التاريخ', _getFormattedDate()),
+          ),
+          const SizedBox(height: 16),
+          _buildSummaryRow('رقم الفاتورة', _getInvoiceNumber()),
+          _buildSummaryRow('التاريخ', _getFormattedDate()),
+          _buildSummaryRow(
+            widget.type == 'sale' ? 'العميل' : 'المورد',
+            _getCustomerOrSupplierName(),
+          ),
+          _buildSummaryRow('الحالة', _getStatusName()),
+          _buildSummaryRow('المبلغ الإجمالي', '${_getTotalAmount().toStringAsFixed(2)} ل.س'),
+          if (_discountAmount > 0)
             _buildSummaryRow(
-              widget.type == 'sale' ? 'العميل' : 'المورد',
-              _getCustomerOrSupplierName(),
+              'الخصم',
+              '${_discountAmount.toStringAsFixed(2)} ل.س',
+              isDiscount: true,
             ),
-            _buildSummaryRow('الحالة', _getStatusName()),
-            _buildSummaryRow('المبلغ الإجمالي', '${_getTotalAmount().toStringAsFixed(2)} ل.س'),
-            if (_discountAmount > 0)
-              _buildSummaryRow(
-                'الخصم',
-                '${_discountAmount.toStringAsFixed(2)} ل.س',
-                isDiscount: true,
-              ),
-            _buildSummaryRow(
-              'المبلغ بعد الخصم',
-              '${(_getTotalAmount() - _discountAmount).toStringAsFixed(2)} ل.س',
-              isBold: true,
-            ),
-          ],
-        ),
+          _buildSummaryRow(
+            'المبلغ بعد الخصم',
+            '${(_getTotalAmount() - _discountAmount).toStringAsFixed(2)} ل.س',
+            isBold: true,
+          ),
+        ],
       ),
     );
   }
@@ -139,7 +141,7 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isDiscount ? Colors.red : null,
+              color: isDiscount ? AppColors.error : null,
             ),
           ),
         ],
@@ -160,66 +162,65 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
   }
 
   Widget _buildActionsSection() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'الإجراءات',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+    return sc.Card(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'الإجراءات',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _buildActionButton(
+                'تحديث حالة الدفع',
+                sc.LucideIcons.banknote,
+                sc.ButtonStyle.primary(),
+                _updatePaymentStatus,
               ),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _buildActionButton(
-                  'تحديث حالة الدفع',
-                  Icons.payment,
-                  Colors.blue,
-                  _updatePaymentStatus,
-                ),
-                _buildActionButton(
-                  'إلغاء الفاتورة',
-                  Icons.cancel,
-                  Colors.orange,
-                  _cancelInvoice,
-                ),
-                _buildActionButton(
-                  'حذف الفاتورة',
-                  Icons.delete,
-                  Colors.red,
-                  _deleteInvoice,
-                ),
-                _buildActionButton(
-                  'تصدير PDF',
-                  Icons.picture_as_pdf,
-                  Colors.green,
-                  _exportToPdf,
-                ),
-              ],
-            ),
-          ],
-        ),
+              _buildActionButton(
+                'إلغاء الفاتورة',
+                sc.LucideIcons.circleX,
+                sc.ButtonStyle.outline(),
+                _cancelInvoice,
+              ),
+              _buildActionButton(
+                'حذف الفاتورة',
+                sc.LucideIcons.trash2,
+                sc.ButtonStyle.destructive(),
+                _deleteInvoice,
+              ),
+              _buildActionButton(
+                'تصدير PDF',
+                sc.LucideIcons.fileText,
+                sc.ButtonStyle.secondary(),
+                _exportToPdf,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildActionButton(String title, IconData icon, Color color, VoidCallback onPressed) {
-    return ElevatedButton.icon(
+  Widget _buildActionButton(
+    String title,
+    IconData icon,
+    sc.ButtonStyle style,
+    VoidCallback onPressed,
+  ) {
+    return sc.Button(
+      style: style,
       onPressed: onPressed,
-      icon: Icon(icon),
-      label: Text(title),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      ),
+      leading: Icon(icon, size: 18),
+      child: Text(title),
     );
   }
 

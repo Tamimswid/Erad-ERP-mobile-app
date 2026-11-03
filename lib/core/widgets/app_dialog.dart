@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class AppDialog {
   static Future<T?> showConfirmation<T>({
@@ -19,7 +20,7 @@ class AppDialog {
         title: Row(
           children: [
             Icon(
-              isDangerous ? Icons.warning : Icons.help,
+              isDangerous ? sc.LucideIcons.triangleAlert : sc.LucideIcons.circleHelp,
               color: isDangerous ? AppColors.error : AppColors.primary,
             ),
             const SizedBox(width: 12),
@@ -71,7 +72,7 @@ class AppDialog {
         ),
         title: Row(
           children: [
-            const Icon(Icons.info, color: AppColors.info),
+            const Icon(sc.LucideIcons.info, color: AppColors.info),
             const SizedBox(width: 12),
             Text(title),
           ],
@@ -108,7 +109,7 @@ class AppDialog {
         ),
         title: Row(
           children: [
-            const Icon(Icons.check_circle, color: AppColors.success),
+            const Icon(sc.LucideIcons.circleCheck, color: AppColors.success),
             const SizedBox(width: 12),
             Text(title),
           ],
@@ -146,7 +147,7 @@ class AppDialog {
         ),
         title: Row(
           children: [
-            const Icon(Icons.error, color: AppColors.error),
+            const Icon(sc.LucideIcons.circleAlert, color: AppColors.error),
             const SizedBox(width: 12),
             Text(title),
           ],

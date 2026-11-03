@@ -1,6 +1,7 @@
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../bloc/auth_cubit.dart';
 
 class LoginForm extends StatefulWidget {
@@ -57,9 +58,9 @@ class _LoginFormState extends State<LoginForm> {
               const SizedBox(height: 10),
               Text(
                 'إراد',
-                style:TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -70,7 +71,7 @@ class _LoginFormState extends State<LoginForm> {
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 100),
+              const SizedBox(height: 32),
         
               // Email Field
               TextFormField(
@@ -78,7 +79,7 @@ class _LoginFormState extends State<LoginForm> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'البريد الإلكتروني',
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: Icon(sc.LucideIcons.mail),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -98,7 +99,7 @@ class _LoginFormState extends State<LoginForm> {
                   controller: _businessNameController,
                   decoration: const InputDecoration(
                     labelText: 'اسم الشركة',
-                    prefixIcon: Icon(Icons.business),
+                    prefixIcon: Icon(sc.LucideIcons.building2),
                   ),
                   validator: (value) {
                     if (!_isLogin &&
@@ -117,12 +118,12 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'كلمة المرور',
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: const Icon(sc.LucideIcons.lock),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                          ? sc.LucideIcons.eye
+                          : sc.LucideIcons.eyeOff,
                     ),
                     onPressed: () {
                       setState(() {
@@ -144,20 +145,25 @@ class _LoginFormState extends State<LoginForm> {
               const SizedBox(height: 24),
         
               // Submit Button
-              ElevatedButton(
+              sc.Button(
+                style: sc.ButtonStyle.primary(),
                 onPressed: state is AuthLoading ? null : _submitForm,
                 child: state is AuthLoading
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.onPrimary,
+                        ),
                       )
                     : Text(_isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'),
               ),
               const SizedBox(height: 16),
         
               // Toggle Login/Register
-              TextButton(
+              sc.Button(
+                style: sc.ButtonStyle.ghost(),
                 onPressed: state is AuthLoading
                     ? null
                     : () {
@@ -175,7 +181,8 @@ class _LoginFormState extends State<LoginForm> {
               // Forgot Password (only for login)
               if (_isLogin) ...[
                 const SizedBox(height: 8),
-                TextButton(
+                sc.Button(
+                  style: sc.ButtonStyle.ghost(),
                   onPressed: state is AuthLoading
                       ? null
                       : () {
@@ -209,19 +216,21 @@ class _LoginFormState extends State<LoginForm> {
                 controller: emailController,
                 decoration: const InputDecoration(
                   labelText: 'البريد الإلكتروني',
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon: Icon(sc.LucideIcons.mail),
                 ),
               ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: () {
                       if (emailController.text.trim().isNotEmpty) {
                         context.read<AuthCubit>().forgotPassword(

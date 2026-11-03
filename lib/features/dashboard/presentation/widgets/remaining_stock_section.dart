@@ -1,6 +1,7 @@
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../bloc/dashboard_cubit.dart';
 
 class RemainingStockSection extends StatelessWidget {
@@ -20,12 +21,7 @@ class RemainingStockSection extends StatelessWidget {
           return _buildEmptyState();
         }
 
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(3),
-            border: Border.all(color: AppColors.divider),
-          ),
+        return sc.Card(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -39,7 +35,7 @@ class RemainingStockSection extends StatelessWidget {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: AppColors.muted,
                         borderRadius: BorderRadius.circular(2),
                       ),
 
@@ -52,7 +48,7 @@ class RemainingStockSection extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w100,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -64,7 +60,7 @@ class RemainingStockSection extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w100,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -76,7 +72,7 @@ class RemainingStockSection extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w100,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -110,7 +106,7 @@ class RemainingStockSection extends StatelessWidget {
                           child: Text(
                             product.productName,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppColors.text,
                             ),
@@ -161,14 +157,14 @@ class RemainingStockSection extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.divider),
       ),
       child: const Center(
         child: Column(
           children: [
             Icon(
-              Icons.inventory_2_outlined,
+              sc.LucideIcons.package,
               size: 48,
               color: AppColors.textSecondary,
             ),

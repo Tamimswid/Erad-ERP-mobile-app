@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/utils/paged_result.dart';
 import '../models/supplier.dart';
 import '../datasource/supplier_remote_datasource.dart';
 
@@ -25,13 +26,27 @@ class SupplierRepository {
     }
   }
 
-  // Stream للموردين في الوقت الفعلي
-  Stream<Either<Failure, List<SupplierModel>>> watchSuppliers() {
-    return remoteDataSource.watchSuppliers().map(
-          (suppliers) => Right<Failure, List<SupplierModel>>(suppliers),
-        ).handleError(
-          (error) => Left<Failure, List<SupplierModel>>(exceptionToFailure(error)),
+  Future<Either<Failure, PagedResult<SupplierModel>>> getSuppliersPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final page = await remoteDataSource.getSuppliersPage(
+          offset: offset,
+          limit: limit,
+          search: search,
         );
+        return Right(page);
+      } on Failure catch (failure) {
+        return Left(failure);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      return Left(NetworkFailure.noConnection());
+    }
   }
 
   Future<Either<Failure, SupplierModel>> getSupplier(String id) async {
@@ -49,7 +64,9 @@ class SupplierRepository {
     }
   }
 
-  Future<Either<Failure, SupplierModel>> createSupplier(SupplierModel supplier) async {
+  Future<Either<Failure, SupplierModel>> createSupplier(
+    SupplierModel supplier,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final createdSupplier = await remoteDataSource.createSupplier(supplier);
@@ -64,7 +81,9 @@ class SupplierRepository {
     }
   }
 
-  Future<Either<Failure, SupplierModel>> updateSupplier(SupplierModel supplier) async {
+  Future<Either<Failure, SupplierModel>> updateSupplier(
+    SupplierModel supplier,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final updatedSupplier = await remoteDataSource.updateSupplier(supplier);
@@ -94,7 +113,9 @@ class SupplierRepository {
     }
   }
 
-  Future<Either<Failure, List<SupplierModel>>> searchSuppliers(String query) async {
+  Future<Either<Failure, List<SupplierModel>>> searchSuppliers(
+    String query,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final suppliers = await remoteDataSource.searchSuppliers(query);

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/presentation/bloc/auth_cubit.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class AppNavigationDrawer extends StatelessWidget {
   const AppNavigationDrawer({super.key});
@@ -26,7 +28,7 @@ class AppNavigationDrawer extends StatelessWidget {
                           ? state.user.email[0].toUpperCase()
                           : 'U',
                       style: const material.TextStyle(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -35,12 +37,12 @@ class AppNavigationDrawer extends StatelessWidget {
               }
               return const material.DrawerHeader(
                 decoration: BoxDecoration(
-                  color: material.Colors.blue,
+                  color: AppColors.primary,
                 ),
                 child: Text(
                   'ERAD',
                   style: TextStyle(
-                    color: material.Colors.white,
+                    color: AppColors.surface,
                     fontSize: 24,
                   ),
                 ),
@@ -63,7 +65,7 @@ class AppNavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.inventory),
+            leading: const Icon(sc.LucideIcons.package),
             title: const Text('المنتجات'),
             onTap: () {
               Navigator.pop(context);
@@ -71,7 +73,7 @@ class AppNavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.receipt),
+            leading: const Icon(sc.LucideIcons.receipt),
             title: const Text('الفواتير'),
             onTap: () {
               Navigator.pop(context);
@@ -81,7 +83,7 @@ class AppNavigationDrawer extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.analytics),
+            leading: const Icon(sc.LucideIcons.chartColumn),
             title: const Text('التحليلات'),
             onTap: () {
               Navigator.pop(context);
@@ -89,7 +91,7 @@ class AppNavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.business),
+            leading: const Icon(sc.LucideIcons.building2),
             title: const Text('الموردون'),
             onTap: () {
               Navigator.pop(context);
@@ -97,7 +99,7 @@ class AppNavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.money_off),
+            leading: const Icon(sc.LucideIcons.banknote),
             title: const Text('المصروفات'),
             onTap: () {
               Navigator.pop(context);
@@ -106,7 +108,7 @@ class AppNavigationDrawer extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.settings),
+            leading: const Icon(sc.LucideIcons.settings),
             title: const Text('الإعدادات'),
             onTap: () {
               Navigator.pop(context);
@@ -114,7 +116,7 @@ class AppNavigationDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.logout),
+            leading: const Icon(sc.LucideIcons.logOut),
             title: const Text('تسجيل الخروج'),
             onTap: () {
               Navigator.pop(context);

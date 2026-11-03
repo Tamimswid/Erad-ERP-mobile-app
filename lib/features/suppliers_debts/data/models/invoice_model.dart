@@ -119,20 +119,20 @@ class PurchaseInvoiceModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        supplierId,
-        invoiceNumber,
-        invoiceDate,
-        totalAmount,
-        paidAmount,
-        remainingAmount,
-        dueDate,
-        paymentStatus,
-        notes,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    userId,
+    supplierId,
+    invoiceNumber,
+    invoiceDate,
+    totalAmount,
+    paidAmount,
+    remainingAmount,
+    dueDate,
+    paymentStatus,
+    notes,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   String toString() {

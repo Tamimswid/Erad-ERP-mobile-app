@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../customers/data/models/customer.dart';
 import '../../../customers/presentation/bloc/customer_cubit.dart';
 import '../../../suppliers/presentation/bloc/supplier_cubit.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class CustomerSupplierSearchCard extends StatefulWidget {
   final String invoiceType;
@@ -167,11 +169,11 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: AppColors.text.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -183,8 +185,8 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
               Row(
                 children: [
                   Icon(
-                    widget.invoiceType == 'sale' ? Icons.person : Icons.business,
-                    color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                    widget.invoiceType == 'sale' ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                    color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                     size: 28,
                   ),
                   const SizedBox(width: 12),
@@ -193,7 +195,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: AppColors.text,
                     ),
                   ),
                 ],
@@ -215,7 +217,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     _errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 14),
+                    style: const TextStyle(color: AppColors.error, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -231,17 +233,17 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                         ? 'اكتب اسم العميل أو الكود أو الهاتف...' 
                         : 'اكتب اسم المورد أو الهاتف...',
                     prefixIcon: Icon(
-                      Icons.search,
-                      color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                      sc.LucideIcons.search,
+                      color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     filled: true,
-                    fillColor: Colors.grey.shade50,
+                    fillColor: AppColors.muted,
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: const Icon(sc.LucideIcons.x),
                             onPressed: () {
                               _clearSelection();
                             },
@@ -259,13 +261,13 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: widget.invoiceType == 'sale' ? Colors.blue.shade300 : Colors.green.shade300,
+                      color: widget.invoiceType == 'sale' ? AppColors.border : AppColors.border,
                     ),
                     borderRadius: BorderRadius.circular(12),
-                    color: Colors.white,
+                    color: AppColors.surface,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: AppColors.text.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -278,7 +280,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: (widget.invoiceType == 'sale' ? Colors.blue.shade50 : Colors.green.shade50),
+                          color: (widget.invoiceType == 'sale' ? AppColors.muted : AppColors.muted),
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(12),
                             topRight: Radius.circular(12),
@@ -287,16 +289,16 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                         child: Row(
                           children: [
                             Icon(
-                              Icons.keyboard,
+                              sc.LucideIcons.keyboard,
                               size: 16,
-                              color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                              color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'اضغط ENTER للأول أو اختر من القائمة',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                                color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -318,21 +320,21 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                             return Container(
                               decoration: BoxDecoration(
                                 color: isFirst 
-                                    ? (widget.invoiceType == 'sale' ? Colors.blue.shade50 : Colors.green.shade50)
+                                    ? (widget.invoiceType == 'sale' ? AppColors.muted : AppColors.muted)
                                     : Colors.transparent,
                                 border: isFirst 
                                     ? Border(top: BorderSide(
-                                        color: widget.invoiceType == 'sale' ? Colors.blue.shade300 : Colors.green.shade300
+                                        color: widget.invoiceType == 'sale' ? AppColors.border : AppColors.border
                                       ))
                                     : null,
                               ),
                               child: ListTile(
                                 dense: false,
                                 leading: CircleAvatar(
-                                  backgroundColor: widget.invoiceType == 'sale' ? Colors.blue.shade100 : Colors.green.shade100,
+                                  backgroundColor: widget.invoiceType == 'sale' ? AppColors.muted : AppColors.muted,
                                   child: Icon(
-                                    isCustomer ? Icons.person : Icons.business,
-                                    color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                                    isCustomer ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                                    color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                                     size: 20,
                                   ),
                                 ),
@@ -341,8 +343,8 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                                   style: TextStyle(
                                     fontWeight: isFirst ? FontWeight.bold : FontWeight.normal,
                                     color: isFirst 
-                                        ? (widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700)
-                                        : Colors.black87,
+                                        ? (widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary)
+                                        : AppColors.text,
                                   ),
                                 ),
                                 subtitle: Column(
@@ -353,14 +355,14 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                                         'الكود: ${entity.code}',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey.shade600,
+                                          color: AppColors.textSecondary,
                                         ),
                                       ),
                                     Text(
                                       '📱 ${entity.phone}',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: Colors.grey.shade600,
+                                        color: AppColors.textSecondary,
                                       ),
                                     ),
                                     if (isCustomer && entity.address != null)
@@ -368,15 +370,15 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                                         '� ${entity.address}',
                                         style: TextStyle(
                                           fontSize: 12,
-                                          color: Colors.grey.shade600,
+                                          color: AppColors.textSecondary,
                                         ),
                                       ),
                                   ],
                                 ),
                                 trailing: isFirst 
                                     ? Icon(
-                                        Icons.keyboard_return,
-                                        color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                                        sc.LucideIcons.cornerDownLeft,
+                                        color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                                         size: 16,
                                       )
                                     : null,
@@ -400,21 +402,21 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: widget.invoiceType == 'sale' 
-                          ? [Colors.blue.shade50, Colors.blue.shade100]
-                          : [Colors.green.shade50, Colors.green.shade100],
+                          ? [AppColors.muted, AppColors.muted]
+                          : [AppColors.muted, AppColors.muted],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: widget.invoiceType == 'sale' ? Colors.blue.shade300 : Colors.green.shade300,
+                      color: widget.invoiceType == 'sale' ? AppColors.border : AppColors.border,
                     ),
                   ),
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: widget.invoiceType == 'sale' ? Colors.blue.shade100 : Colors.green.shade100,
+                        backgroundColor: widget.invoiceType == 'sale' ? AppColors.muted : AppColors.muted,
                         child: Icon(
-                          widget.invoiceType == 'sale' ? Icons.person : Icons.business,
-                          color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                          widget.invoiceType == 'sale' ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                          color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                           size: 20,
                         ),
                       ),
@@ -427,21 +429,21 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                               _selectedEntity.name,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: widget.invoiceType == 'sale' ? Colors.blue.shade700 : Colors.green.shade700,
+                                color: widget.invoiceType == 'sale' ? AppColors.textSecondary : AppColors.primary,
                               ),
                             ),
                             Text(
                               '📱 ${_selectedEntity.phone}',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade600,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.edit, size: 18),
+                        icon: const Icon(sc.LucideIcons.pencil, size: 18),
                         onPressed: () {
                           _clearSelection();
                           _searchFocusNode.requestFocus();

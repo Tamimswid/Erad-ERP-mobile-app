@@ -1,6 +1,7 @@
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../data/models/expense.dart';
 import '../../data/models/expense_category.dart';
@@ -92,7 +93,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(sc.LucideIcons.x),
                   ),
                 ],
               ),
@@ -178,23 +179,17 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
               child: Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: sc.Button(
+                      style: sc.ButtonStyle.outline(),
                       onPressed: () => Navigator.pop(context),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
                       child: const Text('إلغاء'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
+                    child: sc.Button(
+                      style: sc.ButtonStyle.primary(),
                       onPressed: _submit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
                       child: Text(isEditing ? 'حفظ التغييرات' : 'إضافة مصروف'),
                     ),
                   ),
@@ -211,7 +206,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.text,
       ),
@@ -310,7 +305,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
         ),
         child: Row(
           children: [
-            Icon(Icons.calendar_today, size: 18, color: AppColors.textSecondary),
+            Icon(sc.LucideIcons.calendar, size: 18, color: AppColors.textSecondary),
             const SizedBox(width: 12),
             Text(
               '${_expenseDate.day}/${_expenseDate.month}/${_expenseDate.year}',
@@ -324,9 +319,9 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
 
   Widget _buildPaymentMethodSelector() {
     final methods = [
-      {'value': 'cash', 'label': 'نقدي', 'icon': Icons.money},
-      {'value': 'card', 'label': 'بطاقة', 'icon': Icons.credit_card},
-      {'value': 'transfer', 'label': 'تحويل', 'icon': Icons.account_balance},
+      {'value': 'cash', 'label': 'نقدي', 'icon': sc.LucideIcons.banknote},
+      {'value': 'card', 'label': 'بطاقة', 'icon': sc.LucideIcons.creditCard},
+      {'value': 'transfer', 'label': 'تحويل', 'icon': sc.LucideIcons.building2},
     ];
 
     return Row(

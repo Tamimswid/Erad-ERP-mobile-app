@@ -1,34 +1,29 @@
 import 'package:flutter/material.dart';
 
-// DESIGN SYSTEM - Flat & Minimalist
-// Maximum 3 colors + 1 accent
-
+// Tokens mirror the shadcn "natural" (taupe) dark palette.
+// success/warning keep readable data accents; error uses the destructive token.
 class AppColors {
-  // BASE PALETTE 
-  static const background = Color.fromARGB(255, 255, 255, 255);     // Açık gri beyaz
-  static const surface = Color(0xFFFFFFFF);        // Saf beyaz
-  static const text = Color(0xFF1A1A2E);           // Koyu gri-siyah
-  // 
-  
-  
-  // ACCENT - Tek vurgu rengi
-  static const primary = Color(0xFF0F1B3D);        // Mavi
-  // static const primary = Color(0xFF1D4ED8);        // Mavi
+  static const background = Color(0xFF272727);
+  static const surface = Color(0xFF171717);
+  static const text = Color(0xFFFBFAF9);
 
-  
-  // SEMANTIC - Durum renkleri (minimum kullanım)
-  static const success = Color(0xFF10B981);       // Yeşil
-  static const warning = Color(0xFFF59E0B);      // Turuncu
-  static const error = Color(0xFFEF4444);         // Kırmızı
-  
-  // NEUTRAL - Ara tonlar
-  static const textSecondary = Color(0xFF6B7280); // Gri
-  static const divider = Color(0xFFE5E7EB);          // Açık gri
-  static const border = Color(0xFFD1D5DB);         // Kenar grisi
-  
+  static const primary = Color(0xFFE5E5E5);
+  static const onPrimary = Color(0xFF171717);
+  static const onPrimaryMuted = Color(0xB3171717);
+
+  static const success = Color(0xFF2EB88A);
+  static const warning = Color(0xFFE88C30);
+  static const error = Color(0xFFFF6467);
+
+  static const textSecondary = Color(0xFFABA09C);
+  static const divider = Color(0xFF1E1E1E);
+  static const border = Color(0xFF1E1E1E);
+  static const muted = Color(0xFF1E1E1E);
+  static const ring = Color(0xFF7C6D67);
+
   // Aliases
   static const secondary = textSecondary;
-  static const info = Color(0xFF1E3A5F);
+  static const info = textSecondary;
   static const accent = primary;
 }
 
@@ -36,7 +31,7 @@ class AppStrings {
   // App Info
   static const appName = 'ERAD';
   static const appSubtitle = 'نظام المحاسبة والمخزون';
-  
+
   // Navigation
   static const dashboard = 'لوحة التحكم';
   static const customers = 'العملاء';
@@ -46,7 +41,7 @@ class AppStrings {
   static const suppliers = 'الموردون';
   static const expenses = 'المصروفات';
   static const settings = 'الإعدادات';
-  
+
   // Auth
   static const login = 'تسجيل الدخول';
   static const logout = 'تسجيل الخروج';
@@ -54,7 +49,7 @@ class AppStrings {
   static const password = 'كلمة المرور';
   static const forgotPassword = 'نسيت كلمة المرور؟';
   static const rememberMe = 'تذكرني';
-  
+
   // Common
   static const save = 'حفظ';
   static const cancel = 'إلغاء';
@@ -73,17 +68,17 @@ class AppStrings {
   static const error = 'خطأ';
   static const success = 'نجاح';
   static const warning = 'تحذير';
-  
+
   // Stock Status
   static const stockSufficient = 'مخزون كافٍ';
   static const stockLow = 'مخزون منخفض';
   static const stockCritical = 'مخزون حرج';
-  
+
   // Payment Status
   static const paid = 'مدفوع';
   static const pending = 'معلق';
   static const overdue = 'متأخر';
-  
+
   // Invoice Types
   static const salesInvoice = 'فاتورة بيع';
   static const purchaseInvoice = 'فاتورة شراء';
@@ -97,7 +92,7 @@ class AppConstants {
   static const double gap = 16.0;
   static const double gapSmall = 8.0;
   static const double gapLarge = 32.0;
-  
+
   // SPACING - Tutarlı padding sistemi
   static const double spacing = 8.0;
   static const double spacingXs = 4.0;
@@ -105,35 +100,29 @@ class AppConstants {
   static const double spacingMd = 16.0;
   static const double spacingLg = 24.0;
   static const double spacingXl = 32.0;
-  
-  // BORDERS - Minimal radius
+
+  // BORDERS - shadcn radius scale (radius 0.5)
   static const double borderRadius = 8.0;
   static const double borderRadiusSm = 4.0;
-  static const double borderRadiusMd = 8.0;
+  static const double borderRadiusMd = 6.0;
   static const double borderRadiusLg = 12.0;
-  
-  // SHADOW - Çok hafif veya yok
+
+  // SHADOW - Flat surfaces, border carries the separation
   static const double cardElevation = 0.0;
-  static List<BoxShadow> get cardShadow => [
-    BoxShadow(
-      color: Colors.black.withValues(alpha: 0.04),
-      blurRadius: 4,
-      offset: const Offset(0, 1),
-    ),
-  ];
-  
+  static List<BoxShadow> get cardShadow => const [];
+
   // Window Size
   static const double minWindowWidth = 1024.0;
   static const double minWindowHeight = 768.0;
-  
+
   // Pagination
   static const int defaultPageSize = 20;
   static const int maxPageSize = 100;
-  
+
   // Number Formats
   static const String currencyFormat = '###,###.##';
   static const String dateFormat = 'yyyy-MM-dd';
-  
+
   // Stock Thresholds
   static const double lowStockThreshold = 0.2;
   static const double criticalStockThreshold = 0.1;
@@ -157,23 +146,23 @@ class AppRoutes {
   static const String withdrawals = '/withdrawals';
   static const String settings = '/settings';
   static const String profile = '/profile';
-  static const String customerDebts = '/customer-debts';
+  static const String debts = '/debts';
   static const String takrirler = '/takrirler';
 }
 
 class AppFonts {
-  static const String arabicFont = 'Cairo';
-  static const String latinFont = 'Inter';
-  
-  // TYPOGRAPHY - Net ve okunabilir
+  static const String arabicFont = 'Tajawal';
+  static const String latinFont = 'Tajawal';
+
+  // TYPOGRAPHY - shadcn type scale
   static const double fontSizeSmall = 12.0;
   static const double fontSizeMedium = 14.0;
   static const double fontSizeLarge = 16.0;
   static const double fontSizeXLarge = 18.0;
   static const double fontSizeXXLarge = 20.0;
-  static const double fontSizeXXXLarge = 24.0;
-  static const double fontSizeDisplay = 32.0;
-  
+  static const double fontSizeXXXLarge = 30.0;
+  static const double fontSizeDisplay = 36.0;
+
   // Font Weights
   static const FontWeight fontWeightRegular = FontWeight.w400;
   static const FontWeight fontWeightMedium = FontWeight.w500;
@@ -181,9 +170,7 @@ class AppFonts {
   static const FontWeight fontWeightBold = FontWeight.w700;
 }
 
-
 class AppAssets {
   static const String logo = 'assets/images/logo.png';
   static const String loadingAnimation = 'assets/images/loading.gif';
-
 }

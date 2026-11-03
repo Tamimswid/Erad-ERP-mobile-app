@@ -1,11 +1,13 @@
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart' as sl;
+import 'package:erad/core/localization/arabic_shadcn_localizations.dart';
+import 'package:erad/core/theme/shadcn_theme.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/auth/presentation/bloc/auth_cubit.dart';
 import 'package:erad/features/auth/presentation/pages/login_page.dart';
 import 'package:erad/features/customers/presentation/pages/customers_page.dart';
-import 'package:erad/features/customer_debts/presentation/pages/customer_debts_page.dart';
 import 'package:erad/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:erad/features/debts/presentation/pages/debts_page.dart';
 import 'package:erad/features/expenses/presentation/pages/expenses_page.dart';
 import 'package:erad/features/invoices/presentation/bloc/invoice_cubit.dart';
 import 'package:erad/features/invoices/presentation/pages/invoices_page.dart';
@@ -15,17 +17,27 @@ import 'package:erad/features/reports/presentation/pages/takrirler_page.dart';
 import 'package:erad/features/suppliers/presentation/pages/suppliers_page.dart';
 import 'package:erad/features/withdrawals/presentation/pages/withdrawals_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'core/theme/app_theme.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await sl.initServicesLocator();
   await NumberFormatter.initialize();
   await NumberFormatter.setArabicFormat(true);
-  await initializeDateFormatting('en');
+  await initializeDateFormatting('ar');
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+      systemNavigationBarColor: AppColors.background,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
 
   runApp(
     BlocProvider(
@@ -43,27 +55,45 @@ class ERADApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      theme: AppTheme.lightTheme.copyWith(
-        textTheme: GoogleFonts.changaTextTheme(),
-      ),
+      theme: AppShadcnTheme.materialDark,
+      darkTheme: AppShadcnTheme.materialDark,
+      themeMode: ThemeMode.dark,
       locale: const Locale('ar'),
+      supportedLocales: const [Locale('ar')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        ArabicShadcnLocalizations.delegate,
+      ],
       builder: (context, child) {
         final MediaQueryData data = MediaQuery.of(context);
 
-        // 1. Önce font ölçeğini güncelliyoruz
-        final MediaQuery updatedMediaQuery = MediaQuery(
+        return MediaQuery(
           data: data.copyWith(
             textScaler: data.textScaler.clamp(
               minScaleFactor: 0.8,
               maxScaleFactor: 1.0,
             ),
           ),
-          child: child!,
-        );
-
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: updatedMediaQuery,
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(fontFamily: AppShadcnTheme.fontFamily),
+              child: sc.ShadcnLayer(
+                theme: AppShadcnTheme.dark,
+                darkTheme: AppShadcnTheme.dark,
+                themeMode: sc.ThemeMode.dark,
+                scaling: const sc.AdaptiveScaling(1),
+                // sc.Scaffold is not a Material; without this ancestor
+                // every plain Text renders the yellow "no Material" underline.
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: child ?? const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
         );
       },
 
@@ -98,8 +128,8 @@ class ERADApp extends StatelessWidget {
             child: const SettingsPage(),
           ),
         );
-      case AppRoutes.customerDebts:
-        return MaterialPageRoute(builder: (_) => const CustomerDebtsPage());
+      case AppRoutes.debts:
+        return MaterialPageRoute(builder: (_) => const DebtsPage());
       case AppRoutes.takrirler:
         return MaterialPageRoute(builder: (_) => const TakrirlerPage());
       default:

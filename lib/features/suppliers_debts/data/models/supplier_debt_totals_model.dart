@@ -14,11 +14,14 @@ class SupplierDebtTotalsModel extends Equatable {
   factory SupplierDebtTotalsModel.fromMap(Map<String, dynamic> map) {
     return SupplierDebtTotalsModel(
       totalDebtAll: _parseDouble(
-          map['remaining_balance_all_suppliers'] ?? map['remaining_balance_all']),
+        map['remaining_balance_all_suppliers'] ?? map['remaining_balance_all'],
+      ),
       totalPaidAll: _parseDouble(
-          map['total_paid_all_suppliers'] ?? map['total_paid_all']),
+        map['total_paid_all_suppliers'] ?? map['total_paid_all'],
+      ),
       totalInvoicesAll: _parseDouble(
-          map['total_debt_all_suppliers'] ?? map['total_debt_all']),
+        map['total_debt_all_suppliers'] ?? map['total_debt_all'],
+      ),
     );
   }
 

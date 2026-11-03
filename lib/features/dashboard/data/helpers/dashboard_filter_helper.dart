@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../models/dashboard_period.dart';
 
 /// Dashboard tarih filtresi için yardımcı sınıf.
 /// Tarih formatlama ve UI yardımcı fonksiyonları.
@@ -25,6 +26,26 @@ class DashboardFilterHelper {
       start: DateTime(yearInt, 1, 1),
       end: DateTime(yearInt, 12, 31),
     );
+  }
+
+  /// Seçilen periyot için API tarih aralığını döndürür.
+  static DateTimeRange getRangeForPeriod({
+    required DashboardPeriod period,
+    required String year,
+    required DateTime month,
+    DateTimeRange? customDateRange,
+  }) {
+    switch (period) {
+      case DashboardPeriod.month:
+        return DateTimeRange(
+          start: DateTime(month.year, month.month, 1),
+          end: DateTime(month.year, month.month + 1, 0),
+        );
+      case DashboardPeriod.year:
+        return getDefaultDateRangeForYear(year);
+      case DashboardPeriod.custom:
+        return customDateRange ?? getDefaultDateRangeForYear(year);
+    }
   }
 
   /// Aktif tarih aralığını belirler.

@@ -2,6 +2,7 @@ import 'package:erad/core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../bloc/invoice_cubit.dart';
@@ -63,35 +64,28 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
           _discountAmountController.text = AppUtils.formatNumber(discountAmount);
         }
 
-        return Card(
-          elevation: AppConstants.cardElevation,
-          color: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-            side: BorderSide(color: AppColors.border, width: 1),
-          ),
+        return sc.Card(
+          padding: EdgeInsets.zero,
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle(Icons.receipt_long, 'ملخص الفاتورة'),
+                _buildSectionTitle(sc.LucideIcons.receiptText, 'ملخص الفاتورة'),
                 const SizedBox(height: 12),
 
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
+                    color: AppColors.muted,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                    ),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: Column(
                     children: [
                       _buildInfoRow(
-                        Icons.inventory_2_outlined,
+                        sc.LucideIcons.package,
                         'عدد المنتجات',
                         '${cubit.invoiceItems.length} منتج',
                       ),
@@ -249,18 +243,13 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
               ),
             ),
             const SizedBox(width: 8),
-            MaterialButton(
+            sc.Button(
+              style: sc.ButtonStyle.primary(),
               onPressed: () {
                 final discountAmountValue = _discountAmountController.text;
                 _onDiscountAmountChanged(discountAmountValue);
               },
-              color: AppColors.primary,
-              shape: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
-                borderSide: BorderSide.none,
-              ),
-              elevation: 0,
-              child: Center(child: Text('طبق',style: TextStyle(color: AppColors.surface),)),
+              child: const Center(child: Text('طبق')),
             ),
           ],
         ),

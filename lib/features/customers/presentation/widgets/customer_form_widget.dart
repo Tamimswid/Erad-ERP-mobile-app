@@ -1,13 +1,19 @@
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../bloc/customer_cubit.dart';
 
 class CustomerFormWidget extends StatefulWidget {
   final CustomerModel? customerModel;
   final Function(CustomerModel customerModel) onTap;
   final CustomerCubit? cubit;
-  const CustomerFormWidget({super.key, this.customerModel, required this.onTap, this.cubit});
+  const CustomerFormWidget({
+    super.key,
+    this.customerModel,
+    required this.onTap,
+    this.cubit,
+  });
 
   @override
   State<CustomerFormWidget> createState() => _CustomerFormWidgetState();
@@ -31,7 +37,8 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
       _phoneController.text = widget.customerModel!.phone ?? '';
       _addressController.text = widget.customerModel!.address ?? '';
       _cityController.text = widget.customerModel!.city ?? '';
-      _creditLimitController.text = widget.customerModel!.creditLimit.toString();
+      _creditLimitController.text = widget.customerModel!.creditLimit
+          .toString();
     }
   }
 
@@ -51,11 +58,14 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
       final now = DateTime.now();
       final customer = CustomerModel(
         id: widget.customerModel?.id ?? '',
-        userId: widget.customerModel?.userId ?? await UserService.getUserId() ?? '',
+        userId:
+            widget.customerModel?.userId ?? await UserService.getUserId() ?? '',
         code: _codeController.text,
         name: _nameController.text,
         phone: _phoneController.text.isEmpty ? null : _phoneController.text,
-        address: _addressController.text.isEmpty ? null : _addressController.text,
+        address: _addressController.text.isEmpty
+            ? null
+            : _addressController.text,
         city: _cityController.text.isEmpty ? null : _cityController.text,
         creditLimit: double.tryParse(_creditLimitController.text) ?? 0,
         currentBalance: widget.customerModel?.currentBalance ?? 0,
@@ -90,7 +100,7 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'اسم العميل *',
-                prefixIcon: Icon(Icons.person),
+                prefixIcon: Icon(sc.LucideIcons.user),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -107,7 +117,7 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       labelText: 'رقم الهاتف',
-                      prefixIcon: Icon(Icons.phone),
+                      prefixIcon: Icon(sc.LucideIcons.phone),
                     ),
                   ),
                 ),
@@ -117,7 +127,7 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
                     controller: _cityController,
                     decoration: const InputDecoration(
                       labelText: 'المدينة',
-                      prefixIcon: Icon(Icons.location_city),
+                      prefixIcon: Icon(sc.LucideIcons.building2),
                     ),
                   ),
                 ),
@@ -128,20 +138,24 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
               maxLines: 2,
               decoration: const InputDecoration(
                 labelText: 'العنوان',
-                prefixIcon: Icon(Icons.location_on),
+                prefixIcon: Icon(sc.LucideIcons.mapPin),
               ),
             ),
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
+                  child: sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: _submitForm,
-                    child: Text(widget.customerModel == null ? 'إضافة' : 'تحديث'),
+                    child: Text(
+                      widget.customerModel == null ? 'إضافة' : 'تحديث',
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: OutlinedButton(
+                  child: sc.Button(
+                    style: sc.ButtonStyle.outline(),
                     onPressed: () {
                       _formKey.currentState?.reset();
                     },

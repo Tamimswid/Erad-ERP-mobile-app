@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/services_locator.dart';
+import '../../../../core/widgets/app_pagination_list.dart';
 import '../../../customers/presentation/bloc/customer_cubit.dart';
 import '../../../suppliers/presentation/bloc/supplier_cubit.dart';
 import '../widgets/party_list_tile.dart';
@@ -17,12 +20,12 @@ class CustomerInvoicesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isSupplier) {
       return BlocProvider<SupplierCubit>(
-        create: (_) => sl<SupplierCubit>()..getSuppliers(),
+        create: (_) => sl<SupplierCubit>()..loadFirstPage(),
         child: const _PartyListContent(isSupplier: true),
       );
     }
     return BlocProvider<CustomerCubit>(
-      create: (_) => sl<CustomerCubit>()..getCustomers(),
+      create: (_) => sl<CustomerCubit>()..loadFirstPage(),
       child: const _PartyListContent(isSupplier: false),
     );
   }
@@ -39,23 +42,44 @@ class _PartyListContent extends StatefulWidget {
 
 class _PartyListContentState extends State<_PartyListContent> {
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
+  Timer? _debounce;
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      if (widget.isSupplier) {
+        context.read<SupplierCubit>().searchSuppliers(value);
+      } else {
+        context.read<CustomerCubit>().searchCustomers(value);
+      }
+    });
+  }
+
+  bool get _hasQuery => _searchController.text.trim().isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(widget.isSupplier ? 'فواتير مورد' : 'فواتير مشتري'),
-        centerTitle: true,
-      ),
-      body: Column(
+    return sc.Scaffold(
+      headers: [
+        sc.AppBar(
+          title: Text(widget.isSupplier ? 'فواتير مورد' : 'فواتير مشتري'),
+          leading: [
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(sc.LucideIcons.arrowRight, size: 22),
+            ),
+          ],
+        ),
+      ],
+      child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
@@ -63,7 +87,7 @@ class _PartyListContentState extends State<_PartyListContent> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'بحث...',
-                prefixIcon: const Icon(Iconsax.search_normal),
+                prefixIcon: const Icon(sc.LucideIcons.search),
                 filled: true,
                 fillColor: AppColors.surface,
                 border: OutlineInputBorder(
@@ -71,10 +95,14 @@ class _PartyListContentState extends State<_PartyListContent> {
                   borderSide: BorderSide.none,
                 ),
               ),
-              onChanged: (value) => setState(() => _searchQuery = value.trim()),
+              onChanged: _onSearchChanged,
             ),
           ),
-          Expanded(child: widget.isSupplier ? _buildSuppliersList() : _buildCustomersList()),
+          Expanded(
+            child: widget.isSupplier
+                ? _buildSuppliersList()
+                : _buildCustomersList(),
+          ),
         ],
       ),
     );
@@ -83,6 +111,8 @@ class _PartyListContentState extends State<_PartyListContent> {
   Widget _buildCustomersList() {
     return BlocBuilder<CustomerCubit, CustomerState>(
       builder: (context, state) {
+        final cubit = context.read<CustomerCubit>();
+
         if (state is CustomerInitial || state is CustomerLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -92,47 +122,66 @@ class _PartyListContentState extends State<_PartyListContent> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Iconsax.profile_delete, size: 64, color: AppColors.textSecondary),
+                Icon(
+                  sc.LucideIcons.userX,
+                  size: 64,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(height: 16),
-                Text(state.message,
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
-                    textAlign: TextAlign.center),
+                Text(
+                  state.message,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           );
         }
 
         if (state is CustomerLoaded) {
-          final list = _searchQuery.isEmpty
-              ? state.customers
-              : state.customers.where((c) {
-                  final q = _searchQuery.toLowerCase();
-                  return c.name.toLowerCase().contains(q) ||
-                      (c.phone?.toLowerCase().contains(q) ?? false);
-                }).toList();
-
-          if (list.isEmpty) {
-            return _emptyState(_searchQuery.isEmpty ? 'لا يوجد عملاء' : 'لا توجد نتائج');
+          if (state.customers.isEmpty) {
+            return _emptyScrollView(
+              () => cubit.loadFirstPage(showLoading: false),
+              _hasQuery ? 'لا توجد نتائج' : 'لا يوجد عملاء',
+            );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-              final customer = list[index];
-              return PartyListTile(
-                name: customer.name,
-                phone: customer.phone,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CustomerInvoiceDetailPage(
-                      partyId: customer.id, partyName: customer.name, isSupplier: false,
-                    ),
-                  ),
+          return RefreshIndicator(
+            onRefresh: () => cubit.loadFirstPage(showLoading: false),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                AppPaginationSliverList(
+                  itemCount: state.customers.length,
+                  hasMore: state.hasMore,
+                  isLoadingMore: state.isLoadingMore,
+                  onLoadMore: cubit.loadMore,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  separator: const SizedBox(height: 8),
+                  bottomSpace: 24,
+                  itemBuilder: (context, index) {
+                    final customer = state.customers[index];
+                    return PartyListTile(
+                      name: customer.name,
+                      phone: customer.phone,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CustomerInvoiceDetailPage(
+                            partyId: customer.id,
+                            partyName: customer.name,
+                            isSupplier: false,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ],
+            ),
           );
         }
 
@@ -144,6 +193,8 @@ class _PartyListContentState extends State<_PartyListContent> {
   Widget _buildSuppliersList() {
     return BlocBuilder<SupplierCubit, SupplierState>(
       builder: (context, state) {
+        final cubit = context.read<SupplierCubit>();
+
         if (state is SupplierInitial || state is SupplierLoading) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -153,47 +204,66 @@ class _PartyListContentState extends State<_PartyListContent> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Iconsax.profile_delete, size: 64, color: AppColors.textSecondary),
+                Icon(
+                  sc.LucideIcons.userX,
+                  size: 64,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(height: 16),
-                Text(state.message,
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
-                    textAlign: TextAlign.center),
+                Text(
+                  state.message,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           );
         }
 
         if (state is SuppliersLoaded) {
-          final list = _searchQuery.isEmpty
-              ? state.suppliers
-              : state.suppliers.where((s) {
-                  final q = _searchQuery.toLowerCase();
-                  return s.name.toLowerCase().contains(q) ||
-                      (s.phone?.toLowerCase().contains(q) ?? false);
-                }).toList();
-
-          if (list.isEmpty) {
-            return _emptyState(_searchQuery.isEmpty ? 'لا يوجد موردون' : 'لا توجد نتائج');
+          if (state.suppliers.isEmpty) {
+            return _emptyScrollView(
+              () => cubit.loadFirstPage(showLoading: false),
+              _hasQuery ? 'لا توجد نتائج' : 'لا يوجد موردون',
+            );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: list.length,
-            itemBuilder: (context, index) {
-              final supplier = list[index];
-              return PartyListTile(
-                name: supplier.name,
-                phone: supplier.phone,
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CustomerInvoiceDetailPage(
-                      partyId: supplier.id, partyName: supplier.name, isSupplier: true,
-                    ),
-                  ),
+          return RefreshIndicator(
+            onRefresh: () => cubit.loadFirstPage(showLoading: false),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                AppPaginationSliverList(
+                  itemCount: state.suppliers.length,
+                  hasMore: state.hasMore,
+                  isLoadingMore: state.isLoadingMore,
+                  onLoadMore: cubit.loadMore,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  separator: const SizedBox(height: 8),
+                  bottomSpace: 24,
+                  itemBuilder: (context, index) {
+                    final supplier = state.suppliers[index];
+                    return PartyListTile(
+                      name: supplier.name,
+                      phone: supplier.phone,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CustomerInvoiceDetailPage(
+                            partyId: supplier.id,
+                            partyName: supplier.name,
+                            isSupplier: true,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ],
+            ),
           );
         }
 
@@ -202,14 +272,32 @@ class _PartyListContentState extends State<_PartyListContent> {
     );
   }
 
+  Widget _emptyScrollView(Future<void> Function() onRefresh, String message) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: _emptyState(message),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _emptyState(String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Iconsax.profile_delete, size: 64, color: AppColors.textSecondary),
+          Icon(sc.LucideIcons.userX, size: 64, color: AppColors.textSecondary),
           const SizedBox(height: 16),
-          Text(message, style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+          Text(
+            message,
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+          ),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 
 enum PeriodMode { year, custom }
@@ -29,12 +30,7 @@ class FiltersWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return sc.Card(
       padding: const EdgeInsets.all(10),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.end,
@@ -58,7 +54,7 @@ class FiltersWidget extends StatelessWidget {
         const Text(
           'الفترة',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
           ),
@@ -107,9 +103,9 @@ class FiltersWidget extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isActive ? Colors.white : AppColors.textSecondary,
+            color: isActive ? AppColors.onPrimary : AppColors.textSecondary,
           ),
         ),
       ),
@@ -123,7 +119,7 @@ class FiltersWidget extends StatelessWidget {
         const Text(
           'السنة',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
           ),
@@ -146,7 +142,7 @@ class FiltersWidget extends StatelessWidget {
                   value: year,
                   child: Text(
                     year,
-                    style: const TextStyle(fontSize: 13),
+                    style: const TextStyle(fontSize: 14),
                   ),
                 );
               }).toList(),
@@ -165,7 +161,7 @@ class FiltersWidget extends StatelessWidget {
         const Text(
           'نطاق التاريخ',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
           ),
@@ -226,13 +222,13 @@ class FiltersWidget extends StatelessWidget {
                     ? '${value.day.toString().padLeft(2, '0')}.${value.month.toString().padLeft(2, '0')}.${value.year}'
                     : hint,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: value != null ? AppColors.text : AppColors.textSecondary,
                 ),
               ),
             ),
             const Icon(
-              Icons.calendar_today,
+              sc.LucideIcons.calendar,
               size: 14,
               color: AppColors.textSecondary,
             ),

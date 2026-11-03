@@ -1,6 +1,7 @@
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/widgets/common_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceActionButtonsWidget extends StatelessWidget {
   final VoidCallback onExportPdf;
@@ -28,20 +29,20 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.payments,
+                  icon: sc.LucideIcons.banknote,
                   label: 'الدفع',
                   onPressed: onUpdatePaymentStatus,
-                  color: AppColors.primary,
+                  style: sc.ButtonStyle.primary(),
                 ),
               ),
               const SizedBox(width: 8),
 
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.picture_as_pdf,
+                  icon: sc.LucideIcons.fileText,
                   label: 'PDF',
                   onPressed: onExportPdf,
-                  color: AppColors.secondary,
+                  style: sc.ButtonStyle.outline(),
                 ),
               ),
             ],
@@ -51,19 +52,19 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.edit,
+                  icon: sc.LucideIcons.pencil,
                   label: 'تعديل',
                   onPressed: onEdit,
-                  color: AppColors.primary,
+                  style: sc.ButtonStyle.outline(),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.delete_outline,
+                  icon: sc.LucideIcons.trash2,
                   label: 'حذف الفاتورة',
                   onPressed: onDelete,
-                  color: AppColors.error,
+                  style: sc.ButtonStyle.destructive(),
                 ),
               ),
             ],
@@ -77,38 +78,17 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
-    required Color color,
+    required sc.ButtonStyle style,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(10),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 18, color: AppColors.surface),
-                const SizedBox(width: 6),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeSmall,
-                    fontWeight: AppFonts.fontWeightSemiBold,
-                    color: AppColors.surface,
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return sc.Button(
+      style: style,
+      onPressed: onPressed,
+      leading: Icon(icon, size: 18),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: AppFonts.fontSizeSmall,
+          fontWeight: AppFonts.fontWeightSemiBold,
         ),
       ),
     );

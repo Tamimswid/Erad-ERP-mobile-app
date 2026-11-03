@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/app_pagination_list.dart';
 import '../../../../core/widgets/date_filter_sheet.dart';
 import '../bloc/invoice_cubit.dart';
-import '../widgets/invoice_stats_widget.dart';
 import '../widgets/invoice_card_widget.dart';
 import '../widgets/invoice_empty_state_widget.dart';
 import 'invoice_detail_page.dart';
@@ -72,17 +72,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
           firstDate: DateTime(2020),
           lastDate: DateTime(2030),
           initialDateRange: initial,
-          builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                appBarTheme: const AppBarTheme(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              child: child!,
-            );
-          },
+          builder: (context, child) => child!,
         );
         if (picked != null && context.mounted) {
           cubit.setDateRange(picked.start, picked.end);
@@ -117,7 +107,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
                 color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(999),
                 border: Border.all(
                   color: AppColors.primary.withValues(alpha: 0.2),
                 ),
@@ -126,7 +116,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(
-                    Iconsax.calendar,
+                    sc.LucideIcons.calendar,
                     size: 16,
                     color: AppColors.primary,
                   ),
@@ -135,13 +125,13 @@ class _InvoicesPageState extends State<InvoicesPage> {
                     dateLabel,
                     style: const TextStyle(
                       color: AppColors.primary,
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(width: 4),
                   const Icon(
-                    Iconsax.arrow_down_1,
+                    sc.LucideIcons.chevronDown,
                     size: 14,
                     color: AppColors.primary,
                   ),
@@ -157,7 +147,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
           : FloatingActionButton.extended(
               label: const Text(
                 'إضافة فاتورة جديدة',
-                style: TextStyle(color: AppColors.surface),
+                style: TextStyle(color: AppColors.onPrimary),
               ),
               backgroundColor: AppColors.primary,
               onPressed: () {
@@ -166,7 +156,11 @@ class _InvoicesPageState extends State<InvoicesPage> {
                   MaterialPageRoute(
                     builder: (context) => const CreateInvoicePage(),
                   ),
-                );
+                ).then((_) {
+                  if (context.mounted) {
+                    context.read<InvoiceCubit>().loadFirstPage();
+                  }
+                });
               },
             ),
       body: BlocConsumer<InvoiceCubit, InvoiceState>(
@@ -188,27 +182,28 @@ class _InvoicesPageState extends State<InvoicesPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.error_outline,
+                    sc.LucideIcons.circleAlert,
                     size: 64,
-                    color: Colors.grey.shade400,
+                    color: AppColors.textSecondary,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'حدث خطأ',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     state.message,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade500,
+                      color: AppColors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: () =>
                         context.read<InvoiceCubit>().getAllInvoices(),
                     child: const Text('حاول ثانية'),
@@ -242,39 +237,41 @@ class _InvoicesPageState extends State<InvoicesPage> {
                 if (allInvoices.isEmpty)
                   const SliverFillRemaining(child: InvoiceEmptyStateWidget())
                 else
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final invoice = allInvoices[index];
-                        final type =
-                            invoice.runtimeType.toString().contains('Sales')
-                            ? 'sale'
-                            : 'purchase';
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: InvoiceCardWidget(
-                            invoice: invoice,
-                            type: type,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => InvoiceDetailPage(
-                                    invoiceId: invoice.id,
-                                    type: type,
-                                  ),
+                  AppPaginationSliverList(
+                    itemCount: allInvoices.length,
+                    hasMore: state.hasMore,
+                    isLoadingMore: state.isLoadingMore,
+                    onLoadMore: context.read<InvoiceCubit>().loadMore,
+                    itemBuilder: (context, index) {
+                      final invoice = allInvoices[index];
+                      final type =
+                          invoice.runtimeType.toString().contains('Sales')
+                          ? 'sale'
+                          : 'purchase';
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: InvoiceCardWidget(
+                          invoice: invoice,
+                          type: type,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => InvoiceDetailPage(
+                                  invoiceId: invoice.id,
+                                  type: type,
                                 ),
-                              );
-                            },
-                          ),
-                        );
-                      }, childCount: allInvoices.length),
-                    ),
+                              ),
+                            ).then((_) {
+                              if (context.mounted) {
+                                context.read<InvoiceCubit>().loadFirstPage();
+                              }
+                            });
+                          },
+                        ),
+                      );
+                    },
                   ),
-                SliverToBoxAdapter(
-                  child: SizedBox(height: widget.isLocal ? 0 : 100),
-                ),
               ],
             );
           }
@@ -290,8 +287,8 @@ class _InvoicesPageState extends State<InvoicesPage> {
       controller: _searchController,
       decoration: InputDecoration(
         hintText: 'بحث عن فاتورة أو عميل أو مورد...',
-        hintStyle: const TextStyle(fontSize: 13),
-        prefixIcon: const Icon(Iconsax.search_normal, size: 20),
+        hintStyle: const TextStyle(fontSize: 14),
+        prefixIcon: const Icon(sc.LucideIcons.search, size: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.border),
@@ -316,13 +313,8 @@ class _InvoicesPageState extends State<InvoicesPage> {
   }
 
   Widget _buildFilterSection() {
-    return Container(
+    return sc.Card(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -331,7 +323,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
             child: Text(
               'النوع',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),
@@ -351,7 +343,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
             child: Text(
               'حالة الدفع',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),
@@ -401,10 +393,10 @@ class _InvoicesPageState extends State<InvoicesPage> {
                     item.label,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: isSelected
-                          ? Colors.white
+                          ? AppColors.onPrimary
                           : AppColors.textSecondary,
                     ),
                   ),

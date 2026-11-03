@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:erad/core/constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceDetailHeaderWidget extends StatelessWidget {
   final String invoiceNumber;
@@ -21,7 +22,7 @@ class InvoiceDetailHeaderWidget extends StatelessWidget {
             onTap: onBackPressed,
             borderRadius: BorderRadius.circular(12),
             child: const Icon(
-              Icons.arrow_back,
+              sc.LucideIcons.arrowRight,
               color: AppColors.textSecondary,
               size: 22,
             ),

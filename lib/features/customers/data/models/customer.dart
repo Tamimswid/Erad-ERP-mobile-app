@@ -35,21 +35,21 @@ class CustomerModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        code,
-        name,
-        phone,
-        address,
-        city,
-        creditLimit,
-        currentBalance,
-        totalPurchases,
-        isActive,
-        createdAt,
-        updatedAt,
-        deletedAt,
-      ];
+    id,
+    userId,
+    code,
+    name,
+    phone,
+    address,
+    city,
+    creditLimit,
+    currentBalance,
+    totalPurchases,
+    isActive,
+    createdAt,
+    updatedAt,
+    deletedAt,
+  ];
 
   CustomerModel copyWith({
     String? id,
@@ -117,11 +117,14 @@ class CustomerModel extends Equatable {
       isActive: map['is_active'] ?? true,
       createdAt: DateTime.parse(map['created_at']),
       updatedAt: DateTime.parse(map['updated_at']),
-      deletedAt: map['deleted_at'] != null ? DateTime.parse(map['deleted_at']) : null,
+      deletedAt: map['deleted_at'] != null
+          ? DateTime.parse(map['deleted_at'])
+          : null,
     );
   }
 
   bool get hasCreditLimit => creditLimit > 0;
   bool get isOverCreditLimit => hasCreditLimit && currentBalance >= creditLimit;
-  double get availableCredit => hasCreditLimit ? creditLimit - currentBalance : 0;
+  double get availableCredit =>
+      hasCreditLimit ? creditLimit - currentBalance : 0;
 }

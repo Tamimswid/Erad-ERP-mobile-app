@@ -1,57 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/expense.dart';
 import '../../data/models/expense_category.dart';
 import 'expense_detail_dialog.dart';
 
-class ExpenseTableWidget extends StatelessWidget {
-  final List<Expense> expenses;
-  final List<ExpenseCategory> categories;
+class ExpenseTableCard extends StatelessWidget {
+  final Expense expense;
+  final ExpenseCategory? category;
   final Function(Expense) onDelete;
-  final Function(Expense) onTap;
 
-  const ExpenseTableWidget({
+  const ExpenseTableCard({
     super.key,
-    required this.expenses,
-    required this.categories,
+    required this.expense,
+    required this.category,
     required this.onDelete,
-    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (expenses.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: expenses.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final expense = expenses[index];
-        final category = categories.where((c) => c.id == expense.categoryId).firstOrNull;
-        return _buildCard(context, expense: expense, category: category);
-      },
-    );
-  }
-
-  Widget _buildCard(BuildContext context, {
-    required Expense expense,
-    required ExpenseCategory? category,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: InkWell(
-        onTap: () => _showDetailDialog(context, expense, category),
-        borderRadius: BorderRadius.circular(12),
+    return sc.Card(
+      padding: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: sc.Clickable(
+        onPressed: () => _showDetailDialog(context),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
           child: Row(
@@ -74,31 +48,34 @@ class ExpenseTableWidget extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          Icons.calendar_today,
-                          size: 11,
+                          sc.LucideIcons.calendar,
+                          size: 12,
                           color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formatDate(expense.expenseDate),
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
                         ),
                         if (category != null) ...[
                           const SizedBox(width: 10),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
+                              color: AppColors.muted,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              category.name,
+                              category!.name,
                               style: const TextStyle(
-                                fontSize: 10,
-                                color: AppColors.primary,
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ),
@@ -112,17 +89,17 @@ class ExpenseTableWidget extends StatelessWidget {
               Text(
                 _formatCurrency(expense.amount),
                 style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.error,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
                 ),
               ),
               SizedBox(
                 width: 36,
                 child: IconButton(
-                  onPressed: () => _confirmDelete(context, expense),
+                  onPressed: () => _confirmDelete(context),
                   icon: const Icon(
-                    Icons.delete_outline,
+                    sc.LucideIcons.trash2,
                     size: 18,
                     color: AppColors.textSecondary,
                   ),
@@ -137,35 +114,7 @@ class ExpenseTableWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Column(
-        children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 40,
-            color: AppColors.textSecondary,
-          ),
-          SizedBox(height: 16),
-          Text(
-            'لم يتم العثور على بيانات',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmDelete(BuildContext context, Expense expense) {
+  void _confirmDelete(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -192,7 +141,7 @@ class ExpenseTableWidget extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.error,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.surface,
                     ),
                     child: const Text('حذف'),
                   ),
@@ -213,7 +162,7 @@ class ExpenseTableWidget extends StatelessWidget {
     return '${NumberFormatter.format(amount)} ${NumberFormatter.getCurrencySymbol()}';
   }
 
-  void _showDetailDialog(BuildContext context, Expense expense, ExpenseCategory? category) {
+  void _showDetailDialog(BuildContext context) {
     ExpenseDetailDialog.show(context, expense, category);
   }
 }

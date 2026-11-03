@@ -1,13 +1,16 @@
-import 'dart:async';
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/supplier.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/utils/paged_result.dart';
 
 abstract class SupplierRemoteDataSource {
   Future<List<SupplierModel>> getSuppliers();
-  Stream<List<SupplierModel>> watchSuppliers();
+  Future<PagedResult<SupplierModel>> getSuppliersPage({
+    required int offset,
+    int limit,
+    String? search,
+  });
   Future<SupplierModel> getSupplier(String id);
   Future<SupplierModel> createSupplier(SupplierModel supplier);
   Future<SupplierModel> updateSupplier(SupplierModel supplier);
@@ -27,7 +30,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
       if (userId == null) {
         throw Exception('User not logged in');
       }
-      
+
       final response = await client
           .from('suppliers')
           .select()
@@ -35,23 +38,54 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
           .eq('is_active', true)
           .order('created_at', ascending: false);
 
-      return response.map((supplier) => SupplierModel.fromMap(supplier)).toList();
+      return response
+          .map((supplier) => SupplierModel.fromMap(supplier))
+          .toList();
     } catch (e) {
       throw exceptionToFailure(e);
     }
   }
 
   @override
-  Stream<List<SupplierModel>> watchSuppliers() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) throw Exception('User not logged in');
+  Future<PagedResult<SupplierModel>> getSuppliersPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
 
-    await for (final data in client
-        .from('suppliers')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId)
-        .order('created_at', ascending: false)) {
-      yield data.map((item) => SupplierModel.fromMap(item)).toList();
+      var query = client
+          .from('suppliers')
+          .select()
+          .eq('user_id', userId)
+          .eq('is_active', true);
+
+      final term = search?.trim() ?? '';
+      if (term.isNotEmpty) {
+        query = query.or(
+          'name.ilike.%$term%,phone.ilike.%$term%,city.ilike.%$term%',
+        );
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .order('id', ascending: true)
+          .range(offset, offset + limit);
+
+      final rows = response
+          .map((supplier) => SupplierModel.fromMap(supplier))
+          .toList();
+      final hasMore = rows.length > limit;
+      return PagedResult(
+        items: hasMore ? rows.sublist(0, limit) : rows,
+        hasMore: hasMore,
+      );
+    } catch (e) {
+      throw exceptionToFailure(e);
     }
   }
 
@@ -72,7 +106,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
 
   @override
   Future<SupplierModel> createSupplier(SupplierModel supplier) async {
-    try {      
+    try {
       final response = await client
           .from('suppliers')
           .insert(supplier.toMap())
@@ -105,14 +139,20 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
   Future<void> deleteSupplier(String id) async {
     try {
       // جلب معرفات فواتير الشراء المرتبطة بالمورد
-      final invoices = await client.from('purchase_invoices').select('id').eq('supplier_id', id);
+      final invoices = await client
+          .from('purchase_invoices')
+          .select('id')
+          .eq('supplier_id', id);
       final invoiceIds = invoices.map((e) => e['id'] as String).toList();
-      
+
       // حذف عناصر فواتير الشراء المرتبطة
       for (final invoiceId in invoiceIds) {
-        await client.from('purchase_invoice_items').delete().eq('invoice_id', invoiceId);
+        await client
+            .from('purchase_invoice_items')
+            .delete()
+            .eq('invoice_id', invoiceId);
       }
-      
+
       // حذف فواتير الشراء المرتبطة بالمورد
       await client.from('purchase_invoices').delete().eq('supplier_id', id);
       // حذف المورد
@@ -125,7 +165,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
   @override
   Future<List<SupplierModel>> searchSuppliers(String query) async {
     try {
-      final userId = await UserService.getUserId();      
+      final userId = await UserService.getUserId();
       final response = await client
           .from('suppliers')
           .select()
@@ -133,7 +173,9 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
           .or('name.ilike.%$query%,phone.ilike.%$query%,city.ilike.%$query%')
           .order('created_at', ascending: false);
 
-      return response.map((supplier) => SupplierModel.fromMap(supplier)).toList();
+      return response
+          .map((supplier) => SupplierModel.fromMap(supplier))
+          .toList();
     } catch (e) {
       throw exceptionToFailure(e);
     }

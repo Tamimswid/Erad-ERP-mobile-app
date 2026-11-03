@@ -3,6 +3,7 @@ import 'package:erad/features/invoices/presentation/widgets/product_list_widget.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../products/data/models/product.dart';
 import '../../../products/presentation/bloc/product_cubit.dart';
@@ -191,22 +192,15 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
             _cachedItems = List.from(invoiceCubit.invoiceItems);
           }
 
-          return Card(
-            elevation: AppConstants.cardElevation,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-              side: BorderSide(color: AppColors.border, width: 1),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.cardPadding),
-              child: Column(
+          return sc.Card(
+            padding: const EdgeInsets.all(AppConstants.cardPadding),
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       _buildSectionTitle(
-                        Icons.inventory_2_outlined,
+                        sc.LucideIcons.package,
                         'إضافة منتج',
                       ),
                       const Spacer(),
@@ -216,13 +210,14 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppColors.muted,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: AppColors.divider),
                         ),
                         child: Text(
                           '${_cachedItems.length} منتج',
                           style: const TextStyle(
-                            color: AppColors.primary,
+                            color: AppColors.text,
                             fontWeight: AppFonts.fontWeightSemiBold,
                             fontSize: AppFonts.fontSizeSmall,
                           ),
@@ -240,17 +235,17 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
 
                   const SizedBox(height: 16),
                   Container(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primary, width: 0.5),
-                      borderRadius: BorderRadius.circular(10),
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      border: Border.all(color: AppColors.divider),
+                      borderRadius: BorderRadius.circular(8),
+                      color: AppColors.muted,
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         'اسحب لليمين لحذف المنتج',
                         style: TextStyle(
-                          color: AppColors.text,
+                          color: AppColors.textSecondary,
                           fontSize: AppFonts.fontSizeMedium,
                         ),
                       ),
@@ -265,7 +260,6 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
                   ),
                 ],
               ),
-            ),
           );
         },
       ),
@@ -273,19 +267,19 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
   }
 
   Widget _buildExpandButton() {
-    return InkWell(
-      onTap: _openFullscreen,
-      borderRadius: BorderRadius.circular(20),
+    return sc.Clickable(
+      onPressed: _openFullscreen,
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(20),
+          color: AppColors.muted,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: AppColors.divider),
         ),
         child: const Icon(
-          Icons.fullscreen,
+          sc.LucideIcons.maximize,
           size: 18,
-          color: AppColors.primary,
+          color: AppColors.text,
         ),
       ),
     );
@@ -411,17 +405,9 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
             SizedBox(
               width: 100,
               height: 48,
-              child: ElevatedButton(
+              child: sc.Button(
+                style: sc.ButtonStyle.primary(),
                 onPressed: _onQuantitySubmitted,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(0),
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                  ),
-                  elevation: 0,
-                ),
                 child: const Text('إضافة'),
               ),
             ),

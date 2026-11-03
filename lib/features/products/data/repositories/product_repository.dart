@@ -4,6 +4,7 @@ import '../../../../core/network/network_info.dart';
 import '../models/product.dart';
 import '../models/product_category.dart';
 import '../datasource/product_remote_datasource.dart';
+import '../../../../core/utils/paged_result.dart';
 
 class ProductRepository {
   final ProductRemoteDataSource remoteDataSource;
@@ -161,11 +162,21 @@ class ProductRepository {
     }
   }
 
-  Future<Either<Failure, List<ProductModel>>> searchProducts(String query) async {
+  Future<Either<Failure, PagedResult<ProductModel>>> getProductsPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+    String? categoryId,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final products = await remoteDataSource.searchProducts(query);
-        return Right(products);
+        final page = await remoteDataSource.getProductsPage(
+          offset: offset,
+          limit: limit,
+          search: search,
+          categoryId: categoryId,
+        );
+        return Right(page);
       } on Failure catch (failure) {
         return Left(failure);
       } catch (e) {
@@ -173,38 +184,6 @@ class ProductRepository {
       }
     } else {
       return Left(NetworkFailure.noConnection());
-    }
-  }
-
-  Future<Either<Failure, List<ProductModel>>> getProductsByCategory(String categoryId) async {
-    if (await networkInfo.isConnected) {
-      try {
-        final products = await remoteDataSource.getProductsByCategory(categoryId);
-        return Right(products);
-      } on Failure catch (failure) {
-        return Left(failure);
-      } catch (e) {
-        return Left(exceptionToFailure(e));
-      }
-    } else {
-      return Left(NetworkFailure.noConnection());
-    }
-  }
-
-  // Real-time streams
-  Stream<Either<Failure, List<ProductModel>>> watchProducts() {
-    try {
-      return remoteDataSource.watchProducts().map((products) => Right(products));
-    } catch (e) {
-      return Stream.value(Left(exceptionToFailure(e)));
-    }
-  }
-
-  Stream<Either<Failure, List<ProductCategory>>> watchCategories() {
-    try {
-      return remoteDataSource.watchCategories().map((categories) => Right(categories));
-    } catch (e) {
-      return Stream.value(Left(exceptionToFailure(e)));
     }
   }
 }

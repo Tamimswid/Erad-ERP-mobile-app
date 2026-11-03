@@ -17,11 +17,17 @@ class CustomerLoading extends CustomerState {
 
 class CustomerLoaded extends CustomerState {
   final List<CustomerModel> customers;
+  final bool hasMore;
+  final bool isLoadingMore;
 
-  const CustomerLoaded(this.customers);
+  const CustomerLoaded(
+    this.customers, {
+    this.hasMore = false,
+    this.isLoadingMore = false,
+  });
 
   @override
-  List<Object?> get props => [customers];
+  List<Object?> get props => [customers, hasMore, isLoadingMore];
 }
 
 class CustomerSingleLoaded extends CustomerState {

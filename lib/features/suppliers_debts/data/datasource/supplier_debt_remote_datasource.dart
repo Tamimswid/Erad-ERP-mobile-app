@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:erad/core/services/user_service.dart';
+import 'package:erad/core/utils/paged_result.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 import 'package:erad/core/errors/failures.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.dart';
@@ -12,24 +12,69 @@ class SupplierDebtRemoteDataSource {
 
   SupplierDebtRemoteDataSource(this.supabaseClient);
 
-  Future<List<SupplierDebtModel>> getSupplierDebts() async {
+  Future<PagedResult<SupplierDebtModel>> getSupplierDebtsPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
 
-      final response = await supabaseClient
+      var query = supabaseClient
           .from('view_supplier_debt_details')
           .select('*')
           .eq('user_id', userId);
 
-      return (response as List)
+      final term = search?.trim() ?? '';
+      if (term.isNotEmpty) {
+        query = query.ilike('supplier_name', '%$term%');
+      }
+
+      final response = await query
+          .order('supplier_name', ascending: true)
+          .order('supplier_id', ascending: true)
+          .range(offset, offset + limit);
+
+      final rows = (response as List)
           .map(
             (json) =>
                 SupplierDebtModel.fromViewMap(json as Map<String, dynamic>),
           )
           .toList();
+
+      final hasMore = rows.length > limit;
+      return PagedResult(
+        items: hasMore ? rows.sublist(0, limit) : rows,
+        hasMore: hasMore,
+      );
+    } catch (e) {
+      log(e.toString());
+      throw exceptionToFailure(e);
+    }
+  }
+
+  Future<int> getSupplierDebtCount({String? search}) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw const AuthFailure('User not authenticated');
+      }
+
+      var query = supabaseClient
+          .from('view_supplier_debt_details')
+          .select('supplier_id')
+          .eq('user_id', userId);
+
+      final term = search?.trim() ?? '';
+      if (term.isNotEmpty) {
+        query = query.ilike('supplier_name', '%$term%');
+      }
+
+      final response = await query.limit(1).count(CountOption.exact);
+      return response.count;
     } catch (e) {
       log(e.toString());
       throw exceptionToFailure(e);
@@ -52,30 +97,6 @@ class SupplierDebtRemoteDataSource {
       return SupplierDebtTotalsModel.fromMap(response);
     } catch (e) {
       log(e.toString());
-      throw exceptionToFailure(e);
-    }
-  }
-
-  Future<List<SupplierDebtModel>> searchSupplierDebts(String query) async {
-    try {
-      final userId = await UserService.getUserId();
-      if (userId == null) {
-        throw const AuthFailure('User not authenticated');
-      }
-
-      final response = await supabaseClient
-          .from('view_supplier_debt_details')
-          .select('*')
-          .eq('user_id', userId)
-          .ilike('supplier_name', '%$query%');
-
-      return (response as List)
-          .map(
-            (json) =>
-                SupplierDebtModel.fromViewMap(json as Map<String, dynamic>),
-          )
-          .toList();
-    } catch (e) {
       throw exceptionToFailure(e);
     }
   }
@@ -150,6 +171,114 @@ class SupplierDebtRemoteDataSource {
     }
   }
 
+  Future<PagedResult<Map<String, dynamic>>> getSupplierInvoicesPage(
+    String supplierId, {
+    required int offset,
+    int limit = 10,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw const AuthFailure('User not authenticated');
+      }
+
+      final response = await supabaseClient
+          .from('purchase_invoices')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('supplier_id', supplierId)
+          .eq('payment_status', 'debt')
+          .order('invoice_date', ascending: false)
+          .order('id', ascending: true)
+          .range(offset, offset + limit);
+
+      final rows = List<Map<String, dynamic>>.from(response);
+      final hasMore = rows.length > limit;
+      return PagedResult(
+        items: hasMore ? rows.sublist(0, limit) : rows,
+        hasMore: hasMore,
+      );
+    } catch (e) {
+      throw exceptionToFailure(e);
+    }
+  }
+
+  Future<PagedResult<Map<String, dynamic>>> getSupplierPaymentsPage(
+    String supplierId, {
+    required int offset,
+    int limit = 10,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw const AuthFailure('User not authenticated');
+      }
+
+      final response = await supabaseClient
+          .from('payments')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('supplier_id', supplierId)
+          .order('payment_date', ascending: false)
+          .order('id', ascending: true)
+          .range(offset, offset + limit);
+
+      final rows = List<Map<String, dynamic>>.from(response);
+      final hasMore = rows.length > limit;
+      return PagedResult(
+        items: hasMore ? rows.sublist(0, limit) : rows,
+        hasMore: hasMore,
+      );
+    } catch (e) {
+      throw exceptionToFailure(e);
+    }
+  }
+
+  Future<double> getSupplierInvoiceTotal(String supplierId) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw const AuthFailure('User not authenticated');
+      }
+
+      final response = await supabaseClient
+          .from('purchase_invoices')
+          .select('total_amount')
+          .eq('user_id', userId)
+          .eq('supplier_id', supplierId)
+          .eq('payment_status', 'debt');
+
+      return response.fold<double>(
+        0,
+        (sum, row) => sum + ((row['total_amount'] ?? 0) as num).toDouble(),
+      );
+    } catch (e) {
+      throw exceptionToFailure(e);
+    }
+  }
+
+  Future<double> getSupplierPaymentTotal(String supplierId) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw const AuthFailure('User not authenticated');
+      }
+
+      final response = await supabaseClient
+          .from('payments')
+          .select('amount')
+          .eq('user_id', userId)
+          .eq('supplier_id', supplierId);
+
+      return response.fold<double>(
+        0,
+        (sum, row) => sum + ((row['amount'] ?? 0) as num).toDouble(),
+      );
+    } catch (e) {
+      throw exceptionToFailure(e);
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getSupplierPayments(
     String supplierId,
   ) async {
@@ -196,72 +325,6 @@ class SupplierDebtRemoteDataSource {
     } catch (e) {
       log(e.toString());
       throw exceptionToFailure(e);
-    }
-  }
-
-  Stream<List<SupplierDebtModel>> watchSupplierDebts() {
-    final controller = StreamController<List<SupplierDebtModel>>();
-    List<StreamSubscription> subscriptions = [];
-
-    _fetchAndEmitSupplierDebts(controller);
-
-    final userId = UserService.getUserId();
-
-    userId.then((uid) {
-      if (uid == null) return;
-
-      final invoiceStream = supabaseClient
-          .from('purchase_invoices')
-          .stream(primaryKey: ['id'])
-          .eq('user_id', uid);
-
-      final paymentStream = supabaseClient
-          .from('payments')
-          .stream(primaryKey: ['id'])
-          .eq('user_id', uid);
-
-      subscriptions.add(
-        invoiceStream.listen((_) => _fetchAndEmitSupplierDebts(controller)),
-      );
-      subscriptions.add(
-        paymentStream.listen((_) => _fetchAndEmitSupplierDebts(controller)),
-      );
-    });
-
-    controller.onCancel = () {
-      for (final sub in subscriptions) {
-        sub.cancel();
-      }
-      controller.close();
-    };
-
-    return controller.stream;
-  }
-
-  Future<void> _fetchAndEmitSupplierDebts(
-    StreamController<List<SupplierDebtModel>> controller,
-  ) async {
-    try {
-      final userId = await UserService.getUserId();
-      if (userId == null) return;
-
-      final response = await supabaseClient
-          .from('view_supplier_debt_details')
-          .select('*')
-          .eq('user_id', userId);
-
-      final debts = (response as List)
-          .map(
-            (json) =>
-                SupplierDebtModel.fromViewMap(json as Map<String, dynamic>),
-          )
-          .toList();
-
-      if (!controller.isClosed) {
-        controller.add(debts);
-      }
-    } catch (e) {
-      log('Error in _fetchAndEmitSupplierDebts: $e');
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/edit_invoice_cubit.dart';
 
@@ -62,7 +63,7 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: AppColors.primary,
-              onPrimary: AppColors.surface,
+              onPrimary: AppColors.onPrimary,
               surface: AppColors.surface,
               onSurface: AppColors.text,
             ),
@@ -93,19 +94,12 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
         
         return SizedBox(
           height: 140,
-          child: Card(
-            elevation: AppConstants.cardElevation,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-              side: BorderSide(color: AppColors.border, width: 1),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(AppConstants.cardPadding),
-              child: Column(
+          child: sc.Card(
+            padding: const EdgeInsets.all(AppConstants.cardPadding),
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle(Icons.calendar_today, 'التواريخ'),
+                  _buildSectionTitle(sc.LucideIcons.calendar, 'التواريخ'),
                   const Spacer(),
                   Row(
                     children: [
@@ -113,7 +107,7 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
                         child: _buildDateField(
                           _invoiceDateController,
                           'تاريخ الفاتورة',
-                          Icons.event_outlined,
+                          sc.LucideIcons.calendar,
                           'invoice',
                         ),
                       ),
@@ -122,7 +116,7 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
                         child: _buildDateField(
                           _dueDateController,
                           'تاريخ الاستحقاق',
-                          Icons.event_available_outlined,
+                          sc.LucideIcons.calendarCheck,
                           'due',
                         ),
                       ),
@@ -130,7 +124,6 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
                   ),
                 ],
               ),
-            ),
           ),
         );
       },
@@ -187,7 +180,7 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
             ),
             prefixIcon: Icon(icon, color: AppColors.textSecondary, size: 18),
             suffixIcon: IconButton(
-              icon: const Icon(Icons.calendar_today, size: 18),
+              icon: const Icon(sc.LucideIcons.calendar, size: 18),
               onPressed: () => _selectDate(controller, field),
             ),
             filled: true,

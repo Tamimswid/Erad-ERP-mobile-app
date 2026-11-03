@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../../products/data/models/product.dart';
@@ -132,9 +133,8 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
+    return sc.Scaffold(
+      child: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
@@ -158,7 +158,7 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.text),
+            icon: const Icon(sc.LucideIcons.arrowRight, color: AppColors.text),
             onPressed: () => Navigator.of(context).pop(),
           ),
           const SizedBox(width: 4),
@@ -180,13 +180,14 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  color: AppColors.muted,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: AppColors.divider),
                 ),
                 child: Text(
                   '$count منتج',
                   style: const TextStyle(
-                    color: AppColors.primary,
+                    color: AppColors.text,
                     fontWeight: AppFonts.fontWeightSemiBold,
                     fontSize: AppFonts.fontSizeSmall,
                   ),
@@ -214,7 +215,7 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
               decoration: InputDecoration(
                 hintText: 'ابحث عن منتج...',
                 prefixIcon: const Icon(
-                  Icons.search,
+                  sc.LucideIcons.search,
                   color: AppColors.textSecondary,
                 ),
                 border: OutlineInputBorder(
@@ -292,19 +293,9 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
           const SizedBox(width: 8),
           SizedBox(
             height: 48,
-            child: ElevatedButton(
+            child: sc.Button(
+              style: sc.ButtonStyle.primary(),
               onPressed: _addProduct,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    AppConstants.borderRadius,
-                  ),
-                ),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-              ),
               child: const Text('إضافة'),
             ),
           ),
@@ -320,7 +311,7 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.search_off,
+              sc.LucideIcons.search,
               size: 48,
               color: AppColors.textSecondary.withValues(alpha: 0.4),
             ),
@@ -347,7 +338,7 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
         final isSelected = _selectedProduct?.id == product.id;
         return ListTile(
           selected: isSelected,
-          selectedTileColor: AppColors.primary.withValues(alpha: 0.05),
+          selectedTileColor: AppColors.muted,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 4,
@@ -368,12 +359,12 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
           ),
           trailing: isSelected
               ? const Icon(
-                  Icons.check_circle,
+                  sc.LucideIcons.circleCheck,
                   color: AppColors.primary,
                   size: 22,
                 )
               : const Icon(
-                  Icons.add_circle_outline,
+                  sc.LucideIcons.circlePlus,
                   color: AppColors.primary,
                   size: 22,
                 ),
@@ -393,7 +384,7 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.inventory_2_outlined,
+                  sc.LucideIcons.package,
                   size: 64,
                   color: AppColors.textSecondary.withValues(alpha: 0.25),
                 ),
@@ -441,13 +432,14 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.muted,
                       borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.divider),
                     ),
                     child: Text(
                       '${items.length}',
                       style: const TextStyle(
-                        color: AppColors.primary,
+                        color: AppColors.text,
                         fontWeight: AppFonts.fontWeightBold,
                         fontSize: AppFonts.fontSizeSmall,
                       ),
@@ -472,7 +464,10 @@ class _ProductAddFullscreenPageState extends State<ProductAddFullscreenPage> {
                       ),
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 20),
-                      child: const Icon(Icons.delete, color: Colors.white),
+                      child: const Icon(
+                        sc.LucideIcons.trash2,
+                        color: AppColors.onPrimary,
+                      ),
                     ),
                     onDismissed: (_) {
                       context.read<InvoiceCubit>().removeInvoiceItem(index);

@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
-import '../../data/models/expense.dart';
 
 class ExpenseMonthlyChartWidget extends StatelessWidget {
-  final List<Expense> expenses;
+  final Map<String, double> monthlyData;
   final int year;
 
   const ExpenseMonthlyChartWidget({
     super.key,
-    required this.expenses,
+    required this.monthlyData,
     required this.year,
   });
 
   @override
   Widget build(BuildContext context) {
-    final chartData = _getChartData(expenses, year);
-    final values = chartData.map((d) => d.amount).toList();
+    final values = List.generate(
+      12,
+      (index) =>
+          monthlyData['$year-${(index + 1).toString().padLeft(2, '0')}'] ?? 0,
+    );
 
     if (values.isEmpty || values.every((v) => v == 0)) {
-      return Container(
+      return sc.Card(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider),
-        ),
         child: const Center(
           child: Text(
             'لا توجد بيانات للعرض',
@@ -38,16 +36,11 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
 
     final maxY = _calculateMaxY(values);
 
-    return Container(
+    return sc.Card(
       padding: const EdgeInsets.only(
         bottom: 10,
         top: 10,
         right: 10
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +67,7 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
                       return BarTooltipItem(
                         NumberFormatter.format(rod.toY),
                         const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.onPrimary,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -97,7 +90,7 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
                             (index + 1).toString(),
                             style: const TextStyle(
                               color: AppColors.text,
-                              fontSize: 10,
+                              fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -116,7 +109,7 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
                           formatted,
                           style: const TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 10,
+                            fontSize: 12,
                           ),
                         );
                       },
@@ -165,26 +158,6 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
     );
   }
 
-  List<ChartData> _getChartData(List<Expense> expenses, int year) {
-    final Map<int, double> groupedData = {};
-
-    // Initialize all 12 months with 0
-    for (int i = 1; i <= 12; i++) {
-      groupedData[i] = 0;
-    }
-
-    // Sum up expense amounts for selected year
-    for (final expense in expenses) {
-      if (expense.expenseDate.year == year) {
-        final month = expense.expenseDate.month;
-        groupedData[month] = (groupedData[month] ?? 0) + expense.amount;
-      }
-    }
-
-    // Convert to chart data with month numbers
-    return groupedData.entries.map((e) => ChartData(e.key.toString(), e.value)).toList();
-  }
-
   double _calculateMaxY(List<double> values) {
     if (values.isEmpty) return 100;
     final max = values.reduce((a, b) => a > b ? a : b);
@@ -200,11 +173,4 @@ class ExpenseMonthlyChartWidget extends StatelessWidget {
     }
     return value.toStringAsFixed(0);
   }
-}
-
-class ChartData {
-  final String label;
-  final double amount;
-
-  ChartData(this.label, this.amount);
 }

@@ -5,10 +5,12 @@ import 'package:erad/features/invoices/data/models/payment_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/utils/app_utils.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../bloc/invoice_cubit.dart';
 import '../../../../core/services/invoice_pdf_service.dart';
+import 'package:erad/core/constants/app_constants.dart';
 
 class InvoiceDetailsWidget extends StatelessWidget {
   final dynamic invoice; // Can be SalesInvoice or PurchaseInvoice
@@ -17,31 +19,36 @@ class InvoiceDetailsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(invoice.invoiceNumber),
-        actions: [
-          IconButton(
-            onPressed: () => _editInvoice(context),
-            icon: const Icon(Icons.edit),
-          ),
-          IconButton(
-            onPressed: () => _deleteInvoice(context),
-            icon: const Icon(Icons.delete),
-          ),
-          IconButton(
-            onPressed: () => _printInvoice(context),
-            icon: const Icon(Icons.print),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
+    return sc.Scaffold(
+      headers: [
+        sc.AppBar(
+          title: Text(invoice.invoiceNumber),
+          trailing: [
+            sc.IconButton(
+              variance: sc.ButtonStyle.ghost(),
+              icon: const Icon(sc.LucideIcons.pencil),
+              onPressed: () => _editInvoice(context),
+            ),
+            sc.IconButton(
+              variance: sc.ButtonStyle.ghost(),
+              icon: const Icon(sc.LucideIcons.trash2),
+              onPressed: () => _deleteInvoice(context),
+            ),
+            sc.IconButton(
+              variance: sc.ButtonStyle.ghost(),
+              icon: const Icon(sc.LucideIcons.printer),
+              onPressed: () => _printInvoice(context),
+            ),
+          ],
+        ),
+      ],
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Invoice Header Card
-            Card(
+            sc.Card(padding: EdgeInsets.zero, 
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -63,8 +70,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: _getStatusColor().withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
+                            color: _getStatusColor().withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             _getStatusText(),
@@ -81,8 +88,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: _getPaymentStatusColor().withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(16),
+                            color: _getPaymentStatusColor().withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             _getPaymentStatusText(),
@@ -99,11 +106,11 @@ class InvoiceDetailsWidget extends StatelessWidget {
                       children: [
                         Icon(
                           invoice is SalesInvoice
-                              ? Icons.receipt_long
-                              : Icons.shopping_cart,
+                              ? sc.LucideIcons.receiptText
+                              : sc.LucideIcons.shoppingCart,
                           color: invoice is SalesInvoice
-                              ? Colors.green
-                              : Colors.orange,
+                              ? AppColors.primary
+                              : AppColors.warning,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -122,7 +129,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Customer/Supplier Information Card
-            Card(
+            sc.Card(padding: EdgeInsets.zero, 
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -162,7 +169,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Items Card
-            Card(
+            sc.Card(padding: EdgeInsets.zero, 
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -177,7 +184,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Table(
-                      border: TableBorder.all(color: Colors.grey.shade300),
+                      border: TableBorder.all(color: AppColors.border),
                       columnWidths: const {
                         0: FlexColumnWidth(3),
                         1: FlexColumnWidth(1),
@@ -189,7 +196,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         // Header
                         TableRow(
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
+                            color: AppColors.border,
                           ),
                           children: const [
                             Padding(
@@ -280,7 +287,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Totals Card
-            Card(
+            sc.Card(padding: EdgeInsets.zero, 
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -319,7 +326,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
 
             // Notes and Terms Card
             if (invoice.notes != null || invoice.terms != null)
-              Card(
+              sc.Card(padding: EdgeInsets.zero, 
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -357,7 +364,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Invoice Status Actions Card
-            Card(
+            sc.Card(padding: EdgeInsets.zero, 
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -375,31 +382,42 @@ class InvoiceDetailsWidget extends StatelessWidget {
                       spacing: 8,
                       children: [
                         if (invoice.status.name == 'draft') ...[
-                          ElevatedButton.icon(
+                          sc.Button(
+                            style: sc.ButtonStyle.primary(),
                             onPressed: () => _updateInvoiceStatus(context, 'sent'),
-                            icon: const Icon(Icons.send),
-                            label: const Text('إرسال'),
+                            leading: const Icon(sc.LucideIcons.send, size: 18),
+                            child: const Text('إرسال'),
                           ),
                         ],
                         if (invoice.status.name == 'sent') ...[
-                          ElevatedButton.icon(
+                          sc.Button(
+                            style: sc.ButtonStyle.primary(),
                             onPressed: () => _updateInvoiceStatus(context, 'paid'),
-                            icon: const Icon(Icons.check_circle),
-                            label: const Text('تحديد كمدفوعة'),
+                            leading: const Icon(
+                              sc.LucideIcons.circleCheck,
+                              size: 18,
+                            ),
+                            child: const Text('تحديد كمدفوعة'),
                           ),
                         ],
                         if (invoice.status.name == 'paid') ...[
-                          ElevatedButton.icon(
+                          sc.Button(
+                            style: sc.ButtonStyle.primary(),
                             onPressed: () => _updateInvoiceStatus(context, 'overdue'),
-                            icon: const Icon(Icons.warning),
-                            label: const Text('تأخير'),
+                            leading: const Icon(
+                              sc.LucideIcons.triangleAlert,
+                              size: 18,
+                            ),
+                            child: const Text('تأخير'),
                           ),
                         ],
                         if (invoice.status.name != 'cancelled') ...[
-                          OutlinedButton.icon(
-                            onPressed: () => _updateInvoiceStatus(context, 'cancelled'),
-                            icon: const Icon(Icons.cancel),
-                            label: const Text('إلغاء'),
+                          sc.Button(
+                            style: sc.ButtonStyle.outline(),
+                            onPressed: () =>
+                                _updateInvoiceStatus(context, 'cancelled'),
+                            leading: const Icon(sc.LucideIcons.circleX, size: 18),
+                            child: const Text('إلغاء'),
                           ),
                         ],
                       ],
@@ -410,7 +428,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             // Payment Status Actions Card
-            Card(
+            sc.Card(padding: EdgeInsets.zero, 
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -428,17 +446,24 @@ class InvoiceDetailsWidget extends StatelessWidget {
                       spacing: 8,
                       children: [
                         if (invoice.paymentStatus.name == 'debt') ...[
-                          ElevatedButton.icon(
-                            onPressed: () => _updatePaymentStatus(context, 'cash'),
-                            icon: const Icon(Icons.attach_money),
-                            label: const Text('تحديد كمدفوع نقدا'),
+                          sc.Button(
+                            style: sc.ButtonStyle.primary(),
+                            onPressed: () =>
+                                _updatePaymentStatus(context, 'cash'),
+                            leading: const Icon(
+                              sc.LucideIcons.banknote,
+                              size: 18,
+                            ),
+                            child: const Text('تحديد كمدفوع نقدا'),
                           ),
                         ],
                         if (invoice.paymentStatus.name == 'cash') ...[
-                          OutlinedButton.icon(
-                            onPressed: () => _updatePaymentStatus(context, 'debt'),
-                            icon: const Icon(Icons.money_off),
-                            label: const Text('تحديد كمديون'),
+                          sc.Button(
+                            style: sc.ButtonStyle.outline(),
+                            onPressed: () =>
+                                _updatePaymentStatus(context, 'debt'),
+                            leading: const Icon(sc.LucideIcons.clock, size: 18),
+                            child: const Text('تحديد كمديون'),
                           ),
                         ],
                       ],
@@ -491,7 +516,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontSize: isLarge ? 18 : 14,
-              color: isBold ? Theme.of(Get.context!).primaryColor : null,
+              color: isBold ? AppColors.primary : null,
             ),
           ),
         ],
@@ -541,12 +566,14 @@ class InvoiceDetailsWidget extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(dialogContext),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () async {
                       Navigator.pop(dialogContext);
 
@@ -558,7 +585,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                           child: AlertDialog(
                             content: Row(
                               children: [
-                                CircularProgressIndicator(),
+                                sc.CircularProgressIndicator(),
                                 SizedBox(width: 16),
                                 Text('جاري حذف الفاتورة...'),
                               ],
@@ -580,7 +607,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         }
                       }
                     },
-                    child: const Text('حذف', style: TextStyle(color: Colors.red)),
+                    child: const Text('حذف'),
                   ),
                 ],
               ),
@@ -633,9 +660,4 @@ class InvoiceDetailsWidget extends StatelessWidget {
       context.read<InvoiceCubit>().updatePurchaseInvoice(updatedInvoice);
     }
   }
-}
-
-// Extension to get context for theme access
-extension Get on Widget {
-  static BuildContext? context;
 }

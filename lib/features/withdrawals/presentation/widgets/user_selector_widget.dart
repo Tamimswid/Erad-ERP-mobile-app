@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../data/models/partner.dart';
 
@@ -76,14 +77,8 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(15),
+    return sc.Card(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -93,7 +88,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
               const Text(
                 'إضافة / اختيار مستخدم',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                   letterSpacing: 0.5,
@@ -131,7 +126,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
             decoration: InputDecoration(
               hintText: 'بحث...',
               prefixIcon: const Icon(
-                Icons.search,
+                sc.LucideIcons.search,
                 color: AppColors.textSecondary,
                 size: 18,
               ),
@@ -161,24 +156,16 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
   }
 
   Widget _buildAddButton() {
-    return ElevatedButton.icon(
+    return sc.Button(
+      style: sc.ButtonStyle.primary(),
       onPressed: widget.onAddNew,
-      icon: const Icon(Icons.add, size: 15),
-      label: const Text(
+      leading: const Icon(sc.LucideIcons.plus, size: 16),
+      child: const Text(
         'إضافة جديد',
         style: TextStyle(
-          fontSize: 13,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        elevation: 0,
       ),
     );
   }
@@ -200,7 +187,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
                 Text(
                   widget.selectedPartner!.name,
                   style: const TextStyle(
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.text,
                   ),
@@ -220,7 +207,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
             IconButton(
               onPressed: _clearSelection,
               icon: const Icon(
-                Icons.close,
+                sc.LucideIcons.x,
                 color: AppColors.textSecondary,
                 size: 18,
               ),
@@ -240,7 +227,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: AppColors.text.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -271,7 +258,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
                         Text(
                           partner.name,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
                             color: AppColors.text,
                           ),
@@ -281,7 +268,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
                         Text(
                           partner.phone ?? '-',
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -289,7 +276,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
                     ),
                   ),
                   const Icon(
-                    Icons.chevron_right,
+                    sc.LucideIcons.chevronRight,
                     color: AppColors.textSecondary,
                     size: 16,
                   ),

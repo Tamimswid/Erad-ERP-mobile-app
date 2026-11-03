@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../data/models/product.dart';
 import '../../../../core/constants/app_constants.dart';
 
@@ -18,32 +19,20 @@ class ProductCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-        border: Border.all(color: AppColors.divider),
-        boxShadow: AppConstants.cardShadow,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.cardPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildProductName(),
-                const SizedBox(height: AppConstants.spacingMd),
-                _buildPricingSection(),
-                const SizedBox(height: AppConstants.spacingMd),
-                _buildButtons(),
-              ],
-            ),
-          ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: sc.Card(
+        padding: const EdgeInsets.all(AppConstants.cardPadding),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildProductName(),
+            const SizedBox(height: AppConstants.spacingMd),
+            _buildPricingSection(),
+            const SizedBox(height: AppConstants.spacingMd),
+            _buildButtons(),
+          ],
         ),
       ),
     );
@@ -122,36 +111,20 @@ class ProductCardWidget extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton.icon(
+          child: sc.Button(
+            style: sc.ButtonStyle.secondary(),
             onPressed: () => onEdit(product),
-            icon: const Icon(Icons.edit_outlined, size: 16),
-            label: const Text('تعديل'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.surface,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusSm),
-              ),
-            ),
+            leading: const Icon(sc.LucideIcons.pencil, size: 16),
+            child: const Text('تعديل'),
           ),
         ),
         const SizedBox(width: AppConstants.spacing),
         Expanded(
-          child: ElevatedButton.icon(
+          child: sc.Button(
+            style: sc.ButtonStyle.destructive(),
             onPressed: () => onDelete(product.id),
-            icon: const Icon(Icons.delete_outline, size: 16),
-            label: const Text('حذف'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: AppColors.surface,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusSm),
-              ),
-            ),
+            leading: const Icon(sc.LucideIcons.trash2, size: 16),
+            child: const Text('حذف'),
           ),
         ),
       ],

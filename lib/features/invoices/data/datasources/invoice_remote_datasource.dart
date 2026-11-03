@@ -5,12 +5,31 @@ import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/utils/paged_result.dart';
 
 abstract class InvoiceRemoteDataSource {
   // جلب جميع فواتير البيع
   Future<List<SalesInvoice>> getSalesInvoices();
   // جلب جميع فواتير الشراء
   Future<List<PurchaseInvoice>> getPurchaseInvoices();
+  // جلب صفحة من فواتير البيع
+  Future<PagedResult<SalesInvoice>> getSalesInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  });
+  // جلب صفحة من فواتير الشراء
+  Future<PagedResult<PurchaseInvoice>> getPurchaseInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  });
   // دStream لفواتير البيع في الوقت الفعلي
   Stream<List<SalesInvoice>> watchSalesInvoices();
   // دStream لفواتير الشراء في الوقت الفعلي
@@ -92,6 +111,111 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
       return invoices;
     } catch (e) {
       log('ERROR: Failed to load purchase invoices: $e');
+      throw Exception('Failed to load purchase invoices: $e');
+    }
+  }
+
+  @override
+  Future<PagedResult<SalesInvoice>> getSalesInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      var query = _supabaseClient
+          .from('sales_invoices')
+          .select('*, customers!inner(name), sales_invoice_items(*)')
+          .eq('user_id', userId)
+          .isFilter('deleted_at', null)
+          .eq('customers.is_active', true);
+
+      if (status != null && status != 'all') {
+        query = query.eq('payment_status', status);
+      }
+      if (dateFrom != null) {
+        query = query.gte('invoice_date', dateFrom.toIso8601String());
+      }
+      if (dateTo != null) {
+        query = query.lte('invoice_date', dateTo.toIso8601String());
+      }
+      final term = search?.trim();
+      if (term != null && term.isNotEmpty) {
+        final safe = term.replaceAll(',', ' ');
+        query = query.or(
+          'invoice_number.ilike.%$safe%,customers.name.ilike.%$safe%',
+        );
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .order('id', ascending: false)
+          .range(offset, offset + limit);
+
+      final rows = response.map(_mapJsonToSalesInvoice).toList();
+      final hasMore = rows.length > limit;
+      return PagedResult(
+        items: hasMore ? rows.sublist(0, limit) : rows,
+        hasMore: hasMore,
+      );
+    } catch (e) {
+      throw Exception('Failed to load sales invoices: $e');
+    }
+  }
+
+  @override
+  Future<PagedResult<PurchaseInvoice>> getPurchaseInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      var query = _supabaseClient
+          .from('purchase_invoices')
+          .select('*, suppliers(name), purchase_invoice_items(*)')
+          .eq('user_id', userId)
+          .isFilter('deleted_at', null);
+
+      if (status != null && status != 'all') {
+        query = query.eq('payment_status', status);
+      }
+      if (dateFrom != null) {
+        query = query.gte('invoice_date', dateFrom.toIso8601String());
+      }
+      if (dateTo != null) {
+        query = query.lte('invoice_date', dateTo.toIso8601String());
+      }
+      final term = search?.trim();
+      if (term != null && term.isNotEmpty) {
+        final safe = term.replaceAll(',', ' ');
+        query = query.or(
+          'invoice_number.ilike.%$safe%,suppliers.name.ilike.%$safe%',
+        );
+      }
+
+      final response = await query
+          .order('created_at', ascending: false)
+          .order('id', ascending: false)
+          .range(offset, offset + limit);
+
+      final rows = response.map(_mapJsonToPurchaseInvoice).toList();
+      final hasMore = rows.length > limit;
+      return PagedResult(
+        items: hasMore ? rows.sublist(0, limit) : rows,
+        hasMore: hasMore,
+      );
+    } catch (e) {
       throw Exception('Failed to load purchase invoices: $e');
     }
   }

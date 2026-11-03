@@ -5,6 +5,7 @@ import '../../../customers/data/models/customer.dart';
 import '../../../customers/presentation/bloc/customer_cubit.dart';
 import '../../../suppliers/data/models/supplier.dart';
 import '../../../suppliers/presentation/bloc/supplier_cubit.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class CustomerSupplierSearchCard extends StatefulWidget {
   final String invoiceType;
@@ -181,7 +182,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -196,7 +197,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  widget.invoiceType == 'sale' ? Icons.person_outline : Icons.business_outlined,
+                  widget.invoiceType == 'sale' ? sc.LucideIcons.user : sc.LucideIcons.building2,
                   color: _primaryColor,
                   size: 24,
                 ),
@@ -232,7 +233,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.error_outline, color: AppColors.error),
+                  const Icon(sc.LucideIcons.circleAlert, color: AppColors.error),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -241,7 +242,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.refresh, size: 20),
+                    icon: const Icon(sc.LucideIcons.refreshCw, size: 20),
                     onPressed: _loadData,
                     color: AppColors.error,
                   ),
@@ -259,7 +260,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                 hintText: widget.invoiceType == 'sale'
                     ? 'اكتب اسم العميل أو الكود أو الهاتف...'
                     : 'اكتب اسم المورد أو الهاتف...',
-                prefixIcon: Icon(Icons.search, color: _primaryColor),
+                prefixIcon: Icon(sc.LucideIcons.search, color: _primaryColor),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: AppColors.border),
@@ -276,7 +277,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                 fillColor: AppColors.background,
                 suffixIcon: _selectedEntity != null
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(sc.LucideIcons.x),
                         onPressed: _clearSelection,
                       )
                     : null,
@@ -296,7 +297,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                 color: AppColors.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: AppColors.text.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -322,7 +323,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                       leading: CircleAvatar(
                         backgroundColor: _primaryColor.withValues(alpha: 0.15),
                         child: Icon(
-                          isCustomer ? Icons.person : Icons.business,
+                          isCustomer ? sc.LucideIcons.user : sc.LucideIcons.building2,
                           color: _primaryColor,
                           size: 20,
                         ),
@@ -352,7 +353,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                         ],
                       ),
                       trailing: isFirst
-                          ? Icon(Icons.keyboard_return, color: _primaryColor, size: 18)
+                          ? Icon(sc.LucideIcons.cornerDownLeft, color: _primaryColor, size: 18)
                           : null,
                       onTap: () => _onEntitySelected(entity),
                     ),
@@ -383,7 +384,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                   CircleAvatar(
                     backgroundColor: _primaryColor.withValues(alpha: 0.15),
                     child: Icon(
-                      widget.invoiceType == 'sale' ? Icons.person : Icons.business,
+                      widget.invoiceType == 'sale' ? sc.LucideIcons.user : sc.LucideIcons.building2,
                       color: _primaryColor,
                       size: 20,
                     ),
@@ -403,13 +404,13 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                         ),
                         Text(
                           '📱 ${_selectedEntity.phone ?? 'لا يوجد'}',
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.edit, size: 20),
+                    icon: const Icon(sc.LucideIcons.pencil, size: 20),
                     onPressed: () {
                       _clearSelection();
                     },
@@ -427,7 +428,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
               child: Center(
                 child: Column(
                   children: [
-                    Icon(Icons.search_off, size: 48, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                    Icon(sc.LucideIcons.search, size: 48, color: AppColors.textSecondary.withValues(alpha: 0.5)),
                     const SizedBox(height: 12),
                     Text(
                       'لا توجد نتائج',

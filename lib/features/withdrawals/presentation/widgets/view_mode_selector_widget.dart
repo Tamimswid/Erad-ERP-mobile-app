@@ -39,21 +39,21 @@ class ViewModeSelectorWidget extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(7),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFEFF6FF) : AppColors.surface,
+          color: isActive ? AppColors.muted : AppColors.surface,
           border: Border.all(
             color: isActive ? AppColors.primary : AppColors.divider,
             width: isActive ? 2 : 1,
           ),
-          borderRadius: BorderRadius.circular(7),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
             color: isActive ? AppColors.primary : AppColors.textSecondary,
           ),

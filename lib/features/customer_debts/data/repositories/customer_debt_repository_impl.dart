@@ -5,6 +5,7 @@ import 'package:dartz/dartz.dart';
 import 'package:erad/core/errors/failures.dart';
 import 'package:erad/core/network/network_info.dart';
 import 'package:erad/core/services/user_service.dart';
+import 'package:erad/core/utils/paged_result.dart';
 import 'package:erad/features/customer_debts/data/datasource/customer_debt_remote_datasource.dart';
 import 'package:erad/features/customer_debts/data/datasource/customer_debt_local_datasource.dart';
 import 'package:erad/features/customer_debts/data/models/customer_debt_model.dart';
@@ -18,72 +19,38 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
   final NetworkInfo networkInfo;
   StreamSubscription<bool>? _connectionSubscription;
 
-  CustomerDebtRepositoryImpl(this.remoteDataSource, this.localDataSource, this.networkInfo) {
-    _connectionSubscription = networkInfo.connectionStream.listen((isConnected) {
+  CustomerDebtRepositoryImpl(
+    this.remoteDataSource,
+    this.localDataSource,
+    this.networkInfo,
+  ) {
+    _connectionSubscription = networkInfo.connectionStream.listen((
+      isConnected,
+    ) {
       dev.log('CustomerDebtRepo: connection changed -> $isConnected');
       if (isConnected) {
-        dev.log('CustomerDebtRepo: Connection restored, syncing pending payments...');
+        dev.log(
+          'CustomerDebtRepo: Connection restored, syncing pending payments...',
+        );
         syncPendingPayments();
       }
     });
   }
 
   @override
-  Future<Either<Failure, List<CustomerDebtModel>>> getCustomerDebts() async {
+  Future<Either<Failure, PagedResult<CustomerDebtModel>>> getCustomerDebtsPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final debts = await remoteDataSource.getCustomerDebts();
-        final userId = await UserService.getUserId();
-        if (userId != null) {
-          await localDataSource.cacheCustomerDebts(userId, debts);
-        }
-        return Right(debts);
-      } catch (e) {
-        return Left(exceptionToFailure(e));
-      }
-    } else {
-      try {
-        final userId = await UserService.getUserId();
-        if (userId == null) {
-          dev.log('getCustomerDebts offline: userId null');
-          return Left(CacheFailure.notFound());
-        }
-        final cached = await localDataSource.getCachedCustomerDebts(userId);
-        dev.log('getCustomerDebts offline: found ${cached.length} cached debts');
-        if (cached.isNotEmpty) return Right(cached);
-        dev.log('getCustomerDebts offline: cache empty');
-        return Left(NetworkFailure.noConnection());
-      } catch (e) {
-        dev.log('getCustomerDebts offline error: $e');
-        return Left(NetworkFailure.noConnection());
-      }
-    }
-  }
-
-  @override
-  Future<Either<Failure, CustomerDebtTotalsModel>> getCustomerDebtTotals() async {
-    if (await networkInfo.isConnected) {
-      try {
-        final totals = await remoteDataSource.getCustomerDebtTotals();
-        return Right(totals);
-      } catch (e) {
-        return Left(exceptionToFailure(e));
-      }
-    } else {
-      return Left(NetworkFailure.noConnection());
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<CustomerDebtModel>>> searchCustomerDebts(String query) async {
-    if (await networkInfo.isConnected) {
-      try {
-        final debts = await remoteDataSource.searchCustomerDebts(query);
-        final userId = await UserService.getUserId();
-        if (userId != null) {
-          await localDataSource.cacheCustomerDebts(userId, debts);
-        }
-        return Right(debts);
+        final page = await remoteDataSource.getCustomerDebtsPage(
+          offset: offset,
+          limit: limit,
+          search: search,
+        );
+        return Right(page);
       } catch (e) {
         return Left(exceptionToFailure(e));
       }
@@ -92,13 +59,86 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
         final userId = await UserService.getUserId();
         if (userId == null) return Left(CacheFailure.notFound());
         final cached = await localDataSource.getCachedCustomerDebts(userId);
-        final q = query.toLowerCase();
-        final filtered = cached.where((d) =>
-          d.name.toLowerCase().contains(q) ||
-          (d.phone != null && d.phone!.contains(query)),
-        ).toList();
-        if (filtered.isNotEmpty) return Right(filtered);
+        if (cached.isEmpty) return Left(NetworkFailure.noConnection());
+        final query = (search ?? '').trim().toLowerCase();
+        final filtered = query.isEmpty
+            ? List<CustomerDebtModel>.from(cached)
+            : cached
+                  .where((d) => d.name.toLowerCase().contains(query))
+                  .toList();
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        return Right(_slice(filtered, offset, limit));
+      } catch (e) {
+        dev.log('getCustomerDebtsPage offline error: $e');
         return Left(NetworkFailure.noConnection());
+      }
+    }
+  }
+
+  @override
+  Future<Either<Failure, int>> getCustomerDebtCount({String? search}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final count = await remoteDataSource.getCustomerDebtCount(
+          search: search,
+        );
+        return Right(count);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      try {
+        final userId = await UserService.getUserId();
+        if (userId == null) return Left(CacheFailure.notFound());
+        final cached = await localDataSource.getCachedCustomerDebts(userId);
+        if (cached.isEmpty) return Left(NetworkFailure.noConnection());
+        final query = (search ?? '').trim().toLowerCase();
+        final count = query.isEmpty
+            ? cached.length
+            : cached.where((d) => d.name.toLowerCase().contains(query)).length;
+        return Right(count);
+      } catch (_) {
+        return Left(NetworkFailure.noConnection());
+      }
+    }
+  }
+
+  PagedResult<CustomerDebtModel> _slice(
+    List<CustomerDebtModel> items,
+    int offset,
+    int limit,
+  ) {
+    final start = offset.clamp(0, items.length);
+    final end = (start + limit).clamp(0, items.length);
+    return PagedResult(
+      items: items.sublist(start, end),
+      hasMore: end < items.length,
+    );
+  }
+
+  @override
+  Future<Either<Failure, CustomerDebtTotalsModel>>
+  getCustomerDebtTotals() async {
+    if (await networkInfo.isConnected) {
+      try {
+        final totals = await remoteDataSource.getCustomerDebtTotals();
+        return Right(totals);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      try {
+        final userId = await UserService.getUserId();
+        if (userId == null) return Left(CacheFailure.notFound());
+        final cached = await localDataSource.getCachedCustomerDebts(userId);
+        if (cached.isEmpty) return Left(NetworkFailure.noConnection());
+        return Right(
+          CustomerDebtTotalsModel(
+            totalDebtAll: cached.fold(0.0, (s, d) => s + d.remainingDebt),
+            totalPaidAll: cached.fold(0.0, (s, d) => s + d.totalPaid),
+            totalInvoicesAll: cached.fold(0.0, (s, d) => s + d.totalInvoices),
+          ),
+        );
       } catch (_) {
         return Left(NetworkFailure.noConnection());
       }
@@ -106,10 +146,20 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
   }
 
   @override
-  Future<Either<Failure, void>> addPayment(String customerId, double amount, String? note, String paymentDate) async {
+  Future<Either<Failure, void>> addPayment(
+    String customerId,
+    double amount,
+    String? note,
+    String paymentDate,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
-        await remoteDataSource.addPayment(customerId, amount, note, paymentDate);
+        await remoteDataSource.addPayment(
+          customerId,
+          amount,
+          note,
+          paymentDate,
+        );
         await syncPendingPayments();
         return const Right(null);
       } on Failure catch (failure) {
@@ -125,7 +175,9 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
           dev.log('addPayment offline: userId null');
           return Left(CacheFailure.notFound());
         }
-        dev.log('addPayment offline: queuing for userId=$userId customerId=$customerId amount=$amount');
+        dev.log(
+          'addPayment offline: queuing for userId=$userId customerId=$customerId amount=$amount',
+        );
         await localDataSource.queuePayment({
           'id': 'pending_${DateTime.now().millisecondsSinceEpoch}',
           'user_id': userId,
@@ -135,7 +187,11 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
           'payment_date': paymentDate,
           'created_at': DateTime.now().toIso8601String(),
         });
-        await localDataSource.updateDebtAfterPayment(userId, customerId, amount);
+        await localDataSource.updateDebtAfterPayment(
+          userId,
+          customerId,
+          amount,
+        );
         await localDataSource.addPaymentToLocalCache(userId, customerId, {
           'id': 'pending_${DateTime.now().millisecondsSinceEpoch}',
           'user_id': userId,
@@ -168,7 +224,9 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
       dev.log('syncPendingPayments: found ${pending.length} pending payments');
       for (final payment in pending) {
         try {
-          dev.log('syncPendingPayments: sending payment ${payment['id']} for customer ${payment['customer_id']} amount ${payment['amount']}');
+          dev.log(
+            'syncPendingPayments: sending payment ${payment['id']} for customer ${payment['customer_id']} amount ${payment['amount']}',
+          );
           await remoteDataSource.addPayment(
             payment['customer_id'] as String,
             (payment['amount'] as num).toDouble(),
@@ -176,7 +234,9 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
             payment['payment_date'] as String,
           );
           await localDataSource.deletePendingPayment(payment['id'] as String);
-          dev.log('syncPendingPayments: payment ${payment['id']} synced and deleted');
+          dev.log(
+            'syncPendingPayments: payment ${payment['id']} synced and deleted',
+          );
         } catch (e) {
           dev.log('syncPendingPayments: failed for ${payment['id']}: $e');
           break;
@@ -189,7 +249,9 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
   }
 
   @override
-  Future<Either<Failure, CustomerDebtModel>> getCustomerDebt(String customerId) async {
+  Future<Either<Failure, CustomerDebtModel>> getCustomerDebt(
+    String customerId,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final debt = await remoteDataSource.getCustomerDebt(customerId);
@@ -212,13 +274,19 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
   }
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getCustomerInvoices(String customerId) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getCustomerInvoices(
+    String customerId,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final invoices = await remoteDataSource.getCustomerInvoices(customerId);
         final userId = await UserService.getUserId();
         if (userId != null) {
-          await localDataSource.cacheCustomerInvoices(userId, customerId, invoices);
+          await localDataSource.cacheCustomerInvoices(
+            userId,
+            customerId,
+            invoices,
+          );
         }
         return Right(invoices);
       } catch (e) {
@@ -228,7 +296,10 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
       try {
         final userId = await UserService.getUserId();
         if (userId == null) return Left(CacheFailure.notFound());
-        final cached = await localDataSource.getCachedCustomerInvoices(userId, customerId);
+        final cached = await localDataSource.getCachedCustomerInvoices(
+          userId,
+          customerId,
+        );
         if (cached.isNotEmpty) return Right(cached);
         return const Right([]);
       } catch (_) {
@@ -238,13 +309,19 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
   }
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getCustomerPayments(String customerId) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getCustomerPayments(
+    String customerId,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final payments = await remoteDataSource.getCustomerPayments(customerId);
         final userId = await UserService.getUserId();
         if (userId != null) {
-          await localDataSource.cacheCustomerPayments(userId, customerId, payments);
+          await localDataSource.cacheCustomerPayments(
+            userId,
+            customerId,
+            payments,
+          );
         }
         return Right(payments);
       } catch (e) {
@@ -254,7 +331,10 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
       try {
         final userId = await UserService.getUserId();
         if (userId == null) return Left(CacheFailure.notFound());
-        final cached = await localDataSource.getCachedCustomerPayments(userId, customerId);
+        final cached = await localDataSource.getCachedCustomerPayments(
+          userId,
+          customerId,
+        );
         if (cached.isNotEmpty) return Right(cached);
         return const Right([]);
       } catch (_) {
@@ -263,9 +343,91 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, PagedResult<Map<String, dynamic>>>>
+  getCustomerInvoicesPage(
+    String customerId, {
+    required int offset,
+    int limit = 10,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final page = await remoteDataSource.getCustomerInvoicesPage(
+          customerId,
+          offset: offset,
+          limit: limit,
+        );
+        return Right(page);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
+  @override
+  Future<Either<Failure, PagedResult<Map<String, dynamic>>>>
+  getCustomerPaymentsPage(
+    String customerId, {
+    required int offset,
+    int limit = 10,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final page = await remoteDataSource.getCustomerPaymentsPage(
+          customerId,
+          offset: offset,
+          limit: limit,
+        );
+        return Right(page);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
+  @override
+  Future<Either<Failure, double>> getCustomerInvoiceTotal(
+    String customerId,
+  ) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final total = await remoteDataSource.getCustomerInvoiceTotal(
+          customerId,
+        );
+        return Right(total);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
+  @override
+  Future<Either<Failure, double>> getCustomerPaymentTotal(
+    String customerId,
+  ) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final total = await remoteDataSource.getCustomerPaymentTotal(
+          customerId,
+        );
+        return Right(total);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
   // حذف دفعة مع التحقق من الاتصال
   @override
-  Future<Either<Failure, void>> deletePayment(String paymentId, String customerId, double amount) async {
+  Future<Either<Failure, void>> deletePayment(
+    String paymentId,
+    String customerId,
+    double amount,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         await remoteDataSource.deletePayment(paymentId, customerId, amount);
@@ -278,14 +440,5 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
     } else {
       return Left(NetworkFailure.noConnection());
     }
-  }
-
-  @override
-  Stream<Either<Failure, List<CustomerDebtModel>>> watchCustomerDebts() {
-    return remoteDataSource.watchCustomerDebts().map(
-      (debts) => Right<Failure, List<CustomerDebtModel>>(debts),
-    ).handleError(
-      (_) => null,
-    );
   }
 }

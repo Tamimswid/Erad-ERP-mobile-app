@@ -3,6 +3,7 @@ import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/widgets/common_widgets.dart';
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/payment_status.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceInfoGridWidget extends StatelessWidget {
   final String invoiceDate;
@@ -30,14 +31,14 @@ class InvoiceInfoGridWidget extends StatelessWidget {
       children: [
         // Date Info
         _buildInfoItem(
-          icon: Icons.calendar_today,
+          icon: sc.LucideIcons.calendar,
           label: 'Invoice Date',
           value: invoiceDate,
         ),
 
         // Customer Info
         _buildInfoItem(
-          icon: Icons.person,
+          icon: sc.LucideIcons.user,
           label: 'Customer Name',
           value: customerName,
         ),
@@ -176,16 +177,16 @@ class InvoiceInfoGridWidget extends StatelessWidget {
       case 'pending':
       case 'draft':
       case 'sent':
-        return Icons.access_time_outlined;
+        return sc.LucideIcons.clock;
       case 'paid':
       case 'completed':
-        return Icons.check_circle_outline;
+        return sc.LucideIcons.circleCheck;
       case 'cancelled':
-        return Icons.cancel_outlined;
+        return sc.LucideIcons.circleX;
       case 'overdue':
-        return Icons.warning_outlined;
+        return sc.LucideIcons.triangleAlert;
       default:
-        return Icons.access_time_outlined;
+        return sc.LucideIcons.clock;
     }
   }
 
@@ -202,16 +203,16 @@ class InvoiceInfoGridWidget extends StatelessWidget {
       case 'pending':
       case 'draft':
       case 'sent':
-        return Icons.access_time_outlined;
+        return sc.LucideIcons.clock;
       case 'paid':
       case 'completed':
-        return Icons.check_circle_outline;
+        return sc.LucideIcons.circleCheck;
       case 'cancelled':
-        return Icons.cancel_outlined;
+        return sc.LucideIcons.circleX;
       case 'overdue':
-        return Icons.warning_outlined;
+        return sc.LucideIcons.triangleAlert;
       default:
-        return Icons.access_time_outlined;
+        return sc.LucideIcons.clock;
     }
   }
 

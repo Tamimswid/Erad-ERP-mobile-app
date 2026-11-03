@@ -1,8 +1,5 @@
-import 'dart:async';
 import 'dart:developer';
 
-import 'package:dartz/dartz.dart';
-import 'package:erad/core/errors/failures.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_totals_model.dart';
 import 'package:erad/features/suppliers_debts/data/repositories/supplier_debt_repository.dart';
@@ -24,25 +21,44 @@ class SupplierDebtLoaded extends SupplierDebtState {
   final List<SupplierDebtModel> debts;
   final List<SupplierDebtModel> filteredDebts;
   final SupplierDebtTotalsModel totals;
+  final int debtorCount;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const SupplierDebtLoaded({
     required this.debts,
     required this.filteredDebts,
     this.totals = const SupplierDebtTotalsModel(),
+    this.debtorCount = 0,
+    this.hasMore = false,
+    this.isLoadingMore = false,
   });
 
   @override
-  List<Object?> get props => [debts, filteredDebts, totals];
+  List<Object?> get props => [
+    debts,
+    filteredDebts,
+    totals,
+    debtorCount,
+    hasMore,
+    isLoadingMore,
+  ];
 
   SupplierDebtLoaded copyWith({
     List<SupplierDebtModel>? debts,
     List<SupplierDebtModel>? filteredDebts,
     SupplierDebtTotalsModel? totals,
+    int? debtorCount,
+    bool? hasMore,
+    bool? isLoadingMore,
   }) {
     return SupplierDebtLoaded(
       debts: debts ?? this.debts,
       filteredDebts: filteredDebts ?? this.filteredDebts,
       totals: totals ?? this.totals,
+      debtorCount: debtorCount ?? this.debtorCount,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 }
@@ -77,76 +93,94 @@ class SupplierPaymentSuccess extends SupplierDebtState {
 }
 
 class SupplierDebtCubit extends Cubit<SupplierDebtState> {
+  static const int pageSize = 10;
+
   final SupplierDebtRepository repository;
-  StreamSubscription<Either<Failure, List<SupplierDebtModel>>>? _debtsSubscription;
 
-  SupplierDebtCubit({required this.repository}) : super(SupplierDebtInitial()) {
-    _startRealtimeListener();
-  }
+  SupplierDebtCubit({required this.repository}) : super(SupplierDebtInitial());
 
-  List<SupplierDebtModel> _allDebts = [];
-  List<SupplierDebtModel> _filteredDebts = [];
+  final List<SupplierDebtModel> _debts = [];
   SupplierDebtTotalsModel _totals = const SupplierDebtTotalsModel();
+  int _offset = 0;
+  int _requestId = 0;
+  int _debtorCount = 0;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
   String _searchQuery = '';
 
-  void _startRealtimeListener() {
-    log('SupplierDebtCubit: Starting real-time listener...');
-    _debtsSubscription = repository.watchSupplierDebts().listen(
-      (result) {
-        if (isClosed) return;
-        result.fold(
-          (failure) {
-            log('SupplierDebtCubit: Stream error - ${failure.message}');
-            emit(SupplierDebtError(failure.message));
-          },
-          (debts) {
-            log('SupplierDebtCubit: Received ${debts.length} suppliers with debt');
-            _allDebts = debts;
-            _applySearchFilter();
-          },
-        );
-      },
-      onError: (error) {
-        log('SupplierDebtCubit: Stream error - $error');
-        if (!isClosed) {
-          emit(SupplierDebtError('Stream error: $error'));
-        }
-      },
+  Future<void> getSupplierDebts() => loadFirstPage();
+
+  Future<void> loadFirstPage({bool showLoading = true}) async {
+    final requestId = ++_requestId;
+    _offset = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _debts.clear();
+
+    if (showLoading && !isClosed) emit(SupplierDebtLoading());
+
+    final result = await repository.getSupplierDebtsPage(
+      offset: 0,
+      limit: pageSize,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
     );
-  }
+    if (isClosed || requestId != _requestId) return;
 
-  void _applySearchFilter() {
-    if (_searchQuery.isEmpty) {
-      _filteredDebts = _allDebts;
-    } else {
-      _filteredDebts = _allDebts.where((debt) {
-        return debt.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               (debt.phone?.contains(_searchQuery) ?? false);
-      }).toList();
-    }
+    result.fold((failure) => emit(SupplierDebtError(failure.message)), (page) {
+      _debts.addAll(page.items);
+      _offset = page.items.length;
+      _hasMore = page.hasMore;
+      _emitLoaded();
+    });
 
-    if (!isClosed) {
-      emit(SupplierDebtLoaded(
-        debts: _allDebts,
-        filteredDebts: _filteredDebts,
-        totals: _totals,
-      ));
-    }
-  }
-
-  Future<void> getSupplierDebts() async {
-    if (isClosed) return;
-    emit(SupplierDebtLoading());
-    final result = await repository.getSupplierDebts();
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(SupplierDebtError(failure.message)),
-      (debts) {
-        _allDebts = debts;
-        _applySearchFilter();
-      },
-    );
+    if (isClosed || requestId != _requestId) return;
     await _loadTotals();
+    if (isClosed || requestId != _requestId) return;
+    await _loadDebtorCount(requestId);
+  }
+
+  Future<void> loadMore() async {
+    if (isClosed || !_hasMore || _isLoadingMore) return;
+
+    final requestId = _requestId;
+    _isLoadingMore = true;
+    _emitLoaded();
+
+    final result = await repository.getSupplierDebtsPage(
+      offset: _offset,
+      limit: pageSize,
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+    );
+    if (isClosed || requestId != _requestId) return;
+
+    result.fold(
+      (_) {
+        _isLoadingMore = false;
+        _hasMore = false;
+        _emitLoaded();
+      },
+      (page) {
+        _debts.addAll(page.items);
+        _offset += page.items.length;
+        _hasMore = page.hasMore;
+        _isLoadingMore = false;
+        _emitLoaded();
+      },
+    );
+  }
+
+  void _emitLoaded() {
+    if (isClosed) return;
+    emit(
+      SupplierDebtLoaded(
+        debts: List<SupplierDebtModel>.unmodifiable(_debts),
+        filteredDebts: List<SupplierDebtModel>.unmodifiable(_debts),
+        totals: _totals,
+        debtorCount: _debtorCount,
+        hasMore: _hasMore,
+        isLoadingMore: _isLoadingMore,
+      ),
+    );
   }
 
   Future<void> _loadTotals() async {
@@ -155,61 +189,62 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
     result.fold(
       (failure) {
         log('Failed to load supplier totals: ${failure.message}');
-        _totals = SupplierDebtTotalsModel(
-          totalDebtAll:
-              _filteredDebts.fold(0.0, (sum, d) => sum + d.remainingDebt),
-          totalInvoicesAll:
-              _filteredDebts.fold(0.0, (sum, d) => sum + d.totalInvoices),
-          totalPaidAll:
-              _filteredDebts.fold(0.0, (sum, d) => sum + d.totalPaid),
-        );
       },
       (totals) {
         log('Supplier totals loaded');
         _totals = totals;
+        if (state is SupplierDebtLoaded) {
+          emit((state as SupplierDebtLoaded).copyWith(totals: _totals));
+        }
       },
     );
-    if (state is SupplierDebtLoaded) {
-      emit((state as SupplierDebtLoaded).copyWith(totals: _totals));
-    }
   }
 
-  Future<void> searchSupplierDebts(String query) async {
-    _searchQuery = query.trim();
-    
-    if (_searchQuery.isEmpty) {
-      _filteredDebts = _allDebts;
-    } else {
-      _filteredDebts = _allDebts.where((debt) {
-        return debt.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               (debt.phone?.contains(_searchQuery) ?? false);
-      }).toList();
-    }
-
-    if (isClosed) return;
-    if (state is SupplierDebtLoaded) {
-      final currentState = state as SupplierDebtLoaded;
-      emit(currentState.copyWith(filteredDebts: _filteredDebts));
-    } else {
-      emit(SupplierDebtLoaded(debts: _allDebts, filteredDebts: _filteredDebts));
-    }
+  Future<void> _loadDebtorCount(int requestId) async {
+    final result = await repository.getSupplierDebtCount(
+      search: _searchQuery.isEmpty ? null : _searchQuery,
+    );
+    if (isClosed || requestId != _requestId) return;
+    result.fold((_) {}, (count) {
+      _debtorCount = count;
+      if (state is SupplierDebtLoaded) {
+        emit((state as SupplierDebtLoaded).copyWith(debtorCount: count));
+      }
+    });
   }
 
-  Future<void> addPayment(String supplierId, double amount, String? note, String paymentDate) async {
+  void searchSupplierDebts(String query) {
+    final value = query.trim();
+    if (value == _searchQuery) return;
+    _searchQuery = value;
+    loadFirstPage(showLoading: false);
+  }
+
+  Future<void> addPayment(
+    String supplierId,
+    double amount,
+    String? note,
+    String paymentDate,
+  ) async {
     if (isClosed) return;
     emit(SupplierPaymentProcessing());
 
-    final result = await repository.addPayment(supplierId, amount, note, paymentDate);
-    if (isClosed) return;
-    result.fold(
-      (failure) => emit(SupplierDebtError(failure.message)),
-      (_) async {
-        if (!isClosed) {
-          emit(SupplierPaymentSuccess('تم تسجيل الدفعة: ${amount.toStringAsFixed(2)}'));
-        }
-        await getSupplierDebts();
-      },
+    final result = await repository.addPayment(
+      supplierId,
+      amount,
+      note,
+      paymentDate,
     );
+    if (isClosed) return;
+    result.fold((failure) => emit(SupplierDebtError(failure.message)), (_) {
+      if (!isClosed) {
+        emit(
+          SupplierPaymentSuccess(
+            'تم تسجيل الدفعة: ${amount.toStringAsFixed(2)}',
+          ),
+        );
+      }
+    });
   }
 
   void clearError() {
@@ -223,17 +258,11 @@ class SupplierDebtCubit extends Cubit<SupplierDebtState> {
 
   double get totalPaid => _totals.totalPaidAll;
 
-  int get debtorCount {
-    return _filteredDebts.length;
-  }
+  int get debtorCount => _debtorCount;
 
-  List<SupplierDebtModel> get debtsWithDebt {
-    return _filteredDebts;
-  }
+  List<SupplierDebtModel> get debtsWithDebt => _debts;
 
-  @override
-  Future<void> close() {
-    _debtsSubscription?.cancel();
-    return super.close();
-  }
+  bool get hasMore => _hasMore;
+
+  bool get isLoadingMore => _isLoadingMore;
 }

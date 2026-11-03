@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/dashboard_cubit.dart';
 
@@ -14,13 +15,8 @@ class DateFilterSection extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return Container(
+        return sc.Card(
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.divider),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -73,7 +69,7 @@ class DateFilterSection extends StatelessWidget {
               value: state.selectedYear,
               isExpanded: true,
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              icon: const Icon(Icons.keyboard_arrow_down),
+              icon: const Icon(sc.LucideIcons.chevronDown),
               items: availableYears.map((year) {
                 return DropdownMenuItem(
                   value: year,
@@ -150,10 +146,10 @@ class DateFilterSection extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.calendar_today_outlined,
+            const Icon(
+              sc.LucideIcons.calendar,
               size: 16,
-              color: date != null ? AppColors.primary : AppColors.textSecondary,
+              color: AppColors.textSecondary,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -162,7 +158,7 @@ class DateFilterSection extends StatelessWidget {
                     ? '${date.day}/${date.month}/${date.year}'
                     : 'mm/dd/yyyy',
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: date != null ? AppColors.text : AppColors.textSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
@@ -189,8 +185,8 @@ class DateFilterSection extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             appBarTheme: const AppBarTheme(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.background,
+              foregroundColor: AppColors.text,
             ),
           ),
           child: child!,

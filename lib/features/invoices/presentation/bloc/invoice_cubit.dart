@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
-import 'package:dartz/dartz.dart';
-import 'package:erad/core/errors/failures.dart';
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
@@ -16,13 +13,15 @@ import 'package:equatable/equatable.dart';
 part 'invoice_state.dart';
 
 class InvoiceCubit extends Cubit<InvoiceState> {
+  static const int pageSize = 10;
+
   final InvoiceRepository _repository;
-  List<SalesInvoice> _fullSalesInvoices = [];
-  List<PurchaseInvoice> _fullPurchaseInvoices = [];
-  
-  // Real-time stream subscriptions
-  StreamSubscription<Either<Failure, List<SalesInvoice>>>? _salesSubscription;
-  StreamSubscription<Either<Failure, List<PurchaseInvoice>>>? _purchaseSubscription;
+  final List<dynamic> _pagedInvoices = [];
+  int _offset = 0;
+  int _requestId = 0;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+  Timer? _searchDebounce;
 
   // New filtering state
   String _selectedType = 'sale';
@@ -78,101 +77,143 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     // Initialize with default values for new invoice creation
     _invoiceDate = DateTime.now();
     _dueDate = DateTime.now();
-    // Start real-time listeners
-    _startRealtimeListeners();
-  }
-  
-  void _startRealtimeListeners() {
-    log('InvoiceCubit: Starting realtime listeners...');
-    
-    // Listen to sales invoices stream
-    _salesSubscription = _repository.watchSalesInvoices().listen(
-      (result) {
-        log('InvoiceCubit: Received sales invoices from stream');
-        if (isClosed) return;
-        result.fold(
-          (failure) {
-            log('InvoiceCubit: Sales stream error - ${failure.message}');
-            emit(InvoiceError(failure.message));
-          },
-          (salesInvoices) {
-            log('InvoiceCubit: Loaded ${salesInvoices.length} sales invoices from stream');
-            _fullSalesInvoices = salesInvoices;
-            // Always apply filters to update UI, even with empty lists
-            _applyFilters();
-          },
-        );
-      },
-      onError: (error) {
-        log('InvoiceCubit: Sales stream error - $error');
-        if (!isClosed) {
-          emit(InvoiceError('Sales stream error: $error'));
-        }
-      },
-    );
-    
-    // Listen to purchase invoices stream
-    _purchaseSubscription = _repository.watchPurchaseInvoices().listen(
-      (result) {
-        log('InvoiceCubit: Received purchase invoices from stream');
-        if (isClosed) return;
-        result.fold(
-          (failure) {
-            log('InvoiceCubit: Purchase stream error - ${failure.message}');
-            emit(InvoiceError(failure.message));
-          },
-          (purchaseInvoices) {
-            log('InvoiceCubit: Loaded ${purchaseInvoices.length} purchase invoices from stream');
-            _fullPurchaseInvoices = purchaseInvoices;
-            // Always apply filters to update UI, even with empty lists
-            _applyFilters();
-          },
-        );
-      },
-      onError: (error) {
-        log('InvoiceCubit: Purchase stream error - $error');
-        if (!isClosed) {
-          emit(InvoiceError('Purchase stream error: $error'));
-        }
-      },
-    );
+    loadFirstPage();
   }
 
-  Future<void> getSalesInvoices() async {
-    final result = await _repository.getSalesInvoices();
-    result.fold((failure) => emit(InvoiceError(failure.message)), (invoices) {
-      _fullSalesInvoices = invoices;
-      // Only apply filters if we have both types loaded
-      if (_fullPurchaseInvoices.isNotEmpty || _fullSalesInvoices.isNotEmpty) {
-        _applyFilters();
-      } else {
-        emit(SalesInvoicesLoaded(invoices));
-      }
-    });
-  }
+  Future<void> loadFirstPage() async {
+    final requestId = ++_requestId;
+    _offset = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+    _pagedInvoices.clear();
+    emit(const InvoiceLoading());
 
-  Future<void> getPurchaseInvoices() async {
-    final result = await _repository.getPurchaseInvoices();
-    result.fold((failure) => emit(InvoiceError(failure.message)), (invoices) {
-      _fullPurchaseInvoices = invoices;
-      // Only apply filters if we have both types loaded
-      if (_fullSalesInvoices.isNotEmpty || _fullPurchaseInvoices.isNotEmpty) {
-        _applyFilters();
-      } else {
-        emit(PurchaseInvoicesLoaded(invoices));
-      }
-    });
-  }
-
-  Future<void> getAllInvoices() async {
-    // Real-time stream already loads data automatically
-    // This method is kept for backward compatibility
-    log('InvoiceCubit: getAllInvoices called - real-time stream already active');
-    // If no data yet, show loading
-    if (_fullSalesInvoices.isEmpty && _fullPurchaseInvoices.isEmpty && state is! InvoiceFiltered) {
-      emit(const InvoiceLoading());
+    if (_selectedType == 'purchase') {
+      final result = await _repository.getPurchaseInvoicesPage(
+        offset: 0,
+        limit: pageSize,
+        status: _selectedStatus,
+        dateFrom: _dateFrom,
+        dateTo: _dateTo,
+        search: _searchQuery,
+      );
+      if (isClosed || requestId != _requestId) return;
+      result.fold((failure) => emit(InvoiceError(failure.message)), (page) {
+        _pagedInvoices.addAll(page.items);
+        _offset = page.items.length;
+        _hasMore = page.hasMore;
+        _emitFiltered();
+      });
+      return;
     }
+
+    final result = await _repository.getSalesInvoicesPage(
+      offset: 0,
+      limit: pageSize,
+      status: _selectedStatus,
+      dateFrom: _dateFrom,
+      dateTo: _dateTo,
+      search: _searchQuery,
+    );
+    if (isClosed || requestId != _requestId) return;
+    result.fold((failure) => emit(InvoiceError(failure.message)), (page) {
+      _pagedInvoices.addAll(page.items);
+      _offset = page.items.length;
+      _hasMore = page.hasMore;
+      _emitFiltered();
+    });
   }
+
+  Future<void> loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    _isLoadingMore = true;
+    _emitFiltered();
+
+    final requestId = _requestId;
+    final result = _selectedType == 'purchase'
+        ? await _repository.getPurchaseInvoicesPage(
+            offset: _offset,
+            limit: pageSize,
+            status: _selectedStatus,
+            dateFrom: _dateFrom,
+            dateTo: _dateTo,
+            search: _searchQuery,
+          )
+        : await _repository.getSalesInvoicesPage(
+            offset: _offset,
+            limit: pageSize,
+            status: _selectedStatus,
+            dateFrom: _dateFrom,
+            dateTo: _dateTo,
+            search: _searchQuery,
+          );
+
+    if (isClosed || requestId != _requestId) return;
+    _isLoadingMore = false;
+    result.fold(
+      (failure) {
+        _hasMore = false;
+        _emitFiltered();
+      },
+      (page) {
+        _pagedInvoices.addAll(page.items);
+        _offset += page.items.length;
+        _hasMore = page.hasMore;
+        _emitFiltered();
+      },
+    );
+  }
+
+  void _emitFiltered() {
+    final sales = _pagedInvoices.whereType<SalesInvoice>().toList();
+    final purchases = _pagedInvoices.whereType<PurchaseInvoice>().toList();
+    final all = [...sales, ...purchases];
+
+    final paidCount = all.where((invoice) {
+      if (invoice is SalesInvoice) {
+        return invoice.paymentStatus == PaymentStatus.cash;
+      }
+      if (invoice is PurchaseInvoice) {
+        return invoice.paymentStatus == PaymentStatus.cash;
+      }
+      return false;
+    }).length;
+
+    final debtCount = all.where((invoice) {
+      if (invoice is SalesInvoice) {
+        return invoice.paymentStatus == PaymentStatus.debt;
+      }
+      if (invoice is PurchaseInvoice) {
+        return invoice.paymentStatus == PaymentStatus.debt;
+      }
+      return false;
+    }).length;
+
+    final totalAmount = all.fold<double>(0, (sum, invoice) {
+      if (invoice is SalesInvoice) return sum + invoice.totalAmount;
+      if (invoice is PurchaseInvoice) return sum + invoice.totalAmount;
+      return sum;
+    });
+
+    emit(
+      InvoiceFiltered(
+        salesInvoices: sales,
+        purchaseInvoices: purchases,
+        totalCount: all.length,
+        paidCount: paidCount,
+        pendingCount: debtCount,
+        totalAmount: totalAmount,
+        isLoadingMore: _isLoadingMore,
+        hasMore: _hasMore,
+      ),
+    );
+  }
+
+  Future<void> getSalesInvoices() => loadFirstPage();
+
+  Future<void> getPurchaseInvoices() => loadFirstPage();
+
+  Future<void> getAllInvoices() => loadFirstPage();
 
   // CRUD operations
   Future<void> createSalesInvoice(SalesInvoice invoice) async {
@@ -193,70 +234,69 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     );
   }
 
-  Future<void> updateSalesInvoice(SalesInvoice invoice, {bool optimisticUpdate = false}) async {
+  Future<void> updateSalesInvoice(
+    SalesInvoice invoice, {
+    bool optimisticUpdate = false,
+  }) async {
     if (!optimisticUpdate) {
       emit(const InvoiceLoading());
     }
     final result = await _repository.updateSalesInvoice(invoice);
-    result.fold(
-      (failure) => emit(InvoiceError(failure.message)),
-      (success) {
-        if (!optimisticUpdate) {
-          getSalesInvoices();
-        }
-        // If optimistic update, real-time stream will handle the update
-      },
-    );
+    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
+      if (!optimisticUpdate) {
+        getSalesInvoices();
+      }
+      // If optimistic update, real-time stream will handle the update
+    });
   }
 
-  Future<void> updatePurchaseInvoice(PurchaseInvoice invoice, {bool optimisticUpdate = false}) async {
+  Future<void> updatePurchaseInvoice(
+    PurchaseInvoice invoice, {
+    bool optimisticUpdate = false,
+  }) async {
     if (!optimisticUpdate) {
       emit(const InvoiceLoading());
     }
     final result = await _repository.updatePurchaseInvoice(invoice);
-    result.fold(
-      (failure) => emit(InvoiceError(failure.message)),
-      (success) {
-        if (!optimisticUpdate) {
-          getPurchaseInvoices();
-        }
-        // If optimistic update, real-time stream will handle the update
-      },
-    );
+    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
+      if (!optimisticUpdate) {
+        getPurchaseInvoices();
+      }
+      // If optimistic update, real-time stream will handle the update
+    });
   }
 
   Future<void> deleteSalesInvoice(String id) async {
     emit(const InvoiceLoading());
     final result = await _repository.deleteSalesInvoice(id);
-    result.fold(
-      (failure) => emit(InvoiceError(failure.message)),
-      (success) {
-        emit(SalesInvoiceDeleted());
-        getSalesInvoices();
-      },
-    );
+    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
+      emit(SalesInvoiceDeleted());
+      getSalesInvoices();
+    });
   }
 
   Future<void> deletePurchaseInvoice(String id) async {
     emit(const InvoiceLoading());
     final result = await _repository.deletePurchaseInvoice(id);
-    result.fold(
-      (failure) => emit(InvoiceError(failure.message)),
-      (success) {
-        emit(PurchaseInvoiceDeleted());
-        getPurchaseInvoices();
-      },
-    );
+    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
+      emit(PurchaseInvoiceDeleted());
+      getPurchaseInvoices();
+    });
   }
 
   // Delete sales invoice and reduce customer balance if it was a debt invoice
-  Future<void> deleteSalesInvoiceWithBalanceAdjustment(SalesInvoice invoice) async {
+  Future<void> deleteSalesInvoiceWithBalanceAdjustment(
+    SalesInvoice invoice,
+  ) async {
     try {
       emit(const InvoiceLoading());
 
       // If the invoice was not paid (debt), reduce the customer balance
-      if (invoice.paymentStatus == PaymentStatus.debt && invoice.customerId != null) {
-        final amountToReduce = invoice.remainingAmount > 0 ? invoice.remainingAmount : invoice.totalAmount;
+      if (invoice.paymentStatus == PaymentStatus.debt &&
+          invoice.customerId != null) {
+        final amountToReduce = invoice.remainingAmount > 0
+            ? invoice.remainingAmount
+            : invoice.totalAmount;
 
         if (amountToReduce > 0) {
           // Update customer balance via RPC (negative to subtract)
@@ -298,180 +338,37 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   // New filtering methods
   void setTypeFilter(String type) {
+    if (_selectedType == type) return;
     _selectedType = type;
-    _applyFilters();
+    loadFirstPage();
   }
 
   void setStatusFilter(String status) {
+    if (_selectedStatus == status) return;
     _selectedStatus = status;
-    _applyFilters();
+    loadFirstPage();
   }
 
   void setSearchQuery(String query) {
+    if (_searchQuery == query) return;
     _searchQuery = query;
-    _applyFilters();
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), loadFirstPage);
   }
 
   void setDateRange(DateTime? from, DateTime? to) {
     _dateFrom = from;
     _dateTo = to;
-    _applyFilters();
-  }
-
-  void _applyFilters() {
-    // Don't emit if cubit is closed
-    if (isClosed) return;
-    
-    final allInvoices = <dynamic>[];
-    allInvoices.addAll(_fullSalesInvoices);
-    allInvoices.addAll(_fullPurchaseInvoices);
-
-    final filteredInvoices = allInvoices.where((invoice) {
-      // Type filter
-      if (_selectedType != 'all') {
-        if (_selectedType == 'sale' && invoice is! SalesInvoice) return false;
-        if (_selectedType == 'purchase' && invoice is! PurchaseInvoice)
-          return false;
-      }
-
-      // Status filter - Check both InvoiceStatus and PaymentStatus
-      if (_selectedStatus != 'all') {
-        bool statusMatch = false;
-
-        if (invoice is SalesInvoice) {
-          final salesInvoice = invoice;
-          // Check InvoiceStatus first
-          statusMatch = _matchInvoiceStatus(salesInvoice.status);
-          // If no match, also check PaymentStatus for 'paid' and 'pending'
-          if (!statusMatch) {
-            statusMatch = _matchPaymentStatus(salesInvoice.paymentStatus);
-          }
-        } else if (invoice is PurchaseInvoice) {
-          final purchaseInvoice = invoice;
-          statusMatch = _matchInvoiceStatus(purchaseInvoice.status);
-          if (!statusMatch) {
-            statusMatch = _matchPaymentStatus(purchaseInvoice.paymentStatus);
-          }
-        }
-        
-        if (!statusMatch) return false;
-      }
-
-      // Search filter
-      if (_searchQuery.isNotEmpty) {
-        String number = '';
-        String partyName = '';
-        if (invoice is SalesInvoice) {
-          number = invoice.invoiceNumber.toLowerCase();
-          partyName = invoice.customerName?.toLowerCase() ?? '';
-        } else if (invoice is PurchaseInvoice) {
-          number = invoice.invoiceNumber.toLowerCase();
-          partyName = invoice.supplierName?.toLowerCase() ?? '';
-        }
-        if (!number.contains(_searchQuery.toLowerCase()) &&
-            !partyName.contains(_searchQuery.toLowerCase())) {
-          return false;
-        }
-      }
-
-      // Date filter
-      if (_dateFrom != null || _dateTo != null) {
-        DateTime invoiceDate;
-        if (invoice is SalesInvoice) {
-          invoiceDate = invoice.invoiceDate;
-        } else if (invoice is PurchaseInvoice) {
-          invoiceDate = invoice.invoiceDate;
-        } else {
-          return false;
-        }
-
-        if (_dateFrom != null && !invoiceDate.isAfter(_dateFrom!)) return false;
-        if (_dateTo != null && !invoiceDate.isBefore(_dateTo!)) return false;
-      }
-
-      return true;
-    }).toList();
-
-    // Separate filtered invoices by type
-    final filteredSales = filteredInvoices.whereType<SalesInvoice>().toList();
-    final filteredPurchase = filteredInvoices
-        .whereType<PurchaseInvoice>()
-        .toList();
-
-    // Sort by date descending (newest first)
-    filteredSales.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
-    filteredPurchase.sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
-
-    // Calculate statistics
-    final totalCount = filteredInvoices.length;
-    final paidCount = filteredInvoices.where((invoice) {
-      if (invoice is SalesInvoice)
-        return invoice.paymentStatus == PaymentStatus.cash;
-      if (invoice is PurchaseInvoice)
-        return invoice.paymentStatus == PaymentStatus.cash;
-      return false;
-    }).length;
-
-    final deptsCount = filteredInvoices.where((invoice) {
-      if (invoice is SalesInvoice)
-        return invoice.paymentStatus == PaymentStatus.debt;
-      if (invoice is PurchaseInvoice)
-        return invoice.paymentStatus == PaymentStatus.debt;
-      return false;
-    }).length;
-
-    final totalAmount = filteredInvoices.fold<double>(0, (sum, invoice) {
-      if (invoice is SalesInvoice) return sum + invoice.totalAmount;
-      if (invoice is PurchaseInvoice) return sum + invoice.totalAmount;
-      return sum;
-    });
-
-    // Don't emit if cubit is closed
-    if (isClosed) return;
-    
-    emit(
-      InvoiceFiltered(
-        salesInvoices: filteredSales,
-        purchaseInvoices: filteredPurchase,
-        totalCount: totalCount,
-        paidCount: paidCount,
-        pendingCount: deptsCount,
-        totalAmount: totalAmount,
-      ),
-    );
-  }
-
-  bool _matchInvoiceStatus(InvoiceStatus status) {
-    // For 'completed' - check InvoiceStatus.completed
-    if (_selectedStatus == 'completed') {
-      if (status == InvoiceStatus.completed) return true;
-    }
-    // For 'cancelled' - only check InvoiceStatus
-    if (_selectedStatus == 'cancelled') {
-      return status == InvoiceStatus.cancelled;
-    }
-    return false;
-  }
-
-  bool _matchPaymentStatus(PaymentStatus paymentStatus) {
-    // For 'paid' - match PaymentStatus.cash
-    if (_selectedStatus == 'cash') {
-      return paymentStatus == PaymentStatus.cash;
-    }
-    // For 'pending' - match PaymentStatus.debt
-    if (_selectedStatus == 'debt') {
-      return paymentStatus == PaymentStatus.debt;
-    }
-    return false;
+    loadFirstPage();
   }
 
   void clearFilters() {
-    _selectedType = 'all';
+    _selectedType = 'sale';
     _selectedStatus = 'all';
     _searchQuery = '';
     _dateFrom = null;
     _dateTo = null;
-    _applyFilters();
+    loadFirstPage();
   }
 
   // Invoice creation methods
@@ -655,7 +552,10 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   // Calculation methods
   double calculateSubtotal() {
-    return _invoiceItems.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0.0));
+    return _invoiceItems.fold<double>(
+      0,
+      (sum, item) => sum + (item.totalPrice ?? 0.0),
+    );
   }
 
   double calculateDiscountAmount() {
@@ -719,15 +619,19 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
       print('DEBUG: Saving invoice with type: $_invoiceType');
       print('DEBUG: Payment Type: $_paymentType, Paid Amount: $_paidAmount');
-      print('DEBUG: Grand Total: ${calculateGrandTotal()}, Remaining: ${calculateRemainingAmount()}');
+      print(
+        'DEBUG: Grand Total: ${calculateGrandTotal()}, Remaining: ${calculateRemainingAmount()}',
+      );
       print('DEBUG: Payment Status: ${_getPaymentStatus()}');
       print('DEBUG: Invoice Number: $invoiceNumber');
       print('DEBUG: Items count: ${_invoiceItems.length}');
-      print('DEBUG: Items total purchase: ${_invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0)))}');
+      print(
+        'DEBUG: Items total purchase: ${_invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0)))}',
+      );
 
       if (_invoiceType == 'sale') {
         final salesInvoice = SalesInvoice(
-          status: InvoiceStatus.fromString(status) ,
+          status: InvoiceStatus.fromString(status),
           id: '', // Will be generated by Supabase
           userId: userID!,
           invoiceNumber: invoiceNumber,
@@ -742,17 +646,17 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           totalAmount: calculateGrandTotal(),
           paidAmount: _paidAmount,
           remainingAmount: calculateRemainingAmount(),
-paymentMethod: _paymentMethod.isEmpty ? 'cash' : _paymentMethod,
+          paymentMethod: _paymentMethod.isEmpty ? 'cash' : _paymentMethod,
           paymentStatus: _getPurchasePaymentStatus(),
           notes: _notes.isEmpty ? null : _notes,
           isFinalized: _status == 'approved',
           createdAt: now,
           updatedAt: now,
-items: _invoiceItems
+          items: _invoiceItems
               .map(
                 (item) => InvoiceItem(
-                measurement: item.measurement,
-                unit: item.unit,
+                  measurement: item.measurement,
+                  unit: item.unit,
                   productId: item.productId,
                   productName: item.productName,
                   quantity: item.quantity,
@@ -763,8 +667,18 @@ items: _invoiceItems
                 ),
               )
               .toList(),
-          totalPurchaseAmount: _invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0))),
-          profit: calculateGrandTotal() - _invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0))),
+          totalPurchaseAmount: _invoiceItems.fold(
+            0.0,
+            (sum, item) =>
+                sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0)),
+          ),
+          profit:
+              calculateGrandTotal() -
+              _invoiceItems.fold(
+                0.0,
+                (sum, item) =>
+                    sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0)),
+              ),
         );
 
         print('DEBUG: Creating sales invoice: ${salesInvoice.toJson()}');
@@ -774,7 +688,9 @@ items: _invoiceItems
         if (_paymentType == 'debt' && _selectedCustomerId != null) {
           final amountToAdd = calculateRemainingAmount();
           if (amountToAdd > 0) {
-            print('DEBUG: Updating customer balance for debt invoice: +$amountToAdd');
+            print(
+              'DEBUG: Updating customer balance for debt invoice: +$amountToAdd',
+            );
             print('DEBUG: Customer ID: $_selectedCustomerId');
             try {
               final result = await _repository.updateCustomerBalance(
@@ -782,8 +698,11 @@ items: _invoiceItems
                 amountToAdd, // Positive to add to balance
               );
               result.fold(
-                (failure) => print('DEBUG: ERROR updating customer balance: ${failure.message}'),
-                (success) => print('DEBUG: Customer balance updated successfully'),
+                (failure) => print(
+                  'DEBUG: ERROR updating customer balance: ${failure.message}',
+                ),
+                (success) =>
+                    print('DEBUG: Customer balance updated successfully'),
               );
             } catch (e, stackTrace) {
               print('DEBUG: EXCEPTION during balance update: $e');
@@ -815,9 +734,8 @@ items: _invoiceItems
           items: _invoiceItems
               .map(
                 (item) => InvoiceItem(
-
-                measurement: item.measurement,
-                unit: item.unit,
+                  measurement: item.measurement,
+                  unit: item.unit,
                   productId: item.productId,
                   productName: item.productName,
                   quantity: item.quantity,
@@ -903,7 +821,10 @@ items: _invoiceItems
   }
 
   // Update payment status and adjust customer balance accordingly
-  Future<void> updateInvoicePaymentStatusWithBalance(SalesInvoice invoice, String newStatus) async {
+  Future<void> updateInvoicePaymentStatusWithBalance(
+    SalesInvoice invoice,
+    String newStatus,
+  ) async {
     try {
       final updatedStatus = PaymentStatus.values.firstWhere(
         (e) => e.name == newStatus,
@@ -918,7 +839,9 @@ items: _invoiceItems
       // If marking as cash (paid), reduce the customer balance
       if (newStatus == 'cash' && invoice.paymentStatus == PaymentStatus.debt) {
         // Calculate the amount to reduce from customer balance
-        final amountToReduce = invoice.remainingAmount > 0 ? invoice.remainingAmount : invoice.totalAmount;
+        final amountToReduce = invoice.remainingAmount > 0
+            ? invoice.remainingAmount
+            : invoice.totalAmount;
 
         if (amountToReduce > 0 && invoice.customerId != null) {
           // Update customer balance via RPC
@@ -937,8 +860,7 @@ items: _invoiceItems
 
   @override
   Future<void> close() {
-    _salesSubscription?.cancel();
-    _purchaseSubscription?.cancel();
+    _searchDebounce?.cancel();
     return super.close();
   }
 }

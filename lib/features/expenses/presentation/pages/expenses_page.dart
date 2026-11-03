@@ -2,8 +2,10 @@ import 'package:erad/features/expenses/data/models/expense.dart';
 import 'package:erad/features/expenses/data/models/expense_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/services_locator.dart' as sl;
+import '../../../../core/widgets/app_pagination_list.dart';
 import '../../../../core/widgets/date_filter_sheet.dart';
 import '../bloc/expense_cubit.dart';
 import '../widgets/expense_categories_dialog.dart';
@@ -15,8 +17,13 @@ import '../widgets/expense_table_widget.dart';
 
 class ExpensesPage extends StatefulWidget {
   final bool isLocal;
+  final bool autoOpenAdd;
 
-  const ExpensesPage({super.key, this.isLocal = false});
+  const ExpensesPage({
+    super.key,
+    this.isLocal = false,
+    this.autoOpenAdd = false,
+  });
 
   @override
   State<ExpensesPage> createState() => _ExpensesPageState();
@@ -33,6 +40,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
       create: (_) => sl.sl<ExpenseCubit>(),
       child: _ExpensesPageBody(
         isLocal: widget.isLocal,
+        autoOpenAdd: widget.autoOpenAdd,
         periodMode: _periodMode,
         selectedYear: _selectedYear,
         customDateRange: _customDateRange,
@@ -53,6 +61,7 @@ class _ExpensesPageState extends State<ExpensesPage> {
 
 class _ExpensesPageBody extends StatefulWidget {
   final bool isLocal;
+  final bool autoOpenAdd;
   final PeriodMode periodMode;
   final String? selectedYear;
   final DateTimeRange? customDateRange;
@@ -64,6 +73,7 @@ class _ExpensesPageBody extends StatefulWidget {
 
   const _ExpensesPageBody({
     required this.isLocal,
+    required this.autoOpenAdd,
     required this.periodMode,
     required this.selectedYear,
     required this.customDateRange,
@@ -79,6 +89,8 @@ class _ExpensesPageBody extends StatefulWidget {
 }
 
 class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
+  bool _autoAddHandled = false;
+
   @override
   void initState() {
     super.initState();
@@ -86,9 +98,27 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
       final year =
           int.tryParse(widget.selectedYear ?? DateTime.now().year.toString()) ??
           DateTime.now().year;
-      context.read<ExpenseCubit>().filterByDateRange(
-        DateTime(year, 1, 1),
-        DateTime(year, 12, 31),
+      context.read<ExpenseCubit>().loadInitial(
+        startDate: DateTime(year, 1, 1),
+        endDate: DateTime(year, 12, 31),
+      );
+    });
+  }
+
+  void _maybeAutoOpenAdd(BuildContext context, ExpensesLoaded state) {
+    if (!widget.autoOpenAdd || _autoAddHandled || state.categories.isEmpty) {
+      return;
+    }
+    _autoAddHandled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showAddExpenseDialog(
+        context: context,
+        onTap: (expense) {
+          context.read<ExpenseCubit>().createExpense(expense);
+          Navigator.pop(context);
+        },
+        categories: state.categories,
       );
     });
   }
@@ -98,69 +128,77 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('المصروفات'),
-        backgroundColor: AppColors.background,
         actions: [
           if (!widget.isLocal)
             Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Builder(
-              builder: (context) {
-                final cubit = context.read<ExpenseCubit>();
-                final categories = cubit.categories;
-                return IconButton(
-                  onPressed: () => showDialog(
-                    context: context,
-                    builder: (dialogContext) => ExpenseCategoriesDialog(
-                      categories: categories,
-                      onAddCategory: (category) {
-                        context.read<ExpenseCubit>().createExpenseCategory(category);
-                      },
-                      onUpdateCategory: (category) {
-                        context.read<ExpenseCubit>().updateExpenseCategory(category);
-                      },
-                      onDeleteCategory: (id) {
-                        context.read<ExpenseCubit>().deleteExpenseCategory(id);
-                      },
+              padding: const EdgeInsets.only(right: 8),
+              child: Builder(
+                builder: (context) {
+                  final cubit = context.read<ExpenseCubit>();
+                  final categories = cubit.categories;
+                  return IconButton(
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (dialogContext) => ExpenseCategoriesDialog(
+                        categories: categories,
+                        onAddCategory: (category) {
+                          context.read<ExpenseCubit>().createExpenseCategory(
+                            category,
+                          );
+                        },
+                        onUpdateCategory: (category) {
+                          context.read<ExpenseCubit>().updateExpenseCategory(
+                            category,
+                          );
+                        },
+                        onDeleteCategory: (id) {
+                          context.read<ExpenseCubit>().deleteExpenseCategory(
+                            id,
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  icon: const Icon(Icons.category_outlined, size: 24),
-                  tooltip: 'إدارة التصنيفات',
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    foregroundColor: AppColors.primary,
-                  ),
-                );
-              },
+                    icon: const Icon(sc.LucideIcons.folderOpen, size: 22),
+                    tooltip: 'إدارة التصنيفات',
+                  );
+                },
+              ),
             ),
-          ),
           const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(left: 8),
             child: _ExpensesDateFilter(
-            selectedYear: widget.selectedYear,
-            customDateRange: widget.customDateRange,
-            onYearSelected: (year) {
-              widget.onYearChanged(year);
-              final yearInt = int.tryParse(year) ?? DateTime.now().year;
-              context.read<ExpenseCubit>().filterByDateRange(
-                DateTime(yearInt, 1, 1),
-                DateTime(yearInt, 12, 31),
-              );
-            },
-            onDateRangeSelected: (range) {
-              widget.onCustomDateRangeChanged(range);
-              context.read<ExpenseCubit>().filterByDateRange(range.start, range.end);
-            },
-            onClearFilter: () {
-              widget.onClearCustomDateRange();
-              widget.onPeriodModeChanged(PeriodMode.year);
-              final year = int.tryParse(widget.selectedYear ?? DateTime.now().year.toString()) ?? DateTime.now().year;
-              context.read<ExpenseCubit>().filterByDateRange(
-                DateTime(year, 1, 1),
-                DateTime(year, 12, 31),
-              );
-            },
-          ),
+              selectedYear: widget.selectedYear,
+              customDateRange: widget.customDateRange,
+              onYearSelected: (year) {
+                widget.onYearChanged(year);
+                final yearInt = int.tryParse(year) ?? DateTime.now().year;
+                context.read<ExpenseCubit>().filterByDateRange(
+                  DateTime(yearInt, 1, 1),
+                  DateTime(yearInt, 12, 31),
+                );
+              },
+              onDateRangeSelected: (range) {
+                widget.onCustomDateRangeChanged(range);
+                context.read<ExpenseCubit>().filterByDateRange(
+                  range.start,
+                  range.end,
+                );
+              },
+              onClearFilter: () {
+                widget.onClearCustomDateRange();
+                widget.onPeriodModeChanged(PeriodMode.year);
+                final year =
+                    int.tryParse(
+                      widget.selectedYear ?? DateTime.now().year.toString(),
+                    ) ??
+                    DateTime.now().year;
+                context.read<ExpenseCubit>().filterByDateRange(
+                  DateTime(year, 1, 1),
+                  DateTime(year, 12, 31),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -168,11 +206,13 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
       body: SafeArea(
         child: BlocConsumer<ExpenseCubit, ExpenseState>(
           listener: (context, state) {
+            if (state is ExpensesLoaded) {
+              _maybeAutoOpenAdd(context, state);
+            }
             if (state is ExpenseSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
-                  backgroundColor: Colors.green,
                   duration: const Duration(seconds: 2),
                 ),
               );
@@ -190,43 +230,92 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
             if (state is ExpenseInitial || state is ExpenseLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (state is ExpensesLoaded) ...[
+            if (state is ExpenseError) {
+              final cubit = context.read<ExpenseCubit>();
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(sc.LucideIcons.circleAlert,
+                        size: 64, color: AppColors.error),
+                    const SizedBox(height: 16),
+                    Text(state.message,
+                        style: TextStyle(color: AppColors.text)),
+                    const SizedBox(height: 16),
+                    sc.Button(
+                      style: sc.ButtonStyle.primary(),
+                      onPressed: () =>
+                          cubit.filterByDateRange(cubit.startDate, cubit.endDate),
+                      child: const Text('أعد المحاولة'),
+                    ),
+                  ],
+                ),
+              );
+            }
+            if (state is! ExpensesLoaded) {
+              return const SizedBox.shrink();
+            }
 
-                    ExpenseSummaryCardsWidget(
-                      totalAmount: state.totalAmount,
-                      totalCount: state.totalCount,
-                      averageAmount: state.averageAmount,
+            final cubit = context.read<ExpenseCubit>();
+            final categoryById = {
+              for (final category in state.categories) category.id: category,
+            };
+
+            return RefreshIndicator(
+              onRefresh: () =>
+                  cubit.filterByDateRange(cubit.startDate, cubit.endDate),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ExpenseSummaryCardsWidget(
+                            totalAmount: state.totalAmount,
+                            totalCount: state.totalCount,
+                            averageAmount: state.averageAmount,
+                          ),
+                          const SizedBox(height: 12),
+                          ExpenseMonthlyChartWidget(
+                            monthlyData: state.monthlyData,
+                            year: _getSelectedYear(),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildCategoryChips(context, state),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    ExpenseMonthlyChartWidget(
-                      expenses: state.expenses,
-                      year: _getSelectedYear(),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildCategoryChips(context, state),
-                    const SizedBox(height: 12),
-                    ExpenseTableWidget(
-                      expenses: state.expenses,
-                      categories: state.categories,
-                      onDelete: (expense) => context
-                          .read<ExpenseCubit>()
-                          .deleteExpense(expense.id),
-                      onTap: (expense) {},
-                    ),
-                  ] else if (state is ExpenseLoading)
-                    const Center(
+                  ),
+                  if (state.expenses.isEmpty)
+                    SliverToBoxAdapter(
                       child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: CircularProgressIndicator(),
+                        padding: const EdgeInsets.all(12),
+                        child: _buildEmptyState(),
                       ),
                     )
                   else
-                    const SizedBox.shrink(),
+                    AppPaginationSliverList(
+                      itemCount: state.expenses.length,
+                      hasMore: state.hasMore,
+                      isLoadingMore: state.isLoadingMore,
+                      onLoadMore: cubit.loadMore,
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                      separator: const SizedBox(height: 10),
+                      bottomSpace: 100,
+                      itemBuilder: (context, index) {
+                        final expense = state.expenses[index];
+                        return ExpenseTableCard(
+                          expense: expense,
+                          category: categoryById[expense.categoryId],
+                          onDelete: (expense) =>
+                              cubit.deleteExpense(expense.id),
+                        );
+                      },
+                    ),
                 ],
               ),
             );
@@ -236,23 +325,21 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
       floatingActionButton: widget.isLocal
           ? null
           : Builder(
-        builder: (context) {
-          final categories = context.watch<ExpenseCubit>().categories;
-          return FloatingActionButton.extended(
-            label: Text( 'إضافة مصروف',style: TextStyle(color: AppColors.surface),)  ,
-            onPressed: () => _showAddExpenseDialog(
-              context: context,
-              onTap: (expense) {
-                context.read<ExpenseCubit>().createExpense(expense);
-                Navigator.pop(context);
+              builder: (context) {
+                final categories = context.watch<ExpenseCubit>().categories;
+                return FloatingActionButton.extended(
+                  label: const Text('إضافة مصروف'),
+                  onPressed: () => _showAddExpenseDialog(
+                    context: context,
+                    onTap: (expense) {
+                      context.read<ExpenseCubit>().createExpense(expense);
+                      Navigator.pop(context);
+                    },
+                    categories: categories,
+                  ),
+                );
               },
-              categories: categories,
             ),
-            backgroundColor: AppColors.primary,
-           
-          );
-        },
-      ),
     );
   }
 
@@ -301,7 +388,7 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
   }) {
     return Material(
       color: isSelected ? AppColors.primary : Colors.transparent,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(999),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -311,17 +398,40 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
             border: Border.all(
               color: isSelected ? AppColors.primary : AppColors.divider,
             ),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? Colors.white : AppColors.text,
+              color: isSelected ? AppColors.onPrimary : AppColors.text,
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return sc.Card(
+      padding: const EdgeInsets.all(32),
+      child: const Column(
+        children: [
+          Icon(
+            sc.LucideIcons.receiptText,
+            size: 40,
+            color: AppColors.textSecondary,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'لم يتم العثور على بيانات',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -339,7 +449,6 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
       ),
     );
   }
-
 }
 
 class _ExpensesDateFilter extends StatelessWidget {
@@ -368,26 +477,20 @@ class _ExpensesDateFilter extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.2),
-          ),
+          color: AppColors.muted,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: AppColors.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.calendar_today,
-              size: 16,
-              color: AppColors.primary,
-            ),
+            Icon(sc.LucideIcons.calendar, size: 16, color: AppColors.text),
             const SizedBox(width: 6),
             Text(
               label,
               style: const TextStyle(
-                color: AppColors.primary,
-                fontSize: 13,
+                color: AppColors.text,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -419,10 +522,12 @@ class _ExpensesDateFilter extends StatelessWidget {
   }
 
   Future<void> _pickDateRange(BuildContext context) async {
-    final initial = customDateRange ?? DateTimeRange(
-      start: DateTime.now().subtract(const Duration(days: 30)),
-      end: DateTime.now(),
-    );
+    final initial =
+        customDateRange ??
+        DateTimeRange(
+          start: DateTime.now().subtract(const Duration(days: 30)),
+          end: DateTime.now(),
+        );
 
     final picked = await showDateRangePicker(
       context: context,
@@ -433,8 +538,8 @@ class _ExpensesDateFilter extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             appBarTheme: const AppBarTheme(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.background,
+              foregroundColor: AppColors.text,
             ),
           ),
           child: child!,

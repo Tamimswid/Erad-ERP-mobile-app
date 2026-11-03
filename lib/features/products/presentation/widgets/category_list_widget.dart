@@ -1,7 +1,9 @@
 import 'package:erad/features/products/data/models/product_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../bloc/product_cubit.dart';
+import 'package:erad/core/constants/app_constants.dart';
 
 class CategoryListWidget extends StatefulWidget {
   const CategoryListWidget({super.key});
@@ -19,14 +21,13 @@ class _CategoryListWidgetState extends State<CategoryListWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
             ),
           );
         } else if (state is ProductSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: Colors.green,
             ),
           );
         }
@@ -41,7 +42,7 @@ class _CategoryListWidgetState extends State<CategoryListWidget> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.category, size: 64, color: Colors.grey),
+                        Icon(sc.LucideIcons.tag, size: 64, color: AppColors.textSecondary),
                          SizedBox(height: 16),
                          Text('لا يوجد فئات'),
                          SizedBox(height: 8),
@@ -72,44 +73,40 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        // leading: CircleAvatar(
-        //   backgroundColor: Theme.of(context).primaryColor,
-        //   child: Text(
-        //     category.name.isNotEmpty ? category.name[0].toUpperCase() : 'C',
-        //     style: const TextStyle(
-        //       color: Colors.white,
-        //       fontWeight: FontWeight.bold,
-        //     ),
-        //   ),
-        // ),
-        title: Text(
-          category.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: sc.Card(
+        padding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          title: Text(
+            category.name,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: category.description != null
+              ? Text(category.description!)
+              : null,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(sc.LucideIcons.pencil, size: 20),
+                onPressed: () {
+                  _showEditCategoryDialog(context, category);
+                },
+              ),
+              IconButton(
+                icon: const Icon(sc.LucideIcons.trash2, size: 20),
+                onPressed: () {
+                  _showDeleteConfirmation(context, category);
+                },
+              ),
+            ],
+          ),
+          onTap: () {
+            _showCategoryDetails(context, category);
+          },
         ),
-        subtitle: category.description != null ? Text(category.description!) : null,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, size: 20),
-              onPressed: () {
-                _showEditCategoryDialog(context, category);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, size: 20),
-              onPressed: () {
-                _showDeleteConfirmation(context, category);
-              },
-            ),
-          ],
-        ),
-        onTap: () {
-          _showCategoryDetails(context, category);
-        },
       ),
     );
   }
@@ -131,7 +128,8 @@ class CategoryCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إغلاق'),
                   ),
@@ -166,17 +164,18 @@ class CategoryCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       Navigator.pop(context);
                       context.read<ProductCubit>().deleteCategory(category.id);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     child: const Text('حذف'),
                   ),
                 ],

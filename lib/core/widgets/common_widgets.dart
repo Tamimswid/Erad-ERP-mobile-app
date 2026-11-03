@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../constants/app_constants.dart';
 
 class CustomButton extends StatelessWidget {
@@ -31,7 +32,7 @@ class CustomButton extends StatelessWidget {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.surface),
             ),
           )
         : Row(
@@ -156,21 +157,19 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: margin ?? EdgeInsets.all(AppConstants.spacing),
-      elevation: elevation ?? AppConstants.cardElevation,
-      color: color,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        side: BorderSide(color: AppColors.border),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-        child: Padding(
-          padding: padding ?? EdgeInsets.all(AppConstants.spacing),
-          child: child,
-        ),
+    final content = Padding(
+      padding: padding ?? const EdgeInsets.all(AppConstants.spacing),
+      child: child,
+    );
+
+    return Padding(
+      padding: margin ?? const EdgeInsets.all(AppConstants.spacing),
+      child: sc.Card(
+        padding: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null
+            ? content
+            : sc.Clickable(onPressed: onTap, child: content),
       ),
     );
   }
@@ -282,9 +281,9 @@ class StatusBadge extends StatelessWidget {
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius / 2),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusSm),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         text,
@@ -341,10 +340,10 @@ class _SearchFieldState extends State<SearchField> {
       autofocus: widget.autofocus,
       decoration: InputDecoration(
         hintText: widget.hint ?? AppStrings.search,
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: const Icon(sc.LucideIcons.search),
         suffixIcon: _controller.text.isNotEmpty
             ? IconButton(
-                icon: const Icon(Icons.clear),
+                icon: const Icon(sc.LucideIcons.x),
                 onPressed: () {
                   _controller.clear();
                   widget.onChanged('');

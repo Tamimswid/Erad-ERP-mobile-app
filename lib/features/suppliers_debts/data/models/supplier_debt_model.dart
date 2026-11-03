@@ -97,14 +97,14 @@ class SupplierDebtModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        phone,
-        totalInvoices,
-        totalPaid,
-        totalInvoicesCount,
-        pendingInvoicesCount,
-        overdueInvoicesCount,
-        latestDueDate,
-      ];
+    id,
+    name,
+    phone,
+    totalInvoices,
+    totalPaid,
+    totalInvoicesCount,
+    pendingInvoicesCount,
+    overdueInvoicesCount,
+    latestDueDate,
+  ];
 }

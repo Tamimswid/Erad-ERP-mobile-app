@@ -6,6 +6,7 @@ import '../../../customers/presentation/bloc/customer_cubit.dart';
 import '../../../suppliers/data/models/supplier.dart';
 import '../../../suppliers/presentation/bloc/supplier_cubit.dart';
 import '../bloc/invoice_cubit.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class CustomerSupplierSearchWidget extends StatefulWidget {
   const CustomerSupplierSearchWidget({super.key});
@@ -160,7 +161,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(Icons.person, 'العميل'),
+            _buildSectionTitle(sc.LucideIcons.user, 'العميل'),
             const SizedBox(height: AppConstants.spacingMd),
 
             if (widget.state is CustomerInitial || widget.state is CustomerLoading)
@@ -179,7 +180,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: AppColors.error),
+                    const Icon(sc.LucideIcons.circleAlert, color: AppColors.error),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -188,7 +189,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.refresh, size: 20),
+                      icon: const Icon(sc.LucideIcons.refreshCw, size: 20),
                       onPressed: () {
                         context.read<CustomerCubit>().getCustomers();
                       },
@@ -206,7 +207,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                     focusNode: _searchFocusNode,
                     decoration: InputDecoration(
                       hintText: 'ابحث عن عميل...',
-                      prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                      prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
                         borderSide: BorderSide(color: AppColors.border),
@@ -223,7 +224,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                       fillColor: AppColors.surface,
                       suffixIcon: _selectedEntity != null
                           ? IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon: const Icon(sc.LucideIcons.x),
                               onPressed: _clearSelection,
                             )
                           : null,
@@ -253,7 +254,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                             dense: true,
                             leading: CircleAvatar(
                               backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                              child: const Icon(Icons.person, color: AppColors.primary, size: 20),
+                              child: const Icon(sc.LucideIcons.user, color: AppColors.primary, size: 20),
                             ),
                             title: Text(
                               customer.name,
@@ -270,7 +271,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                               ),
                             ),
                             trailing: const Icon(
-                              Icons.chevron_right,
+                              sc.LucideIcons.chevronLeft,
                               color: AppColors.textSecondary,
                               size: 16,
                             ),
@@ -295,7 +296,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                   children: [
                     CircleAvatar(
                       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      child: const Icon(Icons.person, color: AppColors.primary, size: 20),
+                      child: const Icon(sc.LucideIcons.user, color: AppColors.primary, size: 20),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -321,7 +322,7 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 20),
+                      icon: const Icon(sc.LucideIcons.x, size: 20),
                       onPressed: () => _clearSelection(),
                       color: AppColors.textSecondary,
                     ),
@@ -441,7 +442,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(Icons.business, 'المورد'),
+            _buildSectionTitle(sc.LucideIcons.building2, 'المورد'),
             const SizedBox(height: AppConstants.spacingMd),
 
             if (widget.state is SupplierInitial || widget.state is SupplierLoading)
@@ -460,7 +461,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: AppColors.error),
+                    const Icon(sc.LucideIcons.circleAlert, color: AppColors.error),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -469,7 +470,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.refresh, size: 20),
+                      icon: const Icon(sc.LucideIcons.refreshCw, size: 20),
                       onPressed: () {
                         context.read<SupplierCubit>().getSuppliers();
                       },
@@ -487,7 +488,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                     focusNode: _searchFocusNode,
                     decoration: InputDecoration(
                       hintText: 'ابحث عن مورد...',
-                      prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                      prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppConstants.borderRadius),
                         borderSide: BorderSide(color: AppColors.border),
@@ -504,7 +505,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                       fillColor: AppColors.surface,
                       suffixIcon: _selectedEntity != null
                           ? IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon: const Icon(sc.LucideIcons.x),
                               onPressed: _clearSelection,
                             )
                           : null,
@@ -534,7 +535,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                             dense: true,
                             leading: CircleAvatar(
                               backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                              child: const Icon(Icons.business, color: AppColors.primary, size: 20),
+                              child: const Icon(sc.LucideIcons.building2, color: AppColors.primary, size: 20),
                             ),
                             title: Text(
                               supplier.name,
@@ -551,7 +552,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                               ),
                             ),
                             trailing: const Icon(
-                              Icons.chevron_right,
+                              sc.LucideIcons.chevronLeft,
                               color: AppColors.textSecondary,
                               size: 16,
                             ),
@@ -576,7 +577,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                   children: [
                     CircleAvatar(
                       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      child: const Icon(Icons.business, color: AppColors.primary, size: 20),
+                      child: const Icon(sc.LucideIcons.building2, color: AppColors.primary, size: 20),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -602,7 +603,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 20),
+                      icon: const Icon(sc.LucideIcons.x, size: 20),
                       onPressed: () => _clearSelection(),
                       color: AppColors.textSecondary,
                     ),

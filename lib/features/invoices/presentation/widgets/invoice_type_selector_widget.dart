@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/invoice_cubit.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceTypeSelectorWidget extends StatefulWidget {
   const InvoiceTypeSelectorWidget({super.key});
@@ -31,7 +32,7 @@ class _InvoiceTypeSelectorWidgetState extends State<InvoiceTypeSelectorWidget> {
               child: Column(
                 // crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  _buildSectionTitle(Icons.receipt_long, 'معلومات الفاتورة'),
+                  _buildSectionTitle(sc.LucideIcons.receiptText, 'معلومات الفاتورة'),
                   // const SizedBox(height: 16),
                 const  Spacer(),
                   Row(
@@ -134,7 +135,7 @@ class _InvoiceTypeSelectorWidgetState extends State<InvoiceTypeSelectorWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              type == 'sale' ? Icons.trending_up : Icons.trending_down,
+              type == 'sale' ? sc.LucideIcons.trendingUp : sc.LucideIcons.trendingDown,
               color: isSelected ? AppColors.primary : AppColors.textSecondary,
               size: 20,
             ),
@@ -181,7 +182,7 @@ class _InvoiceTypeSelectorWidgetState extends State<InvoiceTypeSelectorWidget> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              type == 'debtor' ? Icons.arrow_downward : Icons.arrow_upward,
+              type == 'debtor' ? sc.LucideIcons.arrowDown : sc.LucideIcons.arrowUp,
               color: isSelected ? AppColors.primary : AppColors.textSecondary,
               size: 20,
             ),

@@ -5,6 +5,8 @@ import 'package:erad/features/invoices/presentation/pages/edit_invoice_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/invoice_cubit.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class SalesInvoiceListWidget extends StatefulWidget {
   const SalesInvoiceListWidget({Key? key}) : super(key: key);
@@ -54,7 +56,7 @@ class _SalesInvoiceListWidgetState extends State<SalesInvoiceListWidget> {
               const Spacer(),
               ElevatedButton.icon(
                 onPressed: () => _showCreateInvoiceDialog(context),
-                icon: const Icon(Icons.add),
+                icon: const Icon(sc.LucideIcons.plus),
                 label: const Text('فاتورة جديدة'),
               ),
             ],
@@ -71,7 +73,7 @@ class _SalesInvoiceListWidgetState extends State<SalesInvoiceListWidget> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error, size: 64, color: Colors.red),
+                      Icon(sc.LucideIcons.circleAlert, size: 64, color: AppColors.error),
                       const SizedBox(height: 16),
                       Text(state.message),
                       const SizedBox(height: 16),
@@ -88,7 +90,7 @@ class _SalesInvoiceListWidgetState extends State<SalesInvoiceListWidget> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.receipt_long, size: 64, color: Colors.grey),
+                        Icon(sc.LucideIcons.receiptText, size: 64, color: AppColors.textSecondary),
                         SizedBox(height: 16),
                         Text('لا توجد فواتير مبيعات'),
                         SizedBox(height: 8),
@@ -143,7 +145,7 @@ class SalesInvoiceCard extends StatelessWidget {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: _getStatusColor().withOpacity(0.2),
+            color: _getStatusColor().withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -172,7 +174,7 @@ class SalesInvoiceCard extends StatelessWidget {
             Text(
               '${invoice.totalAmount.toStringAsFixed(2)} ل.س',
               style: TextStyle(
-                color: Colors.green,
+                color: AppColors.primary,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -181,7 +183,7 @@ class SalesInvoiceCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getPaymentStatusColor().withOpacity(0.2),
+                color: _getPaymentStatusColor().withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -213,19 +215,19 @@ class SalesInvoiceCard extends StatelessWidget {
   IconData _getStatusIcon() {
     switch (invoice.status.name) {
       case 'draft':
-        return Icons.drafts;
+        return sc.LucideIcons.fileText;
       case 'sent':
-        return Icons.send;
+        return sc.LucideIcons.send;
       case 'paid':
-        return Icons.check_circle;
+        return sc.LucideIcons.circleCheck;
       case 'overdue':
-        return Icons.warning;
+        return sc.LucideIcons.triangleAlert;
       case 'cancelled':
-        return Icons.cancel;
+        return sc.LucideIcons.circleX;
       case 'pending':
-        return Icons.pending;
+        return sc.LucideIcons.clock;
       default:
-        return Icons.pending;
+        return sc.LucideIcons.clock;
     }
   }
 
@@ -310,7 +312,7 @@ class SalesInvoiceCard extends StatelessWidget {
                       Navigator.pop(context);
                       _showDeleteConfirmation(context, invoice);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
                     child: const Text('حذف'),
                   ),
                 ],
@@ -328,7 +330,7 @@ class SalesInvoiceCard extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning_outlined, color: Colors.orange[600]),
+            Icon(sc.LucideIcons.triangleAlert, color: AppColors.textSecondary),
             const SizedBox(width: 8),
             const Text('تأكيد الحذف'),
           ],
@@ -349,7 +351,7 @@ class SalesInvoiceCard extends StatelessWidget {
               const SizedBox(height: 8),
               const Text(
                 'هذا الإجراء لا يمكن التراجع عنه',
-                style: TextStyle(color: Colors.red, fontSize: 12),
+                style: TextStyle(color: AppColors.error, fontSize: 12),
               ),
               const SizedBox(height: 24),
               Row(
@@ -365,7 +367,7 @@ class SalesInvoiceCard extends StatelessWidget {
                       Navigator.pop(context);
                       context.read<InvoiceCubit>().deleteSalesInvoice(invoice.id);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
                     child: const Text('حذف'),
                   ),
                 ],

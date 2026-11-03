@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/app_utils.dart';
 import '../../../../core/utils/number_formatter.dart';
@@ -41,30 +41,23 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
         final discountAmount = state.discountAmount;
         final totalAmount = state.totalAmount;
 
-        return Card(
-          elevation: AppConstants.cardElevation,
-          color: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-            side: BorderSide(color: AppColors.border, width: 1),
-          ),
+        return sc.Card(
+          padding: EdgeInsets.zero,
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle(Icons.receipt_long, 'ملخص الفاتورة'),
+                _buildSectionTitle(sc.LucideIcons.receiptText, 'ملخص الفاتورة'),
                 const SizedBox(height: 16),
 
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
+                    color: AppColors.muted,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                    ),
+                    border: Border.all(color: AppColors.divider),
                   ),
                   child: Column(
                     children: [
@@ -173,21 +166,15 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
         const SizedBox(width: 8),
         SizedBox(
           width: 40,
-          child: MaterialButton(
-            height: 40,
+          height: 40,
+          child: sc.IconButton(
+            variance: sc.ButtonStyle.outline(),
+            icon: const Icon(sc.LucideIcons.plus, size: 18),
             onPressed: () {
               final amount = double.tryParse(_discountController.text) ?? 0.0;
               context.read<EditInvoiceCubit>().setDiscountAmount(amount);
               setState(() {});
             },
-            color: AppColors.primary,
-            padding: EdgeInsets.all(0),
-            shape:OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none
-            ),
-            elevation: 0,
-            child:  Center(child: Icon(Iconsax.add,color: AppColors.divider,)),
           ),
         ),
         const Spacer(),

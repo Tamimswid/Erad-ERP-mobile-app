@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../models/product_category.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/utils/paged_result.dart';
 
 abstract class ProductRemoteDataSource {
   Future<List<ProductModel>> getProducts();
@@ -17,12 +18,12 @@ abstract class ProductRemoteDataSource {
   Future<ProductCategory> createCategory(ProductCategory category);
   Future<ProductCategory> updateCategory(ProductCategory category);
   Future<void> deleteCategory(String id);
-  Future<List<ProductModel>> searchProducts(String query);
-  Future<List<ProductModel>> getProductsByCategory(String categoryId);
-  
-  // Real-time streams
-  Stream<List<ProductModel>> watchProducts();
-  Stream<List<ProductCategory>> watchCategories();
+  Future<PagedResult<ProductModel>> getProductsPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+    String? categoryId,
+  });
 }
 
 class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
@@ -196,79 +197,48 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
   }
 
   @override
-  Future<List<ProductModel>> searchProducts(String query) async {
-    try {
-      final response = await client
-          .from('products')
-          .select('*, categories(name)')
-          .eq('is_active', true)
-          .or('name.ilike.%$query%,description.ilike.%$query%,sku.ilike.%$query%')
-          .order('created_at', ascending: false);
-
-      return response.map((product) => ProductModel.fromMap(product)).toList();
-    } catch (e) {
-      throw exceptionToFailure(e);
-    }
-  }
-
-  @override
-  Future<List<ProductModel>> getProductsByCategory(String categoryId) async {
-    try {
-      final response = await client
-          .from('products')
-          .select('*, categories(name)')
-          .eq('category_id', categoryId)
-          .eq('is_active', true)
-          .order('created_at', ascending: false);
-
-      return response.map((product) => ProductModel.fromMap(product)).toList();
-    } catch (e) {
-      throw exceptionToFailure(e);
-    }
-  }
-
-  @override
-  Stream<List<ProductModel>> watchProducts() async* {
+  Future<PagedResult<ProductModel>> getProductsPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+    String? categoryId,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) {
         throw Exception('User not logged in');
       }
 
-      yield* client
+      var query = client
           .from('products')
           .select('*, categories(name)')
           .eq('user_id', userId)
-          .eq('is_active', true)
+          .eq('is_active', true);
+
+      final term = search?.trim() ?? '';
+      if (term.isNotEmpty) {
+        query = query.or(
+          'name.ilike.%$term%,code.ilike.%$term%,barcode.ilike.%$term%',
+        );
+      }
+      if (categoryId != null && categoryId != 'all') {
+        query = query.eq('category_id', categoryId);
+      }
+
+      final response = await query
           .order('created_at', ascending: false)
-          .asStream()
-          .map((productsData) => productsData.map((product) => ProductModel.fromMap(product)).toList());
-    } catch (e) {
-      log('Error in watchProducts stream: ${e.toString()}');
-      throw exceptionToFailure(e);
-    }
-  }
+          .order('id', ascending: true)
+          .range(offset, offset + limit);
 
-  @override
-  Stream<List<ProductCategory>> watchCategories() async* {
-    try {
-      final userId = await UserService.getUserId();
-      if (userId == null) {
-        throw Exception('User not logged in');
-      }
-
-      yield* client
-          .from('categories')
-          .select('id, user_id, name, description, parent_id, sort_order, is_active, created_at')
-          .eq('user_id', userId)
-          .eq('is_active', true)
-          .order('sort_order', ascending: true)
-          .order('name')
-          .limit(50)
-          .asStream()
-          .map((response) => response.map((category) => ProductCategory.fromMap(category)).toList());
+      final products =
+          response.map((product) => ProductModel.fromMap(product)).toList();
+      final hasMore = products.length > limit;
+      return PagedResult(
+        items: hasMore ? products.sublist(0, limit) : products,
+        hasMore: hasMore,
+      );
     } catch (e) {
-      log('Error in watchCategories stream: ${e.toString()}');
+      log('Error loading products page: ${e.toString()}');
       throw exceptionToFailure(e);
     }
   }

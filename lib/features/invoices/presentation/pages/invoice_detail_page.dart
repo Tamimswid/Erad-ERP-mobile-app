@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../data/models/sales_invoice.dart';
 import '../../data/models/purchase_invoice.dart';
 import '../../data/models/invoice_status.dart';
@@ -109,9 +110,8 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
             });
           }
 
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            body: SafeArea(
+          return sc.Scaffold(
+            child: SafeArea(
               child: BlocListener<ProductCubit, ProductState>(
                 listener: (context, state) {
                   if (state is ProductSingleLoaded) {
@@ -245,19 +245,17 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
         ),
         if (isGeneratingPdf)
           Container(
-            color: Colors.black54,
+            color: AppColors.text.withValues(alpha: 0.3),
             child: const Center(
-              child: Card(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('جاري إنشاء PDF...'),
-                    ],
-                  ),
+              child: sc.Card(
+                padding: EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    sc.CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('جاري إنشاء PDF...'),
+                  ],
                 ),
               ),
             ),

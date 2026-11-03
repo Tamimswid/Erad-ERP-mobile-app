@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
+import 'package:erad/core/constants/app_constants.dart';
 
 class DashboardStatsCard extends StatelessWidget {
   final String title;
@@ -20,10 +22,9 @@ class DashboardStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+    return sc.Card(
+      padding: const EdgeInsets.all(16),
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -33,13 +34,15 @@ class DashboardStatsCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isPositive ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                    color: isPositive
+                        ? AppColors.primary.withValues(alpha: 0.1)
+                        : AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     change,
                     style: TextStyle(
-                      color: isPositive ? Colors.green : Colors.red,
+                      color: isPositive ? AppColors.primary : AppColors.error,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                     ),
@@ -60,12 +63,11 @@ class DashboardStatsCard extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.textSecondary,
               ),
             ),
           ],
         ),
-      ),
     );
   }
 }

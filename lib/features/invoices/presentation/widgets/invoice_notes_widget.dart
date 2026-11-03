@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/invoice_cubit.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceNotesWidget extends StatefulWidget {
   const InvoiceNotesWidget({super.key});
@@ -79,7 +80,7 @@ class _InvoiceNotesWidgetState extends State<InvoiceNotesWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(Icons.format_align_left, 'Ek Bilgiler'),
+            _buildSectionTitle(sc.LucideIcons.alignLeft, 'Ek Bilgiler'),
             const SizedBox(height: AppConstants.spacingMd),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

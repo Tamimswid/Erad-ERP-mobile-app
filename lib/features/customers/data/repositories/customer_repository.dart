@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/utils/paged_result.dart';
 import '../models/customer.dart';
 import '../datasource/customer_remote_datasource.dart';
 
@@ -27,13 +28,28 @@ class CustomerRepository {
     }
   }
 
-  // Stream للعملاء في الوقت الفعلي
-  Stream<Either<Failure, List<CustomerModel>>> watchCustomers() {
-    return remoteDataSource.watchCustomers().map(
-          (customers) => Right<Failure, List<CustomerModel>>(customers),
-        ).handleError(
-          (error) => Left<Failure, List<CustomerModel>>(exceptionToFailure(error)),
+  // جلب صفحة من العملاء مع التحقق من الاتصال
+  Future<Either<Failure, PagedResult<CustomerModel>>> getCustomersPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final page = await remoteDataSource.getCustomersPage(
+          offset: offset,
+          limit: limit,
+          search: search,
         );
+        return Right(page);
+      } on Failure catch (failure) {
+        return Left(failure);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      return Left(NetworkFailure.noConnection());
+    }
   }
 
   // جلب عميل بالمعرف مع التحقق من الاتصال
@@ -53,7 +69,9 @@ class CustomerRepository {
   }
 
   // إنشاء عميل جديد مع التحقق من الاتصال
-  Future<Either<Failure, CustomerModel>> createCustomer(CustomerModel customer) async {
+  Future<Either<Failure, CustomerModel>> createCustomer(
+    CustomerModel customer,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final createdCustomer = await remoteDataSource.createCustomer(customer);
@@ -69,7 +87,9 @@ class CustomerRepository {
   }
 
   // تحديث بيانات العميل مع التحقق من الاتصال
-  Future<Either<Failure, CustomerModel>> updateCustomer(CustomerModel customer) async {
+  Future<Either<Failure, CustomerModel>> updateCustomer(
+    CustomerModel customer,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final updatedCustomer = await remoteDataSource.updateCustomer(customer);
@@ -101,7 +121,9 @@ class CustomerRepository {
   }
 
   // البحث عن العملاء مع التحقق من الاتصال
-  Future<Either<Failure, List<CustomerModel>>> searchCustomers(String query) async {
+  Future<Either<Failure, List<CustomerModel>>> searchCustomers(
+    String query,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final customers = await remoteDataSource.searchCustomers(query);

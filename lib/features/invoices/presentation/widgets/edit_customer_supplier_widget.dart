@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../customers/data/models/customer.dart';
 import '../../../customers/presentation/bloc/customer_cubit.dart';
@@ -137,19 +138,12 @@ class _EditCustomerSupplierWidgetState extends State<EditCustomerSupplierWidget>
         final title = widget.isSales ? 'العميل' : 'المورد';
         final hintText = widget.isSales ? 'ابحث عن عميل...' : 'ابحث عن مورد...';
 
-        return Card(
-          elevation: AppConstants.cardElevation,
-          color: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-            side: BorderSide(color: AppColors.border, width: 1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.cardPadding),
-            child: Column(
+        return sc.Card(
+          padding: const EdgeInsets.all(AppConstants.cardPadding),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle(widget.isSales ? Icons.person : Icons.business, title),
+                _buildSectionTitle(widget.isSales ? sc.LucideIcons.user : sc.LucideIcons.building2, title),
                 const SizedBox(height: AppConstants.spacingMd),
                 
                 TextField(
@@ -158,7 +152,7 @@ class _EditCustomerSupplierWidgetState extends State<EditCustomerSupplierWidget>
                   decoration: InputDecoration(
                     hintText: hintText,
                     prefixIcon: Icon(
-                      widget.isSales ? Icons.search : Icons.search,
+                      widget.isSales ? sc.LucideIcons.search : sc.LucideIcons.search,
                       color: AppColors.textSecondary,
                     ),
                     border: OutlineInputBorder(
@@ -177,7 +171,7 @@ class _EditCustomerSupplierWidgetState extends State<EditCustomerSupplierWidget>
                     fillColor: AppColors.surface,
                     suffixIcon: _selectedEntity != null
                         ? IconButton(
-                            icon: const Icon(Icons.clear),
+                            icon: const Icon(sc.LucideIcons.x),
                             onPressed: _clearSelection,
                           )
                         : null,
@@ -205,10 +199,10 @@ class _EditCustomerSupplierWidgetState extends State<EditCustomerSupplierWidget>
                         return ListTile(
                           dense: true,
                           leading: CircleAvatar(
-                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                            backgroundColor: AppColors.muted,
                             child: Icon(
-                              widget.isSales ? Icons.person : Icons.business,
-                              color: AppColors.primary,
+                              widget.isSales ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                              color: AppColors.text,
                               size: 20,
                             ),
                           ),
@@ -237,17 +231,17 @@ class _EditCustomerSupplierWidgetState extends State<EditCustomerSupplierWidget>
                     margin: const EdgeInsets.only(top: 12),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: AppColors.muted,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: AppColors.divider),
                     ),
                     child: Row(
                       children: [
                         CircleAvatar(
-                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                          backgroundColor: AppColors.muted,
                           child: Icon(
-                            widget.isSales ? Icons.person : Icons.business,
-                            color: AppColors.primary,
+                            widget.isSales ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                            color: AppColors.text,
                             size: 20,
                           ),
                         ),
@@ -275,7 +269,7 @@ class _EditCustomerSupplierWidgetState extends State<EditCustomerSupplierWidget>
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, size: 20),
+                          icon: const Icon(sc.LucideIcons.x, size: 20),
                           onPressed: _clearSelection,
                           color: AppColors.textSecondary,
                         ),
@@ -284,7 +278,6 @@ class _EditCustomerSupplierWidgetState extends State<EditCustomerSupplierWidget>
                   ),
               ],
             ),
-          ),
         );
       },
     );

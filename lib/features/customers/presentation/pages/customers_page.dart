@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/customer_cubit.dart';
 import '../widgets/customer_list_widget.dart';
 import '../widgets/customer_form_widget.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class CustomersPage extends StatefulWidget {
   final bool isLocal;
@@ -25,8 +26,7 @@ class _CustomersPageState extends State<CustomersPage> {
   @override
   void initState() {
     super.initState();
-    _customerCubit = sl<CustomerCubit>();
-    // Stream will auto-load data
+    _customerCubit = sl<CustomerCubit>()..loadFirstPage();
   }
 
   @override
@@ -36,13 +36,11 @@ class _CustomersPageState extends State<CustomersPage> {
     super.dispose();
   }
 
-  void _onSearchChanged(BuildContext context, String query) {
+  void _onSearchChanged(String query) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      if (query.trim().isNotEmpty) {
-        context.read<CustomerCubit>().searchCustomers(query.trim());
-      }
-      // If empty, real-time stream will show all customers
+      if (!mounted) return;
+      _customerCubit.searchCustomers(query.trim());
     });
   }
 
@@ -61,12 +59,9 @@ class _CustomersPageState extends State<CustomersPage> {
                   context,
                 ).showSnackBar(SnackBar(content: Text(state.message)));
               } else if (state is CustomerSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
               }
             },
             builder: (context, state) {
@@ -89,15 +84,15 @@ class _CustomersPageState extends State<CustomersPage> {
         floatingActionButton: widget.isLocal
             ? null
             : FloatingActionButton.extended(
-            label: Text(
-              'إضافة عميل جديد',
-              style: TextStyle(color: AppColors.background),
-            ),
-            backgroundColor: AppColors.primary,
-            onPressed: () {
-              _showAddCustomerDialog(context: context);
-            },
-          ),
+                label: Text(
+                  'إضافة عميل جديد',
+                  style: TextStyle(color: AppColors.onPrimary),
+                ),
+                backgroundColor: AppColors.primary,
+                onPressed: () {
+                  _showAddCustomerDialog(context: context);
+                },
+              ),
       ),
     );
   }
@@ -129,7 +124,7 @@ class _CustomersPageState extends State<CustomersPage> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(dialogContext),
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(sc.LucideIcons.x),
                       ),
                     ],
                   ),
@@ -153,35 +148,38 @@ class _CustomersPageState extends State<CustomersPage> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(bottom: BorderSide(color: AppColors.divider)),
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Container(
-                height: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(20),
+          color: AppColors.muted,
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
           children: [
             IconButton(
-              color: Colors.black,
-              onPressed: () =>  Navigator.pop(context),
-              icon: const Icon(Icons.navigate_before,size: 25),
+              color: AppColors.text,
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(sc.LucideIcons.arrowRight, size: 25),
             ),
-        
+
             Expanded(
               child: TextField(
                 controller: _searchController,
-                onChanged: (value) => _onSearchChanged(context, value),
+                onChanged: _onSearchChanged,
                 decoration: InputDecoration(
                   hintText: 'بحث عن عميل...',
-                  prefixIcon: const Icon(Icons.search, size: 20),
+                  prefixIcon: const Icon(sc.LucideIcons.search, size: 20),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 10,
                   ),
-                  hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  hintStyle: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),

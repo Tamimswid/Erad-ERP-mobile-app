@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:erad/core/constants/app_constants.dart';
 
 enum InvoiceStatus {
   draft,
@@ -17,9 +18,9 @@ enum InvoiceStatus {
     switch (this) {
       case InvoiceStatus.draft:
       case InvoiceStatus.completed:
-        return Colors.green;
+        return AppColors.primary;
       case InvoiceStatus.cancelled:
-        return Colors.grey;
+        return AppColors.textSecondary;
     }
   }
 

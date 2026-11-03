@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 
 class PartyInvoiceEmptyState extends StatelessWidget {
@@ -11,7 +11,7 @@ class PartyInvoiceEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Iconsax.receipt_disscount,
+          Icon(sc.LucideIcons.receiptText,
               size: 64, color: AppColors.textSecondary),
           const SizedBox(height: 16),
           Text(

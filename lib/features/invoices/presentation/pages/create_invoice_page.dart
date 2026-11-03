@@ -1,6 +1,7 @@
 import 'package:erad/features/invoices/data/repositories/invoice_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/invoice_cubit.dart';
@@ -66,21 +67,11 @@ class _CreateInvoicePageContentState extends State<_CreateInvoicePageContent> {
           setState(() {});
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const Text(
-            'إنشاء فاتورة جديدة',
-            style: TextStyle(
-              fontWeight: AppFonts.fontWeightBold,
-              color: AppColors.text,
-            ),
-          ),
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          centerTitle: true,
-        ),
-        body: SingleChildScrollView(
+      child: sc.Scaffold(
+        headers: [
+          sc.AppBar(title: const Text('إنشاء فاتورة جديدة')),
+        ],
+        child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: AppConstants.spacingMd),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

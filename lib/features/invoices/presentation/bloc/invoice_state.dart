@@ -156,6 +156,8 @@ class InvoiceFiltered extends InvoiceState {
   final int paidCount;
   final int pendingCount;
   final double totalAmount;
+  final bool isLoadingMore;
+  final bool hasMore;
 
   const InvoiceFiltered({
     required this.salesInvoices,
@@ -164,6 +166,8 @@ class InvoiceFiltered extends InvoiceState {
     required this.paidCount,
     required this.pendingCount,
     required this.totalAmount,
+    this.isLoadingMore = false,
+    this.hasMore = false,
   });
 
   @override
@@ -174,5 +178,7 @@ class InvoiceFiltered extends InvoiceState {
     paidCount,
     pendingCount,
     totalAmount,
+    isLoadingMore,
+    hasMore,
   ];
 }

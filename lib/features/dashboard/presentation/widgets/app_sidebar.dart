@@ -129,7 +129,7 @@ class AppSidebar extends StatelessWidget {
                   child: Text(
                     title,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                       color: isActive ? AppColors.text : AppColors.textSecondary,
                     ),

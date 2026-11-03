@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../../auth/data/models/user.dart';
@@ -41,56 +42,40 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  IconButton(
-                    color: Colors.black,
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.navigate_before, size: 30),
-                  ),
-                  const Text(
-                    'الإعدادات',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.normal,
-                      color: AppColors.text,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // Company Name Card
-              _buildCompanyNameCard(),
-              const SizedBox(height: 16),
-              // Settings cards
-              _buildCurrencyCard(),
-              const SizedBox(height: 16),
-              _buildNumberFormatCard(),
-              const SizedBox(height: 16),
-              _buildLogoutCard(),
-            ],
-          ),
+    return sc.Scaffold(
+      headers: [
+        sc.AppBar(
+          title: const Text('الإعدادات'),
+          leading: [
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(sc.LucideIcons.arrowRight, size: 22),
+            ),
+          ],
+        ),
+      ],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Company Name Card
+            _buildCompanyNameCard(),
+            const SizedBox(height: 16),
+            // Settings cards
+            _buildCurrencyCard(),
+            const SizedBox(height: 16),
+            _buildNumberFormatCard(),
+            const SizedBox(height: 16),
+            _buildLogoutCard(),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildCompanyNameCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return sc.Card(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,31 +124,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               const SizedBox(width: 12),
-              ElevatedButton(
+              sc.Button(
+                style: sc.ButtonStyle.primary(),
                 onPressed: _isLoadingCompany ? null : _updateCompanyName,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
                 child: _isLoadingCompany
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
+                        child: sc.CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
-                        'حفظ',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                    : const Text('حفظ'),
               ),
             ],
           ),
@@ -197,7 +167,6 @@ class _SettingsPageState extends State<SettingsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('تم تحديث اسم الشركة بنجاح'),
-            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -220,12 +189,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildCurrencyCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return sc.Card(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,7 +255,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       fontWeight: isSelected
                           ? FontWeight.w600
                           : FontWeight.w500,
-                      color: isSelected ? Colors.white : AppColors.text,
+                      color: isSelected ? AppColors.onPrimary : AppColors.text,
                     ),
                   ),
                 ),
@@ -304,22 +268,17 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildNumberFormatCard() {
-    return InkWell(
-      onTap: () async {
-        final newValue = !_useShortFormat;
-        await NumberFormatter.setUseShortFormat(newValue);
-        setState(() {
-          _useShortFormat = newValue;
-        });
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.divider),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.all(20),
+    return sc.Card(
+      padding: const EdgeInsets.all(20),
+      clipBehavior: Clip.antiAlias,
+      child: sc.Clickable(
+        onPressed: () async {
+          final newValue = !_useShortFormat;
+          await NumberFormatter.setUseShortFormat(newValue);
+          setState(() {
+            _useShortFormat = newValue;
+          });
+        },
         child: Row(
           children: [
             const Expanded(
@@ -353,7 +312,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   _useShortFormat = value;
                 });
               },
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
             ),
           ],
         ),
@@ -362,22 +321,17 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildLogoutCard() {
-    return InkWell(
-      onTap: () => _showLogoutConfirmation(logout: () {
-            Navigator.pop(context);
-              context.read<AuthCubit>().logout();
-      },),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border.all(color: AppColors.divider),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.all(20),
+    return sc.Card(
+      padding: const EdgeInsets.all(20),
+      clipBehavior: Clip.antiAlias,
+      child: sc.Clickable(
+        onPressed: () => _showLogoutConfirmation(logout: () {
+          Navigator.pop(context);
+          context.read<AuthCubit>().logout();
+        }),
         child: Row(
           children: [
-            Icon(Icons.logout, color: AppColors.error, size: 20),
+            const Icon(sc.LucideIcons.logOut, color: AppColors.error, size: 20),
             const SizedBox(width: 20),
             const Expanded(
               child: Column(
@@ -403,7 +357,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const Icon(
-              Icons.arrow_back_ios,
+              sc.LucideIcons.chevronLeft,
               size: 16,
               color: AppColors.textSecondary,
             ),
@@ -419,7 +373,10 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning_outlined, color: Colors.orange[600]),
+            Icon(
+              sc.LucideIcons.circleAlert,
+              color: AppColors.textSecondary,
+            ),
             const SizedBox(width: 8),
             const Text('تأكيد تسجيل الخروج'),
           ],
@@ -434,14 +391,15 @@ class _SettingsPageState extends State<SettingsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () => logout(),
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
                     child: const Text('تسجيل الخروج'),
                   ),
                 ],

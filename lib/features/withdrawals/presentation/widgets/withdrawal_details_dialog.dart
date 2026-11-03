@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../data/models/withdrawal.dart';
 
 class WithdrawalDetailsDialog extends StatelessWidget {
@@ -28,7 +29,8 @@ class WithdrawalDetailsDialog extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(
+        sc.Button(
+          style: sc.ButtonStyle.ghost(),
           onPressed: () => Navigator.pop(context),
           child: const Text('إغلاق'),
         ),

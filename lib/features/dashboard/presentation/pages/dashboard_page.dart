@@ -1,10 +1,12 @@
 import 'dart:async';
-import 'package:erad/core/constants/app_constants.dart';
-import 'package:erad/features/customer_debts/presentation/pages/customer_debts_page.dart';
+
 import 'package:erad/features/dashboard/presentation/pages/more_page.dart';
-import 'package:erad/features/suppliers_debts/presentation/pages/suppliers_debts_page.dart';
+import 'package:erad/features/debts/presentation/pages/debts_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
+
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/network/network_info.dart';
 import '../../../customers/presentation/bloc/customer_cubit.dart';
@@ -16,9 +18,10 @@ import 'dashboard_overview.dart';
 
 class MenuItem {
   final String title;
+  final IconData icon;
   final int index;
 
-  const MenuItem({required this.title, required this.index});
+  const MenuItem({required this.title, required this.icon, required this.index});
 }
 
 class DashboardPage extends StatefulWidget {
@@ -30,8 +33,7 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage>
-    with WidgetsBindingObserver {
+class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   bool _isConnected = true;
   bool _isKeyboardVisible = false;
@@ -39,18 +41,17 @@ class _DashboardPageState extends State<DashboardPage>
 
   List<MenuItem> get _menuItems {
     if (_isConnected) {
-      return [
-        const MenuItem(title: 'الرئيسية', index: 0),
-        const MenuItem(title: 'الفواتير', index: 1),
-        const MenuItem(title: 'د.عملاء', index: 2),
-        const MenuItem(title: 'د.موردين', index: 3),
-        const MenuItem(title: 'المزيد', index: 4),
+      return const [
+        MenuItem(title: 'الرئيسية', icon: sc.LucideIcons.house, index: 0),
+        MenuItem(title: 'الفواتير', icon: sc.LucideIcons.fileText, index: 1),
+        MenuItem(title: 'الديون', icon: sc.LucideIcons.wallet, index: 2),
+        MenuItem(title: 'المزيد', icon: sc.LucideIcons.ellipsis, index: 3),
       ];
     }
-    return [
-      const MenuItem(title: 'الرئيسية', index: 0),
-      const MenuItem(title: 'الفواتير', index: 1),
-      const MenuItem(title: 'ديون', index: 2),
+    return const [
+      MenuItem(title: 'الرئيسية', icon: sc.LucideIcons.house, index: 0),
+      MenuItem(title: 'الفواتير', icon: sc.LucideIcons.fileText, index: 1),
+      MenuItem(title: 'الديون', icon: sc.LucideIcons.wallet, index: 2),
     ];
   }
 
@@ -80,7 +81,7 @@ class _DashboardPageState extends State<DashboardPage>
       if (mounted) {
         setState(() {
           _isConnected = connected;
-          if (!connected && _selectedIndex > 1) {
+          if (!connected && _selectedIndex > 2) {
             _selectedIndex = 0;
           }
         });
@@ -97,6 +98,7 @@ class _DashboardPageState extends State<DashboardPage>
 
   @override
   Widget build(BuildContext context) {
+    final colors = sc.Theme.of(context).colorScheme;
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => sl.sl<InvoiceCubit>(), lazy: true),
@@ -104,55 +106,46 @@ class _DashboardPageState extends State<DashboardPage>
         BlocProvider(create: (context) => sl.sl<CustomerCubit>(), lazy: true),
         BlocProvider(create: (context) => sl.sl<SupplierCubit>(), lazy: true),
       ],
-      child: Scaffold(
-        // resizeToAvoidBottomInset: false,
-        bottomNavigationBar: Container(
-          // margin: EdgeInsets.fromLTRB(12, 0, 12, MediaQuery.of(context).padding.bottom > 0 ? 8 : 12),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-            child: Row(
-              children: List.generate(_menuItems.length, (index) {
-                final isSelected = index == _selectedIndex;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _selectedIndex = index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.surface
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadiusMd,
-                        ),
-                      ),
-                      child: Text(
-                        _menuItems[index].title,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.surface,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
+      child: _isKeyboardVisible
+          ? _buildContent()
+          : Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: BottomBar(
+                // body: const SizedBox.shrink(),
+                showIcon: false,
+                layout: const BottomBarLayout(
+                  width: double.infinity,
+                  offset: 12,
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+                theme: BottomBarThemeData(
+                  barDecoration: BoxDecoration(
+                    color: colors.card,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: colors.border),
                   ),
-                );
-              }),
+                ),
+                body: IndexedStack(index: _selectedIndex, children: [for (final item in _menuItems) _buildContent()]),
+                child: SizedBox(
+                  height: 64,
+                  child: BottomBarItems(
+                    children: [
+                      for (final item in _menuItems)
+                        BottomBarItem(
+                          icon: Icon(item.icon, size: 20),
+                          label: Text(item.title),
+                          selected: item.index == _selectedIndex,
+                          selectedColor: colors.primary,
+                          color: colors.mutedForeground,
+                          onTap: () => setState(() => _selectedIndex = item.index),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-        body: Column(children: [Expanded(child: _buildContent())]),
-      ),
     );
   }
 
@@ -164,10 +157,8 @@ class _DashboardPageState extends State<DashboardPage>
         case 1:
           return const InvoicesPage(isLocal: false);
         case 2:
-          return const CustomerDebtsPage(isLocal: false);
+          return const DebtsPage(isLocal: false);
         case 3:
-          return SuppliersDebtsPage(isLocal: false);
-        case 4:
           return MorePage();
         default:
           return const DashboardOverview();
@@ -179,7 +170,7 @@ class _DashboardPageState extends State<DashboardPage>
       case 1:
         return const InvoicesPage(isLocal: true);
       case 2:
-        return const CustomerDebtsPage(isLocal: true);
+        return const DebtsPage(isLocal: true);
       default:
         return const DashboardOverview();
     }

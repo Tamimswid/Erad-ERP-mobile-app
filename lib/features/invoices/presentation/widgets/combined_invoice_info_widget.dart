@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/invoice_cubit.dart';
 import '../../../customers/presentation/bloc/customer_cubit.dart';
@@ -124,43 +125,35 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
       builder: (context, state) {
         final isSale = context.read<InvoiceCubit>().invoiceType == 'sale';
         
-        return Card(
-          elevation: AppConstants.cardElevation,
-          color: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-            side: BorderSide(color: AppColors.border, width: 1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppConstants.cardPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Invoice Type and Payment Type Dropdowns
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildInvoiceTypeDropdown(state),
-                    ),
+        return sc.Card(
+          padding: const EdgeInsets.all(AppConstants.cardPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Invoice Type and Payment Type Dropdowns
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInvoiceTypeDropdown(state),
+                  ),
+          
             
+                ],
+              ),
+              const SizedBox(height: 16),
               
-                  ],
-                ),
-                const SizedBox(height: 16),
-                
-                // Search Bar
-                _buildSearchBar(isSale),
-                const SizedBox(height: 16),
-                
-                // Search Results List
-                if (_searchResults.isNotEmpty)
-                  _buildSearchResultsList(isSale),
-                
-                // Selected Entity Display
-                if (_selectedEntity != null)
-                  _buildSelectedEntityDisplay(isSale),
-              ],
-            ),
+              // Search Bar
+              _buildSearchBar(isSale),
+              const SizedBox(height: 16),
+              
+              // Search Results List
+              if (_searchResults.isNotEmpty)
+                _buildSearchResultsList(isSale),
+              
+              // Selected Entity Display
+              if (_selectedEntity != null)
+                _buildSelectedEntityDisplay(isSale),
+            ],
           ),
         );
       },
@@ -171,14 +164,14 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: context.read<InvoiceCubit>().invoiceType,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down),
+          icon: const Icon(sc.LucideIcons.chevronDown),
           items: const [
             DropdownMenuItem(value: 'sale', child: Text('مبيع')),
             DropdownMenuItem(value: 'purchase', child: Text('شراء')),
@@ -198,14 +191,14 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: context.read<InvoiceCubit>().debtType ?? 'debtor',
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down),
+          icon: const Icon(sc.LucideIcons.chevronDown),
           items: const [
             DropdownMenuItem(value: 'debtor', child: Text('آجل')),
             DropdownMenuItem(value: 'creditor', child: Text('نقدي')),
@@ -226,25 +219,25 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
       focusNode: _searchFocusNode,
       decoration: InputDecoration(
         hintText: isSale ? 'ابحث عن عميل...' : 'ابحث عن مورد...',
-        prefixIcon: const Icon(Icons.search, color: Color(0xFF9CA3AF)),
+        prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF3B82F6)),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         filled: true,
         fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
         suffixIcon: _selectedEntity != null
             ? IconButton(
-                icon: const Icon(Icons.clear),
+                icon: const Icon(sc.LucideIcons.x),
                 onPressed: _clearSelection,
               )
             : null,
@@ -257,10 +250,10 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
     return Container(
       constraints: const BoxConstraints(maxHeight: 200),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.border),
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(8),
-          bottomRight: Radius.circular(8),
+          bottomLeft: Radius.circular(AppConstants.borderRadiusMd),
+          bottomRight: Radius.circular(AppConstants.borderRadiusMd),
         ),
         color: AppColors.surface,
         boxShadow: AppConstants.cardShadow,
@@ -273,10 +266,10 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
           return ListTile(
             dense: true,
             leading: CircleAvatar(
-              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+              backgroundColor: AppColors.muted,
               child: Icon(
-                isSale ? Icons.person : Icons.business,
-                color: AppColors.primary,
+                isSale ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                color: AppColors.text,
                 size: 20,
               ),
             ),
@@ -297,7 +290,7 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
                   )
                 : null,
             trailing: const Icon(
-              Icons.chevron_right,
+              sc.LucideIcons.chevronLeft,
               color: AppColors.textSecondary,
               size: 16,
             ),
@@ -313,17 +306,17 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: AppColors.muted,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+            backgroundColor: AppColors.muted,
             child: Icon(
-              isSale ? Icons.person : Icons.business,
-              color: AppColors.primary,
+              isSale ? sc.LucideIcons.user : sc.LucideIcons.building2,
+              color: AppColors.text,
               size: 20,
             ),
           ),
@@ -351,7 +344,7 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(sc.LucideIcons.x, size: 20),
             onPressed: _clearSelection,
             color: AppColors.textSecondary,
           ),

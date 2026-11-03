@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:erad/core/errors/failures.dart';
 import 'package:erad/core/network/network_info.dart';
+import 'package:erad/core/utils/paged_result.dart';
 import 'package:erad/features/suppliers_debts/data/datasource/supplier_debt_remote_datasource.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_model.dart';
 import 'package:erad/features/suppliers_debts/data/models/supplier_debt_totals_model.dart';
@@ -13,11 +14,19 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
   SupplierDebtRepositoryImpl(this.remoteDataSource, this.networkInfo);
 
   @override
-  Future<Either<Failure, List<SupplierDebtModel>>> getSupplierDebts() async {
+  Future<Either<Failure, PagedResult<SupplierDebtModel>>> getSupplierDebtsPage({
+    required int offset,
+    int limit = 10,
+    String? search,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final debts = await remoteDataSource.getSupplierDebts();
-        return Right(debts);
+        final page = await remoteDataSource.getSupplierDebtsPage(
+          offset: offset,
+          limit: limit,
+          search: search,
+        );
+        return Right(page);
       } on Failure catch (failure) {
         return Left(failure);
       } catch (e) {
@@ -29,7 +38,26 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
   }
 
   @override
-  Future<Either<Failure, SupplierDebtTotalsModel>> getSupplierDebtTotals() async {
+  Future<Either<Failure, int>> getSupplierDebtCount({String? search}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final count = await remoteDataSource.getSupplierDebtCount(
+          search: search,
+        );
+        return Right(count);
+      } on Failure catch (failure) {
+        return Left(failure);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      return Left(NetworkFailure.noConnection());
+    }
+  }
+
+  @override
+  Future<Either<Failure, SupplierDebtTotalsModel>>
+  getSupplierDebtTotals() async {
     if (await networkInfo.isConnected) {
       try {
         final totals = await remoteDataSource.getSupplierDebtTotals();
@@ -43,26 +71,20 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
   }
 
   @override
-  Future<Either<Failure, List<SupplierDebtModel>>> searchSupplierDebts(String query) async {
+  Future<Either<Failure, void>> addPayment(
+    String supplierId,
+    double amount,
+    String? note,
+    String paymentDate,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
-        final debts = await remoteDataSource.searchSupplierDebts(query);
-        return Right(debts);
-      } on Failure catch (failure) {
-        return Left(failure);
-      } catch (e) {
-        return Left(exceptionToFailure(e));
-      }
-    } else {
-      return Left(NetworkFailure.noConnection());
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> addPayment(String supplierId, double amount, String? note, String paymentDate) async {
-    if (await networkInfo.isConnected) {
-      try {
-        await remoteDataSource.addPayment(supplierId, amount, note, paymentDate);
+        await remoteDataSource.addPayment(
+          supplierId,
+          amount,
+          note,
+          paymentDate,
+        );
         return const Right(null);
       } on Failure catch (failure) {
         return Left(failure);
@@ -75,7 +97,9 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
   }
 
   @override
-  Future<Either<Failure, SupplierDebtModel>> getSupplierDebt(String supplierId) async {
+  Future<Either<Failure, SupplierDebtModel>> getSupplierDebt(
+    String supplierId,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final debt = await remoteDataSource.getSupplierDebt(supplierId);
@@ -91,7 +115,9 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
   }
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierInvoices(String supplierId) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierInvoices(
+    String supplierId,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final invoices = await remoteDataSource.getSupplierInvoices(supplierId);
@@ -107,7 +133,9 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
   }
 
   @override
-  Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierPayments(String supplierId) async {
+  Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierPayments(
+    String supplierId,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         final payments = await remoteDataSource.getSupplierPayments(supplierId);
@@ -123,7 +151,89 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deletePayment(String paymentId, String supplierId, double amount) async {
+  Future<Either<Failure, PagedResult<Map<String, dynamic>>>>
+  getSupplierInvoicesPage(
+    String supplierId, {
+    required int offset,
+    int limit = 10,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final page = await remoteDataSource.getSupplierInvoicesPage(
+          supplierId,
+          offset: offset,
+          limit: limit,
+        );
+        return Right(page);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
+  @override
+  Future<Either<Failure, PagedResult<Map<String, dynamic>>>>
+  getSupplierPaymentsPage(
+    String supplierId, {
+    required int offset,
+    int limit = 10,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final page = await remoteDataSource.getSupplierPaymentsPage(
+          supplierId,
+          offset: offset,
+          limit: limit,
+        );
+        return Right(page);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
+  @override
+  Future<Either<Failure, double>> getSupplierInvoiceTotal(
+    String supplierId,
+  ) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final total = await remoteDataSource.getSupplierInvoiceTotal(
+          supplierId,
+        );
+        return Right(total);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
+  @override
+  Future<Either<Failure, double>> getSupplierPaymentTotal(
+    String supplierId,
+  ) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final total = await remoteDataSource.getSupplierPaymentTotal(
+          supplierId,
+        );
+        return Right(total);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    }
+    return Left(NetworkFailure.noConnection());
+  }
+
+  @override
+  Future<Either<Failure, void>> deletePayment(
+    String paymentId,
+    String supplierId,
+    double amount,
+  ) async {
     if (await networkInfo.isConnected) {
       try {
         await remoteDataSource.deletePayment(paymentId, supplierId, amount);
@@ -136,14 +246,5 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
     } else {
       return Left(NetworkFailure.noConnection());
     }
-  }
-
-  @override
-  Stream<Either<Failure, List<SupplierDebtModel>>> watchSupplierDebts() {
-    return remoteDataSource.watchSupplierDebts().map(
-      (debts) => Right<Failure, List<SupplierDebtModel>>(debts),
-    ).handleError(
-      (error) => Left<Failure, List<SupplierDebtModel>>(ServerFailure(error.toString())),
-    );
   }
 }

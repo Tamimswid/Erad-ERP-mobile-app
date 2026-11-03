@@ -1,6 +1,8 @@
-import 'package:erad/core/widgets/common_widgets.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/widgets/app_pagination_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../data/models/supplier.dart';
 import '../bloc/supplier_cubit.dart';
 import 'supplier_form_widget.dart';
@@ -20,7 +22,11 @@ class SupplierListWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.business, size: 64, color: Colors.grey),
+                  Icon(
+                    sc.LucideIcons.building2,
+                    size: 64,
+                    color: AppColors.textSecondary,
+                  ),
                   SizedBox(height: 16),
                   Text('لا يوجد موردون'),
                   SizedBox(height: 8),
@@ -30,7 +36,7 @@ class SupplierListWidget extends StatelessWidget {
             );
           }
 
-          return GridView.builder(
+          return AppPaginationGrid(
             padding: const EdgeInsets.all(20),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 1,
@@ -39,6 +45,9 @@ class SupplierListWidget extends StatelessWidget {
               crossAxisSpacing: 16,
             ),
             itemCount: state.suppliers.length,
+            hasMore: state.hasMore,
+            isLoadingMore: state.isLoadingMore,
+            onLoadMore: context.read<SupplierCubit>().loadMore,
             itemBuilder: (context, index) {
               final supplier = state.suppliers[index];
               return SupplierCard(
@@ -76,104 +85,118 @@ class SupplierCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomCard(
-        padding: const EdgeInsets.all(16),
-
-    child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  radius: 24,
-                  child: Text(
-                    supplier.name.isNotEmpty ? supplier.name[0].toUpperCase() : 'S',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+    return sc.Card(
+      padding: const EdgeInsets.all(16),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Theme.of(context).primaryColor,
+                radius: 24,
+                child: Text(
+                  supplier.name.isNotEmpty
+                      ? supplier.name[0].toUpperCase()
+                      : 'S',
+                  style: const TextStyle(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        supplier.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (supplier.phone != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          supplier.phone!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, size: 20),
-                      onPressed: () => _showEditSupplierDialog(context, supplier, (updatedSupplier) => onSupplierEdit(updatedSupplier)),
-                      tooltip: 'Düzenle',
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, size: 20),
-                      onPressed: () => _showDeleteConfirmation(context: context, supplier: supplier, onSupplierDeleted:(id) =>  onSupplierDeleted(id)),
-                      tooltip: 'Sil',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            if (supplier.city != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(8),
-                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (supplier.city != null)
-                      Row(
-                        children: [
-                          Icon(Icons.location_city, size: 16, color: Colors.grey[600]),
-                          const SizedBox(width: 8),
-                          Text(
-                            supplier.city!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ],
+                    Text(
+                      supplier.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    if (supplier.phone != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        supplier.phone!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(sc.LucideIcons.pencil, size: 20),
+                    onPressed: () => _showEditSupplierDialog(
+                      context,
+                      supplier,
+                      (updatedSupplier) => onSupplierEdit(updatedSupplier),
+                    ),
+                    tooltip: 'Düzenle',
+                  ),
+                  IconButton(
+                    icon: const Icon(sc.LucideIcons.trash2, size: 20),
+                    onPressed: () => _showDeleteConfirmation(
+                      context: context,
+                      supplier: supplier,
+                      onSupplierDeleted: (id) => onSupplierDeleted(id),
+                    ),
+                    tooltip: 'Sil',
+                  ),
+                ],
+              ),
             ],
+          ),
+          if (supplier.city != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.muted,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (supplier.city != null)
+                    Row(
+                      children: [
+                        Icon(
+                          sc.LucideIcons.building2,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          supplier.city!,
+                          style: TextStyle(fontSize: 14, color: AppColors.text),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
           ],
-        ),
+        ],
+      ),
     );
   }
 
-  
-  void _showEditSupplierDialog(BuildContext context, SupplierModel supplier, Function(SupplierModel updatedSupplier) onSupplierUpdated) {
+  void _showEditSupplierDialog(
+    BuildContext context,
+    SupplierModel supplier,
+    Function(SupplierModel updatedSupplier) onSupplierUpdated,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -197,7 +220,8 @@ class SupplierCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
@@ -210,13 +234,17 @@ class SupplierCard extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmation({required BuildContext context,required SupplierModel supplier , required Function(String id) onSupplierDeleted}) {
+  void _showDeleteConfirmation({
+    required BuildContext context,
+    required SupplierModel supplier,
+    required Function(String id) onSupplierDeleted,
+  }) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning_outlined, color: Colors.orange[600]),
+            Icon(sc.LucideIcons.triangleAlert, color: AppColors.textSecondary),
             const SizedBox(width: 8),
             const Text('تأكيد الحذف'),
           ],
@@ -238,23 +266,24 @@ class SupplierCard extends StatelessWidget {
               const SizedBox(height: 8),
               const Text(
                 'هذا الإجراء لا يمكن التراجع عنه',
-                style: TextStyle(color: Colors.red, fontSize: 12),
+                style: TextStyle(color: AppColors.error, fontSize: 12),
               ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       Navigator.pop(context);
                       onSupplierDeleted(supplier.id);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     child: const Text('حذف'),
                   ),
                 ],

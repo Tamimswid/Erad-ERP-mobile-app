@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class DeleteInvoiceDialog extends StatelessWidget {
   final String invoiceNumber;
@@ -18,16 +19,18 @@ class DeleteInvoiceDialog extends StatelessWidget {
         'هل أنت متأكد من حذف فاتورة #$invoiceNumber؟ لا يمكن التراجع عن هذا الإجراء.',
       ),
       actions: [
-        TextButton(
+        sc.Button(
+          style: sc.ButtonStyle.ghost(),
           onPressed: () => Navigator.pop(context),
           child: const Text('إلغاء'),
         ),
-        TextButton(
+        sc.Button(
+          style: sc.ButtonStyle.destructive(),
           onPressed: () {
             onConfirm();
             Navigator.pop(context);
           },
-          child: const Text('حذف', style: TextStyle(color: Colors.red)),
+          child: const Text('حذف'),
         ),
       ],
     );

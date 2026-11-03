@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/utils/custom_date_range_picker.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceFiltersWidget extends StatefulWidget {
   final String selectedType;
@@ -53,9 +55,9 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
@@ -94,19 +96,19 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(6),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: widget.selectedType,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, size: 18),
-          style: const TextStyle(fontSize: 13),
+          icon: const Icon(sc.LucideIcons.chevronDown, size: 18),
+          style: const TextStyle(fontSize: 14),
           items: const [
-            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(color: Colors.black ,fontSize: 14),)),
-            DropdownMenuItem(value: 'sale', child: Text('بيع',style: TextStyle(color: Colors.black,fontSize: 14),)),
-            DropdownMenuItem(value: 'purchase', child: Text('شراء',style: TextStyle(color: Colors.black,fontSize: 14),)),
+            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(color: AppColors.text ,fontSize: 14),)),
+            DropdownMenuItem(value: 'sale', child: Text('بيع',style: TextStyle(color: AppColors.text,fontSize: 14),)),
+            DropdownMenuItem(value: 'purchase', child: Text('شراء',style: TextStyle(color: AppColors.text,fontSize: 14),)),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -123,24 +125,24 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
       controller: _searchController,
       decoration: InputDecoration(
         hintText: 'بحث عن فاتورة أو عميل أو مورد...',
-        hintStyle: const TextStyle(fontSize: 13),
-        prefixIcon: const Icon(Icons.search, color: Color(0xFF9CA3AF), size: 20),
+        hintStyle: const TextStyle(fontSize: 14),
+        prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary, size: 20),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF3B82F6)),
+          borderSide: const BorderSide(color: AppColors.primary),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         isDense: true,
       ),
-      style: const TextStyle(fontSize: 13),
+      style: const TextStyle(fontSize: 14),
     );
   }
 
@@ -148,19 +150,19 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(6),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: widget.selectedStatus,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, size: 18),
-          style: const TextStyle(fontSize: 13),
+          icon: const Icon(sc.LucideIcons.chevronDown, size: 18),
+          style: const TextStyle(fontSize: 14),
           items: const [
-            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(fontSize: 13,color: Colors.black))),
-            DropdownMenuItem(value: 'debt', child: Text('دين',style: TextStyle(fontSize: 13,color: Colors.black))),
-            DropdownMenuItem(value: 'cash', child: Text(  'نقدي',style: TextStyle(fontSize: 13,color: Colors.black))),
+            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(fontSize: 14,color: AppColors.text))),
+            DropdownMenuItem(value: 'debt', child: Text('دين',style: TextStyle(fontSize: 14,color: AppColors.text))),
+            DropdownMenuItem(value: 'cash', child: Text(  'نقدي',style: TextStyle(fontSize: 14,color: AppColors.text))),
 
           ],
           onChanged: (value) {

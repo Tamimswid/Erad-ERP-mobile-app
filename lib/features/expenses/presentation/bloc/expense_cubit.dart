@@ -1,10 +1,5 @@
-import 'dart:async';
-import 'dart:math';
-
-import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/errors/failures.dart';
 import '../../data/models/expense.dart';
 import '../../data/models/expense_category.dart';
 import '../../data/repositories/expense_repository.dart';
@@ -12,235 +7,271 @@ import '../../data/repositories/expense_repository.dart';
 part 'expense_state.dart';
 
 class ExpenseCubit extends Cubit<ExpenseState> {
+  static const int pageSize = 10;
+
   final ExpenseRepository _expenseRepository;
 
-  // Stream subscriptions for real-time updates
-  StreamSubscription<Either<Failure, List<ExpenseCategory>>>? _categoriesSubscription;
-  StreamSubscription<Either<Failure, List<Expense>>>? _expensesSubscription;
-
-  // Filter states
+  final List<Expense> _expenses = [];
+  List<ExpenseCategory> _categories = [];
   DateTime? _startDate;
   DateTime? _endDate;
   String? _selectedCategoryId;
-  List<ExpenseCategory> _categories = [];
-  List<Expense> _expenses = [];
+
+  int _offset = 0;
+  int _requestId = 0;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+  double _totalAmount = 0;
+  int _totalCount = 0;
+  double _averageAmount = 0;
+  Map<String, double> _monthlyData = const {};
 
   ExpenseCubit({required ExpenseRepository expenseRepository})
       : _expenseRepository = expenseRepository,
-        super(ExpenseInitial()) {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (!isClosed) {
-        _startRealtimeListeners();
-      }
-    });
-  }
-
-  // Real-time listeners
-  void _startRealtimeListeners() {
-    emit(ExpenseLoading());
-    // Listen to categories stream
-    _categoriesSubscription = _expenseRepository.watchExpenseCategories().listen(
-      (result) {
-        result.fold(
-          (failure) => emit(ExpenseError(failure.message)),
-          (categories) {
-            _categories = categories;
-            _emitExpensesLoaded();
-          },
-        );
-      },
-    );
-
-    // Listen to expenses stream
-    _expensesSubscription = _expenseRepository.watchExpenses().listen(
-      (result) {
-        result.fold(
-          (failure) => emit(ExpenseError(failure.message)),
-          (expenses) {
-            _expenses = expenses;
-            _emitExpensesLoaded();
-          },
-        );
-      },
-    );
-  }
-
-  void _emitExpensesLoaded() {
-    final filteredExpenses = _getFilteredExpenses();
-    final totalAmount = filteredExpenses.fold<double>(0, (sum, e) => sum + e.amount);
-    final totalCount = filteredExpenses.length;
-    final averageAmount = totalCount > 0 ? (totalAmount / totalCount).toDouble() : 0.0;
-    final monthlyData = _calculateMonthlyData(filteredExpenses);
-
-    emit(ExpensesLoaded(
-      expenses: filteredExpenses,
-      categories: _categories,
-      startDate: _startDate,
-      endDate: _endDate,
-      selectedCategoryId: _selectedCategoryId,
-      totalAmount: totalAmount,
-      totalCount: totalCount,
-      averageAmount: averageAmount,
-      monthlyData: monthlyData,
-    ));
-  }
-
-  Map<String, double> _calculateMonthlyData(List<Expense> expenses) {
-    final Map<String, double> monthlyMap = {};
-
-    for (final expense in expenses) {
-      final key = '${expense.expenseDate.year}-${expense.expenseDate.month.toString().padLeft(2, '0')}';
-      monthlyMap[key] = (monthlyMap[key] ?? 0) + expense.amount;
-    }
-
-    return monthlyMap;
-  }
-
-  List<Expense> _getFilteredExpenses() {
-    final filtered = _expenses.where((expense) {
-      // Date filter
-      if (_startDate != null) {
-        if (expense.expenseDate.isBefore(_startDate!)) {
-          return false;
-        }
-      }
-      if (_endDate != null) {
-        if (expense.expenseDate.isAfter(_endDate!)) {
-          return false;
-        }
-      }
-      // Category filter
-      if (_selectedCategoryId != null) {
-        return expense.categoryId == _selectedCategoryId;
-      }
-      return true;
-    }).toList();
-    
-    // Sort by date descending (newest first)
-    filtered.sort((a, b) => b.expenseDate.compareTo(a.expenseDate));
-    return filtered;
-  }
-
-  @override
-  Future<void> close() {
-    _categoriesSubscription?.cancel();
-    _expensesSubscription?.cancel();
-    return super.close();
-  }
+        super(ExpenseInitial());
 
   // Getters for filter states
   DateTime? get startDate => _startDate;
   DateTime? get endDate => _endDate;
   String? get selectedCategoryId => _selectedCategoryId;
   List<ExpenseCategory> get categories => _categories;
-  List<Expense> get expenses => _expenses;
+  List<Expense> get expenses => List<Expense>.unmodifiable(_expenses);
 
-  // Expense Categories - Optimistic UI pattern
-  Future<void> createExpenseCategory(ExpenseCategory category) async {
-    // 1. Generate temporary ID for optimistic update
-    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1000)}';
+  Future<void> loadInitial({DateTime? startDate, DateTime? endDate}) async {
+    _startDate = startDate;
+    _endDate = endDate;
+    await _reload(showLoading: true, includeCategories: true);
+  }
 
-    // 2. Add to local list immediately (optimistic)
-    final optimisticCategory = category.copyWith(id: tempId);
-    _categories = [..._categories, optimisticCategory];
-    _emitExpensesLoaded();
+  Future<void> loadMore() async {
+    if (isClosed || !_hasMore || _isLoadingMore) return;
 
-    // 3. Send to Supabase
-    final result = await _expenseRepository.createExpenseCategory(category);
+    final requestId = _requestId;
+    _isLoadingMore = true;
+    _emitLoaded();
 
+    final result = await _expenseRepository.getExpensesPage(
+      offset: _offset,
+      limit: pageSize,
+      startDate: _startDate,
+      endDate: _endDate,
+      categoryId: _selectedCategoryId,
+    );
+    if (isClosed || requestId != _requestId) return;
+
+    _isLoadingMore = false;
     result.fold(
-      (failure) {
-        // 4. Rollback: Remove from local list on error
-        _categories = _categories.where((c) => c.id != tempId).toList();
-        _emitExpensesLoaded();
-        emit(ExpenseError('فشل إضافة الفئة: ${failure.message}'));
+      (_) {
+        _hasMore = false;
+        _emitLoaded();
       },
-      (createdCategory) {
-        // 5. Success: Real-time stream will replace temp with actual data
+      (page) {
+        _expenses.addAll(page.items);
+        _offset += page.items.length;
+        _hasMore = page.hasMore;
+        _emitLoaded();
+      },
+    );
+  }
+
+  Future<void> _reload({
+    bool showLoading = false,
+    bool includeCategories = false,
+  }) async {
+    final requestId = ++_requestId;
+    _offset = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+
+    if (showLoading && !isClosed) emit(ExpenseLoading());
+
+    final pageFuture = _expenseRepository.getExpensesPage(
+      offset: 0,
+      limit: pageSize,
+      startDate: _startDate,
+      endDate: _endDate,
+      categoryId: _selectedCategoryId,
+    );
+    final summaryFuture = _expenseRepository.getExpenseSummary(
+      startDate: _startDate,
+      endDate: _endDate,
+      categoryId: _selectedCategoryId,
+    );
+    final categoriesFuture = includeCategories
+        ? _expenseRepository.getExpenseCategories()
+        : null;
+
+    final pageResult = await pageFuture;
+    final summaryResult = await summaryFuture;
+    final categoriesResult =
+        categoriesFuture == null ? null : await categoriesFuture;
+
+    if (isClosed || requestId != _requestId) return;
+
+    pageResult.fold(
+      (failure) => emit(ExpenseError(failure.message)),
+      (page) {
+        _expenses
+          ..clear()
+          ..addAll(page.items);
+        _offset = page.items.length;
+        _hasMore = page.hasMore;
+
+        summaryResult.fold(
+          (_) {
+            _totalAmount = 0;
+            _totalCount = 0;
+            _averageAmount = 0;
+            _monthlyData = const {};
+          },
+          (summary) {
+            _totalAmount = summary.totalAmount;
+            _totalCount = summary.totalCount;
+            _averageAmount = summary.averageAmount;
+            _monthlyData = summary.monthlyData;
+          },
+        );
+
+        if (categoriesResult != null) {
+          categoriesResult.fold((_) {}, (categories) {
+            _categories = categories;
+          });
+        }
+
+        _emitLoaded();
+      },
+    );
+  }
+
+  void _emitLoaded() {
+    if (isClosed) return;
+    emit(ExpensesLoaded(
+      expenses: List<Expense>.unmodifiable(_expenses),
+      categories: _categories,
+      startDate: _startDate,
+      endDate: _endDate,
+      selectedCategoryId: _selectedCategoryId,
+      totalAmount: _totalAmount,
+      totalCount: _totalCount,
+      averageAmount: _averageAmount,
+      monthlyData: _monthlyData,
+      hasMore: _hasMore,
+      isLoadingMore: _isLoadingMore,
+    ));
+  }
+
+  // Expense Categories
+  Future<void> _reloadCategories() async {
+    final result = await _expenseRepository.getExpenseCategories();
+    if (isClosed) return;
+    result.fold((_) {}, (categories) {
+      _categories = categories;
+      _emitLoaded();
+    });
+  }
+
+  Future<void> createExpenseCategory(ExpenseCategory category) async {
+    final result = await _expenseRepository.createExpenseCategory(category);
+    if (isClosed) return;
+    result.fold(
+      (failure) => emit(ExpenseError('فشل إضافة الفئة: ${failure.message}')),
+      (_) {
+        if (isClosed) return;
         emit(ExpenseSuccess('تم إضافة فئة المصروفات بنجاح'));
-        // Stream will automatically update the list with real ID
+        _reloadCategories();
       },
     );
   }
 
   Future<void> updateExpenseCategory(ExpenseCategory category) async {
     final result = await _expenseRepository.updateExpenseCategory(category);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
-      (updatedCategory) {
+      (_) {
+        if (isClosed) return;
         emit(ExpenseSuccess('تم تحديث فئة المصروفات بنجاح'));
-        // Stream will automatically update the list
+        _reloadCategories();
       },
     );
   }
 
   Future<void> deleteExpenseCategory(String id) async {
     final result = await _expenseRepository.deleteExpenseCategory(id);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (_) {
+        if (isClosed) return;
         emit(ExpenseSuccess('تم حذف فئة المصروفات بنجاح'));
-        // Stream will automatically update the list
+        _reloadCategories();
       },
     );
   }
 
-  // Filter methods - Just re-emit with filtered data
-  void setCategoryFilter(String? categoryId) {
+  // Filter methods
+  Future<void> setCategoryFilter(String? categoryId) async {
     _selectedCategoryId = categoryId;
-    _emitExpensesLoaded();
+    await _reload();
   }
 
-  void filterByDateRange(DateTime? start, DateTime? end) {
+  Future<void> filterByDateRange(DateTime? start, DateTime? end) async {
     _startDate = start;
     _endDate = end;
-    _emitExpensesLoaded();
+    await _reload();
   }
 
-  void clearFilters() {
+  Future<void> clearFilters() async {
     _startDate = null;
     _endDate = null;
     _selectedCategoryId = null;
-    _emitExpensesLoaded();
+    await _reload();
   }
 
-  // CRUD operations - Stream will handle automatic updates
+  // CRUD operations
   Future<void> createExpense(Expense expense) async {
     emit(ExpenseLoading());
     final result = await _expenseRepository.createExpense(expense);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
-      (createdExpense) {
+      (_) {
+        if (isClosed) return;
         emit(ExpenseSuccess('تم إضافة المصروف بنجاح'));
-        // Reload data to show updated list
-        _emitExpensesLoaded();
+        _reload();
       },
     );
   }
 
   Future<void> updateExpense(Expense expense) async {
     final result = await _expenseRepository.updateExpense(expense);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
-      (updatedExpense) {
+      (_) {
+        if (isClosed) return;
         emit(ExpenseSuccess('تم تحديث المصروف بنجاح'));
-        _emitExpensesLoaded();
+        _reload();
       },
     );
   }
 
   Future<void> deleteExpense(String id) async {
     final result = await _expenseRepository.deleteExpense(id);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(ExpenseError(failure.message)),
       (_) {
+        if (isClosed) return;
         emit(ExpenseSuccess('تم حذف المصروف بنجاح'));
-        _emitExpensesLoaded();
+        _reload();
       },
     );
   }
 
   void clearError() {
+    if (isClosed) return;
     emit(ExpenseInitial());
   }
 }

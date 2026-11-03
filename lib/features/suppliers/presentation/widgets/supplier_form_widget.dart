@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/services/user_service.dart';
 import '../../data/models/supplier.dart';
 import '../bloc/supplier_cubit.dart';
@@ -9,7 +10,12 @@ class SupplierFormWidget extends StatefulWidget {
   final Function(SupplierModel) onSubmit;
   final SupplierCubit? cubit;
 
-  const SupplierFormWidget({super.key, this.supplier, required this.onSubmit, this.cubit});
+  const SupplierFormWidget({
+    super.key,
+    this.supplier,
+    required this.onSubmit,
+    this.cubit,
+  });
 
   @override
   State<SupplierFormWidget> createState() => _SupplierFormWidgetState();
@@ -47,15 +53,19 @@ class _SupplierFormWidgetState extends State<SupplierFormWidget> {
         id: widget.supplier?.id ?? '',
         userId: userId!,
         name: _nameController.text.trim(),
-        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-        city: _cityController.text.trim().isEmpty ? null : _cityController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
+        city: _cityController.text.trim().isEmpty
+            ? null
+            : _cityController.text.trim(),
         currentBalance: widget.supplier?.currentBalance ?? 0.0,
         totalPurchases: widget.supplier?.totalPurchases ?? 0.0,
         isActive: widget.supplier?.isActive ?? true,
         createdAt: widget.supplier?.createdAt ?? now,
         updatedAt: now,
       );
-      
+
       if (widget.cubit != null) {
         widget.cubit!.createSupplier(supplier);
       } else {
@@ -76,7 +86,7 @@ class _SupplierFormWidgetState extends State<SupplierFormWidget> {
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'اسم المورد *',
-                prefixIcon: Icon(Icons.business),
+                prefixIcon: Icon(sc.LucideIcons.building2),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -91,7 +101,7 @@ class _SupplierFormWidgetState extends State<SupplierFormWidget> {
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
                 labelText: 'رقم الهاتف',
-                prefixIcon: Icon(Icons.phone),
+                prefixIcon: Icon(sc.LucideIcons.phone),
               ),
             ),
             const SizedBox(height: 16),
@@ -99,13 +109,14 @@ class _SupplierFormWidgetState extends State<SupplierFormWidget> {
               controller: _cityController,
               decoration: const InputDecoration(
                 labelText: 'المدينة',
-                prefixIcon: Icon(Icons.location_city),
+                prefixIcon: Icon(sc.LucideIcons.building2),
               ),
             ),
             const SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: sc.Button(
+                style: sc.ButtonStyle.primary(),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _submit();

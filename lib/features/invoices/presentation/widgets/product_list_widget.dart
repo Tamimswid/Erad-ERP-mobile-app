@@ -6,6 +6,7 @@ import '../../../../core/utils/app_utils.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../data/models/invoice_item.dart';
 import '../bloc/invoice_cubit.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class ProductListWidget extends StatefulWidget {
   final VoidCallback? onItemRemoved;
@@ -61,7 +62,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.inventory_2_outlined,
+            sc.LucideIcons.package,
             size: 40,
             color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
@@ -91,7 +92,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
               color: AppColors.error,
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
-              child: const Icon(Icons.delete, color: Colors.white, size: 24),
+              child: const Icon(sc.LucideIcons.trash2, color: AppColors.surface, size: 24),
             ),
             onDismissed: (direction) {
               _removeItem(index);
@@ -125,15 +126,16 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
+                          color: AppColors.muted,
                           borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: AppColors.divider),
                         ),
                         child: Text(
                           '×${item.quantity}',
                           style: const TextStyle(
                             fontWeight: AppFonts.fontWeightBold,
-                            color: AppColors.primary,
-                            fontSize: 13,
+                            color: AppColors.text,
+                            fontSize: 14,
                           ),
                         ),
                       ),
@@ -176,25 +178,25 @@ class _ProductListWidgetState extends State<ProductListWidget> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.08),
+            color: AppColors.muted,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+            border: Border.all(color: AppColors.divider),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.inventory_2_outlined,
+              const Icon(
+                sc.LucideIcons.package,
                 size: 18,
-                color: AppColors.primary,
+                color: AppColors.textSecondary,
               ),
               const SizedBox(width: 8),
               Text(
                 '${items.length} منتج',
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: AppFonts.fontWeightSemiBold,
                   fontSize: AppFonts.fontSizeSmall,
-                  color: AppColors.primary,
+                  color: AppColors.text,
                 ),
               ),
             ],
@@ -263,9 +265,9 @@ class _ProductListWidgetState extends State<ProductListWidget> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: AppColors.muted,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+          border: Border.all(color: AppColors.divider),
         ),
         child: Text(
           NumberFormatter.format(item.unitPrice?.toDouble() ?? 0.0),

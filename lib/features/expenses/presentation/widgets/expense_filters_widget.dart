@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/utils/custom_date_range_picker.dart';
 
 enum PeriodMode { year, custom }
 
@@ -26,12 +26,7 @@ class ExpenseFiltersWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return sc.Card(
       padding: const EdgeInsets.all(12),
       child: Wrap(
         crossAxisAlignment: WrapCrossAlignment.end,
@@ -55,7 +50,7 @@ class ExpenseFiltersWidget extends StatelessWidget {
         const Text(
           'الفترة',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
             height: 1.0,
@@ -105,9 +100,9 @@ class ExpenseFiltersWidget extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: isActive ? Colors.white : AppColors.textSecondary,
+            color: isActive ? AppColors.onPrimary : AppColors.textSecondary,
           ),
         ),
       ),
@@ -121,7 +116,7 @@ class ExpenseFiltersWidget extends StatelessWidget {
         const Text(
           'السنة',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
             height: 1.0,
@@ -144,7 +139,7 @@ class ExpenseFiltersWidget extends StatelessWidget {
                   value: year,
                   child: Text(
                     year,
-                    style: const TextStyle(fontSize: 13),
+                    style: const TextStyle(fontSize: 14),
                   ),
                 );
               }).toList(),
@@ -163,7 +158,7 @@ class ExpenseFiltersWidget extends StatelessWidget {
         const Text(
           'نطاق التاريخ',
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: AppColors.textSecondary,
             height: 1.0,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/edit_invoice_cubit.dart';
 
@@ -40,7 +41,7 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.error : AppColors.success,
+        backgroundColor: isError ? AppColors.error : null,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 3),
@@ -50,20 +51,8 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return sc.Card(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -73,39 +62,18 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
               Expanded(
                 child: SizedBox(
                   height: 50,
-                  child: ElevatedButton.icon(
+                  child: sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: _isSaving ? null : _saveInvoice,
-                    icon: _isSaving
+                    leading: _isSaving
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.save, size: 20),
-                    label: Text(
+                        : const Icon(sc.LucideIcons.save, size: 20),
+                    child: Text(
                       _isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                      backgroundColor: _isSaving
-                          ? AppColors.primary.withValues(alpha: 0.7)
-                          : AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
-                      ),
                     ),
                   ),
                 ),
@@ -114,26 +82,11 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
               Expanded(
                 child: SizedBox(
                   height: 50,
-                  child: OutlinedButton.icon(
+                  child: sc.Button(
+                    style: sc.ButtonStyle.outline(),
                     onPressed: _isSaving ? null : () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, size: 20),
-                    label: const Text(
-                      'إلغاء',
-                      style: TextStyle(
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                      foregroundColor: AppColors.text,
-                      side: BorderSide(color: AppColors.border),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppConstants.borderRadius,
-                        ),
-                      ),
-                    ),
+                    leading: const Icon(sc.LucideIcons.x, size: 20),
+                    child: const Text('إلغاء'),
                   ),
                 ),
               ),

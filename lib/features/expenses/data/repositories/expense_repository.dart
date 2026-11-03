@@ -1,8 +1,10 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
+import '../../../../core/utils/paged_result.dart';
 import '../models/expense.dart';
 import '../models/expense_category.dart';
+import '../models/expense_summary.dart';
 import '../datasource/expense_remote_datasource.dart';
 
 // مستودع المصروفات - يتحقق من الاتصال ويعالج الأخطاء
@@ -76,21 +78,48 @@ class ExpenseRepository {
     }
   }
 
-  // مراقبة فئات المصروفات بشكل فوري
-  Stream<Either<Failure, List<ExpenseCategory>>> watchExpenseCategories() {
-    try {
-      return remoteDataSource.watchExpenseCategories().map((data) => Right(data));
-    } catch (e) {
-      return Stream.value(Left(exceptionToFailure(e)));
+  // جلب صفحة من المصروفات مع التحقق من الاتصال
+  Future<Either<Failure, PagedResult<Expense>>> getExpensesPage({
+    required int offset,
+    int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? categoryId,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final page = await remoteDataSource.getExpensesPage(
+          offset: offset,
+          limit: limit,
+          startDate: startDate,
+          endDate: endDate,
+          categoryId: categoryId,
+        );
+        return Right(page);
+      } on Failure catch (failure) {
+        return Left(failure);
+      } catch (e) {
+        return Left(exceptionToFailure(e));
+      }
+    } else {
+      return Left(NetworkFailure.noConnection());
     }
   }
 
-  // جلب المصروفات مع التحقق من الاتصال
-  Future<Either<Failure, List<Expense>>> getExpenses({DateTime? startDate, DateTime? endDate, String? categoryId}) async {
+  // ملخص المصروفات مع التحقق من الاتصال
+  Future<Either<Failure, ExpenseSummary>> getExpenseSummary({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? categoryId,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final expenses = await remoteDataSource.getExpenses(startDate: startDate, endDate: endDate, categoryId: categoryId);
-        return Right(expenses);
+        final summary = await remoteDataSource.getExpenseSummary(
+          startDate: startDate,
+          endDate: endDate,
+          categoryId: categoryId,
+        );
+        return Right(summary);
       } on Failure catch (failure) {
         return Left(failure);
       } catch (e) {
@@ -165,12 +194,4 @@ class ExpenseRepository {
     }
   }
 
-  // مراقبة المصروفات بشكل فوري
-  Stream<Either<Failure, List<Expense>>> watchExpenses() {
-    try {
-      return remoteDataSource.watchExpenses().map((data) => Right(data));
-    } catch (e) {
-      return Stream.value(Left(exceptionToFailure(e)));
-    }
-  }
 }

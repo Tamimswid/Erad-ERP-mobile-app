@@ -1,8 +1,5 @@
-import 'dart:async';
-import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/errors/failures.dart';
 import '../../data/models/withdrawal.dart';
 import '../../data/models/partner.dart';
 import '../../data/repositories/withdrawal_repository.dart';
@@ -10,163 +7,189 @@ import '../../data/repositories/withdrawal_repository.dart';
 part 'withdrawal_state.dart';
 
 class WithdrawalCubit extends Cubit<WithdrawalState> {
+  static const int pageSize = 10;
+
   final WithdrawalRepository withdrawalRepository;
-  StreamSubscription<Either<Failure, List<Withdrawal>>>? _withdrawalsSubscription;
-  StreamSubscription<Either<Failure, List<Partner>>>? _partnersSubscription;
 
-  WithdrawalCubit({required this.withdrawalRepository})
-      : super(WithdrawalInitial()) {
-    emit(WithdrawalLoading());
-    // Use delayed to ensure loading state is visible for at least a moment
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (!isClosed) {
-        _startRealtimeListeners();
-      }
-    });
-  }
-
-  List<Withdrawal> _allWithdrawals = [];
-  List<Partner> _allPartners = [];
+  final List<Withdrawal> _withdrawals = [];
+  List<Partner> _partners = [];
   String? _selectedPartnerId;
   DateTime? _startDate;
   DateTime? _endDate;
   String? _selectedYear;
 
-  void _startRealtimeListeners() {
-    emit(WithdrawalLoading());
-    // Listen to withdrawals stream
-    _withdrawalsSubscription = withdrawalRepository
-        .watchWithdrawals()
-        .listen(
-      (result) {
-        if (isClosed) return;
-        result.fold(
-          (failure) => emit(WithdrawalError(failure.message)),
-          (withdrawals) {
-            _allWithdrawals = withdrawals;
-            _applyFilters();
-          },
-        );
+  int _offset = 0;
+  int _requestId = 0;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+  double _totalAmount = 0;
+  int _totalCount = 0;
+  double _averageAmount = 0;
+  List<double> _monthlyData = List<double>.filled(12, 0);
+
+  WithdrawalCubit({required this.withdrawalRepository})
+      : super(WithdrawalInitial());
+
+  Future<void> loadInitial({required String year}) async {
+    final yearInt = int.tryParse(year) ?? DateTime.now().year;
+    _selectedYear = yearInt.toString();
+    _startDate = DateTime(yearInt, 1, 1);
+    _endDate = DateTime(yearInt, 12, 31);
+    await _reload(showLoading: true, includePartners: true);
+  }
+
+  Future<void> loadMore() async {
+    if (isClosed || !_hasMore || _isLoadingMore) return;
+
+    final requestId = _requestId;
+    _isLoadingMore = true;
+    _emitLoaded();
+
+    final result = await withdrawalRepository.getWithdrawalsPage(
+      offset: _offset,
+      limit: pageSize,
+      startDate: _startDate,
+      endDate: _endDate,
+      partnerId: _selectedPartnerId,
+    );
+    if (isClosed || requestId != _requestId) return;
+
+    _isLoadingMore = false;
+    result.fold(
+      (_) {
+        _hasMore = false;
+        _emitLoaded();
+      },
+      (page) {
+        _withdrawals.addAll(page.items);
+        _offset += page.items.length;
+        _hasMore = page.hasMore;
+        _emitLoaded();
       },
     );
+  }
 
-    // Listen to partners stream
-    _partnersSubscription = withdrawalRepository.watchPartners().listen(
-      (result) {
-        if (isClosed) return;
-        result.fold(
-          (failure) => emit(WithdrawalError(failure.message)),
-          (partners) {
-            _allPartners = partners;
-            _applyFilters();
+  Future<void> _reload({
+    bool showLoading = false,
+    bool includePartners = false,
+  }) async {
+    final requestId = ++_requestId;
+    _offset = 0;
+    _hasMore = true;
+    _isLoadingMore = false;
+
+    if (showLoading && !isClosed) emit(WithdrawalLoading());
+
+    final pageFuture = withdrawalRepository.getWithdrawalsPage(
+      offset: 0,
+      limit: pageSize,
+      startDate: _startDate,
+      endDate: _endDate,
+      partnerId: _selectedPartnerId,
+    );
+    final summaryFuture = withdrawalRepository.getWithdrawalsSummary(
+      startDate: _startDate,
+      endDate: _endDate,
+      partnerId: _selectedPartnerId,
+    );
+    final partnersFuture =
+        includePartners ? withdrawalRepository.getPartners() : null;
+
+    final pageResult = await pageFuture;
+    final summaryResult = await summaryFuture;
+    final partnersResult = partnersFuture == null ? null : await partnersFuture;
+
+    if (isClosed || requestId != _requestId) return;
+
+    pageResult.fold(
+      (failure) => emit(WithdrawalError(failure.message)),
+      (page) {
+        _withdrawals
+          ..clear()
+          ..addAll(page.items);
+        _offset = page.items.length;
+        _hasMore = page.hasMore;
+
+        summaryResult.fold(
+          (_) {
+            _totalAmount = 0;
+            _totalCount = 0;
+            _averageAmount = 0;
+            _monthlyData = List<double>.filled(12, 0);
+          },
+          (summary) {
+            _totalAmount = summary.totalAmount;
+            _totalCount = summary.totalCount;
+            _averageAmount = summary.averageAmount;
+            _monthlyData = summary.monthlyData;
           },
         );
+
+        if (partnersResult != null) {
+          partnersResult.fold((_) {}, (partners) {
+            _partners = partners;
+          });
+        }
+
+        _emitLoaded();
       },
     );
   }
 
-  void _applyFilters() {
+  void _emitLoaded() {
     if (isClosed) return;
-
-    var filteredWithdrawals = _allWithdrawals;
-
-    if (_selectedPartnerId != null) {
-      filteredWithdrawals = filteredWithdrawals
-          .where((w) => w.partnerId == _selectedPartnerId)
-          .toList();
-    }
-
-    if (_selectedYear != null) {
-      final year = int.parse(_selectedYear!);
-      filteredWithdrawals = filteredWithdrawals
-          .where((w) => w.withdrawalDate.year == year)
-          .toList();
-    }
-
-    if (_startDate != null) {
-      filteredWithdrawals = filteredWithdrawals
-          .where((w) => !w.withdrawalDate.isBefore(_startDate!))
-          .toList();
-    }
-
-    if (_endDate != null) {
-      filteredWithdrawals = filteredWithdrawals
-          .where((w) => !w.withdrawalDate.isAfter(_endDate!))
-          .toList();
-    }
-
-    // Sort by date descending (newest first)
-    filteredWithdrawals.sort((a, b) => b.withdrawalDate.compareTo(a.withdrawalDate));
-
-    _emitLoadedState(filteredWithdrawals);
-  }
-
-  Future<void> loadData({DateTime? startDate, DateTime? endDate, String? partnerId}) async {
-    if (isClosed) return;
-
-    _startDate = startDate;
-    _endDate = endDate;
-    _selectedPartnerId = partnerId;
-
-    // Re-apply filters with new parameters
-    _applyFilters();
-  }
-
-  void _emitLoadedState(List<Withdrawal> filteredWithdrawals) {
-    if (isClosed) return;
-    final monthlyData = _calculateMonthlyData(filteredWithdrawals);
-    final totalAmount = filteredWithdrawals.fold<double>(0, (sum, w) => sum + w.amount);
-    final totalCount = filteredWithdrawals.length;
-    final averageAmount = totalCount > 0 ? (totalAmount / totalCount).toDouble() : 0.0;
-
     emit(WithdrawalsLoaded(
-      withdrawals: filteredWithdrawals,
-      partners: _allPartners,
-      totalAmount: totalAmount,
-      totalCount: totalCount,
-      averageAmount: averageAmount,
-      monthlyData: monthlyData,
+      withdrawals: List<Withdrawal>.unmodifiable(_withdrawals),
+      partners: _partners,
+      totalAmount: _totalAmount,
+      totalCount: _totalCount,
+      averageAmount: _averageAmount,
+      monthlyData: _monthlyData,
       selectedPartnerId: _selectedPartnerId,
       startDate: _startDate,
       endDate: _endDate,
       selectedYear: _selectedYear,
+      hasMore: _hasMore,
+      isLoadingMore: _isLoadingMore,
     ));
   }
 
-  List<double> _calculateMonthlyData(List<Withdrawal> withdrawals) {
-    final data = List<double>.filled(12, 0);
-    for (final w in withdrawals) {
-      final month = w.withdrawalDate.month - 1;
-      data[month] += w.amount;
-    }
-    return data;
+  Future<void> _reloadPartners() async {
+    final result = await withdrawalRepository.getPartners();
+    if (isClosed) return;
+    result.fold((_) {}, (partners) {
+      _partners = partners;
+      _emitLoaded();
+    });
   }
 
-  void filterByPartner(String? partnerId) {
+  Future<void> filterByPartner(String? partnerId) async {
     _selectedPartnerId = partnerId;
-    _applyFilters();
+    await _reload();
   }
 
-  void filterByDateRange(DateTime? start, DateTime? end) {
+  Future<void> filterByDateRange(DateTime? start, DateTime? end) async {
     _startDate = start;
     _endDate = end;
     _selectedYear = null;
-    _applyFilters();
+    await _reload();
   }
 
-  void filterByYear(String year) {
-    _selectedYear = year;
-    _startDate = null;
-    _endDate = null;
-    _applyFilters();
+  Future<void> filterByYear(String year) async {
+    final yearInt = int.tryParse(year) ?? DateTime.now().year;
+    _selectedYear = yearInt.toString();
+    _startDate = DateTime(yearInt, 1, 1);
+    _endDate = DateTime(yearInt, 12, 31);
+    await _reload();
   }
 
-  void clearFilters() {
+  Future<void> clearFilters() async {
     _selectedPartnerId = null;
     _startDate = null;
     _endDate = null;
     _selectedYear = null;
-    _applyFilters();
+    await _reload();
   }
 
   Future<void> createWithdrawal(Withdrawal withdrawal) async {
@@ -175,10 +198,10 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(WithdrawalError(failure.message)),
-      (createdWithdrawal) {
+      (_) {
+        if (isClosed) return;
         emit(WithdrawalSuccess('تم إضافة السحب بنجاح'));
-        // Immediately emit loaded state so UI doesn't break
-        _applyFilters();
+        _reload();
       },
     );
   }
@@ -189,8 +212,10 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(WithdrawalError(failure.message)),
-      (updatedWithdrawal) {
-        // Real-time stream will automatically update the UI
+      (_) {
+        if (isClosed) return;
+        emit(WithdrawalSuccess('تم تحديث السحب بنجاح'));
+        _reload();
       },
     );
   }
@@ -202,7 +227,9 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
     result.fold(
       (failure) => emit(WithdrawalError(failure.message)),
       (_) {
-        // Real-time stream will automatically update the UI
+        if (isClosed) return;
+        emit(WithdrawalSuccess('تم حذف السحب بنجاح'));
+        _reload();
       },
     );
   }
@@ -213,9 +240,7 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(WithdrawalError(failure.message)),
-      (createdPartner) {
-        // Real-time stream will automatically update the UI
-      },
+      (_) => _reloadPartners(),
     );
   }
 
@@ -226,9 +251,11 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
     result.fold(
       (failure) => emit(WithdrawalError(failure.message)),
       (_) {
-        // Real-time stream will automatically update the UI
         if (_selectedPartnerId == id) {
           _selectedPartnerId = null;
+          _reload();
+        } else {
+          _reloadPartners();
         }
       },
     );
@@ -237,19 +264,7 @@ class WithdrawalCubit extends Cubit<WithdrawalState> {
   void clearError() {
     if (isClosed) return;
     if (state is WithdrawalError) {
-      _emitLoadedState(_allWithdrawals);
+      _emitLoaded();
     }
-  }
-
-  @override
-  Future<void> close() {
-    _withdrawalsSubscription?.cancel();
-    _partnersSubscription?.cancel();
-    return super.close();
-  }
-
-  @Deprecated('Use loadData instead')
-  Future<void> getWithdrawals({DateTime? startDate, DateTime? endDate}) async {
-    await loadData(startDate: startDate, endDate: endDate);
   }
 }

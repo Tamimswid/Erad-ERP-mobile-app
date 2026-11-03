@@ -1,8 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/expense.dart';
 import '../models/expense_category.dart';
+import '../models/expense_summary.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/utils/paged_result.dart';
 
 abstract class ExpenseRemoteDataSource {
   // جلب جميع فئات المصروفات
@@ -13,11 +15,21 @@ abstract class ExpenseRemoteDataSource {
   Future<ExpenseCategory> updateExpenseCategory(ExpenseCategory category);
   // حذف فئة المصروفات
   Future<void> deleteExpenseCategory(String id);
-  // مراقبة فئات المصروفات بشكل فوري
-  Stream<List<ExpenseCategory>> watchExpenseCategories();
-  
-  // جلب المصروفات مع إمكانية التصفية
-  Future<List<Expense>> getExpenses({DateTime? startDate, DateTime? endDate, String? categoryId});
+
+  // جلب صفحة من المصروفات مع إمكانية التصفية
+  Future<PagedResult<Expense>> getExpensesPage({
+    required int offset,
+    int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? categoryId,
+  });
+  // ملخص المصروفات (إجمالي، عدد، متوسط، بيانات شهرية)
+  Future<ExpenseSummary> getExpenseSummary({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? categoryId,
+  });
   // جلب مصروف بالمعرف
   Future<Expense> getExpense(String id);
   // إنشاء مصروف جديد
@@ -26,8 +38,6 @@ abstract class ExpenseRemoteDataSource {
   Future<Expense> updateExpense(Expense expense);
   // حذف المصروف
   Future<void> deleteExpense(String id);
-  // مراقبة المصروفات بشكل فوري
-  Stream<List<Expense>> watchExpenses();
 }
 
 class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
@@ -105,40 +115,102 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
   }
 
   @override
-  Stream<List<ExpenseCategory>> watchExpenseCategories() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) {
-      throw Exception('User not logged in');
-    }
-
-    // مراقبة فئات المصروفات بشكل فوري
-    yield* client
-        .from('expense_categories')
-        .select()
-        .eq('user_id', userId)
-        .eq('is_active', true)
-        .order('name')
-        .asStream()
-        .map((response) => response.map((item) => ExpenseCategory.fromMap(item)).toList());
-  }
-
-  @override
-  Future<List<Expense>> getExpenses({DateTime? startDate, DateTime? endDate, String? categoryId}) async {
+  Future<PagedResult<Expense>> getExpensesPage({
+    required int offset,
+    int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? categoryId,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) {
         throw Exception('User not logged in');
       }
-      
-      // جلب المصروفات مع فئاتها
-      final response = await client
+
+      var query = client
           .from('expenses')
           .select('*, expense_categories(name)')
           .eq('user_id', userId)
-          .isFilter('deleted_at', null)
-          .order('expense_date', ascending: false);
+          .isFilter('deleted_at', null);
 
-      return response.map((expense) => Expense.fromMap(expense)).toList();
+      if (startDate != null) {
+        query = query.gte('expense_date', startDate.toIso8601String());
+      }
+      if (endDate != null) {
+        query = query.lte('expense_date', endDate.toIso8601String());
+      }
+      if (categoryId != null) {
+        query = query.eq('category_id', categoryId);
+      }
+
+      final response = await query
+          .order('expense_date', ascending: false)
+          .order('id', ascending: true)
+          .range(offset, offset + limit);
+
+      final expenses =
+          response.map((expense) => Expense.fromMap(expense)).toList();
+      final hasMore = expenses.length > limit;
+      return PagedResult(
+        items: hasMore ? expenses.sublist(0, limit) : expenses,
+        hasMore: hasMore,
+      );
+    } catch (e) {
+      throw exceptionToFailure(e);
+    }
+  }
+
+  @override
+  Future<ExpenseSummary> getExpenseSummary({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? categoryId,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      var query = client
+          .from('expenses')
+          .select('amount, expense_date')
+          .eq('user_id', userId)
+          .isFilter('deleted_at', null);
+
+      if (startDate != null) {
+        query = query.gte('expense_date', startDate.toIso8601String());
+      }
+      if (endDate != null) {
+        query = query.lte('expense_date', endDate.toIso8601String());
+      }
+      if (categoryId != null) {
+        query = query.eq('category_id', categoryId);
+      }
+
+      final response = await query;
+
+      var totalAmount = 0.0;
+      var totalCount = 0;
+      final monthlyData = <String, double>{};
+
+      for (final row in response) {
+        final amount = (row['amount'] ?? 0).toDouble();
+        final date = DateTime.parse(row['expense_date']);
+        totalAmount += amount;
+        totalCount++;
+        final key =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}';
+        monthlyData[key] = (monthlyData[key] ?? 0) + amount;
+      }
+
+      return ExpenseSummary(
+        totalAmount: totalAmount,
+        totalCount: totalCount,
+        averageAmount: totalCount > 0 ? totalAmount / totalCount : 0,
+        monthlyData: monthlyData,
+      );
     } catch (e) {
       throw exceptionToFailure(e);
     }
@@ -204,23 +276,5 @@ class ExpenseRemoteDataSourceImpl implements ExpenseRemoteDataSource {
     } catch (e) {
       throw exceptionToFailure(e);
     }
-  }
-
-  @override
-  Stream<List<Expense>> watchExpenses() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) {
-      throw Exception('User not logged in');
-    }
-
-    // مراقبة المصروفات بشكل فوري
-    yield* client
-        .from('expenses')
-        .select('*, expense_categories(name)')
-        .eq('user_id', userId)
-        .isFilter('deleted_at', null)
-        .order('expense_date', ascending: false)
-        .asStream()
-        .map((response) => response.map((item) => Expense.fromMap(item)).toList());
   }
 }

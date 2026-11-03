@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../products/data/models/product.dart';
 import '../../../products/presentation/bloc/product_cubit.dart';
 import '../../data/models/invoice_item.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class QuickProductAddCard extends StatefulWidget {
   final List<InvoiceItem> items;
@@ -144,11 +146,11 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                         decoration: InputDecoration(
                           labelText: 'Ürün Ara',
                           hintText: 'Ürün adı veya kodu yazın...',
-                          prefixIcon: const Icon(Icons.search),
+                          prefixIcon: const Icon(sc.LucideIcons.search),
                           border: const OutlineInputBorder(),
                           suffixIcon: _searchController.text.isNotEmpty
                               ? IconButton(
-                                  icon: const Icon(Icons.clear),
+                                  icon: const Icon(sc.LucideIcons.x),
                                   onPressed: () {
                                     _searchController.clear();
                                     _selectedProduct = null;
@@ -170,7 +172,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
+                                color: AppColors.muted,
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(8),
                                   topRight: Radius.circular(8),
@@ -179,16 +181,16 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                               child: Row(
                                 children: [
                                   Icon(
-                                    Icons.keyboard,
+                                    sc.LucideIcons.keyboard,
                                     size: 16,
-                                    color: Colors.blue.shade700,
+                                    color: AppColors.textSecondary,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'İlk ürün için ENTER tuşuna basın veya bir ürün seçin',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.blue.shade700,
+                                      color: AppColors.textSecondary,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -198,15 +200,15 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                             Container(
                               constraints: const BoxConstraints(maxHeight: 250),
                               decoration: BoxDecoration(
-                                border: Border.all(color: Colors.blue.shade300),
+                                border: Border.all(color: AppColors.border),
                                 borderRadius: const BorderRadius.only(
                                   bottomLeft: Radius.circular(8),
                                   bottomRight: Radius.circular(8),
                                 ),
-                                color: Colors.white,
+                                color: AppColors.surface,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: AppColors.text.withValues(alpha: 0.1),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -220,18 +222,18 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                   final isFirst = index == 0;
                                   return Container(
                                     decoration: BoxDecoration(
-                                      color: isFirst ? Colors.blue.shade50 : Colors.transparent,
+                                      color: isFirst ? AppColors.muted : Colors.transparent,
                                       border: isFirst 
-                                          ? Border(top: BorderSide(color: Colors.blue.shade300))
+                                          ? Border(top: BorderSide(color: AppColors.border))
                                           : null,
                                     ),
                                     child: ListTile(
                                       dense: true,
                                       leading: CircleAvatar(
-                                        backgroundColor: Colors.blue.shade100,
+                                        backgroundColor: AppColors.muted,
                                         child: Icon(
-                                          Icons.inventory_2,
-                                          color: Colors.blue.shade700,
+                                          sc.LucideIcons.package,
+                                          color: AppColors.textSecondary,
                                           size: 20,
                                         ),
                                       ),
@@ -239,7 +241,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                         product.name,
                                         style: TextStyle(
                                           fontWeight: isFirst ? FontWeight.bold : FontWeight.normal,
-                                          color: isFirst ? Colors.blue.shade700 : Colors.black87,
+                                          color: isFirst ? AppColors.textSecondary : AppColors.text,
                                         ),
                                       ),
                                       subtitle: Column(
@@ -250,7 +252,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                             'فيات: ${product.salePrice.toStringAsFixed(2)} TL',
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: Colors.green.shade600,
+                                              color: AppColors.primary,
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -258,8 +260,8 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                       ),
                                       trailing: isFirst 
                                           ? Icon(
-                                              Icons.keyboard_return,
-                                              color: Colors.blue.shade700,
+                                              sc.LucideIcons.cornerDownLeft,
+                                              color: AppColors.textSecondary,
                                               size: 16,
                                             )
                                           : null,
@@ -286,7 +288,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                     decoration: const InputDecoration(
                       labelText: 'قطعة',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.format_list_numbered),
+                      prefixIcon: Icon(sc.LucideIcons.listOrdered),
                     ),
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
@@ -313,7 +315,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
         child: Center(
           child: Text(
             'لم تتم إضافة أي منتجات حتى الآن',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: AppColors.textSecondary),
           ),
         ),
       );
@@ -321,7 +323,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
@@ -330,8 +332,8 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+              color: AppColors.muted,
+              border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
             child: const Row(
               children: [
@@ -352,8 +354,8 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
             return Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
               decoration: BoxDecoration(
-                color: index % 2 == 0 ? Colors.white : Colors.grey.shade50,
-                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+                color: index % 2 == 0 ? AppColors.surface : AppColors.muted,
+                border: Border(bottom: BorderSide(color: AppColors.border)),
               ),
               child: Row(
                 children: [
@@ -367,13 +369,13 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, size: 18),
+                          icon: const Icon(sc.LucideIcons.pencil, size: 18),
                           onPressed: () {
                             // TODO: Implement edit functionality
                           },
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete, size: 18, color: Colors.red),
+                          icon: const Icon(sc.LucideIcons.trash2, size: 18, color: AppColors.error),
                           onPressed: () => _removeItem(item),
                         ),
                       ],
@@ -388,8 +390,8 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              border: Border(top: BorderSide(color: Colors.grey.shade400)),
+              color: AppColors.muted,
+              border: Border(top: BorderSide(color: AppColors.textSecondary)),
             ),
             child: Row(
               children: [

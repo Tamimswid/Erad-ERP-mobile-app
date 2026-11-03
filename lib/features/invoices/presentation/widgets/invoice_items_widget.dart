@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:erad/core/constants/app_constants.dart';
 
 class InvoiceItemsWidget extends StatelessWidget {
   final List items;
@@ -20,7 +21,7 @@ class InvoiceItemsWidget extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: AppColors.muted,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
           ),
           child: const Row(
@@ -55,7 +56,7 @@ class InvoiceItemsWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(
         children: [
@@ -73,7 +74,7 @@ class InvoiceItemsWidget extends StatelessWidget {
                     'SKU: ${item.productCode}',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                     ),
                   ),
               ],
@@ -85,7 +86,7 @@ class InvoiceItemsWidget extends StatelessWidget {
             flex: 1,
             child: Text(
               '${_getDiscountAmount(item).toStringAsFixed(2)}',
-              style: TextStyle(color: Colors.red.shade700),
+              style: TextStyle(color: AppColors.error),
             ),
           ),
           Expanded(

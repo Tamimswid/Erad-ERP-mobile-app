@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
+import 'package:erad/core/constants/app_constants.dart';
 
 class EmptyStateWidget extends StatelessWidget {
   const EmptyStateWidget({super.key});
@@ -10,9 +12,9 @@ class EmptyStateWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.account_balance_wallet_outlined,
+            sc.LucideIcons.wallet,
             size: 64,
-            color: Colors.grey,
+            color: AppColors.textSecondary,
           ),
           SizedBox(height: 16),
           Text('لا يوجد سحوبات'),

@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/utils/paged_result.dart';
 import '../models/sales_invoice.dart';
 import '../models/purchase_invoice.dart';
 import '../datasources/invoice_local_datasource.dart';
@@ -14,6 +15,24 @@ abstract class InvoiceRepository {
   Future<Either<Failure, List<SalesInvoice>>> getSalesInvoices();
   // جلب جميع فواتير الشراء
   Future<Either<Failure, List<PurchaseInvoice>>> getPurchaseInvoices();
+  // جلب صفحة من فواتير البيع
+  Future<Either<Failure, PagedResult<SalesInvoice>>> getSalesInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  });
+  // جلب صفحة من فواتير الشراء
+  Future<Either<Failure, PagedResult<PurchaseInvoice>>> getPurchaseInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  });
   // دStream لفواتير البيع في الوقت الفعلي
   Stream<Either<Failure, List<SalesInvoice>>> watchSalesInvoices();
   // دStream لفواتير الشراء في الوقت الفعلي
@@ -100,6 +119,133 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
         return Left(NetworkFailure.noConnection());
       }
     }
+  }
+
+  @override
+  Future<Either<Failure, PagedResult<SalesInvoice>>> getSalesInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final result = await remoteDataSource.getSalesInvoicesPage(
+          offset: offset,
+          limit: limit,
+          status: status,
+          dateFrom: dateFrom,
+          dateTo: dateTo,
+          search: search,
+        );
+        return Right(result);
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    }
+
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) return Left(ServerFailure('User not found'));
+      final cached = await localDataSource.getCachedSalesInvoices(userId);
+      final filtered = cached
+          .where((invoice) {
+            if (status != null &&
+                status != 'all' &&
+                invoice.paymentStatus.name != status) {
+              return false;
+            }
+            if (dateFrom != null && invoice.invoiceDate.isBefore(dateFrom)) {
+              return false;
+            }
+            if (dateTo != null && invoice.invoiceDate.isAfter(dateTo)) {
+              return false;
+            }
+            if (search != null && search.trim().isNotEmpty) {
+              final term = search.toLowerCase();
+              final number = invoice.invoiceNumber.toLowerCase();
+              final party = invoice.customerName?.toLowerCase() ?? '';
+              if (!number.contains(term) && !party.contains(term)) return false;
+            }
+            return true;
+          })
+          .toList()
+        ..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      final page = _slice(filtered, offset, limit);
+      return Right(page);
+    } catch (_) {
+      return Left(NetworkFailure.noConnection());
+    }
+  }
+
+  @override
+  Future<Either<Failure, PagedResult<PurchaseInvoice>>> getPurchaseInvoicesPage({
+    required int offset,
+    int limit = 10,
+    String? status,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? search,
+  }) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final result = await remoteDataSource.getPurchaseInvoicesPage(
+          offset: offset,
+          limit: limit,
+          status: status,
+          dateFrom: dateFrom,
+          dateTo: dateTo,
+          search: search,
+        );
+        return Right(result);
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
+      }
+    }
+
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) return Left(ServerFailure('User not found'));
+      final cached = await localDataSource.getCachedPurchaseInvoices(userId);
+      final filtered = cached
+          .where((invoice) {
+            if (status != null &&
+                status != 'all' &&
+                invoice.paymentStatus.name != status) {
+              return false;
+            }
+            if (dateFrom != null && invoice.invoiceDate.isBefore(dateFrom)) {
+              return false;
+            }
+            if (dateTo != null && invoice.invoiceDate.isAfter(dateTo)) {
+              return false;
+            }
+            if (search != null && search.trim().isNotEmpty) {
+              final term = search.toLowerCase();
+              final number = invoice.invoiceNumber.toLowerCase();
+              final party = invoice.supplierName?.toLowerCase() ?? '';
+              if (!number.contains(term) && !party.contains(term)) return false;
+            }
+            return true;
+          })
+          .toList()
+        ..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      final page = _slice(filtered, offset, limit);
+      return Right(page);
+    } catch (_) {
+      return Left(NetworkFailure.noConnection());
+    }
+  }
+
+  PagedResult<T> _slice<T>(List<T> items, int offset, int limit) {
+    final start = offset.clamp(0, items.length);
+    final end = (start + limit).clamp(0, items.length);
+    return PagedResult(
+      items: items.sublist(start, end),
+      hasMore: end < items.length,
+    );
   }
 
   @override

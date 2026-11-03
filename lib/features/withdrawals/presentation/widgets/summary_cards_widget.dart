@@ -1,5 +1,6 @@
 import 'package:erad/core/utils/app_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 
@@ -49,12 +50,7 @@ class SummaryCardsWidget extends StatelessWidget {
     required String value,
     required Color valueColor,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return sc.Card(
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -62,7 +58,7 @@ class SummaryCardsWidget extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary,
               letterSpacing: 0.5,

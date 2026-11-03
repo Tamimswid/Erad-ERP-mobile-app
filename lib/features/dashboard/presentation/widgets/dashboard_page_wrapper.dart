@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_constants.dart';
 
 class DashboardPageWrapper extends StatelessWidget {
   final String title;
@@ -15,7 +16,7 @@ class DashboardPageWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppColors.background,
       body: child,
       floatingActionButton: floatingActionButton,
     );

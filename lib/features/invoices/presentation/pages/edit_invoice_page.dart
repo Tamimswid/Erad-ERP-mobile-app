@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/edit_invoice_cubit.dart';
@@ -88,10 +89,7 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
       listener: (context, state) {
         if (state is EditInvoiceUpdated) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.success,
-            ),
+            SnackBar(content: Text(state.message)),
           );
           Navigator.of(context).pop(true);
         } else if (state is EditInvoiceError) {
@@ -105,36 +103,31 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
       },
       builder: (context, state) {
         if (state is EditInvoiceLoading) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: AppBar(
-              title: const Text('تعديل الفاتورة'),
-              backgroundColor: AppColors.background,
-            ),
-            body: const Center(child: CircularProgressIndicator()),
+          return sc.Scaffold(
+            headers: [
+              sc.AppBar(title: const Text('تعديل الفاتورة')),
+            ],
+            child: const Center(child: CircularProgressIndicator()),
           );
         }
 
         if (state is EditInvoiceLoaded) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: AppBar(
-              title: Text(
-                widget.isSales ? 'تعديل فاتورة البيع' : 'تعديل فاتورة الشراء',
-                style: TextStyle(
-                  fontWeight: AppFonts.fontWeightBold,
-                  color: AppColors.text,
+          return sc.Scaffold(
+            headers: [
+              sc.AppBar(
+                title: Text(
+                  widget.isSales ? 'تعديل فاتورة البيع' : 'تعديل فاتورة الشراء',
                 ),
+                leading: [
+                  sc.IconButton(
+                    variance: sc.ButtonStyle.ghost(),
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(sc.LucideIcons.arrowRight),
+                  ),
+                ],
               ),
-              backgroundColor: AppColors.background,
-              elevation: 0,
-              centerTitle: true,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-            body: SingleChildScrollView(
+            ],
+            child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,13 +155,11 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
           );
         }
 
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: AppBar(
-            title: const Text('تعديل الفاتورة'),
-            backgroundColor: AppColors.background,
-          ),
-          body: const Center(child: Text('جاري تحميل الفاتورة...')),
+        return sc.Scaffold(
+          headers: [
+            sc.AppBar(title: const Text('تعديل الفاتورة')),
+          ],
+          child: const Center(child: Text('جاري تحميل الفاتورة...')),
         );
       },
     );

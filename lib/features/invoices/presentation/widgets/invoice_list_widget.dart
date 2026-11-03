@@ -4,6 +4,8 @@ import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:erad/features/invoices/data/models/payment_status.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/invoice_cubit.dart';
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceListWidget extends StatelessWidget {
   final String type;
@@ -26,7 +28,7 @@ class InvoiceListWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long, size: 64, color: Colors.grey),
+                  Icon(sc.LucideIcons.receiptText, size: 64, color: AppColors.textSecondary),
                   SizedBox(height: 16),
                   Text('لا يوجد فواتير بيع'),
                   SizedBox(height: 8),
@@ -52,7 +54,7 @@ class InvoiceListWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long, size: 64, color: Colors.grey),
+                  Icon(sc.LucideIcons.receiptText, size: 64, color: AppColors.textSecondary),
                   SizedBox(height: 16),
                   Text('لا يوجد فواتير شراء'),
                   SizedBox(height: 8),
@@ -87,8 +89,8 @@ class SalesInvoiceCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.green.shade100,
-          child: Icon(Icons.sell, color: Colors.green),
+          backgroundColor: AppColors.muted,
+          child: Icon(sc.LucideIcons.tag, color: AppColors.primary),
         ),
         title: Text('فاتورة #${invoice.invoiceNumber}'),
         subtitle: Column(
@@ -138,8 +140,8 @@ class PurchaseInvoiceCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.blue.shade100,
-          child: Icon(Icons.shopping_cart, color: Colors.blue),
+          backgroundColor: AppColors.muted,
+          child: Icon(sc.LucideIcons.shoppingCart, color: AppColors.primary),
         ),
         title: Text('فاتورة #${invoice.invoiceNumber}'),
         subtitle: Column(

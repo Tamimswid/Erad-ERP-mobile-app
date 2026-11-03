@@ -3,18 +3,29 @@ import 'dart:developer';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/withdrawal.dart';
 import '../models/partner.dart';
+import '../models/withdrawal_summary.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/utils/paged_result.dart';
 
 abstract class WithdrawalRemoteDataSource {
-  Future<List<Withdrawal>> getWithdrawals({DateTime? startDate, DateTime? endDate, String? partnerId});
-  Stream<List<Withdrawal>> watchWithdrawals({String? partnerId});
+  Future<PagedResult<Withdrawal>> getWithdrawalsPage({
+    required int offset,
+    int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? partnerId,
+  });
+  Future<WithdrawalSummary> getWithdrawalsSummary({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? partnerId,
+  });
   Future<Withdrawal> getWithdrawal(String id);
   Future<Withdrawal> createWithdrawal(Withdrawal withdrawal);
   Future<Withdrawal> updateWithdrawal(Withdrawal withdrawal);
   Future<void> deleteWithdrawal(String id);
   Future<List<Partner>> getPartners();
-  Stream<List<Partner>> watchPartners();
   Future<Partner> createPartner(Partner partner);
   Future<void> deletePartner(String id);
 }
@@ -25,7 +36,13 @@ class WithdrawalRemoteDataSourceImpl implements WithdrawalRemoteDataSource {
   WithdrawalRemoteDataSourceImpl(this.client);
 
   @override
-  Future<List<Withdrawal>> getWithdrawals({DateTime? startDate, DateTime? endDate, String? partnerId}) async {
+  Future<PagedResult<Withdrawal>> getWithdrawalsPage({
+    required int offset,
+    int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? partnerId,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) {
@@ -48,9 +65,71 @@ class WithdrawalRemoteDataSourceImpl implements WithdrawalRemoteDataSource {
         query = query.lte('withdrawal_date', endDate.toIso8601String());
       }
 
-      final response = await query.order('withdrawal_date', ascending: false);
+      final response = await query
+          .order('withdrawal_date', ascending: false)
+          .order('id', ascending: true)
+          .range(offset, offset + limit);
 
-      return response.map((withdrawal) => Withdrawal.fromMap(withdrawal)).toList();
+      final withdrawals =
+          response.map((withdrawal) => Withdrawal.fromMap(withdrawal)).toList();
+      final hasMore = withdrawals.length > limit;
+      return PagedResult(
+        items: hasMore ? withdrawals.sublist(0, limit) : withdrawals,
+        hasMore: hasMore,
+      );
+    } catch (e) {
+      throw exceptionToFailure(e);
+    }
+  }
+
+  @override
+  Future<WithdrawalSummary> getWithdrawalsSummary({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? partnerId,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      var query = client
+          .from('withdrawals')
+          .select('amount, withdrawal_date')
+          .eq('user_id', userId)
+          .isFilter('deleted_at', null);
+
+      if (partnerId != null) {
+        query = query.eq('partner_id', partnerId);
+      }
+      if (startDate != null) {
+        query = query.gte('withdrawal_date', startDate.toIso8601String());
+      }
+      if (endDate != null) {
+        query = query.lte('withdrawal_date', endDate.toIso8601String());
+      }
+
+      final response = await query;
+
+      var totalAmount = 0.0;
+      var totalCount = 0;
+      final monthlyData = List<double>.filled(12, 0);
+
+      for (final row in response) {
+        final amount = (row['amount'] ?? 0).toDouble();
+        final date = DateTime.parse(row['withdrawal_date']);
+        totalAmount += amount;
+        totalCount++;
+        monthlyData[date.month - 1] += amount;
+      }
+
+      return WithdrawalSummary(
+        totalAmount: totalAmount,
+        totalCount: totalCount,
+        averageAmount: totalCount > 0 ? totalAmount / totalCount : 0,
+        monthlyData: monthlyData,
+      );
     } catch (e) {
       throw exceptionToFailure(e);
     }
@@ -68,45 +147,6 @@ class WithdrawalRemoteDataSourceImpl implements WithdrawalRemoteDataSource {
       return Withdrawal.fromMap(response);
     } catch (e) {
       throw exceptionToFailure(e);
-    }
-  }
-
-  Stream<List<Withdrawal>> watchWithdrawals({String? partnerId}) async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) throw Exception('User not logged in');
-
-    var query = client
-        .from('withdrawals')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId)
-        .order('withdrawal_date', ascending: false);
-
-    await for (final data in query) {
-      var withdrawals = data
-          .map((item) => Withdrawal.fromMap(item))
-          .toList();
-
-      // Apply partner filter if specified
-      if (partnerId != null && partnerId.isNotEmpty) {
-        withdrawals = withdrawals.where((w) => w.partnerId == partnerId).toList();
-      }
-
-      yield withdrawals;
-    }
-  }
-
-  Stream<List<Partner>> watchPartners() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) throw Exception('User not logged in');
-
-    await for (final data in client
-        .from('partners')
-        .stream(primaryKey: ['id'])
-        .eq('user_id', userId)
-        .order('created_at', ascending: false)) {
-      yield data
-          .map((item) => Partner.fromMap(item))
-          .toList();
     }
   }
 

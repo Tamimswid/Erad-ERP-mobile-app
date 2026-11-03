@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:erad/core/constants/app_constants.dart';
 
 enum PaymentStatus {
   cash,
@@ -16,9 +17,9 @@ enum PaymentStatus {
   Color get getColor {
     switch (this) {
       case PaymentStatus.cash:
-        return Colors.green;
+        return AppColors.primary;
       case PaymentStatus.debt:
-        return Colors.red;
+        return AppColors.error;
     }
   }
 

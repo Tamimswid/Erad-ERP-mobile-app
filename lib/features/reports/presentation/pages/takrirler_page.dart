@@ -2,20 +2,18 @@ import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/features/reports/presentation/pages/customer_invoices_page.dart';
 import 'package:erad/features/reports/presentation/pages/stock_tracking_page.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class TakrirlerPage extends StatelessWidget {
   const TakrirlerPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('التقارير'),
-        centerTitle: true,
-      ),
-      body: Padding(
+    return sc.Scaffold(
+      headers: [
+        sc.AppBar(title: const Text('التقارير')),
+      ],
+      child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingMd),
         child: GridView(
           physics: const NeverScrollableScrollPhysics(),
@@ -23,13 +21,12 @@ class TakrirlerPage extends StatelessWidget {
             crossAxisCount: 2,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 1.1,
+            childAspectRatio: 1.2,
           ),
           children: [
             _ReportCard(
-              icon: Iconsax.receipt_text,
+              icon: sc.LucideIcons.receiptText,
               title: 'فواتير مشتري',
-              color: const Color(0xFF3B82F6),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -38,9 +35,8 @@ class TakrirlerPage extends StatelessWidget {
               ),
             ),
             _ReportCard(
-              icon: Iconsax.receipt_disscount,
+              icon: sc.LucideIcons.receiptText,
               title: 'فواتير مورد',
-              color: const Color(0xFF10B981),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -49,9 +45,8 @@ class TakrirlerPage extends StatelessWidget {
               ),
             ),
             _ReportCard(
-              icon: Iconsax.box_search,
+              icon: sc.LucideIcons.packageSearch,
               title: 'تتبع المخزون',
-              color: const Color(0xFFDE24C8),
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -67,45 +62,44 @@ class TakrirlerPage extends StatelessWidget {
 }
 
 class _ReportCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color color;
-  final VoidCallback onTap;
-
   const _ReportCard({
     required this.icon,
     required this.title,
-    required this.color,
     required this.onTap,
   });
 
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.divider,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primary),
-            color: AppColors.surface,
-          ),
-          padding: const EdgeInsets.all(20),
+    return sc.Card(
+      padding: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: sc.Clickable(
+        onPressed: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(),
-              Icon(icon, color: AppColors.primary, size: 40),
-              const Spacer(),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.muted,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: AppColors.text, size: 22),
+              ),
+              const SizedBox(height: 12),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
+                  color: AppColors.text,
                 ),
                 textAlign: TextAlign.center,
               ),

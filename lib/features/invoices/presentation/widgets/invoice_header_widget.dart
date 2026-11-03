@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 
@@ -18,31 +19,18 @@ class InvoiceHeaderWidget extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 24),
       child: Row(
         children: [
-          // Modern icon container
+          // Icon container
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primary,
-                  AppColors.primary.withOpacity(0.8),
-                ],
-              ),
+              color: AppColors.muted,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              border: Border.all(color: AppColors.divider),
             ),
             child: const Icon(
-              Icons.description,
-              color: Colors.white,
+              sc.LucideIcons.fileText,
+              color: AppColors.text,
               size: 24,
             ),
           ),
@@ -58,7 +46,7 @@ class InvoiceHeaderWidget extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1F2937),
+                    color: AppColors.text,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -67,47 +55,19 @@ class InvoiceHeaderWidget extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF6B7280),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
           
-          // Modern button
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primary,
-                  AppColors.primary.withOpacity(0.8),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: ElevatedButton.icon(
-              onPressed: onNewInvoice,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('new_invoice'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-            ),
+          // Button
+          sc.Button(
+            style: sc.ButtonStyle.primary(),
+            onPressed: onNewInvoice,
+            leading: const Icon(sc.LucideIcons.plus, size: 18),
+            child: const Text('new_invoice'),
           ),
         ],
       ),

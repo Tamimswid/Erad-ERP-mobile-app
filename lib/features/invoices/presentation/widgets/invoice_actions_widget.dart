@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/invoice_cubit.dart';
 
@@ -105,15 +106,17 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('إلغاء'),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('تأكيد'),
-                  ),
+                sc.Button(
+                  style: sc.ButtonStyle.ghost(),
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('إلغاء'),
+                ),
+                const SizedBox(width: 8),
+                sc.Button(
+                  style: sc.ButtonStyle.primary(),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('تأكيد'),
+                ),
                 ],
               ),
             ],
@@ -127,7 +130,7 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppColors.error : AppColors.success,
+        backgroundColor: isError ? AppColors.error : null,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         duration: const Duration(seconds: 3),
@@ -137,13 +140,8 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return sc.Card(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border, width: 1),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -163,13 +161,13 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                   vertical: 8,
                 ),
                 prefixIcon: Icon(
-                  Icons.money,
+                  sc.LucideIcons.banknote,
                   color: AppColors.textSecondary,
                   size: 18,
                 ),
               ),
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 14,
                 color: _isSaving ? AppColors.textSecondary : AppColors.text,
               ),
               items: const [
@@ -186,42 +184,24 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Action Buttons
           Row(
             children: [
               Expanded(
                 child: SizedBox(
                   height: 48,
-                  child: ElevatedButton.icon(
+                  child: sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: _isSaving ? null : _saveInvoice,
-                    icon: _isSaving 
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Icon(Icons.save, size: 18),
-                    label: Text(
-                      _isSaving ? 'جاري...' : 'حفظ',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-
-                      backgroundColor: _isSaving ? AppColors.primary.withOpacity(0.7) : AppColors.primary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                    ),
+                    leading: _isSaving
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: sc.CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(sc.LucideIcons.save, size: 18),
+                    child: Text(_isSaving ? 'جاري...' : 'حفظ'),
                   ),
                 ),
               ),
@@ -229,53 +209,14 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
               Expanded(
                 child: SizedBox(
                   height: 48,
-                  child: ElevatedButton.icon(
+                  child: sc.Button(
+                    style: sc.ButtonStyle.destructive(),
                     onPressed: _isSaving ? null : _deleteInvoice,
-                    icon: const Icon(Icons.delete, size: 18),
-                    label: Text(
-                      'حذف',
-                      style: const TextStyle(
-                        fontWeight: AppFonts.fontWeightSemiBold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(0),
-                      backgroundColor: _isSaving ? AppColors.error.withOpacity(0.5) : AppColors.error,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                    ),
+                    leading: const Icon(sc.LucideIcons.trash2, size: 18),
+                    child: const Text('حذف'),
                   ),
                 ),
               ),
-              // const SizedBox(width: 8),
-              // Expanded(
-              //   child: SizedBox(
-              //     height: 48,
-              //     child: ElevatedButton.icon(
-              //       onPressed: _isSaving ? null : _exportToPDF,
-              //       icon: const Icon(Icons.picture_as_pdf, size: 18),
-              //       label: Text(
-              //         'PDF',
-              //         style: const TextStyle(
-              //           fontWeight: AppFonts.fontWeightSemiBold,
-              //           fontSize: 13,
-              //         ),
-              //       ),
-              //       style: ElevatedButton.styleFrom(
-              //         backgroundColor: _isSaving ? AppColors.secondary.withOpacity(0.5) : AppColors.secondary,
-              //         foregroundColor: Colors.white,
-              //         elevation: 0,
-              //         shape: RoundedRectangleBorder(
-              //           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
             ],
           ),
         ],

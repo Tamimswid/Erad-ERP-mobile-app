@@ -109,22 +109,23 @@ class PaymentModel extends Equatable {
   Map<String, dynamic> toJson() => toMap();
 
   /// إنشاء من JSON
-  factory PaymentModel.fromJson(Map<String, dynamic> json) => PaymentModel.fromMap(json);
+  factory PaymentModel.fromJson(Map<String, dynamic> json) =>
+      PaymentModel.fromMap(json);
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        customerId,
-        invoiceId,
-        amount,
-        paymentMethod,
-        paymentDate,
-        notes,
-        createdAt,
-        updatedAt,
-        paymentType,
-      ];
+    id,
+    userId,
+    customerId,
+    invoiceId,
+    amount,
+    paymentMethod,
+    paymentDate,
+    notes,
+    createdAt,
+    updatedAt,
+    paymentType,
+  ];
 
   @override
   String toString() {

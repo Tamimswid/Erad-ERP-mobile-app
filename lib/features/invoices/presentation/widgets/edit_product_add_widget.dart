@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../../products/data/models/product.dart';
@@ -170,21 +171,14 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
           builder: (context, state) {
             final items = state is EditInvoiceLoaded ? state.items : <InvoiceItem>[];
             
-            return Card(
-              elevation: AppConstants.cardElevation,
-              color: AppColors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.borderRadiusLg),
-                side: BorderSide(color: AppColors.border, width: 1),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.cardPadding),
-                child: Column(
+            return sc.Card(
+              padding: const EdgeInsets.all(AppConstants.cardPadding),
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        _buildSectionTitle(Icons.inventory_2_outlined, 'المنتجات'),
+                        _buildSectionTitle(sc.LucideIcons.package, 'المنتجات'),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -192,13 +186,14 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(20),
+                            color: AppColors.muted,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: AppColors.divider),
                           ),
                           child: Text(
                             '${items.length} منتج',
                             style: const TextStyle(
-                              color: AppColors.primary,
+                              color: AppColors.text,
                               fontWeight: AppFonts.fontWeightSemiBold,
                               fontSize: AppFonts.fontSizeSmall,
                             ),
@@ -217,7 +212,6 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     _buildProductList(items),
                   ],
                 ),
-              ),
             );
           },
         );
@@ -318,16 +312,9 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
             SizedBox(
               width: 100,
               height: 48,
-              child: ElevatedButton(
+              child: sc.Button(
+                style: sc.ButtonStyle.primary(),
                 onPressed: _confirmAddProduct,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                  ),
-                ),
                 child: const Text('إضافة'),
               ),
             ),
@@ -341,9 +328,9 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: AppColors.muted,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,8 +394,8 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                         return ListTile(
                           dense: true,
                           leading: CircleAvatar(
-                            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                            child: Icon(Icons.inventory_2, color: AppColors.primary, size: 18),
+                            backgroundColor: AppColors.surface,
+                            child: Icon(sc.LucideIcons.package, color: AppColors.text, size: 18),
                           ),
                           title: Text(
                             product.name,
@@ -485,20 +472,13 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                 SizedBox(
                   width: double.infinity,
                   height: 35,
-                  child: ElevatedButton(
+                  child: sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: _confirmAddProduct,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.surface,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                      ),
-                    ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add, size: 18),
+                        Icon(sc.LucideIcons.plus, size: 18),
                         SizedBox(width: 4),
                         Text('إضافة'),
                       ],
@@ -536,7 +516,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory_2_outlined, size: 40, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+            Icon(sc.LucideIcons.package, size: 40, color: AppColors.textSecondary.withValues(alpha: 0.5)),
             const SizedBox(height: 8),
             Text(
               'لم تتم إضافة منتجات بعد',
@@ -582,12 +562,12 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(item.productName??'', style: const TextStyle(fontWeight: FontWeight.w600)),
-                        Text(item.unit ?? '', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        Text(item.unit ?? '', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete_outline, size: 20, color: AppColors.error),
+                    icon: Icon(sc.LucideIcons.trash2, size: 20, color: AppColors.error),
                     onPressed: () {
                       _priceControllers.remove(index);
                       context.read<EditInvoiceCubit>().removeItem(index);
@@ -602,22 +582,23 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('الكمية', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        Text('الكمية', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         const SizedBox(height: 4),
                         GestureDetector(
                           onTap: () => _showEditQuantityDialog(index, item),
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
+                              color: AppColors.muted,
                               borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: AppColors.divider),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary)),
+                                Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.text)),
                                 const SizedBox(width: 4),
-                                const Icon(Icons.edit, size: 14, color: AppColors.primary),
+                                const Icon(sc.LucideIcons.pencil, size: 14, color: AppColors.textSecondary),
                               ],
                             ),
                           ),
@@ -630,7 +611,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('السعر', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        Text('السعر', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         const SizedBox(height: 4),
                         SizedBox(
                           height: 36,
@@ -654,7 +635,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                                 borderSide: const BorderSide(color: AppColors.primary, width: 2),
                               ),
                               filled: true,
-                              fillColor: AppColors.background,
+                              fillColor: AppColors.surface,
                             ),
                             onChanged: (value) {
                               final newPrice = double.tryParse(value);
@@ -685,11 +666,11 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('الإجمالي', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        Text('الإجمالي', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         const SizedBox(height: 4),
                         Text(
                           '${item.totalPrice?.toStringAsFixed(2) ?? "0.00"} ${NumberFormatter.getCurrencySymbol()}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                          style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.text),
                         ),
                       ],
                     ),
@@ -725,12 +706,14 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: () {
                       final newQuantity = int.tryParse(quantityController.text);
                       if (newQuantity != null && newQuantity > 0) {
@@ -784,12 +767,14 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  sc.Button(
+                    style: sc.ButtonStyle.primary(),
                     onPressed: () {
                       final newPrice = double.tryParse(priceController.text);
                       if (newPrice != null && newPrice > 0) {

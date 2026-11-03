@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../data/models/expense_category.dart';
 
@@ -91,16 +92,17 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
         title: const Text('تأكيد الحذف'),
         content: const Text('هل أنت متأكد من حذف هذه الفئة؟'),
         actions: [
-          TextButton(
+          sc.Button(
+            style: sc.ButtonStyle.ghost(),
             onPressed: () => Navigator.pop(context),
             child: const Text('إلغاء'),
           ),
-          ElevatedButton(
+          sc.Button(
+            style: sc.ButtonStyle.destructive(),
             onPressed: () {
               widget.onDeleteCategory(id);
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('حذف'),
           ),
         ],
@@ -137,19 +139,16 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                   Row(
                     children: [
                       if (!_isAdding && _editingCategory == null)
-                        ElevatedButton.icon(
+                        sc.Button(
+                          style: sc.ButtonStyle.primary(),
                           onPressed: _startAdding,
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('فئة جديدة'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                          ),
+                          leading: const Icon(sc.LucideIcons.plus, size: 16),
+                          child: const Text('فئة جديدة'),
                         ),
                       const SizedBox(width: 8),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
+                        icon: const Icon(sc.LucideIcons.x),
                       ),
                     ],
                   ),
@@ -220,19 +219,17 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                       Row(
                         children: [
                           Expanded(
-                            child: OutlinedButton(
+                            child: sc.Button(
+                              style: sc.ButtonStyle.outline(),
                               onPressed: _cancelForm,
                               child: const Text('إلغاء'),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: ElevatedButton(
+                            child: sc.Button(
+                              style: sc.ButtonStyle.primary(),
                               onPressed: _submit,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                              ),
                               child: Text(
                                 _editingCategory != null ? 'حفظ' : 'إضافة',
                               ),
@@ -252,7 +249,7 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.folder_open_outlined,
+                            sc.LucideIcons.folderOpen,
                             size: 64,
                             color: AppColors.textSecondary,
                           ),
@@ -269,7 +266,7 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                             'أضف فئة جديدة للبدء',
                             style: TextStyle(
                               fontSize: 14,
-                              color: AppColors.textSecondary.withValues(alpha: 0.7),
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         ],
@@ -302,11 +299,11 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                             children: [
                               IconButton(
                                 onPressed: () => _startEditing(category),
-                                icon: Icon(Icons.edit_outlined, color: AppColors.primary),
+                                icon: const Icon(sc.LucideIcons.pencil, color: AppColors.text),
                               ),
                               IconButton(
                                 onPressed: () => _deleteCategory(category.id),
-                                icon: Icon(Icons.delete_outline, color: AppColors.error),
+                                icon: const Icon(sc.LucideIcons.trash2, color: AppColors.error),
                               ),
                             ],
                           ),

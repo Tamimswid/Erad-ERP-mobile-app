@@ -47,7 +47,7 @@ class InvoiceModel extends Equatable {
   }
 
   /// هل الفاتورة مستحقة؟
-  bool get isDebt =>  paymentStatus == 'debt';
+  bool get isDebt => paymentStatus == 'debt';
 
   /// نسخ مع تعديل
   InvoiceModel copyWith({
@@ -124,24 +124,25 @@ class InvoiceModel extends Equatable {
   Map<String, dynamic> toJson() => toMap();
 
   /// إنشاء من JSON
-  factory InvoiceModel.fromJson(Map<String, dynamic> json) => InvoiceModel.fromMap(json);
+  factory InvoiceModel.fromJson(Map<String, dynamic> json) =>
+      InvoiceModel.fromMap(json);
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        customerId,
-        invoiceNumber,
-        invoiceDate,
-        totalAmount,
-        paidAmount,
-        remainingAmount,
-        dueDate,
-        paymentStatus,
-        notes,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    userId,
+    customerId,
+    invoiceNumber,
+    invoiceDate,
+    totalAmount,
+    paidAmount,
+    remainingAmount,
+    dueDate,
+    paymentStatus,
+    notes,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   String toString() {

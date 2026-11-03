@@ -4,15 +4,37 @@ import 'package:erad/features/customer_debts/data/models/customer_debt_model.dar
 abstract class CustomerDebtLocalDataSource {
   Future<void> cacheCustomerDebts(String userId, List<CustomerDebtModel> debts);
   Future<List<CustomerDebtModel>> getCachedCustomerDebts(String userId);
-  Future<void> cacheCustomerInvoices(String userId, String customerId, List<Map<String, dynamic>> invoices);
-  Future<List<Map<String, dynamic>>> getCachedCustomerInvoices(String userId, String customerId);
-  Future<void> cacheCustomerPayments(String userId, String customerId, List<Map<String, dynamic>> payments);
-  Future<List<Map<String, dynamic>>> getCachedCustomerPayments(String userId, String customerId);
+  Future<void> cacheCustomerInvoices(
+    String userId,
+    String customerId,
+    List<Map<String, dynamic>> invoices,
+  );
+  Future<List<Map<String, dynamic>>> getCachedCustomerInvoices(
+    String userId,
+    String customerId,
+  );
+  Future<void> cacheCustomerPayments(
+    String userId,
+    String customerId,
+    List<Map<String, dynamic>> payments,
+  );
+  Future<List<Map<String, dynamic>>> getCachedCustomerPayments(
+    String userId,
+    String customerId,
+  );
   Future<void> queuePayment(Map<String, dynamic> payment);
   Future<List<Map<String, dynamic>>> getPendingPayments(String userId);
   Future<void> deletePendingPayment(String id);
-  Future<void> updateDebtAfterPayment(String userId, String customerId, double amount);
-  Future<void> addPaymentToLocalCache(String userId, String customerId, Map<String, dynamic> payment);
+  Future<void> updateDebtAfterPayment(
+    String userId,
+    String customerId,
+    double amount,
+  );
+  Future<void> addPaymentToLocalCache(
+    String userId,
+    String customerId,
+    Map<String, dynamic> payment,
+  );
   Future<void> clearCache(String userId);
 }
 
@@ -22,7 +44,10 @@ class CustomerDebtLocalDataSourceImpl implements CustomerDebtLocalDataSource {
   CustomerDebtLocalDataSourceImpl(this._db);
 
   @override
-  Future<void> cacheCustomerDebts(String userId, List<CustomerDebtModel> debts) async {
+  Future<void> cacheCustomerDebts(
+    String userId,
+    List<CustomerDebtModel> debts,
+  ) async {
     await _db.clearTable('customer_debts_cache', userId);
     await _db.upsertJsonList(
       'customer_debts_cache',
@@ -44,7 +69,12 @@ class CustomerDebtLocalDataSourceImpl implements CustomerDebtLocalDataSource {
     String customerId,
     List<Map<String, dynamic>> invoices,
   ) async {
-    await _db.upsertCustomerData('customer_invoices_cache', customerId, userId, invoices);
+    await _db.upsertCustomerData(
+      'customer_invoices_cache',
+      customerId,
+      userId,
+      invoices,
+    );
   }
 
   @override
@@ -52,7 +82,11 @@ class CustomerDebtLocalDataSourceImpl implements CustomerDebtLocalDataSource {
     String userId,
     String customerId,
   ) async {
-    return await _db.getCustomerData('customer_invoices_cache', customerId, userId);
+    return await _db.getCustomerData(
+      'customer_invoices_cache',
+      customerId,
+      userId,
+    );
   }
 
   @override
@@ -61,7 +95,12 @@ class CustomerDebtLocalDataSourceImpl implements CustomerDebtLocalDataSource {
     String customerId,
     List<Map<String, dynamic>> payments,
   ) async {
-    await _db.upsertCustomerData('customer_payments_cache', customerId, userId, payments);
+    await _db.upsertCustomerData(
+      'customer_payments_cache',
+      customerId,
+      userId,
+      payments,
+    );
   }
 
   @override
@@ -69,7 +108,11 @@ class CustomerDebtLocalDataSourceImpl implements CustomerDebtLocalDataSource {
     String userId,
     String customerId,
   ) async {
-    return await _db.getCustomerData('customer_payments_cache', customerId, userId);
+    return await _db.getCustomerData(
+      'customer_payments_cache',
+      customerId,
+      userId,
+    );
   }
 
   @override
@@ -88,7 +131,11 @@ class CustomerDebtLocalDataSourceImpl implements CustomerDebtLocalDataSource {
   }
 
   @override
-  Future<void> updateDebtAfterPayment(String userId, String customerId, double amount) async {
+  Future<void> updateDebtAfterPayment(
+    String userId,
+    String customerId,
+    double amount,
+  ) async {
     final debts = await getCachedCustomerDebts(userId);
     final index = debts.indexWhere((d) => d.id == customerId);
     if (index == -1) return;
@@ -100,7 +147,11 @@ class CustomerDebtLocalDataSourceImpl implements CustomerDebtLocalDataSource {
   }
 
   @override
-  Future<void> addPaymentToLocalCache(String userId, String customerId, Map<String, dynamic> payment) async {
+  Future<void> addPaymentToLocalCache(
+    String userId,
+    String customerId,
+    Map<String, dynamic> payment,
+  ) async {
     final payments = await getCachedCustomerPayments(userId, customerId);
     payments.add(payment);
     await cacheCustomerPayments(userId, customerId, payments);

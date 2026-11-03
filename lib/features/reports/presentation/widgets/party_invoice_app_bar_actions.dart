@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/party_invoice_cubit.dart';
 
@@ -39,13 +39,13 @@ class PartyInvoiceAppBarActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Iconsax.document_download),
+          icon: const Icon(sc.LucideIcons.fileDown),
           onPressed: hasInvoices ? onPdfTap : null,
         ),
         Stack(
           children: [
             IconButton(
-              icon: const Icon(Iconsax.calendar),
+              icon: const Icon(sc.LucideIcons.calendar),
               onPressed: onDateFilterTap,
             ),
             if (hasFilter)

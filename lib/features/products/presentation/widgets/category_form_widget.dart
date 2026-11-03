@@ -1,6 +1,7 @@
 import 'package:erad/core/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../data/models/product_category.dart';
 import '../bloc/product_cubit.dart';
 
@@ -70,7 +71,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
             decoration: const InputDecoration(
               labelText: 'اسم الفئة *',
               border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.category),
+              prefixIcon: Icon(sc.LucideIcons.tag),
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -84,14 +85,16 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: sc.Button(
+                  style: sc.ButtonStyle.outline(),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('إلغاء'),
                 ),
               ),
-           SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
-                child: ElevatedButton(
+                child: sc.Button(
+                  style: sc.ButtonStyle.primary(),
                   onPressed: _saveCategory,
                   child: Text(widget.category == null ? 'إضافة' : 'حفظ'),
                 ),

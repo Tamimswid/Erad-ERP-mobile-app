@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
+import 'package:erad/core/constants/app_constants.dart';
 
 class CancelInvoiceDialog extends StatelessWidget {
   final String invoiceNumber;
@@ -16,16 +18,18 @@ class CancelInvoiceDialog extends StatelessWidget {
       title: const Text('إلغاء الفاتورة'),
       content: Text('هل أنت متأكد من إلغاء فاتورة #$invoiceNumber؟'),
       actions: [
-        TextButton(
+        sc.Button(
+          style: sc.ButtonStyle.ghost(),
           onPressed: () => Navigator.pop(context),
           child: const Text('لا'),
         ),
-        TextButton(
+        sc.Button(
+          style: sc.ButtonStyle.primary(),
           onPressed: () {
             onConfirm();
             Navigator.pop(context);
           },
-          child: const Text('نعم', style: TextStyle(color: Colors.orange)),
+          child: const Text('نعم'),
         ),
       ],
     );

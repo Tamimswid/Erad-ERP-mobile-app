@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/utils/app_utils.dart';
 import 'package:erad/core/utils/number_formatter.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
 class InvoiceProductListWidget extends StatelessWidget {
   final List<InvoiceItem> items;
@@ -20,7 +21,7 @@ class InvoiceProductListWidget extends StatelessWidget {
         // Header
         Row(
           children: [
-            Icon(Icons.inventory_2, size: 20, color: AppColors.textSecondary),
+            Icon(sc.LucideIcons.package, size: 20, color: AppColors.textSecondary),
             const SizedBox(width: 8),
             Text(
               'Products',

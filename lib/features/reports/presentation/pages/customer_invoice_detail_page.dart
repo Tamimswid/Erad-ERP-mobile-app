@@ -2,13 +2,14 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import 'package:printing/printing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/services_locator.dart';
 import '../../../../core/services/pdf_invoice_service.dart';
 import '../../../../core/services/user_service.dart';
+import '../../../../core/widgets/app_pagination_list.dart';
 import '../../../../core/widgets/date_filter_sheet.dart';
 import '../../../../core/widgets/invoice_card_widget.dart';
 import '../bloc/party_invoice_cubit.dart';
@@ -28,8 +29,7 @@ class CustomerInvoiceDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<PartyInvoiceCubit>(
-      create: (_) =>
-          sl<PartyInvoiceCubit>()..loadInvoices(partyId, isSupplier),
+      create: (_) => sl<PartyInvoiceCubit>()..loadInvoices(partyId, isSupplier),
       child: _DetailPageBody(
         partyName: partyName,
         isSupplier: isSupplier,
@@ -87,12 +87,15 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
   }
 
   Future<void> _generatePdf() async {
-    final state = context.read<PartyInvoiceCubit>().state;
+    final cubit = context.read<PartyInvoiceCubit>();
+    final state = cubit.state;
     if (state is! PartyInvoiceLoaded || state.invoices.isEmpty) return;
 
     setState(() => _isGeneratingPdf = true);
     try {
-      final cubit = context.read<PartyInvoiceCubit>();
+      final exportResult = await cubit.getInvoicesForPdf();
+      final invoices = exportResult.getOrElse(() => <dynamic>[]);
+      if (invoices.isEmpty) return;
 
       String companyName = '';
       final userId = await UserService.getUserId();
@@ -107,18 +110,19 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
         }
       }
 
-      final dateRangeLabel = cubit.isCustomDateRange && cubit.customDateRange != null
+      final dateRangeLabel =
+          cubit.isCustomDateRange && cubit.customDateRange != null
           ? 'من ${cubit.customDateRange!.start.day}/${cubit.customDateRange!.start.month}/${cubit.customDateRange!.start.year} إلى ${cubit.customDateRange!.end.day}/${cubit.customDateRange!.end.month}/${cubit.customDateRange!.end.year}'
           : cubit.selectedYear != null
-              ? 'السنة: ${cubit.selectedYear}'
-              : '';
+          ? 'السنة: ${cubit.selectedYear}'
+          : '';
 
       final pdfService = PdfInvoiceService();
       final pdf = await pdfService.generateInvoiceListPdf(
         companyName: companyName,
         partyName: widget.partyName,
         dateRangeLabel: dateRangeLabel,
-        invoices: state.invoices,
+        invoices: invoices,
         type: widget.isSupplier ? 'purchase' : 'sale',
       );
 
@@ -129,9 +133,9 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
     } catch (e) {
       log('PDF generation failed: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('فشل إنشاء PDF: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('فشل إنشاء PDF: $e')));
       }
     } finally {
       if (mounted) setState(() => _isGeneratingPdf = false);
@@ -143,62 +147,74 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
     final cubit = context.watch<PartyInvoiceCubit>();
     final state = cubit.state;
     final type = widget.isSupplier ? 'purchase' : 'sale';
-    final hasFilter = cubit.selectedYear != null ||
+    final hasFilter =
+        cubit.selectedYear != null ||
         (cubit.isCustomDateRange && cubit.customDateRange != null);
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(widget.partyName),
-        centerTitle: true,
-        actions: [
-          if (_isGeneratingPdf)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
-          else ...[
+    return sc.Scaffold(
+      headers: [
+        sc.AppBar(
+          title: Text(widget.partyName),
+          leading: [
             IconButton(
-              icon: const Icon(Iconsax.document_download),
-              onPressed: state is PartyInvoiceLoaded && state.invoices.isNotEmpty
-                  ? _generatePdf
-                  : null,
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(sc.LucideIcons.arrowRight, size: 22),
             ),
-            Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Iconsax.calendar),
-                  onPressed: _showDateFilter,
+          ],
+          trailing: [
+            if (_isGeneratingPdf)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                if (hasFilter)
-                  const Positioned(
-                    right: 8,
-                    top: 8,
-                    child: SizedBox(
-                      width: 8,
-                      height: 8,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
+              )
+            else ...[
+              IconButton(
+                icon: const Icon(sc.LucideIcons.fileDown),
+                onPressed:
+                    state is PartyInvoiceLoaded && state.invoices.isNotEmpty
+                    ? _generatePdf
+                    : null,
+              ),
+              Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(sc.LucideIcons.calendar),
+                    onPressed: _showDateFilter,
+                  ),
+                  if (hasFilter)
+                    const Positioned(
+                      right: 8,
+                      top: 8,
+                      child: SizedBox(
+                        width: 8,
+                        height: 8,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
-        ],
-      ),
-      body: _buildBody(context, state, type),
+        ),
+      ],
+      child: _buildBody(context, state, type),
     );
   }
 
-  Widget _buildBody(BuildContext context, PartyInvoiceState state, String type) {
+  Widget _buildBody(
+    BuildContext context,
+    PartyInvoiceState state,
+    String type,
+  ) {
     if (state is PartyInvoiceLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -208,8 +224,11 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Iconsax.receipt_disscount,
-                size: 64, color: AppColors.textSecondary),
+            Icon(
+              sc.LucideIcons.receiptText,
+              size: 64,
+              color: AppColors.textSecondary,
+            ),
             const SizedBox(height: 16),
             Text(
               state.message,
@@ -227,8 +246,11 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Iconsax.receipt_disscount,
-                  size: 64, color: AppColors.textSecondary),
+              Icon(
+                sc.LucideIcons.receiptText,
+                size: 64,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(height: 16),
               const Text(
                 'لا توجد فواتير',
@@ -239,17 +261,31 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
         );
       }
 
-      return ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: state.invoices.length,
-        itemBuilder: (context, index) {
-          final invoice = state.invoices[index];
-          return InvoiceCardWidget(
-            invoice: invoice,
-            type: type,
-            onTap: () {},
-          );
-        },
+      final cubit = context.read<PartyInvoiceCubit>();
+      return RefreshIndicator(
+        onRefresh: () => cubit.loadFirstPage(showLoading: false),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            AppPaginationSliverList(
+              itemCount: state.invoices.length,
+              hasMore: state.hasMore,
+              isLoadingMore: state.isLoadingMore,
+              onLoadMore: cubit.loadMore,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              separator: const SizedBox.shrink(),
+              bottomSpace: 24,
+              itemBuilder: (context, index) {
+                final invoice = state.invoices[index];
+                return InvoiceCardWidget(
+                  invoice: invoice,
+                  type: type,
+                  onTap: () {},
+                );
+              },
+            ),
+          ],
+        ),
       );
     }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/utils/number_formatter.dart';
 
@@ -17,13 +18,8 @@ class MonthlyChartWidget extends StatelessWidget {
     final isEmpty = values.isEmpty || values.every((v) => v == 0);
 
     if (isEmpty) {
-      return Container(
+      return sc.Card(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider),
-        ),
         child: const Center(
           child: Text(
             'لا توجد بيانات للعرض',
@@ -35,13 +31,8 @@ class MonthlyChartWidget extends StatelessWidget {
 
     final maxY = _calculateMaxY(values);
 
-    return Container(
+    return sc.Card(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -69,7 +60,7 @@ class MonthlyChartWidget extends StatelessWidget {
                       return BarTooltipItem(
                         '${NumberFormatter.format(rod.toY)}',
                         const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -93,7 +84,7 @@ class MonthlyChartWidget extends StatelessWidget {
                             (index + 1).toString(),
                             style: const TextStyle(
                               color: AppColors.text,
-                              fontSize: 10,
+                              fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -112,7 +103,7 @@ class MonthlyChartWidget extends StatelessWidget {
                           formatted,
                           style: const TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 10,
+                            fontSize: 12,
                           ),
                         );
                       },

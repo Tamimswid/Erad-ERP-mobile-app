@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
 
 class InvoiceStatusDialog extends StatefulWidget {
@@ -51,12 +52,14 @@ class _InvoiceStatusDialogState extends State<InvoiceStatusDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
+                sc.Button(
+                  style: sc.ButtonStyle.ghost(),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('إلغاء'),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(
+                sc.Button(
+                  style: sc.ButtonStyle.primary(),
                   onPressed: () {
                     widget.onUpdate(selectedStatus);
                     Navigator.pop(context);
