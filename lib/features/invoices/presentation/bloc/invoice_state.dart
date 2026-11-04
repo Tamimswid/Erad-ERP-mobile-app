@@ -1,11 +1,6 @@
 part of 'invoice_cubit.dart';
 
-enum DateFilter {
-  all,
-  thisMonth,
-  thisYear,
-  custom,
-}
+enum DateFilter { all, thisMonth, thisYear, custom }
 
 abstract class InvoiceState extends Equatable {
   const InvoiceState();
@@ -38,7 +33,12 @@ class FilteredSalesInvoicesLoaded extends InvoiceState {
   final DateTime? startDate;
   final DateTime? endDate;
 
-  const FilteredSalesInvoicesLoaded(this.invoices, this.filter, {this.startDate, this.endDate});
+  const FilteredSalesInvoicesLoaded(
+    this.invoices,
+    this.filter, {
+    this.startDate,
+    this.endDate,
+  });
 
   @override
   List<Object?> get props => [invoices, filter, startDate, endDate];
@@ -91,7 +91,12 @@ class FilteredPurchaseInvoicesLoaded extends InvoiceState {
   final DateTime? startDate;
   final DateTime? endDate;
 
-  const FilteredPurchaseInvoicesLoaded(this.invoices, this.filter, {this.startDate, this.endDate});
+  const FilteredPurchaseInvoicesLoaded(
+    this.invoices,
+    this.filter, {
+    this.startDate,
+    this.endDate,
+  });
 
   @override
   List<Object?> get props => [invoices, filter, startDate, endDate];

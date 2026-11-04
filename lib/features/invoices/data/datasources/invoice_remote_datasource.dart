@@ -30,10 +30,6 @@ abstract class InvoiceRemoteDataSource {
     DateTime? dateTo,
     String? search,
   });
-  // دStream لفواتير البيع في الوقت الفعلي
-  Stream<List<SalesInvoice>> watchSalesInvoices();
-  // دStream لفواتير الشراء في الوقت الفعلي
-  Stream<List<PurchaseInvoice>> watchPurchaseInvoices();
   // جلب فاتورة بيع بالمعرف
   Future<SalesInvoice> getSalesInvoiceById(String id);
   // جلب فاتورة شراء بالمعرف
@@ -496,92 +492,6 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
           .eq('id', id);
     } catch (e) {
       throw Exception('Failed to finalize purchase invoice: $e');
-    }
-  }
-
-  @override
-  Stream<List<SalesInvoice>> watchSalesInvoices() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) throw Exception('User not logged in');
-
-    await for (final data
-        in _supabaseClient
-            .from('sales_invoices')
-            .stream(primaryKey: ['id'])
-            .eq('user_id', userId)
-            .order('created_at', ascending: false)) {
-      // Fetch customer names and items for each invoice
-      final invoices = await Future.wait(
-        data.map((json) async {
-          final invoiceJson = Map<String, dynamic>.from(json);
-
-          // Fetch customer name
-          if (json['customer_id'] != null) {
-            final customerResponse = await _supabaseClient
-                .from('customers')
-                .select('name')
-                .eq('id', json['customer_id'])
-                .maybeSingle();
-            if (customerResponse != null) {
-              invoiceJson['customer_name'] = customerResponse['name'];
-            }
-          }
-
-          // Fetch invoice items
-          final itemsResponse = await _supabaseClient
-              .from('sales_invoice_items')
-              .select()
-              .eq('invoice_id', json['id']);
-          invoiceJson['items'] = itemsResponse;
-
-          return _mapJsonToSalesInvoice(invoiceJson);
-        }),
-      );
-
-      yield invoices;
-    }
-  }
-
-  @override
-  Stream<List<PurchaseInvoice>> watchPurchaseInvoices() async* {
-    final userId = await UserService.getUserId();
-    if (userId == null) throw Exception('User not logged in');
-
-    await for (final data
-        in _supabaseClient
-            .from('purchase_invoices')
-            .stream(primaryKey: ['id'])
-            .eq('user_id', userId)
-            .order('created_at', ascending: false)) {
-      // Fetch supplier names and items for each invoice
-      final invoices = await Future.wait(
-        data.map((json) async {
-          final invoiceJson = Map<String, dynamic>.from(json);
-
-          // Fetch supplier name
-          if (json['supplier_id'] != null) {
-            final supplierResponse = await _supabaseClient
-                .from('suppliers')
-                .select('name')
-                .eq('id', json['supplier_id'])
-                .maybeSingle();
-            if (supplierResponse != null) {
-              invoiceJson['supplier_name'] = supplierResponse['name'];
-            }
-          }
-
-          // Fetch invoice items
-          final itemsResponse = await _supabaseClient
-              .from('purchase_invoice_items')
-              .select()
-              .eq('invoice_id', json['id']);
-          invoiceJson['items'] = itemsResponse;
-
-          return _mapJsonToPurchaseInvoice(invoiceJson);
-        }),
-      );
-
-      yield invoices;
     }
   }
 

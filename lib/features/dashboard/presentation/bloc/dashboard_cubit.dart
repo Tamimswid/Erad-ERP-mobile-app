@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -12,18 +13,62 @@ import '../../data/helpers/dashboard_filter_helper.dart';
 part 'dashboard_state.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
+  static const List<DataDomain> _watchedDomains = [
+    DataDomain.invoices,
+    DataDomain.customerDebts,
+    DataDomain.supplierDebts,
+    DataDomain.products,
+    DataDomain.expenses,
+    DataDomain.withdrawals,
+  ];
+
   final DashboardRepository _dashboardRepository;
+  final DataChangeNotifier _dataChanges;
+  final Map<DataDomain, int> _dataChangeVersions = {};
 
   DashboardPeriod _period = DashboardPeriod.year;
   String _selectedYear = DateTime.now().year.toString();
   DateTime _selectedMonth = DateTime.now();
   DateTimeRange? _customDateRange;
+  int _requestId = 0;
+  bool _refreshScheduled = false;
 
   DashboardCubit({
     required DashboardRepository dashboardRepository,
-  })  : _dashboardRepository = dashboardRepository,
-        super(const DashboardInitial()) {
+    required DataChangeNotifier dataChanges,
+  }) : _dashboardRepository = dashboardRepository,
+       _dataChanges = dataChanges,
+       super(const DashboardInitial()) {
+    for (final domain in _watchedDomains) {
+      _dataChangeVersions[domain] = _dataChanges.versionOf(domain);
+    }
+    _dataChanges.addListener(_handleDataChange);
     refreshData();
+  }
+
+  void _handleDataChange() {
+    if (isClosed) return;
+
+    var changed = false;
+    for (final domain in _watchedDomains) {
+      final version = _dataChanges.versionOf(domain);
+      if (version != _dataChangeVersions[domain]) {
+        _dataChangeVersions[domain] = version;
+        changed = true;
+      }
+    }
+    if (!changed || _refreshScheduled) return;
+
+    _refreshScheduled = true;
+    Future.microtask(() {
+      _refreshScheduled = false;
+      if (isClosed) return;
+      loadDashboardData(
+        period: _period,
+        customDateRange: _customDateRange,
+        showLoading: false,
+      );
+    });
   }
 
   Future<void> loadDashboardData({
@@ -31,7 +76,9 @@ class DashboardCubit extends Cubit<DashboardState> {
     String? year,
     DateTime? month,
     DateTimeRange? customDateRange,
+    bool showLoading = true,
   }) async {
+    final requestId = ++_requestId;
     final nextYear = year ?? _selectedYear;
     final nextMonth = month ?? _selectedMonth;
     final nextRange = customDateRange ?? _customDateRange;
@@ -53,7 +100,9 @@ class DashboardCubit extends Cubit<DashboardState> {
     final startDate = DashboardFilterHelper.formatDateForApi(dateRange.start);
     final endDate = DashboardFilterHelper.formatDateForApi(dateRange.end);
 
-    emit(const DashboardLoading());
+    if (showLoading && !isClosed) emit(const DashboardLoading());
+
+    final previous = state is DashboardLoaded ? state as DashboardLoaded : null;
 
     try {
       final results = await Future.wait([
@@ -63,28 +112,57 @@ class DashboardCubit extends Cubit<DashboardState> {
         ),
         _dashboardRepository.getProductStock(),
       ]);
+      if (isClosed || requestId != _requestId) return;
 
-      DashboardFinancialsModel financials =
-          const DashboardFinancialsModel(userId: '');
       final financialsResult =
           results[0] as Either<Failure, DashboardFinancialsModel>;
-      financialsResult.fold((failure) => null, (data) => financials = data);
-
-      List<DashboardProductStockModel> productStock = [];
       final stockResult =
           results[1] as Either<Failure, List<DashboardProductStockModel>>;
-      stockResult.fold((failure) => null, (data) => productStock = data);
 
-      emit(DashboardLoaded(
-        financials: financials,
-        productStock: productStock,
-        period: period,
-        selectedYear: nextYear,
-        selectedMonth: nextMonth,
-        customDateRange:
-            period == DashboardPeriod.custom ? nextRange : null,
-      ));
+      DashboardFinancialsModel? financials;
+      Failure? financialsFailure;
+      financialsResult.fold(
+        (failure) => financialsFailure = failure,
+        (data) => financials = data,
+      );
+
+      List<DashboardProductStockModel>? productStock;
+      Failure? stockFailure;
+      stockResult.fold(
+        (failure) => stockFailure = failure,
+        (data) => productStock = data,
+      );
+
+      if (financials == null && productStock == null && previous == null) {
+        emit(
+          DashboardError(
+            financialsFailure?.message ??
+                stockFailure?.message ??
+                'Failed to load dashboard data',
+          ),
+        );
+        return;
+      }
+
+      emit(
+        DashboardLoaded(
+          financials:
+              financials ??
+              previous?.financials ??
+              const DashboardFinancialsModel(userId: ''),
+          productStock:
+              productStock ??
+              previous?.productStock ??
+              const <DashboardProductStockModel>[],
+          period: period,
+          selectedYear: nextYear,
+          selectedMonth: nextMonth,
+          customDateRange: period == DashboardPeriod.custom ? nextRange : null,
+        ),
+      );
     } catch (e) {
+      if (isClosed || requestId != _requestId) return;
+      if (!showLoading && state is DashboardLoaded) return;
       emit(DashboardError('Failed to load dashboard data: $e'));
     }
   }
@@ -110,10 +188,7 @@ class DashboardCubit extends Cubit<DashboardState> {
   }
 
   void refreshData() {
-    loadDashboardData(
-      period: _period,
-      customDateRange: _customDateRange,
-    );
+    loadDashboardData(period: _period, customDateRange: _customDateRange);
   }
 
   void retry() => refreshData();
@@ -127,5 +202,11 @@ class DashboardCubit extends Cubit<DashboardState> {
       selectedYear: loaded.selectedYear,
       customDateRange: loaded.customDateRange,
     );
+  }
+
+  @override
+  Future<void> close() {
+    _dataChanges.removeListener(_handleDataChange);
+    return super.close();
   }
 }

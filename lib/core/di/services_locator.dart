@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/app_database.dart';
 import '../network/network_info.dart';
+import '../notifications/data_change_notifier.dart';
 import '../utils/app_utils.dart';
 import '../services/user_service.dart';
 import '../../features/auth/data/datasource/auth_remote_datasource.dart';
@@ -50,7 +51,9 @@ import '../../features/dashboard/presentation/bloc/dashboard_cubit.dart';
 import '../../features/reports/data/datasources/report_remote_datasource.dart';
 import '../../features/reports/data/repositories/report_repository.dart';
 import '../../features/reports/presentation/bloc/party_invoice_cubit.dart';
-
+import '../../features/stock/data/datasources/stock_remote_datasource.dart';
+import '../../features/stock/data/repositories/stock_repository.dart';
+import '../../features/stock/presentation/bloc/stock_review_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -74,6 +77,7 @@ Future<void> initServicesLocator() async {
 
   sl.registerLazySingleton(() => AppUtils());
   sl.registerLazySingleton(() => UserService());
+  sl.registerLazySingleton(() => DataChangeNotifier());
   // Database
   final db = await AppDatabase.create();
   sl.registerSingleton<AppDatabase>(db);
@@ -96,7 +100,9 @@ Future<void> initServicesLocator() async {
     () => AuthLocalDataSourceImpl(sl()),
   );
 
-  sl.registerLazySingleton<AuthRepository>(() => AuthRepository(sl(), sl(),sl()));
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepository(sl(), sl(), sl()),
+  );
 
   sl.registerFactory(() => AuthCubit(authRepository: sl()));
 
@@ -109,7 +115,9 @@ Future<void> initServicesLocator() async {
     () => ProductRepository(sl(), sl()),
   );
 
-  sl.registerFactory(() => ProductCubit(productRepository: sl()));
+  sl.registerFactory(
+    () => ProductCubit(productRepository: sl(), dataChanges: sl()),
+  );
 
   // Invoices
   sl.registerLazySingleton<InvoiceRemoteDataSource>(
@@ -128,8 +136,8 @@ Future<void> initServicesLocator() async {
     () => EditInvoiceRepositoryImpl(sl()),
   );
 
-  sl.registerFactory(() => InvoiceCubit(sl()));
-  sl.registerFactory(() => EditInvoiceCubit(sl()));
+  sl.registerFactory(() => InvoiceCubit(sl(), sl()));
+  sl.registerFactory(() => EditInvoiceCubit(sl(), sl()));
 
   // Customers
   sl.registerLazySingleton<CustomerRemoteDataSource>(
@@ -140,7 +148,9 @@ Future<void> initServicesLocator() async {
     () => CustomerRepository(sl(), sl()),
   );
 
-  sl.registerFactory(() => CustomerCubit(customerRepository: sl()));
+  sl.registerFactory(
+    () => CustomerCubit(customerRepository: sl(), dataChanges: sl()),
+  );
 
   // Customer Debts
   sl.registerLazySingleton<CustomerDebtRemoteDataSource>(
@@ -151,7 +161,9 @@ Future<void> initServicesLocator() async {
     () => CustomerDebtRepositoryImpl(sl(), sl(), sl()),
   );
 
-  sl.registerFactory(() => CustomerDebtCubit(repository: sl()));
+  sl.registerFactory(
+    () => CustomerDebtCubit(repository: sl(), dataChanges: sl()),
+  );
   // Suppliers
   sl.registerLazySingleton<SupplierRemoteDataSource>(
     () => SupplierRemoteDataSourceImpl(sl()),
@@ -161,7 +173,9 @@ Future<void> initServicesLocator() async {
     () => SupplierRepository(sl(), sl()),
   );
 
-  sl.registerFactory(() => SupplierCubit(supplierRepository: sl()));
+  sl.registerFactory(
+    () => SupplierCubit(supplierRepository: sl(), dataChanges: sl()),
+  );
 
   // Supplier Debts
   sl.registerLazySingleton<SupplierDebtRemoteDataSource>(
@@ -172,7 +186,9 @@ Future<void> initServicesLocator() async {
     () => SupplierDebtRepositoryImpl(sl(), sl()),
   );
 
-  sl.registerFactory(() => SupplierDebtCubit(repository: sl()));
+  sl.registerFactory(
+    () => SupplierDebtCubit(repository: sl(), dataChanges: sl()),
+  );
 
   // Expenses
   sl.registerLazySingleton<ExpenseRemoteDataSource>(
@@ -183,7 +199,9 @@ Future<void> initServicesLocator() async {
     () => ExpenseRepository(sl(), sl()),
   );
 
-  sl.registerFactory(() => ExpenseCubit(expenseRepository: sl()));
+  sl.registerFactory(
+    () => ExpenseCubit(expenseRepository: sl(), dataChanges: sl()),
+  );
 
   // Withdrawals
   sl.registerLazySingleton<WithdrawalRemoteDataSource>(
@@ -194,7 +212,9 @@ Future<void> initServicesLocator() async {
     () => WithdrawalRepository(sl(), sl()),
   );
 
-  sl.registerFactory(() => WithdrawalCubit(withdrawalRepository: sl()));
+  sl.registerFactory(
+    () => WithdrawalCubit(withdrawalRepository: sl(), dataChanges: sl()),
+  );
 
   // Dashboard
   sl.registerLazySingleton<DashboardRemoteDataSource>(
@@ -209,19 +229,27 @@ Future<void> initServicesLocator() async {
     () => DashboardRepository(sl(), sl(), sl()),
   );
 
-  sl.registerFactory(() => DashboardCubit(
-    dashboardRepository: sl(),
-  ));
+  sl.registerFactory(
+    () => DashboardCubit(dashboardRepository: sl(), dataChanges: sl()),
+  );
+
+  // Stock review
+  sl.registerLazySingleton<StockRemoteDataSource>(
+    () => StockRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<StockRepository>(() => StockRepository(sl(), sl()));
+
+  sl.registerFactory(
+    () => StockReviewCubit(stockRepository: sl(), dataChanges: sl()),
+  );
 
   // Reports
   sl.registerLazySingleton<ReportRemoteDataSource>(
     () => ReportRemoteDataSourceImpl(sl()),
   );
 
-  sl.registerLazySingleton<ReportRepository>(
-    () => ReportRepositoryImpl(sl()),
-  );
+  sl.registerLazySingleton<ReportRepository>(() => ReportRepositoryImpl(sl()));
 
   sl.registerFactory(() => PartyInvoiceCubit(sl()));
-
 }

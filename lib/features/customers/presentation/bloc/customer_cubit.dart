@@ -1,3 +1,4 @@
+import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
 import 'package:erad/features/customers/data/repositories/customer_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,29 +10,61 @@ class CustomerCubit extends Cubit<CustomerState> {
   static const int pageSize = 10;
 
   final CustomerRepository customerRepository;
+  final DataChangeNotifier _dataChanges;
+  late int _dataChangeVersion;
 
-  CustomerCubit({required this.customerRepository}) : super(CustomerInitial());
+  CustomerCubit({
+    required this.customerRepository,
+    required DataChangeNotifier dataChanges,
+  }) : _dataChanges = dataChanges,
+       super(CustomerInitial()) {
+    _dataChangeVersion = _dataChanges.versionOf(DataDomain.customers);
+    _dataChanges.addListener(_handleDataChange);
+  }
 
   final List<CustomerModel> _customers = [];
   int _offset = 0;
   int _requestId = 0;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  bool _hasLoaded = false;
   bool _pagedMode = false;
   String _searchQuery = '';
 
+  void _handleDataChange() {
+    if (isClosed) return;
+    final version = _dataChanges.versionOf(DataDomain.customers);
+    if (version == _dataChangeVersion) return;
+    _dataChangeVersion = version;
+    if (_pagedMode) {
+      loadFirstPage(showLoading: false);
+    } else {
+      getCustomers(showLoading: false);
+    }
+  }
+
   /// Loads the full customer list (used by invoice pickers and reports).
-  Future<void> getCustomers() async {
+  Future<void> getCustomers({bool showLoading = true}) async {
     _pagedMode = false;
     _searchQuery = '';
     final requestId = ++_requestId;
-    if (!isClosed) emit(CustomerLoading());
+    if (showLoading && !isClosed) emit(CustomerLoading());
 
     final result = await customerRepository.getCustomers();
     if (isClosed || requestId != _requestId) return;
     result.fold(
-      (failure) => emit(CustomerError(failure.message)),
-      (customers) => emit(CustomerLoaded(customers, hasMore: false)),
+      (failure) {
+        emit(CustomerError(failure.message));
+        if (_hasLoaded) _emitLoaded();
+      },
+      (customers) {
+        _customers
+          ..clear()
+          ..addAll(customers);
+        _hasMore = false;
+        _hasLoaded = true;
+        emit(CustomerLoaded(customers, hasMore: false));
+      },
     );
   }
 
@@ -39,10 +72,11 @@ class CustomerCubit extends Cubit<CustomerState> {
   Future<void> loadFirstPage({bool showLoading = true}) async {
     _pagedMode = true;
     final requestId = ++_requestId;
+    final previousOffset = _offset;
+    final previousHasMore = _hasMore;
     _offset = 0;
     _hasMore = true;
     _isLoadingMore = false;
-    _customers.clear();
 
     if (showLoading && !isClosed) emit(CustomerLoading());
 
@@ -53,12 +87,23 @@ class CustomerCubit extends Cubit<CustomerState> {
     );
     if (isClosed || requestId != _requestId) return;
 
-    result.fold((failure) => emit(CustomerError(failure.message)), (page) {
-      _customers.addAll(page.items);
-      _offset = page.items.length;
-      _hasMore = page.hasMore;
-      _emitLoaded();
-    });
+    result.fold(
+      (failure) {
+        _offset = previousOffset;
+        _hasMore = previousHasMore;
+        emit(CustomerError(failure.message));
+        if (_hasLoaded) _emitLoaded();
+      },
+      (page) {
+        _customers
+          ..clear()
+          ..addAll(page.items);
+        _offset = page.items.length;
+        _hasMore = page.hasMore;
+        _hasLoaded = true;
+        _emitLoaded();
+      },
+    );
   }
 
   Future<void> loadMore() async {
@@ -113,7 +158,7 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
-      (_) => _refreshAfterMutation(),
+      (_) => _notifyChanged(),
     );
   }
 
@@ -123,7 +168,7 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
-      (_) => _refreshAfterMutation(),
+      (_) => _notifyChanged(),
     );
   }
 
@@ -133,16 +178,15 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
-      (_) => _refreshAfterMutation(),
+      (_) => _notifyChanged(),
     );
   }
 
-  void _refreshAfterMutation() {
-    if (_pagedMode) {
-      loadFirstPage(showLoading: false);
-    } else {
-      getCustomers();
-    }
+  void _notifyChanged() {
+    _dataChanges.notifyChangedAll([
+      DataDomain.customers,
+      DataDomain.customerDebts,
+    ]);
   }
 
   void clearError() {
@@ -150,5 +194,11 @@ class CustomerCubit extends Cubit<CustomerState> {
     if (state is CustomerError) {
       emit(CustomerInitial());
     }
+  }
+
+  @override
+  Future<void> close() {
+    _dataChanges.removeListener(_handleDataChange);
+    return super.close();
   }
 }

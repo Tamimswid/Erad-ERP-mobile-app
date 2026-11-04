@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
@@ -16,11 +17,13 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   static const int pageSize = 10;
 
   final InvoiceRepository _repository;
+  final DataChangeNotifier _dataChanges;
   final List<dynamic> _pagedInvoices = [];
   int _offset = 0;
   int _requestId = 0;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  bool _hasLoaded = false;
   Timer? _searchDebounce;
 
   // New filtering state
@@ -32,12 +35,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   // Invoice creation state
   String _invoiceType = 'sale';
-  String _debtType = 'debtor'; // 'debtor' or 'creditor'
   String? _selectedCustomerId;
   String? _selectedSupplierId;
-  DateTime? _invoiceDate;
-  DateTime? _dueDate;
-  DateTime? _deliveryDate;
   List<InvoiceItem> _invoiceItems = [];
   double _discountAmount = 0.0;
   double _paidAmount = 0.0;
@@ -45,7 +44,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   String _reference = '';
   String _project = '';
   String _paymentMethod = '';
-  String _paymentType = 'debt'; // 'debt' or 'cash'
+  String? _paymentType; // 'debt' or 'cash' - no default selection
   String _status = 'completed';
 
   // Getters for accessing filter state
@@ -57,12 +56,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   // Getters for invoice creation state
   String get invoiceType => _invoiceType;
-  String get debtType => _debtType;
   String? get selectedCustomerId => _selectedCustomerId;
   String? get selectedSupplierId => _selectedSupplierId;
-  DateTime? get invoiceDate => _invoiceDate;
-  DateTime? get dueDate => _dueDate;
-  DateTime? get deliveryDate => _deliveryDate;
   List<InvoiceItem> get invoiceItems => _invoiceItems;
   double get discountAmount => _discountAmount;
   double get paidAmount => _paidAmount;
@@ -70,23 +65,22 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   String get reference => _reference;
   String get project => _project;
   String get paymentMethod => _paymentMethod;
-  String get paymentType => _paymentType;
+  String? get paymentType => _paymentType;
   String get status => _status;
 
-  InvoiceCubit(this._repository) : super(const InvoiceInitial()) {
-    // Initialize with default values for new invoice creation
-    _invoiceDate = DateTime.now();
-    _dueDate = DateTime.now();
+  InvoiceCubit(this._repository, this._dataChanges)
+    : super(const InvoiceInitial()) {
     loadFirstPage();
   }
 
-  Future<void> loadFirstPage() async {
+  Future<void> loadFirstPage({bool showLoading = true}) async {
     final requestId = ++_requestId;
+    final previousOffset = _offset;
+    final previousHasMore = _hasMore;
     _offset = 0;
     _hasMore = true;
     _isLoadingMore = false;
-    _pagedInvoices.clear();
-    emit(const InvoiceLoading());
+    if (showLoading && !isClosed) emit(const InvoiceLoading());
 
     if (_selectedType == 'purchase') {
       final result = await _repository.getPurchaseInvoicesPage(
@@ -98,12 +92,23 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         search: _searchQuery,
       );
       if (isClosed || requestId != _requestId) return;
-      result.fold((failure) => emit(InvoiceError(failure.message)), (page) {
-        _pagedInvoices.addAll(page.items);
-        _offset = page.items.length;
-        _hasMore = page.hasMore;
-        _emitFiltered();
-      });
+      result.fold(
+        (failure) {
+          _offset = previousOffset;
+          _hasMore = previousHasMore;
+          emit(InvoiceError(failure.message));
+          if (_hasLoaded) _emitFiltered();
+        },
+        (page) {
+          _pagedInvoices
+            ..clear()
+            ..addAll(page.items);
+          _offset = page.items.length;
+          _hasMore = page.hasMore;
+          _hasLoaded = true;
+          _emitFiltered();
+        },
+      );
       return;
     }
 
@@ -116,12 +121,23 @@ class InvoiceCubit extends Cubit<InvoiceState> {
       search: _searchQuery,
     );
     if (isClosed || requestId != _requestId) return;
-    result.fold((failure) => emit(InvoiceError(failure.message)), (page) {
-      _pagedInvoices.addAll(page.items);
-      _offset = page.items.length;
-      _hasMore = page.hasMore;
-      _emitFiltered();
-    });
+    result.fold(
+      (failure) {
+        _offset = previousOffset;
+        _hasMore = previousHasMore;
+        emit(InvoiceError(failure.message));
+        if (_hasLoaded) _emitFiltered();
+      },
+      (page) {
+        _pagedInvoices
+          ..clear()
+          ..addAll(page.items);
+        _offset = page.items.length;
+        _hasMore = page.hasMore;
+        _hasLoaded = true;
+        _emitFiltered();
+      },
+    );
   }
 
   Future<void> loadMore() async {
@@ -216,81 +232,167 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   Future<void> getAllInvoices() => loadFirstPage();
 
   // CRUD operations
-  Future<void> createSalesInvoice(SalesInvoice invoice) async {
-    emit(const InvoiceLoading());
+  Future<bool> createSalesInvoice(SalesInvoice invoice) async {
     final result = await _repository.createSalesInvoice(invoice);
-    result.fold(
-      (failure) => emit(InvoiceError(failure.message)),
-      (success) => getSalesInvoices(),
+    if (isClosed) return false;
+    return result.fold(
+      (failure) {
+        emit(InvoiceError(failure.message));
+        return false;
+      },
+      (_) {
+        _dataChanges.notifyChanged(DataDomain.invoices);
+        return true;
+      },
     );
   }
 
-  Future<void> createPurchaseInvoice(PurchaseInvoice invoice) async {
-    emit(const InvoiceLoading());
+  Future<bool> createPurchaseInvoice(PurchaseInvoice invoice) async {
     final result = await _repository.createPurchaseInvoice(invoice);
-    result.fold(
-      (failure) => emit(InvoiceError(failure.message)),
-      (success) => getPurchaseInvoices(),
+    if (isClosed) return false;
+    return result.fold(
+      (failure) {
+        emit(InvoiceError(failure.message));
+        return false;
+      },
+      (_) {
+        _dataChanges.notifyChanged(DataDomain.invoices);
+        return true;
+      },
     );
   }
 
-  Future<void> updateSalesInvoice(
-    SalesInvoice invoice, {
-    bool optimisticUpdate = false,
-  }) async {
-    if (!optimisticUpdate) {
-      emit(const InvoiceLoading());
-    }
+  Future<bool> updateSalesInvoice(SalesInvoice invoice) async {
+    final snapshot = List<dynamic>.from(_pagedInvoices);
+    if (_replaceInvoice(invoice)) _emitFiltered();
+
     final result = await _repository.updateSalesInvoice(invoice);
-    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
-      if (!optimisticUpdate) {
-        getSalesInvoices();
-      }
-      // If optimistic update, real-time stream will handle the update
-    });
+    if (isClosed) return false;
+    return result.fold(
+      (failure) {
+        _pagedInvoices
+          ..clear()
+          ..addAll(snapshot);
+        emit(InvoiceError(failure.message));
+        _emitFiltered();
+        return false;
+      },
+      (_) {
+        _dataChanges.notifyChanged(DataDomain.invoices);
+        return true;
+      },
+    );
   }
 
-  Future<void> updatePurchaseInvoice(
-    PurchaseInvoice invoice, {
-    bool optimisticUpdate = false,
-  }) async {
-    if (!optimisticUpdate) {
-      emit(const InvoiceLoading());
-    }
+  Future<bool> updatePurchaseInvoice(PurchaseInvoice invoice) async {
+    final snapshot = List<dynamic>.from(_pagedInvoices);
+    if (_replaceInvoice(invoice)) _emitFiltered();
+
     final result = await _repository.updatePurchaseInvoice(invoice);
-    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
-      if (!optimisticUpdate) {
-        getPurchaseInvoices();
-      }
-      // If optimistic update, real-time stream will handle the update
-    });
+    if (isClosed) return false;
+    return result.fold(
+      (failure) {
+        _pagedInvoices
+          ..clear()
+          ..addAll(snapshot);
+        emit(InvoiceError(failure.message));
+        _emitFiltered();
+        return false;
+      },
+      (_) {
+        _dataChanges.notifyChanged(DataDomain.invoices);
+        return true;
+      },
+    );
   }
 
   Future<void> deleteSalesInvoice(String id) async {
-    emit(const InvoiceLoading());
+    final snapshot = List<dynamic>.from(_pagedInvoices);
+    final previousOffset = _offset;
+    if (_removeInvoice(id)) _emitFiltered();
+
     final result = await _repository.deleteSalesInvoice(id);
-    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
-      emit(SalesInvoiceDeleted());
-      getSalesInvoices();
-    });
+    if (isClosed) return;
+    result.fold(
+      (failure) {
+        _pagedInvoices
+          ..clear()
+          ..addAll(snapshot);
+        _offset = previousOffset;
+        emit(InvoiceError(failure.message));
+        _emitFiltered();
+      },
+      (_) {
+        emit(const SalesInvoiceDeleted());
+        _emitFiltered();
+        _dataChanges.notifyChangedAll([
+          DataDomain.invoices,
+          DataDomain.customerDebts,
+        ]);
+      },
+    );
   }
 
   Future<void> deletePurchaseInvoice(String id) async {
-    emit(const InvoiceLoading());
+    final snapshot = List<dynamic>.from(_pagedInvoices);
+    final previousOffset = _offset;
+    if (_removeInvoice(id)) _emitFiltered();
+
     final result = await _repository.deletePurchaseInvoice(id);
-    result.fold((failure) => emit(InvoiceError(failure.message)), (success) {
-      emit(PurchaseInvoiceDeleted());
-      getPurchaseInvoices();
-    });
+    if (isClosed) return;
+    result.fold(
+      (failure) {
+        _pagedInvoices
+          ..clear()
+          ..addAll(snapshot);
+        _offset = previousOffset;
+        emit(InvoiceError(failure.message));
+        _emitFiltered();
+      },
+      (_) {
+        emit(const PurchaseInvoiceDeleted());
+        _emitFiltered();
+        _dataChanges.notifyChangedAll([
+          DataDomain.invoices,
+          DataDomain.supplierDebts,
+        ]);
+      },
+    );
+  }
+
+  bool _replaceInvoice(dynamic invoice) {
+    final index = _pagedInvoices.indexWhere((item) => item.id == invoice.id);
+    if (index == -1) return false;
+    _pagedInvoices[index] = invoice;
+    return true;
+  }
+
+  bool _removeInvoice(String id) {
+    final index = _pagedInvoices.indexWhere((item) => item.id == id);
+    if (index == -1) return false;
+    _pagedInvoices.removeAt(index);
+    if (_offset > 0) _offset--;
+    return true;
   }
 
   // Delete sales invoice and reduce customer balance if it was a debt invoice
   Future<void> deleteSalesInvoiceWithBalanceAdjustment(
     SalesInvoice invoice,
   ) async {
-    try {
-      emit(const InvoiceLoading());
+    final snapshot = List<dynamic>.from(_pagedInvoices);
+    final previousOffset = _offset;
+    if (_removeInvoice(invoice.id)) _emitFiltered();
 
+    void rollback(String message) {
+      _pagedInvoices
+        ..clear()
+        ..addAll(snapshot);
+      _offset = previousOffset;
+      emit(InvoiceError(message));
+      _emitFiltered();
+    }
+
+    try {
       // If the invoice was not paid (debt), reduce the customer balance
       if (invoice.paymentStatus == PaymentStatus.debt &&
           invoice.customerId != null) {
@@ -309,12 +411,17 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
       // Now delete the invoice
       final result = await _repository.deleteSalesInvoice(invoice.id);
-      result.fold(
-        (failure) => emit(InvoiceError(failure.message)),
-        (success) => getSalesInvoices(),
-      );
+      if (isClosed) return;
+      result.fold((failure) => rollback(failure.message), (_) {
+        emit(const SalesInvoiceDeleted());
+        _emitFiltered();
+        _dataChanges.notifyChangedAll([
+          DataDomain.invoices,
+          DataDomain.customerDebts,
+        ]);
+      });
     } catch (e) {
-      emit(InvoiceError('فشل حذف الفاتورة: ${e.toString()}'));
+      if (!isClosed) rollback('فشل حذف الفاتورة: ${e.toString()}');
     }
   }
 
@@ -382,11 +489,6 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     emit(InvoiceFormUpdated(updateType: 'invoiceType'));
   }
 
-  void setDebtType(String type) {
-    _debtType = type;
-    emit(InvoiceFormUpdated(updateType: 'debtType'));
-  }
-
   void setCustomer(String? customerId) {
     _selectedCustomerId = customerId;
     emit(InvoiceFormUpdated(updateType: 'customer'));
@@ -395,23 +497,6 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   void setSupplier(String? supplierId) {
     _selectedSupplierId = supplierId;
     emit(InvoiceFormUpdated(updateType: 'supplier'));
-  }
-
-  void setInvoiceDate(DateTime? date) {
-    print('DEBUG: setInvoiceDate called with: $date');
-    _invoiceDate = date;
-    print('DEBUG: _invoiceDate set to: $_invoiceDate');
-    emit(InvoiceFormUpdated(updateType: 'invoiceDate'));
-  }
-
-  void setDueDate(DateTime? date) {
-    _dueDate = date;
-    emit(InvoiceFormUpdated(updateType: 'dueDate'));
-  }
-
-  void setDeliveryDate(DateTime? date) {
-    _deliveryDate = date;
-    emit(InvoiceFormUpdated(updateType: 'deliveryDate'));
   }
 
   void addInvoiceItem(InvoiceItem item) {
@@ -449,24 +534,10 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   }
 
   void _calculateAndUpdateTotals() {
-    // This method ensures totals are calculated and ready for UI
-    final subtotal = calculateSubtotal();
-    final discountAmount = calculateDiscountAmount();
-    final grandTotal = calculateGrandTotal();
-
-    // If payment type is cash, update paidAmount to match grand total
     if (_paymentType == 'cash') {
-      _paidAmount = grandTotal;
+      _paidAmount = calculateGrandTotal();
     }
 
-    final remaining = calculateRemainingAmount();
-
-    // Debug: Log calculated values (can be removed in production)
-    print(
-      'DEBUG: Totals calculated - Subtotal: $subtotal, Discount: $discountAmount, Grand Total: $grandTotal, Paid: $_paidAmount, Remaining: $remaining',
-    );
-
-    // Force UI to update with new totals
     emit(InvoiceFormUpdated(updateType: 'calculateTotals'));
   }
 
@@ -511,14 +582,9 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     emit(InvoiceFormUpdated(updateType: 'paymentMethod'));
   }
 
-  void setPaymentType(String type) {
+  void setPaymentType(String? type) {
     _paymentType = type;
-    // Automatically update paidAmount based on payment type
-    if (type == 'cash') {
-      _paidAmount = calculateGrandTotal();
-    } else {
-      _paidAmount = 0.0;
-    }
+    _paidAmount = type == 'cash' ? calculateGrandTotal() : 0.0;
     emit(InvoiceFormUpdated(updateType: 'paymentType'));
   }
 
@@ -528,15 +594,9 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   }
 
   void clearInvoiceData() {
-    print('DEBUG: clearInvoiceData called - resetting to defaults');
     _invoiceType = 'sale';
-    _debtType = 'debtor';
     _selectedCustomerId = null;
     _selectedSupplierId = null;
-    // Reset to defaults instead of null to avoid validation issues
-    _invoiceDate = DateTime.now();
-    _dueDate = DateTime.now();
-    _deliveryDate = null;
     _invoiceItems.clear();
     _discountAmount = 0.0;
     _paidAmount = 0.0;
@@ -544,9 +604,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     _reference = '';
     _project = '';
     _paymentMethod = '';
-    _paymentType = 'debt';
+    _paymentType = null;
     _status = 'completed';
-    print('DEBUG: clearInvoiceData - reset invoice date to: $_invoiceDate');
     emit(InvoiceFormUpdated(updateType: 'clearAll'));
   }
 
@@ -571,36 +630,17 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   }
 
   bool get canSaveInvoice {
-    print('DEBUG: Invoice Type: $_invoiceType');
-    print('DEBUG: Customer ID: $_selectedCustomerId');
-    print('DEBUG: Supplier ID: $_selectedSupplierId');
-    print('DEBUG: Invoice Items Count: ${_invoiceItems.length}');
-    print('DEBUG: Invoice Date: $_invoiceDate');
-
-    if (_invoiceType == 'sale' && _selectedCustomerId == null) {
-      print('DEBUG: Failed - Sale type requires customer');
-      return false;
-    }
-    if (_invoiceType == 'purchase' && _selectedSupplierId == null) {
-      print('DEBUG: Failed - Purchase type requires supplier');
-      return false;
-    }
-    if (_invoiceItems.isEmpty) {
-      print('DEBUG: Failed - No invoice items');
-      return false;
-    }
-    if (_invoiceDate == null) {
-      print('DEBUG: Failed - No invoice date');
-      return false;
-    }
-    print('DEBUG: All validations passed!');
+    if (_invoiceType == 'sale' && _selectedCustomerId == null) return false;
+    if (_invoiceType == 'purchase' && _selectedSupplierId == null) return false;
+    if (_invoiceItems.isEmpty) return false;
+    if (_paymentType == null) return false;
     return true;
   }
 
-  Future<void> saveInvoice() async {
+  Future<bool> saveInvoice() async {
     if (!canSaveInvoice) {
       emit(InvoiceError('يرجى إكمال جميع الحقول المطلوبة'));
-      return;
+      return false;
     }
 
     emit(const InvoiceLoading());
@@ -609,35 +649,25 @@ class InvoiceCubit extends Cubit<InvoiceState> {
       final now = DateTime.now();
       final invoiceNumber = _generateInvoiceNumber();
       final userID = await UserService.getUserId();
-
-      // Set paidAmount based on paymentType before saving
-      if (_paymentType == 'cash') {
-        _paidAmount = calculateGrandTotal();
-      } else {
-        _paidAmount = 0.0;
+      if (userID == null) {
+        emit(InvoiceError('تعذر تحديد المستخدم الحالي'));
+        return false;
       }
 
-      print('DEBUG: Saving invoice with type: $_invoiceType');
-      print('DEBUG: Payment Type: $_paymentType, Paid Amount: $_paidAmount');
-      print(
-        'DEBUG: Grand Total: ${calculateGrandTotal()}, Remaining: ${calculateRemainingAmount()}',
-      );
-      print('DEBUG: Payment Status: ${_getPaymentStatus()}');
-      print('DEBUG: Invoice Number: $invoiceNumber');
-      print('DEBUG: Items count: ${_invoiceItems.length}');
-      print(
-        'DEBUG: Items total purchase: ${_invoiceItems.fold(0.0, (sum, item) => sum + ((item.purchasePrice ?? 0.0) * (item.quantity ?? 0)))}',
-      );
+      final paymentStatus = _paymentType == 'cash'
+          ? PaymentStatus.cash
+          : PaymentStatus.debt;
+      _paidAmount = _paymentType == 'cash' ? calculateGrandTotal() : 0.0;
 
       if (_invoiceType == 'sale') {
         final salesInvoice = SalesInvoice(
-          status: InvoiceStatus.fromString(status),
+          status: InvoiceStatus.fromString(_status),
           id: '', // Will be generated by Supabase
-          userId: userID!,
+          userId: userID,
           invoiceNumber: invoiceNumber,
           customerId: _selectedCustomerId,
-          invoiceDate: _invoiceDate!,
-          dueDate: _dueDate,
+          invoiceDate: now,
+          dueDate: now,
           subtotal: calculateSubtotal(),
           discountAmount: calculateDiscountAmount(),
           taxAmount: 0.0,
@@ -646,8 +676,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           totalAmount: calculateGrandTotal(),
           paidAmount: _paidAmount,
           remainingAmount: calculateRemainingAmount(),
-          paymentMethod: _paymentMethod.isEmpty ? 'cash' : _paymentMethod,
-          paymentStatus: _getPurchasePaymentStatus(),
+          paymentMethod: _paymentType == 'cash' ? 'cash' : 'debt',
+          paymentStatus: paymentStatus,
           notes: _notes.isEmpty ? null : _notes,
           isFinalized: _status == 'approved',
           createdAt: now,
@@ -681,44 +711,29 @@ class InvoiceCubit extends Cubit<InvoiceState> {
               ),
         );
 
-        print('DEBUG: Creating sales invoice: ${salesInvoice.toJson()}');
-        await createSalesInvoice(salesInvoice);
+        final created = await createSalesInvoice(salesInvoice);
+        if (!created) return false;
 
         // If debt invoice, update customer balance
         if (_paymentType == 'debt' && _selectedCustomerId != null) {
           final amountToAdd = calculateRemainingAmount();
           if (amountToAdd > 0) {
-            print(
-              'DEBUG: Updating customer balance for debt invoice: +$amountToAdd',
+            await _repository.updateCustomerBalance(
+              _selectedCustomerId!,
+              amountToAdd,
             );
-            print('DEBUG: Customer ID: $_selectedCustomerId');
-            try {
-              final result = await _repository.updateCustomerBalance(
-                _selectedCustomerId!,
-                amountToAdd, // Positive to add to balance
-              );
-              result.fold(
-                (failure) => print(
-                  'DEBUG: ERROR updating customer balance: ${failure.message}',
-                ),
-                (success) =>
-                    print('DEBUG: Customer balance updated successfully'),
-              );
-            } catch (e, stackTrace) {
-              print('DEBUG: EXCEPTION during balance update: $e');
-              print('DEBUG: Stack trace: $stackTrace');
-            }
+            _dataChanges.notifyChanged(DataDomain.customerDebts);
           }
         }
       } else {
         final purchaseInvoice = PurchaseInvoice(
-          status: InvoiceStatus.fromString(status),
+          status: InvoiceStatus.fromString(_status),
           id: '', // Will be generated by Supabase
-          userId: userID!,
+          userId: userID,
           invoiceNumber: invoiceNumber,
           supplierId: _selectedSupplierId,
-          invoiceDate: _invoiceDate!,
-          dueDate: _dueDate,
+          invoiceDate: now,
+          dueDate: now,
           subtotal: calculateSubtotal(),
           discountAmount: calculateDiscountAmount(),
           taxAmount: 0.0, // TODO: Implement tax calculation
@@ -726,7 +741,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           totalAmount: calculateGrandTotal(),
           paidAmount: _paidAmount,
           remainingAmount: calculateRemainingAmount(),
-          paymentStatus: _getPurchasePaymentStatus(),
+          paymentStatus: paymentStatus,
           notes: _notes.isEmpty ? null : _notes,
           isFinalized: _status == 'approved',
           createdAt: now,
@@ -748,15 +763,19 @@ class InvoiceCubit extends Cubit<InvoiceState> {
               .toList(),
         );
 
-        print('DEBUG: Creating purchase invoice: ${purchaseInvoice.toJson()}');
-        await createPurchaseInvoice(purchaseInvoice);
+        final created = await createPurchaseInvoice(purchaseInvoice);
+        if (!created) return false;
+
+        if (_paymentType == 'debt' && _selectedSupplierId != null) {
+          _dataChanges.notifyChanged(DataDomain.supplierDebts);
+        }
       }
 
-      print('DEBUG: Invoice saved successfully!');
       clearInvoiceData();
+      return true;
     } catch (e) {
-      print('DEBUG: Error saving invoice: $e');
       emit(InvoiceError('فشل حفظ الفاتورة: ${e.toString()}'));
+      return false;
     }
   }
 
@@ -767,24 +786,6 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
     final random = DateTime.now().millisecondsSinceEpoch % 10000;
     return '$prefix-$dateStr-$random';
-  }
-
-  PaymentStatus _getPaymentStatus() {
-    final remaining = calculateRemainingAmount();
-    if (remaining <= 0) return PaymentStatus.cash;
-    return PaymentStatus.debt;
-  }
-
-  PaymentStatus _getPurchasePaymentStatus() {
-    final remaining = calculateRemainingAmount();
-    if (remaining <= 0) return PaymentStatus.cash;
-    if (_invoiceDate != null &&
-        DateTime.now().isAfter(
-          _dueDate ?? _invoiceDate!.add(const Duration(days: 30)),
-        )) {
-      return PaymentStatus.debt;
-    }
-    return PaymentStatus.debt;
   }
 
   // Yeni method: herhangi bir faturanın durumunu günceller
@@ -801,7 +802,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           updatedAt: DateTime.now(),
         );
 
-        await updateSalesInvoice(updatedInvoice);
+        final updated = await updateSalesInvoice(updatedInvoice);
+        if (updated) _dataChanges.notifyChanged(DataDomain.customerDebts);
       } else if (invoice is PurchaseInvoice) {
         final updatedStatus = InvoiceStatus.values.firstWhere(
           (e) => e.name == newStatus,
@@ -813,7 +815,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
           updatedAt: DateTime.now(),
         );
 
-        await updatePurchaseInvoice(updatedInvoice);
+        final updated = await updatePurchaseInvoice(updatedInvoice);
+        if (updated) _dataChanges.notifyChanged(DataDomain.supplierDebts);
       }
     } catch (e) {
       emit(InvoiceError('فشل تحديث حالة الفاتورة: ${e.toString()}'));
@@ -821,7 +824,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   }
 
   // Update payment status and adjust customer balance accordingly
-  Future<void> updateInvoicePaymentStatusWithBalance(
+  Future<bool> updateInvoicePaymentStatusWithBalance(
     SalesInvoice invoice,
     String newStatus,
   ) async {
@@ -852,9 +855,12 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         }
       }
 
-      await updateSalesInvoice(updatedInvoice);
+      final updated = await updateSalesInvoice(updatedInvoice);
+      if (updated) _dataChanges.notifyChanged(DataDomain.customerDebts);
+      return updated;
     } catch (e) {
       emit(InvoiceError('فشل تحديث حالة الدفع: ${e.toString()}'));
+      return false;
     }
   }
 

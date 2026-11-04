@@ -33,10 +33,6 @@ abstract class InvoiceRepository {
     DateTime? dateTo,
     String? search,
   });
-  // دStream لفواتير البيع في الوقت الفعلي
-  Stream<Either<Failure, List<SalesInvoice>>> watchSalesInvoices();
-  // دStream لفواتير الشراء في الوقت الفعلي
-  Stream<Either<Failure, List<PurchaseInvoice>>> watchPurchaseInvoices();
   // جلب فاتورة بيع بالمعرف
   Future<Either<Failure, SalesInvoice>> getSalesInvoiceById(String id);
   // جلب فاتورة شراء بالمعرف
@@ -356,23 +352,5 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
-  }
-
-  @override
-  Stream<Either<Failure, List<SalesInvoice>>> watchSalesInvoices() {
-    return remoteDataSource.watchSalesInvoices().map(
-      (invoices) => Right<Failure, List<SalesInvoice>>(invoices),
-    ).handleError(
-      (error) => Left<Failure, List<SalesInvoice>>(ServerFailure(error.toString())),
-    );
-  }
-
-  @override
-  Stream<Either<Failure, List<PurchaseInvoice>>> watchPurchaseInvoices() {
-    return remoteDataSource.watchPurchaseInvoices().map(
-      (invoices) => Right<Failure, List<PurchaseInvoice>>(invoices),
-    ).handleError(
-      (error) => Left<Failure, List<PurchaseInvoice>>(ServerFailure(error.toString())),
-    );
   }
 }

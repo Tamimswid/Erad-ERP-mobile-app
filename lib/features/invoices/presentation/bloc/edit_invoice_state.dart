@@ -50,22 +50,22 @@ class EditInvoiceLoaded extends EditInvoiceState {
 
   @override
   List<Object?> get props => [
-        invoice,
-        isSales,
-        items,
-        customerId,
-        supplierId,
-        invoiceDate,
-        dueDate,
-        subtotal,
-        discountAmount,
-        totalAmount,
-        paidAmount,
-        remainingAmount,
-        notes,
-        paymentMethod,
-        paymentType,
-      ];
+    invoice,
+    isSales,
+    items,
+    customerId,
+    supplierId,
+    invoiceDate,
+    dueDate,
+    subtotal,
+    discountAmount,
+    totalAmount,
+    paidAmount,
+    remainingAmount,
+    notes,
+    paymentMethod,
+    paymentType,
+  ];
 }
 
 class EditInvoiceUpdated extends EditInvoiceState {

@@ -1,3 +1,4 @@
+import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/features/products/data/models/product.dart';
 import 'package:erad/features/products/data/models/product_category.dart';
 import 'package:erad/features/products/data/repositories/product_repository.dart';
@@ -10,10 +11,18 @@ class ProductCubit extends Cubit<ProductState> {
   static const int pageSize = 10;
 
   final ProductRepository _repository;
+  final DataChangeNotifier _dataChanges;
+  int _dataChangeVersion = 0;
 
-  ProductCubit({required ProductRepository productRepository})
-      : _repository = productRepository,
-        super(ProductInitial());
+  ProductCubit({
+    required ProductRepository productRepository,
+    required DataChangeNotifier dataChanges,
+  }) : _repository = productRepository,
+       _dataChanges = dataChanges,
+       super(ProductInitial()) {
+    _dataChangeVersion = _dataChanges.versionOf(DataDomain.products);
+    _dataChanges.addListener(_handleDataChange);
+  }
 
   final List<ProductModel> _products = [];
   final List<ProductModel> _fullProducts = [];
@@ -24,22 +33,26 @@ class ProductCubit extends Cubit<ProductState> {
   int _requestId = 0;
   bool _hasMore = true;
   bool _isLoadingMore = false;
+  bool _hasLoaded = false;
   bool _pagedMode = false;
 
   String get selectedCategoryId => _selectedCategoryId;
   List<ProductCategory> get categories => _categories;
 
   /// Loads the full product list (used by invoice product pickers).
-  Future<void> getProducts() async {
+  Future<void> getProducts({bool showLoading = true}) async {
     _pagedMode = false;
     _searchQuery = '';
     final requestId = ++_requestId;
-    if (!isClosed) emit(ProductLoading());
+    if (showLoading && !isClosed) emit(ProductLoading());
 
     final result = await _repository.getProducts();
     if (isClosed || requestId != _requestId) return;
     result.fold(
-      (failure) => emit(ProductError(failure.message)),
+      (failure) {
+        emit(ProductError(failure.message));
+        if (_hasLoaded) _emitCurrent();
+      },
       (products) {
         _fullProducts
           ..clear()
@@ -47,6 +60,8 @@ class ProductCubit extends Cubit<ProductState> {
         _products
           ..clear()
           ..addAll(_filterByCategory(_fullProducts));
+        _hasMore = false;
+        _hasLoaded = true;
         emit(ProductsLoaded(List<ProductModel>.unmodifiable(_products)));
       },
     );
@@ -67,10 +82,11 @@ class ProductCubit extends Cubit<ProductState> {
   Future<void> loadFirstPage({bool showLoading = true}) async {
     _pagedMode = true;
     final requestId = ++_requestId;
+    final previousOffset = _offset;
+    final previousHasMore = _hasMore;
     _offset = 0;
     _hasMore = true;
     _isLoadingMore = false;
-    _products.clear();
 
     if (showLoading && !isClosed) emit(ProductLoading());
 
@@ -82,12 +98,23 @@ class ProductCubit extends Cubit<ProductState> {
     );
     if (isClosed || requestId != _requestId) return;
 
-    result.fold((failure) => emit(ProductError(failure.message)), (page) {
-      _products.addAll(page.items);
-      _offset = page.items.length;
-      _hasMore = page.hasMore;
-      _emitLoaded();
-    });
+    result.fold(
+      (failure) {
+        _offset = previousOffset;
+        _hasMore = previousHasMore;
+        emit(ProductError(failure.message));
+        if (_hasLoaded) _emitCurrent();
+      },
+      (page) {
+        _products
+          ..clear()
+          ..addAll(page.items);
+        _offset = page.items.length;
+        _hasMore = page.hasMore;
+        _hasLoaded = true;
+        _emitLoaded();
+      },
+    );
   }
 
   Future<void> loadMore() async {
@@ -139,52 +166,150 @@ class ProductCubit extends Cubit<ProductState> {
 
   Future<void> createProduct(ProductModel product) async {
     if (isClosed) return;
+    final snapshot = _snapshot();
+    _insertOptimistic(_withOptimisticId(product));
+
     final result = await _repository.createProduct(product);
     if (isClosed) return;
     result.fold(
-      (failure) => emit(ProductError(failure.message)),
+      (failure) {
+        _restore(snapshot);
+        emit(ProductError(failure.message));
+        _emitCurrent();
+      },
       (_) {
-        if (isClosed) return;
         emit(ProductSuccess('Product created successfully'));
-        _refreshAfterMutation();
+        if (_hasLoaded) _emitCurrent();
+        _dataChanges.notifyChanged(DataDomain.products);
       },
     );
   }
 
   Future<void> updateProduct(ProductModel product) async {
     if (isClosed) return;
+    final snapshot = _snapshot();
+    final index = _products.indexWhere((item) => item.id == product.id);
+    if (index != -1) _products[index] = product;
+    final fullIndex = _fullProducts.indexWhere((item) => item.id == product.id);
+    if (fullIndex != -1) _fullProducts[fullIndex] = product;
+    _emitCurrent();
+
     final result = await _repository.updateProduct(product);
     if (isClosed) return;
     result.fold(
-      (failure) => emit(ProductError(failure.message)),
+      (failure) {
+        _restore(snapshot);
+        emit(ProductError(failure.message));
+        _emitCurrent();
+      },
       (_) {
-        if (isClosed) return;
         emit(ProductSuccess('Product updated successfully'));
-        _refreshAfterMutation();
+        if (_hasLoaded) _emitCurrent();
+        _dataChanges.notifyChanged(DataDomain.products);
       },
     );
   }
 
   Future<void> deleteProduct(String id) async {
     if (isClosed) return;
+    final snapshot = _snapshot();
+    _products.removeWhere((product) => product.id == id);
+    _fullProducts.removeWhere((product) => product.id == id);
+    if (_pagedMode && _offset > 0) _offset--;
+    _emitCurrent();
+
     final result = await _repository.deleteProduct(id);
     if (isClosed) return;
     result.fold(
-      (failure) => emit(ProductError(failure.message)),
+      (failure) {
+        _restore(snapshot);
+        emit(ProductError(failure.message));
+        _emitCurrent();
+      },
       (_) {
-        if (isClosed) return;
         emit(ProductSuccess('Product deleted successfully'));
-        _refreshAfterMutation();
+        if (_hasLoaded) _emitCurrent();
+        _dataChanges.notifyChanged(DataDomain.products);
       },
     );
   }
 
-  void _refreshAfterMutation() {
+  ({List<ProductModel> products, List<ProductModel> fullProducts, int offset})
+  _snapshot() => (
+    products: List<ProductModel>.from(_products),
+    fullProducts: List<ProductModel>.from(_fullProducts),
+    offset: _offset,
+  );
+
+  void _restore(
+    ({List<ProductModel> products, List<ProductModel> fullProducts, int offset})
+    snapshot,
+  ) {
+    _products
+      ..clear()
+      ..addAll(snapshot.products);
+    _fullProducts
+      ..clear()
+      ..addAll(snapshot.fullProducts);
+    _offset = snapshot.offset;
+  }
+
+  ProductModel _withOptimisticId(ProductModel product) {
+    if (product.id.isNotEmpty) return product;
+    return product.copyWith(
+      id: 'optimistic_${DateTime.now().microsecondsSinceEpoch}',
+    );
+  }
+
+  void _insertOptimistic(ProductModel product) {
+    if (_pagedMode) {
+      if (_matchesPagedFilters(product)) _products.insert(0, product);
+    } else {
+      _fullProducts.insert(0, product);
+      _products
+        ..clear()
+        ..addAll(_filterByCategory(_fullProducts));
+    }
+    _emitCurrent();
+  }
+
+  bool _matchesPagedFilters(ProductModel product) {
+    if (_selectedCategoryId != 'all' &&
+        product.categoryId != _selectedCategoryId) {
+      return false;
+    }
+    final query = _searchQuery.toLowerCase();
+    if (query.isEmpty) return true;
+    return product.name.toLowerCase().contains(query) ||
+        product.code.toLowerCase().contains(query) ||
+        (product.barcode?.toLowerCase().contains(query) ?? false);
+  }
+
+  void _emitCurrent() {
+    if (isClosed) return;
+    if (_pagedMode) {
+      _emitLoaded();
+    } else {
+      emit(ProductsLoaded(List<ProductModel>.unmodifiable(_products)));
+    }
+  }
+
+  void _handleDataChange() {
+    if (isClosed) return;
+    final version = _dataChanges.versionOf(DataDomain.products);
+    if (version == _dataChangeVersion) return;
+    _dataChangeVersion = version;
     if (_pagedMode) {
       loadFirstPage(showLoading: false);
-    } else {
-      getProducts();
+    } else if (_hasLoaded || state is ProductsLoaded) {
+      getProducts(showLoading: false);
     }
+  }
+
+  @override
+  Future<void> close() {
+    _dataChanges.removeListener(_handleDataChange);
+    return super.close();
   }
 
   // Categories
@@ -193,15 +318,12 @@ class ProductCubit extends Cubit<ProductState> {
     emit(ProductLoading());
     final result = await _repository.getCategories();
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (categories) {
-        _categories
-          ..clear()
-          ..addAll(categories);
-        emit(CategoriesLoaded(categories));
-      },
-    );
+    result.fold((failure) => emit(ProductError(failure.message)), (categories) {
+      _categories
+        ..clear()
+        ..addAll(categories);
+      emit(CategoriesLoaded(categories));
+    });
   }
 
   Future<void> createCategory(ProductCategory category) async {
@@ -209,14 +331,14 @@ class ProductCubit extends Cubit<ProductState> {
     emit(ProductLoading());
     final result = await _repository.createCategory(category);
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (createdCategory) {
-        if (isClosed) return;
-        emit(ProductSuccess('Category created successfully'));
-        getCategories(); // Refresh list
-      },
-    );
+    result.fold((failure) => emit(ProductError(failure.message)), (
+      createdCategory,
+    ) {
+      if (isClosed) return;
+      emit(ProductSuccess('Category created successfully'));
+      getCategories(); // Refresh list
+      _dataChanges.notifyChanged(DataDomain.products);
+    });
   }
 
   Future<void> updateCategory(ProductCategory category) async {
@@ -224,14 +346,14 @@ class ProductCubit extends Cubit<ProductState> {
     emit(ProductLoading());
     final result = await _repository.updateCategory(category);
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (updatedCategory) {
-        if (isClosed) return;
-        emit(ProductSuccess('Category updated successfully'));
-        getCategories(); // Refresh list
-      },
-    );
+    result.fold((failure) => emit(ProductError(failure.message)), (
+      updatedCategory,
+    ) {
+      if (isClosed) return;
+      emit(ProductSuccess('Category updated successfully'));
+      getCategories(); // Refresh list
+      _dataChanges.notifyChanged(DataDomain.products);
+    });
   }
 
   Future<void> deleteCategory(String id) async {
@@ -239,14 +361,12 @@ class ProductCubit extends Cubit<ProductState> {
     emit(ProductLoading());
     final result = await _repository.deleteCategory(id);
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (_) {
-        if (isClosed) return;
-        emit(ProductSuccess('Category deleted successfully'));
-        getCategories(); // Refresh list
-      },
-    );
+    result.fold((failure) => emit(ProductError(failure.message)), (_) {
+      if (isClosed) return;
+      emit(ProductSuccess('Category deleted successfully'));
+      getCategories(); // Refresh list
+      _dataChanges.notifyChanged(DataDomain.products);
+    });
   }
 
   Future<void> setCategoryFilter(String categoryId) async {

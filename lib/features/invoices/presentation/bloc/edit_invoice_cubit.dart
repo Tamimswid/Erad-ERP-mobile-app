@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
@@ -10,7 +11,8 @@ part 'edit_invoice_state.dart';
 
 class EditInvoiceCubit extends Cubit<EditInvoiceState> {
   final EditInvoiceRepository _repository;
-  
+  final DataChangeNotifier _dataChanges;
+
   dynamic _originalInvoice;
   bool _isSales = true;
 
@@ -25,7 +27,8 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
   String _paymentMethod = 'cash';
   String _paymentType = 'cash';
 
-  EditInvoiceCubit(this._repository) : super(EditInvoiceInitial());
+  EditInvoiceCubit(this._repository, this._dataChanges)
+    : super(EditInvoiceInitial());
 
   String? get customerId => _customerId;
   String? get supplierId => _supplierId;
@@ -41,39 +44,46 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
 
   Future<void> loadSalesInvoice(String id) async {
     emit(EditInvoiceLoading());
-    
+
     final result = await _repository.getSalesInvoiceForEdit(id);
-    result.fold(
-      (failure) => emit(EditInvoiceError(failure.message)),
-      (invoice) {
-        _originalInvoice = invoice;
-        _isSales = true;
-        
-        final invoiceItems = invoice.items ?? [];
-        _items = invoiceItems.map((item) => InvoiceItem(
-          id: item.id ?? '',
-          productId: item.productId ?? '',
-          productName: item.productName ?? '',
-          quantity: item.quantity ?? 1,
-          unitPrice: item.unitPrice ?? 0,
-          purchasePrice: item.purchasePrice ?? 0,
-          discountAmount: item.discountAmount ?? 0,
-          totalPrice: item.totalPrice ?? 0,
-          unit: item.unit,
-          measurement: item.measurement,
-          createdAt: item.createdAt ?? DateTime.now(),
-        )).toList();
-        
-        _customerId = invoice.customerId;
-        _invoiceDate = invoice.invoiceDate ?? DateTime.now();
-        _dueDate = invoice.dueDate;
-        _discountAmount = invoice.discountAmount ?? 0;
-        _paidAmount = invoice.paidAmount ?? 0;
-        _notes = invoice.notes ?? '';
-        _paymentMethod = invoice.paymentMethod ?? 'cash';
-        _paymentType = invoice.paymentStatus == PaymentStatus.cash ? 'cash' : 'debt';
-        
-        emit(EditInvoiceLoaded(
+    result.fold((failure) => emit(EditInvoiceError(failure.message)), (
+      invoice,
+    ) {
+      _originalInvoice = invoice;
+      _isSales = true;
+
+      final invoiceItems = invoice.items ?? [];
+      _items = invoiceItems
+          .map(
+            (item) => InvoiceItem(
+              id: item.id ?? '',
+              productId: item.productId ?? '',
+              productName: item.productName ?? '',
+              quantity: item.quantity ?? 1,
+              unitPrice: item.unitPrice ?? 0,
+              purchasePrice: item.purchasePrice ?? 0,
+              discountAmount: item.discountAmount ?? 0,
+              totalPrice: item.totalPrice ?? 0,
+              unit: item.unit,
+              measurement: item.measurement,
+              createdAt: item.createdAt ?? DateTime.now(),
+            ),
+          )
+          .toList();
+
+      _customerId = invoice.customerId;
+      _invoiceDate = invoice.invoiceDate ?? DateTime.now();
+      _dueDate = invoice.dueDate;
+      _discountAmount = invoice.discountAmount ?? 0;
+      _paidAmount = invoice.paidAmount ?? 0;
+      _notes = invoice.notes ?? '';
+      _paymentMethod = invoice.paymentMethod ?? 'cash';
+      _paymentType = invoice.paymentStatus == PaymentStatus.cash
+          ? 'cash'
+          : 'debt';
+
+      emit(
+        EditInvoiceLoaded(
           invoice: invoice,
           isSales: true,
           items: _items,
@@ -89,46 +99,53 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           notes: _notes,
           paymentMethod: _paymentMethod,
           paymentType: _paymentType,
-        ));
-      },
-    );
+        ),
+      );
+    });
   }
 
   Future<void> loadPurchaseInvoice(String id) async {
     emit(EditInvoiceLoading());
-    
+
     final result = await _repository.getPurchaseInvoiceForEdit(id);
-    result.fold(
-      (failure) => emit(EditInvoiceError(failure.message)),
-      (invoice) {
-        _originalInvoice = invoice;
-        _isSales = false;
-        
-        final invoiceItems = invoice.items ?? [];
-        _items = invoiceItems.map((item) => InvoiceItem(
-          id: item.id ?? '',
-          productId: item.productId ?? '',
-          productName: item.productName ?? '',
-          quantity: item.quantity ?? 1,
-          unitPrice: item.unitPrice ?? 0,
-          purchasePrice: item.purchasePrice ?? 0,
-          discountAmount: item.discountAmount ?? 0,
-          totalPrice: item.totalPrice ?? 0,
-          unit: item.unit,
-          measurement: item.measurement,
-          createdAt: item.createdAt ?? DateTime.now(),
-        )).toList();
-        
-        _supplierId = invoice.supplierId;
-        _invoiceDate = invoice.invoiceDate ;
-        _dueDate = invoice.dueDate;
-        _discountAmount = invoice.discountAmount;
-        _paidAmount = invoice.paidAmount;
-        _notes = invoice.notes ?? '';
-        _paymentMethod = invoice.paymentStatus.name ;
-        _paymentType = invoice.paymentStatus == PaymentStatus.cash ? 'cash' : 'debt';
-        
-        emit(EditInvoiceLoaded(
+    result.fold((failure) => emit(EditInvoiceError(failure.message)), (
+      invoice,
+    ) {
+      _originalInvoice = invoice;
+      _isSales = false;
+
+      final invoiceItems = invoice.items ?? [];
+      _items = invoiceItems
+          .map(
+            (item) => InvoiceItem(
+              id: item.id ?? '',
+              productId: item.productId ?? '',
+              productName: item.productName ?? '',
+              quantity: item.quantity ?? 1,
+              unitPrice: item.unitPrice ?? 0,
+              purchasePrice: item.purchasePrice ?? 0,
+              discountAmount: item.discountAmount ?? 0,
+              totalPrice: item.totalPrice ?? 0,
+              unit: item.unit,
+              measurement: item.measurement,
+              createdAt: item.createdAt ?? DateTime.now(),
+            ),
+          )
+          .toList();
+
+      _supplierId = invoice.supplierId;
+      _invoiceDate = invoice.invoiceDate;
+      _dueDate = invoice.dueDate;
+      _discountAmount = invoice.discountAmount;
+      _paidAmount = invoice.paidAmount;
+      _notes = invoice.notes ?? '';
+      _paymentMethod = invoice.paymentStatus.name;
+      _paymentType = invoice.paymentStatus == PaymentStatus.cash
+          ? 'cash'
+          : 'debt';
+
+      emit(
+        EditInvoiceLoaded(
           invoice: invoice,
           isSales: false,
           items: _items,
@@ -144,9 +161,9 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           notes: _notes,
           paymentMethod: _paymentMethod,
           paymentType: _paymentType,
-        ));
-      },
-    );
+        ),
+      );
+    });
   }
 
   void setCustomer(String? customerId) {
@@ -219,7 +236,10 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
   }
 
   double _calculateSubtotal() {
-    return _items.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0.0));
+    return _items.fold<double>(
+      0,
+      (sum, item) => sum + (item.totalPrice ?? 0.0),
+    );
   }
 
   double _calculateTotal() {
@@ -232,23 +252,25 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
 
   void _emitUpdated() {
     if (_originalInvoice != null) {
-      emit(EditInvoiceLoaded(
-        invoice: _originalInvoice,
-        isSales: _isSales,
-        items: _items,
-        customerId: _customerId,
-        supplierId: _supplierId,
-        invoiceDate: _invoiceDate ?? DateTime.now(),
-        dueDate: _dueDate,
-        subtotal: _calculateSubtotal(),
-        discountAmount: _discountAmount,
-        totalAmount: _calculateTotal(),
-        paidAmount: _paidAmount,
-        remainingAmount: _calculateRemaining(),
-        notes: _notes,
-        paymentMethod: _paymentMethod,
-        paymentType: _paymentType,
-      ));
+      emit(
+        EditInvoiceLoaded(
+          invoice: _originalInvoice,
+          isSales: _isSales,
+          items: _items,
+          customerId: _customerId,
+          supplierId: _supplierId,
+          invoiceDate: _invoiceDate ?? DateTime.now(),
+          dueDate: _dueDate,
+          subtotal: _calculateSubtotal(),
+          discountAmount: _discountAmount,
+          totalAmount: _calculateTotal(),
+          paidAmount: _paidAmount,
+          remainingAmount: _calculateRemaining(),
+          notes: _notes,
+          paymentMethod: _paymentMethod,
+          paymentType: _paymentType,
+        ),
+      );
     }
   }
 
@@ -269,21 +291,27 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
     emit(EditInvoiceLoading());
 
     try {
-      final newItems = _items.map((item) => InvoiceItem(
-        id: '',
-        productId: item.productId,
-        productName: item.productName,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        purchasePrice: item.purchasePrice,
-        discountAmount: item.discountAmount,
-        totalPrice: item.totalPrice,
-        unit: item.unit,
-        measurement: item.measurement,
-        createdAt: DateTime.now(),
-      )).toList();
+      final newItems = _items
+          .map(
+            (item) => InvoiceItem(
+              id: '',
+              productId: item.productId,
+              productName: item.productName,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              purchasePrice: item.purchasePrice,
+              discountAmount: item.discountAmount,
+              totalPrice: item.totalPrice,
+              unit: item.unit,
+              measurement: item.measurement,
+              createdAt: DateTime.now(),
+            ),
+          )
+          .toList();
 
-      final paymentStatus = _paymentType == 'cash' ? PaymentStatus.cash : PaymentStatus.debt;
+      final paymentStatus = _paymentType == 'cash'
+          ? PaymentStatus.cash
+          : PaymentStatus.debt;
 
       if (_isSales && _originalInvoice is SalesInvoice) {
         final original = _originalInvoice as SalesInvoice;
@@ -311,15 +339,18 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           status: original.status,
         );
 
-        final result = await _repository.updateSalesInvoice(updatedInvoice, newItems);
-
-        result.fold(
-          (failure) => emit(EditInvoiceError(failure.message)),
-          (invoice) {
-            _originalInvoice = invoice;
-            emit(const EditInvoiceUpdated('تم تحديث الفاتورة بنجاح'));
-          },
+        final result = await _repository.updateSalesInvoice(
+          updatedInvoice,
+          newItems,
         );
+
+        result.fold((failure) => emit(EditInvoiceError(failure.message)), (
+          invoice,
+        ) {
+          _originalInvoice = invoice;
+          emit(const EditInvoiceUpdated('تم تحديث الفاتورة بنجاح'));
+          _dataChanges.notifyChanged(DataDomain.invoices);
+        });
       } else if (!_isSales && _originalInvoice is PurchaseInvoice) {
         final original = _originalInvoice as PurchaseInvoice;
         final updatedInvoice = PurchaseInvoice(
@@ -344,15 +375,18 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           status: original.status,
         );
 
-        final result = await _repository.updatePurchaseInvoice(updatedInvoice, newItems);
-
-        result.fold(
-          (failure) => emit(EditInvoiceError(failure.message)),
-          (invoice) {
-            _originalInvoice = invoice;
-            emit(const EditInvoiceUpdated('تم تحديث الفاتورة بنجاح'));
-          },
+        final result = await _repository.updatePurchaseInvoice(
+          updatedInvoice,
+          newItems,
         );
+
+        result.fold((failure) => emit(EditInvoiceError(failure.message)), (
+          invoice,
+        ) {
+          _originalInvoice = invoice;
+          emit(const EditInvoiceUpdated('تم تحديث الفاتورة بنجاح'));
+          _dataChanges.notifyChanged(DataDomain.invoices);
+        });
       }
     } catch (e) {
       emit(EditInvoiceError('فشل تحديث الفاتورة: ${e.toString()}'));
