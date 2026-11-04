@@ -54,6 +54,11 @@ import '../../features/reports/presentation/bloc/party_invoice_cubit.dart';
 import '../../features/stock/data/datasources/stock_remote_datasource.dart';
 import '../../features/stock/data/repositories/stock_repository.dart';
 import '../../features/stock/presentation/bloc/stock_review_cubit.dart';
+import '../../features/voice_invoice/data/datasources/voice_invoice_remote_datasource.dart';
+import '../../features/voice_invoice/data/repositories/voice_invoice_repository.dart';
+import '../../features/voice_invoice/data/services/speech_recognition_service.dart';
+import '../../features/voice_invoice/presentation/bloc/voice_invoice_cubit.dart';
+import '../../features/voice_invoice/voice_invoice_config.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -252,4 +257,23 @@ Future<void> initServicesLocator() async {
   sl.registerLazySingleton<ReportRepository>(() => ReportRepositoryImpl(sl()));
 
   sl.registerFactory(() => PartyInvoiceCubit(sl()));
+
+  // Voice invoice
+  sl.registerLazySingleton<VoiceInvoiceConfig>(
+    () => const VoiceInvoiceConfig(),
+  );
+
+  sl.registerLazySingleton<SpeechRecognitionService>(
+    () => SpeechRecognitionService(config: sl()),
+  );
+
+  sl.registerLazySingleton<VoiceInvoiceRemoteDataSource>(
+    () => VoiceInvoiceRemoteDataSource(sl(), config: sl()),
+  );
+
+  sl.registerLazySingleton<VoiceInvoiceRepository>(
+    () => VoiceInvoiceRepository(sl(), sl()),
+  );
+
+  sl.registerFactory(() => VoiceInvoiceCubit(repository: sl(), speech: sl()));
 }

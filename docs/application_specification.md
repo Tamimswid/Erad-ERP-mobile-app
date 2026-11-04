@@ -3001,3 +3001,14 @@ Sunucu sözleşmesinin (şema/RLS/view/RPC/publication) hiç görülememiş olma
 | Kullanılmayan shared widget | `grep -rn "LoadingWidget(\|CustomButton(\|CustomTextField(" lib` |
 | Ölü bağımlılık | her paket adı için `grep -rn "<paket>" lib` |
 | Failures kullanım sayımı | `grep -roh "NetworkFailure\.[a-zA-Z]*\|…" lib --exclude=failures.dart \| sort \| uniq -c` |
+
+## 17. Sesle fatura ekleme (yeni özellik)
+
+- **Akış:** Fatura ekleme sayfasındaki mikrofon FAB'ı → cihaz içi `speech_to_text` ile canlı
+  transkript → `voice-invoice` Supabase Edge Function → LLM + veritabanı eşleştirmesi →
+  mevcut `InvoiceCubit` formuna uygulama (satış/alım → taraf → ürünler → ödeme türü).
+- **Kaydetme:** Ses akışı faturayı otomatik kaydetmez; kullanıcı mevcut kaydet adımını onaylar.
+- **Sunucu:** `supabase/functions/voice-invoice/index.ts`; JWT doğrulaması ve tüm sorgularda
+  `user_id` filtresi zorunludur. Fiyatlar veritabanından alınır, LLM'den alınmaz.
+- **Doküman:** kurulum, secret'lar, istek/yanıt sözleşmesi ve Flutter katmanları için
+  [`docs/voice_invoice_feature.md`](voice_invoice_feature.md).

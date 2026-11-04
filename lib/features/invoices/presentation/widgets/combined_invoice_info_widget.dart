@@ -31,6 +31,7 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
   Timer? _debounce;
   String _query = '';
   bool _isSearching = false;
+  bool _loadingParty = false;
   dynamic _selectedEntity;
 
   @override
@@ -142,14 +143,106 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
     _focusPartySearch();
   }
 
+  void _syncSelectionFromCubit() {
+    if (!mounted) return;
+
+    final cubit = context.read<InvoiceCubit>();
+    final isSale = cubit.invoiceType == 'sale';
+    final id = isSale ? cubit.selectedCustomerId : cubit.selectedSupplierId;
+
+    if (id == null) {
+      if (_selectedEntity != null) {
+        setState(() {
+          _selectedEntity = null;
+          _query = '';
+          _isSearching = false;
+        });
+      }
+      return;
+    }
+
+    if (_selectedEntity?.id == id) return;
+
+    final entity = _findEntity(isSale, id);
+    if (entity != null) {
+      _setSelectedEntity(entity);
+    } else {
+      _loadPartyListAndSync(isSale, id);
+    }
+  }
+
+  dynamic _findEntity(bool isSale, String id) {
+    if (isSale) {
+      final state = context.read<CustomerCubit>().state;
+      if (state is CustomerLoaded) {
+        for (final customer in state.customers) {
+          if (customer.id == id) return customer;
+        }
+      }
+      return null;
+    }
+
+    final state = context.read<SupplierCubit>().state;
+    if (state is SuppliersLoaded) {
+      for (final supplier in state.suppliers) {
+        if (supplier.id == id) return supplier;
+      }
+    }
+    return null;
+  }
+
+  void _setSelectedEntity(dynamic entity) {
+    _debounce?.cancel();
+    _searchController.clear();
+    setState(() {
+      _selectedEntity = entity;
+      _query = '';
+      _isSearching = false;
+    });
+  }
+
+  Future<void> _loadPartyListAndSync(bool isSale, String id) async {
+    if (_loadingParty) return;
+    _loadingParty = true;
+
+    if (isSale) {
+      await context.read<CustomerCubit>().getCustomers(showLoading: false);
+    } else {
+      await context.read<SupplierCubit>().getSuppliers(showLoading: false);
+    }
+    _loadingParty = false;
+
+    if (!mounted) return;
+
+    final cubit = context.read<InvoiceCubit>();
+    final currentId = cubit.invoiceType == 'sale'
+        ? cubit.selectedCustomerId
+        : cubit.selectedSupplierId;
+    if (currentId != id) return;
+
+    final entity = _findEntity(isSale, id);
+    if (entity != null) _setSelectedEntity(entity);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<InvoiceCubit, InvoiceState>(
       listenWhen: (previous, current) =>
-          current is InvoiceFormUpdated && current.updateType == 'clearAll',
+          current is InvoiceFormUpdated &&
+          (current.updateType == 'clearAll' ||
+              current.updateType == 'customer' ||
+              current.updateType == 'supplier' ||
+              current.updateType == 'invoiceType'),
       listener: (context, state) {
-        _clearSelection(focus: false);
-        _focusPartySearch();
+        if (state is! InvoiceFormUpdated) return;
+
+        if (state.updateType == 'clearAll') {
+          _clearSelection(focus: false);
+          _focusPartySearch();
+          return;
+        }
+
+        _syncSelectionFromCubit();
       },
       child: BlocBuilder<InvoiceCubit, InvoiceState>(
         builder: (context, state) {
