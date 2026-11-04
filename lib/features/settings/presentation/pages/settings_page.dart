@@ -91,10 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
           const SizedBox(height: 4),
           const Text(
             'اسم الشركة المعروض في الفواتير',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 16),
           Row(
@@ -125,6 +122,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(width: 12),
               sc.Button(
+                alignment: Alignment.center,
                 style: sc.ButtonStyle.primary(),
                 onPressed: _isLoadingCompany ? null : _updateCompanyName,
                 child: _isLoadingCompany
@@ -148,9 +146,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final newCompanyName = _companyNameController.text.trim();
     if (newCompanyName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء إدخال اسم الشركة')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('الرجاء إدخال اسم الشركة')));
       return;
     }
 
@@ -160,14 +158,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
     try {
       await context.read<AuthCubit>().updateProfile(
-            user.copyWith(businessName: newCompanyName),
-          );
+        user.copyWith(businessName: newCompanyName),
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تم تحديث اسم الشركة بنجاح'),
-          ),
+          const SnackBar(content: Text('تم تحديث اسم الشركة بنجاح')),
         );
       }
     } catch (e) {
@@ -325,10 +321,12 @@ class _SettingsPageState extends State<SettingsPage> {
       padding: const EdgeInsets.all(20),
       clipBehavior: Clip.antiAlias,
       child: sc.Clickable(
-        onPressed: () => _showLogoutConfirmation(logout: () {
-          Navigator.pop(context);
-          context.read<AuthCubit>().logout();
-        }),
+        onPressed: () => _showLogoutConfirmation(
+          logout: () {
+            Navigator.pop(context);
+            context.read<AuthCubit>().logout();
+          },
+        ),
         child: Row(
           children: [
             const Icon(sc.LucideIcons.logOut, color: AppColors.error, size: 20),
@@ -373,10 +371,7 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(
-              sc.LucideIcons.circleAlert,
-              color: AppColors.textSecondary,
-            ),
+            Icon(sc.LucideIcons.circleAlert, color: AppColors.textSecondary),
             const SizedBox(width: 8),
             const Text('تأكيد تسجيل الخروج'),
           ],
@@ -392,12 +387,14 @@ class _SettingsPageState extends State<SettingsPage> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.destructive(),
                     onPressed: () => logout(),
                     child: const Text('تسجيل الخروج'),

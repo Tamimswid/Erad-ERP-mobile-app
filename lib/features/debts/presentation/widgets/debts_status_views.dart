@@ -75,6 +75,7 @@ class DebtsErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             sc.Button(
+              alignment: Alignment.center,
               style: const sc.ButtonStyle.outline(),
               onPressed: onRetry,
               child: const Text('إعادة المحاولة'),

@@ -207,10 +207,17 @@ class DebtPartyCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: sc.Button(
+                  alignment: Alignment.center,
                   style: const sc.ButtonStyle.secondary(),
                   onPressed: onPaymentTap,
-                  leading: const Icon(sc.LucideIcons.banknote, size: 16),
-                  child: const Text('تسجيل دفعة'),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(sc.LucideIcons.banknote, size: 16),
+                      SizedBox(width: 8),
+                      Text('تسجيل دفعة'),
+                    ],
+                  ),
                 ),
               ),
             ],

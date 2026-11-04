@@ -55,26 +55,17 @@ class ProductCardWidget extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _buildPriceBox(
-            label: 'شراء',
-            price: product.purchasePrice,
-          ),
+          child: _buildPriceBox(label: 'شراء', price: product.purchasePrice),
         ),
         const SizedBox(width: AppConstants.spacing),
         Expanded(
-          child: _buildPriceBox(
-            label: 'بيع',
-            price: product.salePrice,
-          ),
+          child: _buildPriceBox(label: 'بيع', price: product.salePrice),
         ),
       ],
     );
   }
 
-  Widget _buildPriceBox({
-    required String label,
-    required double price,
-  }) {
+  Widget _buildPriceBox({required String label, required double price}) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
       decoration: BoxDecoration(
@@ -112,19 +103,33 @@ class ProductCardWidget extends StatelessWidget {
       children: [
         Expanded(
           child: sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.secondary(),
             onPressed: () => onEdit(product),
-            leading: const Icon(sc.LucideIcons.pencil, size: 16),
-            child: const Text('تعديل'),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(sc.LucideIcons.pencil, size: 16),
+                SizedBox(width: 8),
+                Text('تعديل'),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: AppConstants.spacing),
         Expanded(
           child: sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.destructive(),
             onPressed: () => onDelete(product.id),
-            leading: const Icon(sc.LucideIcons.trash2, size: 16),
-            child: const Text('حذف'),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(sc.LucideIcons.trash2, size: 16),
+                SizedBox(width: 8),
+                Text('حذف'),
+              ],
+            ),
           ),
         ),
       ],

@@ -25,42 +25,44 @@ class _CategoryListWidgetState extends State<CategoryListWidget> {
             ),
           );
         } else if (state is ProductSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       child: BlocBuilder<ProductCubit, ProductState>(
         builder: (context, state) {
-              if (state is ProductLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is CategoriesLoaded) {
-                if (state.categories.isEmpty) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(sc.LucideIcons.tag, size: 64, color: AppColors.textSecondary),
-                         SizedBox(height: 16),
-                         Text('لا يوجد فئات'),
-                         SizedBox(height: 8),
-                         Text('أضف فئة جديدة للبدء'),
-                      ],
+          if (state is ProductLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is CategoriesLoaded) {
+            if (state.categories.isEmpty) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      sc.LucideIcons.tag,
+                      size: 64,
+                      color: AppColors.textSecondary,
                     ),
-                  );
-                }
-                return ListView.builder(
-                  itemCount: state.categories.length,
-                  itemBuilder: (context, index) {
-                    final category = state.categories[index];
-                    return CategoryCard(category: category);
-                  },
-                );
-              }
-              return const SizedBox.shrink();
-            },
+                    SizedBox(height: 16),
+                    Text('لا يوجد فئات'),
+                    SizedBox(height: 8),
+                    Text('أضف فئة جديدة للبدء'),
+                  ],
+                ),
+              );
+            }
+            return ListView.builder(
+              itemCount: state.categories.length,
+              itemBuilder: (context, index) {
+                final category = state.categories[index];
+                return CategoryCard(category: category);
+              },
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
@@ -121,14 +123,18 @@ class CategoryCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (category.description != null) Text('الوصف: ${category.description}'),
-              Text('تم الإنشاء: ${category.createdAt.toString().split(' ')[0]}'),
+              if (category.description != null)
+                Text('الوصف: ${category.description}'),
+              Text(
+                'تم الإنشاء: ${category.createdAt.toString().split(' ')[0]}',
+              ),
               Text('الحالة: ${category.isActive ? 'نشطة' : 'غير نشطة'}'),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إغلاق'),
@@ -144,9 +150,9 @@ class CategoryCard extends StatelessWidget {
 
   void _showEditCategoryDialog(BuildContext context, ProductCategory category) {
     // TODO: Implement edit dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('قيد التطوير')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('قيد التطوير')));
   }
 
   void _showDeleteConfirmation(BuildContext context, ProductCategory category) {
@@ -165,12 +171,14 @@ class CategoryCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       Navigator.pop(context);

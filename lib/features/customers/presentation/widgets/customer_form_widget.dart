@@ -145,6 +145,7 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
               children: [
                 Expanded(
                   child: sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.primary(),
                     onPressed: _submitForm,
                     child: Text(
@@ -155,6 +156,7 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.outline(),
                     onPressed: () {
                       _formKey.currentState?.reset();

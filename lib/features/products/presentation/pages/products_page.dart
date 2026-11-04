@@ -171,12 +171,14 @@ class _ProductsPageState extends State<ProductsPage>
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.primary(),
                     onPressed: () {
                       if (searchController.text.trim().isNotEmpty) {
@@ -237,6 +239,7 @@ class _ProductsPageState extends State<ProductsPage>
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: sc.Button(
+                                alignment: Alignment.center,
                                 style: sc.ButtonStyle.primary(),
                                 onPressed: () =>
                                     _showAddCategoryDialog(dialogContext),
@@ -374,12 +377,14 @@ class _ProductsPageState extends State<ProductsPage>
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.ghost(),
                       onPressed: () => Navigator.pop(context),
                       child: const Text('إلغاء'),
                     ),
                     const SizedBox(width: 8),
                     sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.destructive(),
                       onPressed: () {
                         Navigator.pop(context);

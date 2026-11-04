@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 
-// Tokens mirror the shadcn "natural" (taupe) dark palette.
-// success/warning keep readable data accents; error uses the destructive token.
+// Tokens mirror the shadcn "natural" (taupe) light palette.
+// success/warning/error use darker shades so they stay readable on white.
 class AppColors {
-  static const background = Color(0xFF272727);
-  static const surface = Color(0xFF171717);
-  static const text = Color(0xFFFBFAF9);
+  static const background = Color(0xFFF6F5F3);
+  static const surface = Color(0xFFFFFFFF);
+  static const text = Color(0xFF1C1917);
 
-  static const primary = Color(0xFFE5E5E5);
-  static const onPrimary = Color(0xFF171717);
-  static const onPrimaryMuted = Color(0xB3171717);
+  static const primary = Color(0xFF1C1917);
+  static const onPrimary = Color(0xFFFAFAF9);
+  static const onPrimaryMuted = Color(0xB3FAFAF9);
 
-  static const success = Color(0xFF2EB88A);
-  static const warning = Color(0xFFE88C30);
-  static const error = Color(0xFFFF6467);
+  static const success = Color(0xFF15803D);
+  static const warning = Color(0xFFB45309);
+  static const error = Color(0xFFDC2626);
 
-  static const textSecondary = Color(0xFFABA09C);
-  static const divider = Color(0xFF1E1E1E);
-  static const border = Color(0xFF1E1E1E);
-  static const muted = Color(0xFF1E1E1E);
-  static const ring = Color(0xFF7C6D67);
+  static const textSecondary = Color(0xFF6B6560);
+  static const divider = Color(0xFFE7E5E4);
+  static const border = Color(0xFFE0DDD9);
+  static const muted = Color(0xFFF1EFED);
+  static const ring = Color(0xFFA8A29E);
 
   // Aliases
   static const secondary = textSecondary;

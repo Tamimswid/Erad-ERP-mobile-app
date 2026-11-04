@@ -200,6 +200,7 @@ class _StockReviewPageState extends State<StockReviewPage> {
               ),
               const SizedBox(height: 16),
               sc.Button(
+                alignment: Alignment.center,
                 style: sc.ButtonStyle.primary(),
                 onPressed: cubit.reload,
                 leading: const Icon(sc.LucideIcons.refreshCw, size: 16),

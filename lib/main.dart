@@ -32,10 +32,10 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
       systemNavigationBarColor: AppColors.background,
-      systemNavigationBarIconBrightness: Brightness.light,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
@@ -55,9 +55,9 @@ class ERADApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      theme: AppShadcnTheme.materialDark,
-      darkTheme: AppShadcnTheme.materialDark,
-      themeMode: ThemeMode.dark,
+      theme: AppShadcnTheme.materialLight,
+      darkTheme: AppShadcnTheme.materialLight,
+      themeMode: ThemeMode.light,
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar')],
       localizationsDelegates: const [
@@ -81,9 +81,9 @@ class ERADApp extends StatelessWidget {
             child: DefaultTextStyle.merge(
               style: const TextStyle(fontFamily: AppShadcnTheme.fontFamily),
               child: sc.ShadcnLayer(
-                theme: AppShadcnTheme.dark,
-                darkTheme: AppShadcnTheme.dark,
-                themeMode: sc.ThemeMode.dark,
+                theme: AppShadcnTheme.light,
+                darkTheme: AppShadcnTheme.light,
+                themeMode: sc.ThemeMode.light,
                 scaling: const sc.AdaptiveScaling(1),
                 // sc.Scaffold is not a Material; without this ancestor
                 // every plain Text renders the yellow "no Material" underline.

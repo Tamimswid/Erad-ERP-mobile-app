@@ -57,7 +57,8 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
       _unitController.text = ProductUnitData.unitItems.first.value!;
     });
   }
-// 
+
+  //
   @override
   void dispose() {
     _codeController.dispose();
@@ -228,30 +229,30 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 },
               ),
 
-                    TextFormField(
-                      controller: _measurementController,
-                      decoration: const InputDecoration(
-                        labelText: 'حجم',
-                        prefixIcon: Icon(sc.LucideIcons.ruler),
-                        hintText: 'حجم ',
-                      ),
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  const SizedBox(width: 16),
-                  DropdownButtonFormField<String>(
-                    initialValue: ProductUnitData.unitItems.first.value,
-                    decoration: const InputDecoration(
-                      labelText: 'القياس',
-                      prefixIcon: Icon(sc.LucideIcons.ruler),
-                    ),
-                    items: ProductUnitData.unitItems,
-                    onChanged: (value) {
-                      setState(() {
-                        _unitController.text =
-                            value ?? ProductUnitData.unitItems.first.value!;
-                      });
-                    },
-                  ),
+              TextFormField(
+                controller: _measurementController,
+                decoration: const InputDecoration(
+                  labelText: 'حجم',
+                  prefixIcon: Icon(sc.LucideIcons.ruler),
+                  hintText: 'حجم ',
+                ),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              const SizedBox(width: 16),
+              DropdownButtonFormField<String>(
+                initialValue: ProductUnitData.unitItems.first.value,
+                decoration: const InputDecoration(
+                  labelText: 'القياس',
+                  prefixIcon: Icon(sc.LucideIcons.ruler),
+                ),
+                items: ProductUnitData.unitItems,
+                onChanged: (value) {
+                  setState(() {
+                    _unitController.text =
+                        value ?? ProductUnitData.unitItems.first.value!;
+                  });
+                },
+              ),
               //
               Row(
                 children: [
@@ -274,6 +275,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                 children: [
                   Expanded(
                     child: sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.primary(),
                       onPressed: () {
                         _submitForm();
@@ -284,6 +286,7 @@ class _ProductFormWidgetState extends State<ProductFormWidget> {
                   ),
                   Expanded(
                     child: sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.outline(),
                       onPressed: () {
                         _formKey.currentState?.reset();

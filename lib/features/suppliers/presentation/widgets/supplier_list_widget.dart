@@ -221,6 +221,7 @@ class SupplierCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
@@ -273,12 +274,14 @@ class SupplierCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       Navigator.pop(context);

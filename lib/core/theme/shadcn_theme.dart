@@ -4,38 +4,38 @@ import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 abstract final class AppShadcnTheme {
   static const String fontFamily = 'Tajawal';
 
-  // Neutral dark palette.
+  // Warm neutral light palette.
   static const sc.ColorScheme colors = sc.ColorScheme(
-    brightness: Brightness.dark,
-    background: Color(0xFF272727),
-    foreground: Color(0xFFFBFAF9),
-    card: Color(0xFF171717),
-    cardForeground: Color(0xFFFBFAF9),
-    popover: Color(0xFF171717),
-    popoverForeground: Color(0xFFFBFAF9),
-    primary: Color(0xFFE5E5E5),
-    primaryForeground: Color(0xFF171717),
-    secondary: Color(0xFF1E1E1E),
-    secondaryForeground: Color(0xFFFBFAF9),
-    muted: Color(0xFF1E1E1E),
-    mutedForeground: Color(0xFFABA09C),
-    accent: Color(0xFF1E1E1E),
-    accentForeground: Color(0xFFFBFAF9),
-    destructive: Color(0xFFFF6467),
-    border: Color(0x1AFFFFFF),
-    input: Color(0x26FFFFFF),
-    ring: Color(0xFF7C6D67),
-    chart1: Color(0xFFE5E5E5),
-    chart2: Color(0xFFBDBDBD),
-    chart3: Color(0xFF8A8A8A),
-    chart4: Color(0xFF5E5E5E),
-    chart5: Color(0xFF1E1E1E),
+    brightness: Brightness.light,
+    background: Color(0xFFF6F5F3),
+    foreground: Color(0xFF1C1917),
+    card: Color(0xFFFFFFFF),
+    cardForeground: Color(0xFF1C1917),
+    popover: Color(0xFFFFFFFF),
+    popoverForeground: Color(0xFF1C1917),
+    primary: Color(0xFF1C1917),
+    primaryForeground: Color(0xFFFAFAF9),
+    secondary: Color(0xFFF1EFED),
+    secondaryForeground: Color(0xFF1C1917),
+    muted: Color(0xFFF1EFED),
+    mutedForeground: Color(0xFF6B6560),
+    accent: Color(0xFFF1EFED),
+    accentForeground: Color(0xFF1C1917),
+    destructive: Color(0xFFDC2626),
+    border: Color(0x1A1C1917),
+    input: Color(0x261C1917),
+    ring: Color(0xFFA8A29E),
+    chart1: Color(0xFF1C1917),
+    chart2: Color(0xFF44403C),
+    chart3: Color(0xFF78716C),
+    chart4: Color(0xFFA8A29E),
+    chart5: Color(0xFFD6D3D1),
   );
 
   // Luma style + large radius.
   static const double radius = 0.875;
 
-  static sc.ThemeData get dark {
+  static sc.ThemeData get light {
     final typography = const sc.Typography.geist();
     return sc.ThemeData(
       colorScheme: colors,
@@ -58,8 +58,8 @@ abstract final class AppShadcnTheme {
     );
   }
 
-  static ThemeData get materialDark {
-    final scheme = ColorScheme.dark(
+  static ThemeData get materialLight {
+    final scheme = ColorScheme.light(
       primary: colors.primary,
       onPrimary: colors.primaryForeground,
       primaryContainer: colors.secondary,
@@ -73,13 +73,13 @@ abstract final class AppShadcnTheme {
       tertiaryContainer: colors.muted,
       onTertiaryContainer: colors.foreground,
       error: colors.destructive,
-      onError: colors.foreground,
-      errorContainer: colors.destructive,
-      onErrorContainer: colors.foreground,
+      onError: Colors.white,
+      errorContainer: const Color(0xFFFEE2E2),
+      onErrorContainer: const Color(0xFF7F1D1D),
       surface: colors.background,
       onSurface: colors.foreground,
-      surfaceContainerLowest: colors.background,
-      surfaceContainerLow: colors.background,
+      surfaceContainerLowest: colors.card,
+      surfaceContainerLow: colors.card,
       surfaceContainer: colors.background,
       surfaceContainerHigh: colors.card,
       surfaceContainerHighest: colors.muted,
@@ -122,7 +122,7 @@ abstract final class AppShadcnTheme {
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       colorScheme: scheme,
       fontFamily: fontFamily,
       textTheme: textTheme,
@@ -175,7 +175,7 @@ abstract final class AppShadcnTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: colors.foreground,
-          backgroundColor: colors.background,
+          backgroundColor: colors.card,
           side: BorderSide(color: colors.border),
           shape: buttonShape,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -243,7 +243,7 @@ abstract final class AppShadcnTheme {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: colors.background,
+        backgroundColor: colors.card,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -254,9 +254,9 @@ abstract final class AppShadcnTheme {
         contentTextStyle: text(14, FontWeight.w400),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: colors.background,
+        backgroundColor: colors.card,
         surfaceTintColor: Colors.transparent,
-        modalBackgroundColor: colors.background,
+        modalBackgroundColor: colors.card,
         elevation: 0,
         modalElevation: 0,
         dragHandleColor: colors.border,
@@ -293,7 +293,7 @@ abstract final class AppShadcnTheme {
         thumbColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
               ? colors.primaryForeground
-              : colors.background,
+              : colors.card,
         ),
         trackColor: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
@@ -342,7 +342,7 @@ abstract final class AppShadcnTheme {
         textStyle: text(12, FontWeight.w400, colors.primaryForeground),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: colors.background,
+        color: colors.card,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         shape: RoundedRectangleBorder(

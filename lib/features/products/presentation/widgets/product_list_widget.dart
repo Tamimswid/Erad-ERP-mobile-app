@@ -32,12 +32,16 @@ class ProductListWidget extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(sc.LucideIcons.circleAlert,
-                    size: 64, color: AppColors.error),
+                Icon(
+                  sc.LucideIcons.circleAlert,
+                  size: 64,
+                  color: AppColors.error,
+                ),
                 const SizedBox(height: 16),
                 Text(state.message, style: TextStyle(color: AppColors.text)),
                 const SizedBox(height: 16),
                 sc.Button(
+                  alignment: Alignment.center,
                   style: sc.ButtonStyle.primary(),
                   onPressed: () => cubit.loadFirstPage(),
                   child: const Text('أعد المحاولة'),
@@ -47,8 +51,9 @@ class ProductListWidget extends StatelessWidget {
           );
         }
 
-        final products =
-            state is ProductsLoaded ? state.products : const <ProductModel>[];
+        final products = state is ProductsLoaded
+            ? state.products
+            : const <ProductModel>[];
         final hasMore = state is ProductsLoaded && state.hasMore;
         final isLoadingMore = state is ProductsLoaded && state.isLoadingMore;
 
@@ -101,13 +106,17 @@ class ProductListWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            isAllCategories ? sc.LucideIcons.package : sc.LucideIcons.listFilter,
+            isAllCategories
+                ? sc.LucideIcons.package
+                : sc.LucideIcons.listFilter,
             size: 48,
             color: AppColors.textSecondary,
           ),
           const SizedBox(height: 12),
           Text(
-            isAllCategories ? 'لم يتم العثور على منتجات' : 'لا توجد منتجات في هذه الفئة',
+            isAllCategories
+                ? 'لم يتم العثور على منتجات'
+                : 'لا توجد منتجات في هذه الفئة',
             style: TextStyle(fontSize: 14, color: AppColors.text),
           ),
           const SizedBox(height: 4),

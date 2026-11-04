@@ -204,6 +204,7 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
                 children: [
                   Expanded(
                     child: sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.outline(),
                       onPressed: () => Navigator.pop(context),
                       child: const Text('إلغاء'),
@@ -212,6 +213,7 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.primary(),
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {

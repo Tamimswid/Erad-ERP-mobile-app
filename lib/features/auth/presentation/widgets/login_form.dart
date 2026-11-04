@@ -65,14 +65,14 @@ class _LoginFormState extends State<LoginForm> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-        
+
               Text(
                 'نظام المحاسبة والمخزون',
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-        
+
               // Email Field
               TextFormField(
                 controller: _emailController,
@@ -92,7 +92,7 @@ class _LoginFormState extends State<LoginForm> {
                 },
               ),
               const SizedBox(height: 16),
-        
+
               // Business Name Field (only for registration)
               if (!_isLogin) ...[
                 TextFormField(
@@ -102,8 +102,7 @@ class _LoginFormState extends State<LoginForm> {
                     prefixIcon: Icon(sc.LucideIcons.building2),
                   ),
                   validator: (value) {
-                    if (!_isLogin &&
-                        (value == null || value.trim().isEmpty)) {
+                    if (!_isLogin && (value == null || value.trim().isEmpty)) {
                       return 'اسم الشركة مطلوب';
                     }
                     return null;
@@ -111,7 +110,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 const SizedBox(height: 16),
               ],
-        
+
               // Password Field
               TextFormField(
                 controller: _passwordController,
@@ -143,9 +142,10 @@ class _LoginFormState extends State<LoginForm> {
                 },
               ),
               const SizedBox(height: 24),
-        
+
               // Submit Button
               sc.Button(
+                alignment: Alignment.center,
                 style: sc.ButtonStyle.primary(),
                 onPressed: state is AuthLoading ? null : _submitForm,
                 child: state is AuthLoading
@@ -160,9 +160,10 @@ class _LoginFormState extends State<LoginForm> {
                     : Text(_isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'),
               ),
               const SizedBox(height: 16),
-        
+
               // Toggle Login/Register
               sc.Button(
+                alignment: Alignment.center,
                 style: sc.ButtonStyle.ghost(),
                 onPressed: state is AuthLoading
                     ? null
@@ -177,11 +178,12 @@ class _LoginFormState extends State<LoginForm> {
                       : 'لديك حساب بالفعل؟ تسجيل الدخول',
                 ),
               ),
-        
+
               // Forgot Password (only for login)
               if (_isLogin) ...[
                 const SizedBox(height: 8),
                 sc.Button(
+                  alignment: Alignment.center,
                   style: sc.ButtonStyle.ghost(),
                   onPressed: state is AuthLoading
                       ? null
@@ -210,7 +212,9 @@ class _LoginFormState extends State<LoginForm> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('أدخل بريدك الإلكتروني لإرسال رابط استعادة كلمة المرور'),
+              const Text(
+                'أدخل بريدك الإلكتروني لإرسال رابط استعادة كلمة المرور',
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: emailController,
@@ -224,12 +228,14 @@ class _LoginFormState extends State<LoginForm> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.primary(),
                     onPressed: () {
                       if (emailController.text.trim().isNotEmpty) {

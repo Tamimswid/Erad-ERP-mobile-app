@@ -94,6 +94,7 @@ class _ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             sc.Button(
+              alignment: Alignment.center,
               style: const sc.ButtonStyle.outline(),
               onPressed: () => context.read<DashboardCubit>().retry(),
               child: const Text('إعادة المحاولة'),

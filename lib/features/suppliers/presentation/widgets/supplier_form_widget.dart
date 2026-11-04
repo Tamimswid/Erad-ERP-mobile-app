@@ -116,6 +116,7 @@ class _SupplierFormWidgetState extends State<SupplierFormWidget> {
             SizedBox(
               width: double.infinity,
               child: sc.Button(
+                alignment: Alignment.center,
                 style: sc.ButtonStyle.primary(),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {

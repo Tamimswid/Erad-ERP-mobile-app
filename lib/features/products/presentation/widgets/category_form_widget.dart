@@ -35,18 +35,17 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
     super.dispose();
   }
 
-  void _saveCategory() async{
+  void _saveCategory() async {
     if (_formKey.currentState!.validate()) {
       final category = ProductCategory(
         userId: await UserService.getUserId() ?? '',
         id: widget.category?.id ?? '',
         name: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty 
-            ? null 
+        description: _descriptionController.text.trim().isEmpty
+            ? null
             : _descriptionController.text.trim(),
         isActive: true,
         createdAt: widget.category?.createdAt ?? DateTime.now(),
-
       );
 
       if (widget.category == null) {
@@ -86,6 +85,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
             children: [
               Expanded(
                 child: sc.Button(
+                  alignment: Alignment.center,
                   style: sc.ButtonStyle.outline(),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('إلغاء'),
@@ -94,6 +94,7 @@ class _CategoryFormWidgetState extends State<CategoryFormWidget> {
               const SizedBox(width: 10),
               Expanded(
                 child: sc.Button(
+                  alignment: Alignment.center,
                   style: sc.ButtonStyle.primary(),
                   onPressed: _saveCategory,
                   child: Text(widget.category == null ? 'إضافة' : 'حفظ'),

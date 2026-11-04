@@ -176,6 +176,7 @@ class DateFilterSheet {
                           const SizedBox(height: 12),
                           Center(
                             child: sc.Button(
+                              alignment: Alignment.center,
                               style: sc.ButtonStyle.ghost(),
                               onPressed: () {
                                 onClearFilter();

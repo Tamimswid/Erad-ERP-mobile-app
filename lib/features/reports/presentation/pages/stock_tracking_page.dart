@@ -424,6 +424,7 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
       child: Row(
         children: [
           sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.ghost(),
             onPressed: _selectAllFiltered,
             leading: const Icon(sc.LucideIcons.circleCheck, size: 16),
@@ -431,6 +432,7 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
           ),
           const SizedBox(width: 8),
           sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.ghost(),
             onPressed: _deselectAll,
             leading: const Icon(sc.LucideIcons.circleX, size: 16),

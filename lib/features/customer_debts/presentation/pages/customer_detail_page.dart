@@ -580,6 +580,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage> {
           if (onAdd != null) ...[
             const SizedBox(width: 8),
             sc.Button(
+              alignment: Alignment.center,
               style: const sc.ButtonStyle.secondary(),
               onPressed: onAdd,
               leading: const Icon(sc.LucideIcons.plus, size: 14),

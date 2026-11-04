@@ -84,6 +84,7 @@ class DebtDetailHeader extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         sc.Button(
+          alignment: Alignment.center,
           style: const sc.ButtonStyle.outline(),
           onPressed: isGeneratingPdf ? null : onPdf,
           leading: const Icon(sc.LucideIcons.fileText, size: 16),
