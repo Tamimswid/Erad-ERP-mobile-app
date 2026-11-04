@@ -2,6 +2,7 @@ import 'dart:developer' as dev;
 
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
+import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/core/services/pdf_invoice_service.dart';
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/core/widgets/app_pagination_list.dart';
@@ -269,6 +270,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
           _showSuccess('تم تسجيل المدفوعة بنجاح: ${amount.toStringAsFixed(2)}');
           _loadTotals();
           _loadPayments(reset: true);
+          sl<DataChangeNotifier>().notifyChanged(DataDomain.supplierDebts);
         },
       );
     } catch (e) {
@@ -312,6 +314,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
           _showSuccess('تم حذف المدفوعة بنجاح');
           _loadTotals();
           _loadPayments(reset: true);
+          sl<DataChangeNotifier>().notifyChanged(DataDomain.supplierDebts);
         },
       );
     } catch (e) {

@@ -89,11 +89,7 @@ class _CustomerDebtsView extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => CustomerDetailPage(customer: debt, isLocal: isLocal),
       ),
-    ).then((_) {
-      if (context.mounted) {
-        context.read<CustomerDebtCubit>().getCustomerDebts();
-      }
-    });
+    );
   }
 
   void _openPayment(BuildContext context, CustomerDebtModel debt) {
@@ -119,7 +115,6 @@ class _CustomerDebtsView extends StatelessWidget {
     return BlocConsumer<CustomerDebtCubit, CustomerDebtState>(
       listener: (context, state) {
         if (state is PaymentSuccess) {
-          context.read<CustomerDebtCubit>().getCustomerDebts();
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
@@ -230,11 +225,7 @@ class _SupplierDebtsView extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => SupplierDetailPage(supplier: debt, isLocal: isLocal),
       ),
-    ).then((_) {
-      if (context.mounted) {
-        context.read<SupplierDebtCubit>().getSupplierDebts();
-      }
-    });
+    );
   }
 
   void _openPayment(BuildContext context, SupplierDebtModel debt) {
@@ -260,7 +251,6 @@ class _SupplierDebtsView extends StatelessWidget {
     return BlocConsumer<SupplierDebtCubit, SupplierDebtState>(
       listener: (context, state) {
         if (state is SupplierPaymentSuccess) {
-          context.read<SupplierDebtCubit>().getSupplierDebts();
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));

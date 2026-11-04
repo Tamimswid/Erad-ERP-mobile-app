@@ -41,6 +41,7 @@ class _ProductsPageState extends State<ProductsPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _productCubit.close();
     super.dispose();
   }
 
@@ -131,15 +132,16 @@ class _ProductsPageState extends State<ProductsPage>
           floatingActionButton: widget.isLocal
               ? null
               : FloatingActionButton.extended(
-            label: const Text('إنشاء المنتج'),
-            onPressed: () {
-              _showAddProductDialog(
-                context: context,
-                onSubmit: (product) => _productCubit.createProduct(product),
-                categoryList: _categories,
-              );
-            },
-          ),
+                  label: const Text('إنشاء المنتج'),
+                  onPressed: () {
+                    _showAddProductDialog(
+                      context: context,
+                      onSubmit: (product) =>
+                          _productCubit.createProduct(product),
+                      categoryList: _categories,
+                    );
+                  },
+                ),
         ),
       ),
     );
@@ -231,18 +233,21 @@ class _ProductsPageState extends State<ProductsPage>
                       children: [
                         if (!widget.isLocal)
                           Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: sc.Button(
-                              style: sc.ButtonStyle.primary(),
-                              onPressed: () =>
-                                  _showAddCategoryDialog(dialogContext),
-                              leading: const Icon(sc.LucideIcons.plus, size: 18),
-                              child: const Text('إضافة فئة جديدة'),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: sc.Button(
+                                style: sc.ButtonStyle.primary(),
+                                onPressed: () =>
+                                    _showAddCategoryDialog(dialogContext),
+                                leading: const Icon(
+                                  sc.LucideIcons.plus,
+                                  size: 18,
+                                ),
+                                child: const Text('إضافة فئة جديدة'),
+                              ),
                             ),
                           ),
-                        ),
                         const Expanded(child: CategoryListWidget()),
                       ],
                     ),
@@ -337,53 +342,56 @@ class _ProductsPageState extends State<ProductsPage>
         return AlertDialog(
           title: Row(
             children: [
-              Icon(sc.LucideIcons.triangleAlert, color: AppColors.textSecondary),
+              Icon(
+                sc.LucideIcons.triangleAlert,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 8),
               const Text('تأكيد الحذف'),
             ],
           ),
           content: SingleChildScrollView(
             child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text('هل أنت متأكد من حذف هذا المنتج؟'),
-              const SizedBox(height: 12),
-              const Text(
-                'سيتم حذف جميع البيانات المرتبطة بهذا المنتج:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              const Text('• عناصر فواتير البيع'),
-              const Text('• عناصر فواتير الشراء'),
-              const SizedBox(height: 8),
-              const Text(
-                'هذا الإجراء لا يمكن التراجع عنه',
-                style: TextStyle(color: AppColors.error, fontSize: 12),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  sc.Button(
-                    style: sc.ButtonStyle.ghost(),
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('إلغاء'),
-                  ),
-                  const SizedBox(width: 8),
-                  sc.Button(
-                    style: sc.ButtonStyle.destructive(),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      onDelete(productId);
-                    },
-                    child: const Text('حذف'),
-                  ),
-                ],
-              ),
-            ],
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('هل أنت متأكد من حذف هذا المنتج؟'),
+                const SizedBox(height: 12),
+                const Text(
+                  'سيتم حذف جميع البيانات المرتبطة بهذا المنتج:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text('• عناصر فواتير البيع'),
+                const Text('• عناصر فواتير الشراء'),
+                const SizedBox(height: 8),
+                const Text(
+                  'هذا الإجراء لا يمكن التراجع عنه',
+                  style: TextStyle(color: AppColors.error, fontSize: 12),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    sc.Button(
+                      style: sc.ButtonStyle.ghost(),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('إلغاء'),
+                    ),
+                    const SizedBox(width: 8),
+                    sc.Button(
+                      style: sc.ButtonStyle.destructive(),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        onDelete(productId);
+                      },
+                      child: const Text('حذف'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
         );
       },
     );

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:erad/core/di/services_locator.dart';
+import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/features/invoices/presentation/widgets/invoice_details_widget.dart';
 import 'package:erad/features/suppliers/data/models/supplier.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +29,10 @@ class _SuppliersPageState extends State<SuppliersPage> {
   @override
   void initState() {
     super.initState();
-    _supplierCubit = SupplierCubit(supplierRepository: sl<SupplierRepository>())
-      ..loadFirstPage();
+    _supplierCubit = SupplierCubit(
+      supplierRepository: sl<SupplierRepository>(),
+      dataChanges: sl<DataChangeNotifier>(),
+    )..loadFirstPage();
   }
 
   @override
