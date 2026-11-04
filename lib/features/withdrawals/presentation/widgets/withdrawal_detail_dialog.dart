@@ -16,13 +16,15 @@ class WithdrawalDetailDialog extends StatelessWidget {
     this.partner,
   });
 
-  static void show(BuildContext context, Withdrawal withdrawal, Partner? partner) {
+  static void show(
+    BuildContext context,
+    Withdrawal withdrawal,
+    Partner? partner,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => WithdrawalDetailDialog(
-        withdrawal: withdrawal,
-        partner: partner,
-      ),
+      builder: (context) =>
+          WithdrawalDetailDialog(withdrawal: withdrawal, partner: partner),
     );
   }
 
@@ -39,102 +41,105 @@ class WithdrawalDetailDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'تفاصيل السحب',
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeXLarge,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.text,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(
-                    sc.LucideIcons.x,
-                    color: AppColors.textSecondary,
-                  ),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.muted,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            
-            // Amount
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.muted,
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              ),
-              child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'المبلغ',
+                    'تفاصيل السحب',
                     style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '$currencySymbol ${NumberFormatter.format(withdrawal.amount)}',
-                    style: const TextStyle(
-                      fontSize: AppFonts.fontSizeXXLarge,
+                      fontSize: AppFonts.fontSizeXLarge,
                       fontWeight: FontWeight.bold,
                       color: AppColors.text,
                     ),
                   ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      sc.LucideIcons.x,
+                      color: AppColors.textSecondary,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.muted,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-            // Partner
-            _buildInfoRow(
-              icon: sc.LucideIcons.user,
-              label: 'الشريك',
-              value: partner?.name ?? '-',
-            ),
-            const SizedBox(height: 12),
-
-            // Date
-            _buildInfoRow(
-              icon: sc.LucideIcons.calendar,
-              label: 'التاريخ',
-              value: dateFormat.format(withdrawal.withdrawalDate),
-            ),
-            const SizedBox(height: 12),
-
-            // Description
-            _buildInfoRow(
-              icon: sc.LucideIcons.fileText,
-              label: 'الوصف',
-              value: withdrawal.description?.isNotEmpty == true 
-                  ? withdrawal.description! 
-                  : '-',
-            ),
-
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: sc.Button(
-                style: sc.ButtonStyle.primary(),
-                onPressed: () => Navigator.pop(context),
-                child: const Text('إغلاق'),
+              // Amount
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.muted,
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadius,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'المبلغ',
+                      style: TextStyle(
+                        fontSize: AppFonts.fontSizeSmall,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$currencySymbol ${NumberFormatter.format(withdrawal.amount)}',
+                      style: const TextStyle(
+                        fontSize: AppFonts.fontSizeXXLarge,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              // Partner
+              _buildInfoRow(
+                icon: sc.LucideIcons.user,
+                label: 'الشريك',
+                value: partner?.name ?? '-',
+              ),
+              const SizedBox(height: 12),
+
+              // Date
+              _buildInfoRow(
+                icon: sc.LucideIcons.calendar,
+                label: 'التاريخ',
+                value: dateFormat.format(withdrawal.withdrawalDate),
+              ),
+              const SizedBox(height: 12),
+
+              // Description
+              _buildInfoRow(
+                icon: sc.LucideIcons.fileText,
+                label: 'الوصف',
+                value: withdrawal.description?.isNotEmpty == true
+                    ? withdrawal.description!
+                    : '-',
+              ),
+
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: sc.Button(
+                  alignment: Alignment.center,
+                  style: sc.ButtonStyle.primary(),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('إغلاق'),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

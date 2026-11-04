@@ -198,13 +198,19 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(sc.LucideIcons.circleAlert,
-                        size: 64, color: AppColors.error),
+                    Icon(
+                      sc.LucideIcons.circleAlert,
+                      size: 64,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(height: 16),
-                    Text(state.message,
-                        style: TextStyle(color: AppColors.text)),
+                    Text(
+                      state.message,
+                      style: TextStyle(color: AppColors.text),
+                    ),
                     const SizedBox(height: 16),
                     sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.primary(),
                       onPressed: () => cubit.filterByYear(currentYear),
                       child: const Text('أعد المحاولة'),
@@ -339,6 +345,7 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
           if (!widget.isLocal) const SizedBox(height: 24),
           if (!widget.isLocal)
             sc.Button(
+              alignment: Alignment.center,
               style: sc.ButtonStyle.primary(),
               onPressed: () => _showAddPartnerDialog(context),
               leading: const Icon(sc.LucideIcons.plus, size: 16),
@@ -355,10 +362,7 @@ class _WithdrawalsPageBodyState extends State<_WithdrawalsPageBody> {
       child: const Center(
         child: Text(
           'لا توجد سحوبات',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
         ),
       ),
     );

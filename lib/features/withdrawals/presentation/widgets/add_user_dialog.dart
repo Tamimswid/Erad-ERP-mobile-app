@@ -6,15 +6,15 @@ import '../../../../core/constants/app_constants.dart';
 class AddUserDialog extends StatefulWidget {
   final Function(String name, String phone) onSave;
 
-  const AddUserDialog({
-    super.key,
-    required this.onSave,
-  });
+  const AddUserDialog({super.key, required this.onSave});
 
   @override
   State<AddUserDialog> createState() => _AddUserDialogState();
 
-  static void show(BuildContext context, {required Function(String name, String phone) onSave}) {
+  static void show(
+    BuildContext context, {
+    required Function(String name, String phone) onSave,
+  }) {
     showDialog(
       context: context,
       builder: (context) => AddUserDialog(onSave: onSave),
@@ -36,10 +36,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      widget.onSave(
-        _nameController.text.trim(),
-        _phoneController.text.trim(),
-      );
+      widget.onSave(_nameController.text.trim(), _phoneController.text.trim());
       Navigator.pop(context);
     }
   }
@@ -106,11 +103,15 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppColors.divider),
+                          borderSide: const BorderSide(
+                            color: AppColors.divider,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppColors.divider),
+                          borderSide: const BorderSide(
+                            color: AppColors.divider,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -155,11 +156,15 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppColors.divider),
+                          borderSide: const BorderSide(
+                            color: AppColors.divider,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: AppColors.divider),
+                          borderSide: const BorderSide(
+                            color: AppColors.divider,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -183,6 +188,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                   children: [
                     Expanded(
                       child: sc.Button(
+                        alignment: Alignment.center,
                         style: sc.ButtonStyle.outline(),
                         onPressed: () => Navigator.pop(context),
                         child: const Text(
@@ -197,6 +203,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: sc.Button(
+                        alignment: Alignment.center,
                         style: sc.ButtonStyle.primary(),
                         onPressed: _submit,
                         child: const Text(

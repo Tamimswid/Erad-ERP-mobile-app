@@ -56,7 +56,8 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
         _filteredPartners = widget.partners.where((p) {
           final name = p.name.toLowerCase();
           final phone = p.phone?.toLowerCase() ?? '';
-          return name.contains(query.toLowerCase()) || phone.contains(query.toLowerCase());
+          return name.contains(query.toLowerCase()) ||
+              phone.contains(query.toLowerCase());
         }).toList();
       }
       _isDropdownOpen = true;
@@ -95,9 +96,7 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
                 ),
               ),
               const SizedBox(width: 10),
-              Expanded(
-                child: _buildSearchField(),
-              ),
+              Expanded(child: _buildSearchField()),
               const SizedBox(width: 10),
               _buildAddButton(),
             ],
@@ -146,7 +145,10 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
               ),
             ),
           ),
@@ -157,15 +159,13 @@ class _UserSelectorWidgetState extends State<UserSelectorWidget> {
 
   Widget _buildAddButton() {
     return sc.Button(
+      alignment: Alignment.center,
       style: sc.ButtonStyle.primary(),
       onPressed: widget.onAddNew,
       leading: const Icon(sc.LucideIcons.plus, size: 16),
       child: const Text(
         'إضافة جديد',
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
       ),
     );
   }

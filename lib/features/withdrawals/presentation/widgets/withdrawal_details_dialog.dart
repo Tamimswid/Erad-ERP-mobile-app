@@ -5,10 +5,7 @@ import '../../data/models/withdrawal.dart';
 class WithdrawalDetailsDialog extends StatelessWidget {
   final Withdrawal withdrawal;
 
-  const WithdrawalDetailsDialog({
-    super.key,
-    required this.withdrawal,
-  });
+  const WithdrawalDetailsDialog({super.key, required this.withdrawal});
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +20,16 @@ class WithdrawalDetailsDialog extends StatelessWidget {
               Text('الوصف: ${withdrawal.description!}'),
             Text('المبلغ: ${withdrawal.amount.toStringAsFixed(2)} ل.س'),
             Text('طريقة الدفع: ${withdrawal.paymentMethod}'),
-            Text('التاريخ: ${withdrawal.withdrawalDate.toString().split(' ')[0]}'),
+            Text(
+              'التاريخ: ${withdrawal.withdrawalDate.toString().split(' ')[0]}',
+            ),
             if (withdrawal.notes != null) Text('ملاحظات: ${withdrawal.notes!}'),
           ],
         ),
       ),
       actions: [
         sc.Button(
+          alignment: Alignment.center,
           style: sc.ButtonStyle.ghost(),
           onPressed: () => Navigator.pop(context),
           child: const Text('إغلاق'),
