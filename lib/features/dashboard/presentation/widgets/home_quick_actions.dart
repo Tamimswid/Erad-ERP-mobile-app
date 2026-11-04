@@ -2,6 +2,7 @@ import 'package:erad/core/widgets/app_quick_action.dart';
 import 'package:erad/core/widgets/app_section_header.dart';
 import 'package:erad/features/expenses/presentation/pages/expenses_page.dart';
 import 'package:erad/features/invoices/presentation/pages/create_invoice_page.dart';
+import 'package:erad/features/stock/presentation/pages/stock_review_page.dart';
 import 'package:erad/features/withdrawals/presentation/pages/withdrawals_page.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
@@ -32,10 +33,9 @@ class HomeQuickActions extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: AppQuickAction(
-                icon: sc.LucideIcons.handCoins,
-                label: 'إضافة دين',
-                // TODO: enable when customer/supplier debts share one page.
-                onTap: null,
+                icon: sc.LucideIcons.packageSearch,
+                label: 'مراجعة المخزون',
+                onTap: () => _push(context, const StockReviewPage()),
               ),
             ),
           ],
