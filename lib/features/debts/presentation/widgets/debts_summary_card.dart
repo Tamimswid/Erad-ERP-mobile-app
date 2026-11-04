@@ -1,3 +1,4 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/core/widgets/app_stat_tile.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,7 @@ class DebtsSummaryCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w700,
-                    color: scheme.foreground,
+                    color: AppColors.moneyOut,
                   ),
                 ),
                 const SizedBox(width: 6),

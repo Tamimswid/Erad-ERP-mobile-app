@@ -205,7 +205,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: AppFonts.fontSizeSmall,
                 fontWeight: AppFonts.fontWeightBold,
-                color: AppColors.primary,
+                color: AppColors.moneyIn,
               ),
             ),
           ),

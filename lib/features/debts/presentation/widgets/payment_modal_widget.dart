@@ -132,8 +132,8 @@ class _PaymentModalWidgetState extends State<PaymentModalWidget> {
                         fontSize: AppFonts.fontSizeMedium,
                         fontWeight: AppFonts.fontWeightBold,
                         color: widget.remainingDebt > 0
-                            ? AppColors.error
-                            : AppColors.success,
+                            ? AppColors.moneyOut
+                            : AppColors.moneyIn,
                       ),
                     ),
                   ],

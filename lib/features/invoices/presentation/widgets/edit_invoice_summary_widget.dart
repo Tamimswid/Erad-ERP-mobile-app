@@ -124,7 +124,7 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
               fontSize: isTotal
                   ? AppFonts.fontSizeLarge
                   : AppFonts.fontSizeSmall,
-              color: isTotal ? AppColors.primary : AppColors.text,
+              color: isTotal ? AppColors.moneyIn : AppColors.text,
             ),
           ),
         ],

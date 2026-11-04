@@ -187,7 +187,7 @@ class PurchaseInvoiceCard extends StatelessWidget {
             Text(
               '${invoice.totalAmount.toStringAsFixed(2)} ل.س',
               style: TextStyle(
-                color: AppColors.warning,
+                color: AppColors.moneyIn,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

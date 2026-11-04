@@ -148,7 +148,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                         '${AppUtils.formatNumber(item.totalPrice?.toDouble() ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
                         style: const TextStyle(
                           fontWeight: AppFonts.fontWeightBold,
-                          color: AppColors.primary,
+                          color: AppColors.moneyIn,
                           fontSize: 14,
                         ),
                       ),

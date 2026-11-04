@@ -40,7 +40,7 @@ class InvoiceTotalsWidget extends StatelessWidget {
           _buildTotalRow(
             label: 'المجموع الإجمالي',
             value: total,
-            color: AppColors.primary,
+            color: AppColors.moneyIn,
             isLarge: true,
           ),
         ],

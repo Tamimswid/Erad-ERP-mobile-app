@@ -1,3 +1,4 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/suppliers_debts/data/models/invoice_model.dart';
 import 'package:flutter/material.dart';
@@ -90,7 +91,7 @@ class UnpaidInvoiceRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: scheme.foreground,
+                    color: AppColors.moneyOut,
                   ),
                 ),
                 const SizedBox(height: 2),

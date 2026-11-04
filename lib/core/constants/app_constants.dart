@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // Tokens mirror the shadcn "natural" (taupe) light palette.
 // success/warning/error use darker shades so they stay readable on white.
 class AppColors {
-  static const background = Color(0xFFF6F5F3);
+  static const background = Color(0xFFEEF2F5);
   static const surface = Color(0xFFFFFFFF);
   static const text = Color(0xFF1C1917);
 
@@ -14,6 +14,10 @@ class AppColors {
   static const success = Color(0xFF15803D);
   static const warning = Color(0xFFB45309);
   static const error = Color(0xFFDC2626);
+
+  // Money emphasis — dark enough to stay readable on white
+  static const moneyIn = Color(0xFF166534);
+  static const moneyOut = Color(0xFFB91C1C);
 
   static const textSecondary = Color(0xFF6B6560);
   static const divider = Color(0xFFE7E5E4);
@@ -92,6 +96,9 @@ class AppConstants {
   static const double gap = 16.0;
   static const double gapSmall = 8.0;
   static const double gapLarge = 32.0;
+
+  // Shell bottom bar (height 64 + offset 12) clearance for hosted pages
+  static const double bottomBarClearance = 76.0;
 
   // SPACING - Tutarlı padding sistemi
   static const double spacing = 8.0;

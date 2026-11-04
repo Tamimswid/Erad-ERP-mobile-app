@@ -562,7 +562,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontSize: isLarge ? 18 : 14,
-              color: isBold ? AppColors.primary : null,
+              color: isBold ? AppColors.moneyIn : null,
             ),
           ),
         ],

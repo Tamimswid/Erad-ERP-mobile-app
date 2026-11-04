@@ -1,3 +1,4 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -134,7 +135,7 @@ class DebtPartyCard extends StatelessWidget {
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: _hasDebt
-                            ? scheme.foreground
+                            ? AppColors.moneyOut
                             : scheme.mutedForeground,
                       ),
                     ),

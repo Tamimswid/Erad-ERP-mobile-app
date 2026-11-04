@@ -114,7 +114,11 @@ class SalesInvoiceCard extends StatelessWidget {
           children: [
             Text(
               '${invoice.totalAmount.toStringAsFixed(2)} ل.س',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: AppColors.moneyIn,
+              ),
             ),
             Text(
               invoice.paymentStatus.name,
@@ -162,7 +166,11 @@ class PurchaseInvoiceCard extends StatelessWidget {
           children: [
             Text(
               '${invoice.totalAmount.toStringAsFixed(2)} ل.س',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: AppColors.moneyIn,
+              ),
             ),
             Text(
               invoice.paymentStatus.name,

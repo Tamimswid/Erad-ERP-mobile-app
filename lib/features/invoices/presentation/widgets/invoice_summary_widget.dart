@@ -172,7 +172,7 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
                     style: const TextStyle(
                       fontSize: AppFonts.fontSizeLarge,
                       fontWeight: AppFonts.fontWeightSemiBold,
-                      color: AppColors.primary,
+                      color: AppColors.moneyIn,
                     ),
                   ),
                 ],

@@ -214,7 +214,7 @@ class InvoiceProductListWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
                 fontWeight: AppFonts.fontWeightBold,
-                color: AppColors.primary,
+                color: AppColors.moneyIn,
               ),
             ),
           ),
