@@ -38,7 +38,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       if (userId == null) {
         throw Exception('User not logged in');
       }
-      
+
       final response = await client
           .from('products')
           .select('*, categories(name)')
@@ -75,12 +75,14 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       if (userId == null) {
         throw Exception('User not logged in');
       }
-      
+
       log('Loading categories for user: $userId');
-      
+
       final response = await client
           .from('categories')
-          .select('id, user_id, name, description, parent_id, sort_order, is_active, created_at')
+          .select(
+            'id, user_id, name, description, parent_id, sort_order, is_active, created_at',
+          )
           .eq('user_id', userId)
           .eq('is_active', true)
           .order('sort_order', ascending: true)
@@ -88,7 +90,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .limit(50); // Limit for better performance
 
       log('Categories loaded: ${response.length}');
-      return response.map((category) => ProductCategory.fromMap(category)).toList();
+      return response
+          .map((category) => ProductCategory.fromMap(category))
+          .toList();
     } catch (e) {
       log('Error loading categories: ${e.toString()}');
       throw exceptionToFailure(e);
@@ -217,9 +221,7 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
 
       final term = search?.trim() ?? '';
       if (term.isNotEmpty) {
-        query = query.or(
-          'name.ilike.%$term%,code.ilike.%$term%,barcode.ilike.%$term%',
-        );
+        query = query.ilike('name', '%$term%');
       }
       if (categoryId != null && categoryId != 'all') {
         query = query.eq('category_id', categoryId);
@@ -230,8 +232,9 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
           .order('id', ascending: true)
           .range(offset, offset + limit);
 
-      final products =
-          response.map((product) => ProductModel.fromMap(product)).toList();
+      final products = response
+          .map((product) => ProductModel.fromMap(product))
+          .toList();
       final hasMore = products.length > limit;
       return PagedResult(
         items: hasMore ? products.sublist(0, limit) : products,
