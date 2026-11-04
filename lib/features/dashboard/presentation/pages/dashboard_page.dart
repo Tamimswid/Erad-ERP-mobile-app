@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/features/dashboard/presentation/pages/more_page.dart';
 import 'package:erad/features/debts/presentation/pages/debts_page.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +128,16 @@ class _DashboardPageState extends State<DashboardPage>
                   border: Border.all(color: colors.border),
                 ),
               ),
-              body: _buildContent(),
+              body: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  padding: MediaQuery.paddingOf(context).copyWith(
+                    bottom:
+                        MediaQuery.paddingOf(context).bottom +
+                        AppConstants.bottomBarClearance,
+                  ),
+                ),
+                child: _buildContent(),
+              ),
               child: SizedBox(
                 height: 64,
                 child: BottomBarItems(
