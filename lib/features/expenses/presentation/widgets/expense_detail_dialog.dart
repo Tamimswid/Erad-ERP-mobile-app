@@ -10,19 +10,17 @@ class ExpenseDetailDialog extends StatelessWidget {
   final Expense expense;
   final ExpenseCategory? category;
 
-  const ExpenseDetailDialog({
-    super.key,
-    required this.expense,
-    this.category,
-  });
+  const ExpenseDetailDialog({super.key, required this.expense, this.category});
 
-  static void show(BuildContext context, Expense expense, ExpenseCategory? category) {
+  static void show(
+    BuildContext context,
+    Expense expense,
+    ExpenseCategory? category,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => ExpenseDetailDialog(
-        expense: expense,
-        category: category,
-      ),
+      builder: (context) =>
+          ExpenseDetailDialog(expense: expense, category: category),
     );
   }
 
@@ -39,100 +37,103 @@ class ExpenseDetailDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'تفاصيل المصروف',
-                  style: TextStyle(
-                    fontSize: AppFonts.fontSizeXLarge,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.text,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(sc.LucideIcons.x),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.muted,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            
-            // Amount
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.muted,
-                borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              ),
-              child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'المبلغ',
+                    'تفاصيل المصروف',
                     style: TextStyle(
-                      fontSize: AppFonts.fontSizeSmall,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '$currencySymbol ${NumberFormatter.format(expense.amount)}',
-                    style: const TextStyle(
-                      fontSize: AppFonts.fontSizeXXLarge,
+                      fontSize: AppFonts.fontSizeXLarge,
                       fontWeight: FontWeight.bold,
                       color: AppColors.text,
                     ),
                   ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(sc.LucideIcons.x),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.muted,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-            // Date
-            _buildInfoRow(
-              icon: sc.LucideIcons.calendar,
-              label: 'التاريخ',
-              value: dateFormat.format(expense.expenseDate),
-            ),
-            const SizedBox(height: 12),
+              // Amount
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.muted,
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadius,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'المبلغ',
+                      style: TextStyle(
+                        fontSize: AppFonts.fontSizeSmall,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$currencySymbol ${NumberFormatter.format(expense.amount)}',
+                      style: const TextStyle(
+                        fontSize: AppFonts.fontSizeXXLarge,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
 
-            // Category
-            if (category != null) ...[
+              // Date
               _buildInfoRow(
-                icon: sc.LucideIcons.tag,
-                label: 'الفئة',
-                value: category!.name,
+                icon: sc.LucideIcons.calendar,
+                label: 'التاريخ',
+                value: dateFormat.format(expense.expenseDate),
               ),
               const SizedBox(height: 12),
-            ],
 
-            // Description
-            _buildInfoRow(
-              icon: sc.LucideIcons.fileText,
-              label: 'الوصف',
-              value: expense.description?.isNotEmpty == true 
-                  ? expense.description! 
-                  : '-',
-            ),
+              // Category
+              if (category != null) ...[
+                _buildInfoRow(
+                  icon: sc.LucideIcons.tag,
+                  label: 'الفئة',
+                  value: category!.name,
+                ),
+                const SizedBox(height: 12),
+              ],
 
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: sc.Button(
-                style: sc.ButtonStyle.primary(),
-                onPressed: () => Navigator.pop(context),
-                child: const Text('إغلاق'),
+              // Description
+              _buildInfoRow(
+                icon: sc.LucideIcons.fileText,
+                label: 'الوصف',
+                value: expense.description?.isNotEmpty == true
+                    ? expense.description!
+                    : '-',
               ),
-            ),
-          ],
-        ),
+
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: sc.Button(
+                  alignment: Alignment.center,
+                  style: sc.ButtonStyle.primary(),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('إغلاق'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

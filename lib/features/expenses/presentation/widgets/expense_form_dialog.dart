@@ -46,9 +46,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
     _receiptController = TextEditingController(
       text: expense?.receiptNumber ?? '',
     );
-    _notesController = TextEditingController(
-      text: expense?.notes ?? '',
-    );
+    _notesController = TextEditingController(text: expense?.notes ?? '');
     _selectedCategoryId = expense?.categoryId;
     _expenseDate = expense?.expenseDate ?? DateTime.now();
     _paymentMethod = expense?.paymentMethod ?? 'cash';
@@ -114,11 +112,13 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                         controller: _amountController,
                         keyboardType: TextInputType.number,
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*'),
+                          ),
                         ],
                         decoration: _buildInputDecoration(
                           hint: 'أدخل المبلغ',
-                          prefix:  Text(NumberFormatter.getCurrencySymbol()),
+                          prefix: Text(NumberFormatter.getCurrencySymbol()),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -143,9 +143,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _descriptionController,
-                        decoration: _buildInputDecoration(
-                          hint: 'وصف المصروف',
-                        ),
+                        decoration: _buildInputDecoration(hint: 'وصف المصروف'),
                       ),
                       const SizedBox(height: 16),
 
@@ -180,6 +178,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                 children: [
                   Expanded(
                     child: sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.outline(),
                       onPressed: () => Navigator.pop(context),
                       child: const Text('إلغاء'),
@@ -188,6 +187,7 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.primary(),
                       onPressed: _submit,
                       child: Text(isEditing ? 'حفظ التغييرات' : 'إضافة مصروف'),
@@ -219,10 +219,12 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
   }) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: prefix != null ? Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: prefix,
-      ) : null,
+      prefixIcon: prefix != null
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: prefix,
+            )
+          : null,
       prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
       filled: true,
       fillColor: AppColors.background,
@@ -305,7 +307,11 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
         ),
         child: Row(
           children: [
-            Icon(sc.LucideIcons.calendar, size: 18, color: AppColors.textSecondary),
+            Icon(
+              sc.LucideIcons.calendar,
+              size: 18,
+              color: AppColors.textSecondary,
+            ),
             const SizedBox(width: 12),
             Text(
               '${_expenseDate.day}/${_expenseDate.month}/${_expenseDate.year}',
@@ -339,7 +345,9 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.background,
+                  color: isSelected
+                      ? AppColors.primary.withValues(alpha: 0.1)
+                      : AppColors.background,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isSelected ? AppColors.primary : AppColors.divider,
@@ -350,14 +358,18 @@ class _ExpenseFormDialogState extends State<ExpenseFormDialog> {
                     Icon(
                       method['icon'] as IconData,
                       size: 20,
-                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       method['label'] as String,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
                       ),
                     ),
                   ],

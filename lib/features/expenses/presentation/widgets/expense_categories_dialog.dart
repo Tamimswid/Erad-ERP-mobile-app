@@ -18,7 +18,8 @@ class ExpenseCategoriesDialog extends StatefulWidget {
   });
 
   @override
-  State<ExpenseCategoriesDialog> createState() => _ExpenseCategoriesDialogState();
+  State<ExpenseCategoriesDialog> createState() =>
+      _ExpenseCategoriesDialogState();
 }
 
 class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
@@ -93,11 +94,13 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
         content: const Text('هل أنت متأكد من حذف هذه الفئة؟'),
         actions: [
           sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.ghost(),
             onPressed: () => Navigator.pop(context),
             child: const Text('إلغاء'),
           ),
           sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.destructive(),
             onPressed: () {
               widget.onDeleteCategory(id);
@@ -140,6 +143,7 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                     children: [
                       if (!_isAdding && _editingCategory == null)
                         sc.Button(
+                          alignment: Alignment.center,
                           style: sc.ButtonStyle.primary(),
                           onPressed: _startAdding,
                           leading: const Icon(sc.LucideIcons.plus, size: 16),
@@ -220,6 +224,7 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                         children: [
                           Expanded(
                             child: sc.Button(
+                              alignment: Alignment.center,
                               style: sc.ButtonStyle.outline(),
                               onPressed: _cancelForm,
                               child: const Text('إلغاء'),
@@ -228,6 +233,7 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: sc.Button(
+                              alignment: Alignment.center,
                               style: sc.ButtonStyle.primary(),
                               onPressed: _submit,
                               child: Text(
@@ -275,7 +281,8 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
                       itemCount: widget.categories.length,
-                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final category = widget.categories[index];
                         return ListTile(
@@ -299,11 +306,17 @@ class _ExpenseCategoriesDialogState extends State<ExpenseCategoriesDialog> {
                             children: [
                               IconButton(
                                 onPressed: () => _startEditing(category),
-                                icon: const Icon(sc.LucideIcons.pencil, color: AppColors.text),
+                                icon: const Icon(
+                                  sc.LucideIcons.pencil,
+                                  color: AppColors.text,
+                                ),
                               ),
                               IconButton(
                                 onPressed: () => _deleteCategory(category.id),
-                                icon: const Icon(sc.LucideIcons.trash2, color: AppColors.error),
+                                icon: const Icon(
+                                  sc.LucideIcons.trash2,
+                                  color: AppColors.error,
+                                ),
                               ),
                             ],
                           ),

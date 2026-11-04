@@ -65,10 +65,7 @@ class ExpenseListWidget extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final expense = expenses[index];
-        return ExpenseCard(
-          expense: expense,
-          categories: categories,
-        );
+        return ExpenseCard(expense: expense, categories: categories);
       },
     );
   }
@@ -231,8 +228,14 @@ class ExpenseCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDetailRow('المبلغ', NumberFormatter.format(expense.amount)),
-              _buildDetailRow('طريقة الدفع', _getPaymentMethodText(expense.paymentMethod)),
-              _buildDetailRow('التاريخ', '${expense.expenseDate.day}/${expense.expenseDate.month}/${expense.expenseDate.year}'),
+              _buildDetailRow(
+                'طريقة الدفع',
+                _getPaymentMethodText(expense.paymentMethod),
+              ),
+              _buildDetailRow(
+                'التاريخ',
+                '${expense.expenseDate.day}/${expense.expenseDate.month}/${expense.expenseDate.year}',
+              ),
               if (expense.categoryName != null)
                 _buildDetailRow('الفئة', expense.categoryName!),
               if (expense.receiptNumber != null)
@@ -244,6 +247,7 @@ class ExpenseCard extends StatelessWidget {
         ),
         actions: [
           sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.ghost(),
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text('إغلاق'),
@@ -261,10 +265,7 @@ class ExpenseCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 4),
           Text(
@@ -325,12 +326,14 @@ class ExpenseCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(dialogContext),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.destructive(),
                     onPressed: () {
                       cubit.deleteExpense(expense.id);

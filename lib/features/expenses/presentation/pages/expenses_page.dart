@@ -236,16 +236,24 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(sc.LucideIcons.circleAlert,
-                        size: 64, color: AppColors.error),
+                    Icon(
+                      sc.LucideIcons.circleAlert,
+                      size: 64,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(height: 16),
-                    Text(state.message,
-                        style: TextStyle(color: AppColors.text)),
+                    Text(
+                      state.message,
+                      style: TextStyle(color: AppColors.text),
+                    ),
                     const SizedBox(height: 16),
                     sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.primary(),
-                      onPressed: () =>
-                          cubit.filterByDateRange(cubit.startDate, cubit.endDate),
+                      onPressed: () => cubit.filterByDateRange(
+                        cubit.startDate,
+                        cubit.endDate,
+                      ),
                       child: const Text('أعد المحاولة'),
                     ),
                   ],
@@ -426,10 +434,7 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
           SizedBox(height: 16),
           Text(
             'لم يتم العثور على بيانات',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ],
       ),
