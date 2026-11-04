@@ -23,8 +23,8 @@ class EditInvoiceTypeWidget extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
               decoration: BoxDecoration(
-                color: isSales 
-                    ? AppColors.primary.withValues(alpha: 0.1) 
+                color: isSales
+                    ? AppColors.primary.withValues(alpha: 0.1)
                     : AppColors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppConstants.borderRadius),
                 border: Border.all(
@@ -36,7 +36,9 @@ class EditInvoiceTypeWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    isSales ? sc.LucideIcons.trendingUp : sc.LucideIcons.trendingDown,
+                    isSales
+                        ? sc.LucideIcons.trendingUp
+                        : sc.LucideIcons.trendingDown,
                     color: isSales ? AppColors.primary : AppColors.warning,
                     size: 20,
                   ),

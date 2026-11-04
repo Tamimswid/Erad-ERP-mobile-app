@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/di/services_locator.dart' as sl;
+import '../../../../core/notifications/data_change_notifier.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/edit_invoice_cubit.dart';
 import '../widgets/edit_invoice_type_widget.dart';
@@ -36,17 +37,24 @@ class _EditInvoicePageState extends State<EditInvoicePage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (context) => sl.sl<EditInvoiceCubit>()),
         BlocProvider(
-          create: (context) => sl.sl<EditInvoiceCubit>(),
+          create: (context) => ProductCubit(
+            productRepository: sl.sl<ProductRepository>(),
+            dataChanges: sl.sl<DataChangeNotifier>(),
+          )..getProducts(),
         ),
         BlocProvider(
-          create: (context) => ProductCubit(productRepository: sl.sl<ProductRepository>())..getProducts(),
+          create: (context) => CustomerCubit(
+            customerRepository: sl.sl<CustomerRepository>(),
+            dataChanges: sl.sl<DataChangeNotifier>(),
+          )..getCustomers(),
         ),
         BlocProvider(
-          create: (context) => CustomerCubit(customerRepository: sl.sl<CustomerRepository>())..getCustomers(),
-        ),
-        BlocProvider(
-          create: (context) => SupplierCubit(supplierRepository: sl.sl<SupplierRepository>())..getSuppliers(),
+          create: (context) => SupplierCubit(
+            supplierRepository: sl.sl<SupplierRepository>(),
+            dataChanges: sl.sl<DataChangeNotifier>(),
+          )..getSuppliers(),
         ),
       ],
       child: _EditInvoicePageContent(
@@ -67,7 +75,8 @@ class _EditInvoicePageContent extends StatefulWidget {
   });
 
   @override
-  State<_EditInvoicePageContent> createState() => _EditInvoicePageContentState();
+  State<_EditInvoicePageContent> createState() =>
+      _EditInvoicePageContentState();
 }
 
 class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
@@ -84,13 +93,13 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
   }
 
   @override
-  Widget build(BuildContext context) {    
+  Widget build(BuildContext context) {
     return BlocConsumer<EditInvoiceCubit, EditInvoiceState>(
       listener: (context, state) {
         if (state is EditInvoiceUpdated) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
           Navigator.of(context).pop(true);
         } else if (state is EditInvoiceError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -104,9 +113,7 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
       builder: (context, state) {
         if (state is EditInvoiceLoading) {
           return sc.Scaffold(
-            headers: [
-              sc.AppBar(title: const Text('تعديل الفاتورة')),
-            ],
+            headers: [sc.AppBar(title: const Text('تعديل الفاتورة'))],
             child: const Center(child: CircularProgressIndicator()),
           );
         }
@@ -134,10 +141,7 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: EditInvoiceDatesWidget(),
-                      ),
+                      Expanded(flex: 1, child: EditInvoiceDatesWidget()),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -156,9 +160,7 @@ class _EditInvoicePageContentState extends State<_EditInvoicePageContent> {
         }
 
         return sc.Scaffold(
-          headers: [
-            sc.AppBar(title: const Text('تعديل الفاتورة')),
-          ],
+          headers: [sc.AppBar(title: const Text('تعديل الفاتورة'))],
           child: const Center(child: Text('جاري تحميل الفاتورة...')),
         );
       },

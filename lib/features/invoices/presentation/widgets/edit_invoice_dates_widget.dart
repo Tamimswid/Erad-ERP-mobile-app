@@ -41,7 +41,7 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
   ) async {
     final cubit = context.read<EditInvoiceCubit>();
     DateTime initialDate = DateTime.now();
-    
+
     if (controller.text.isNotEmpty) {
       final parts = controller.text.split('-');
       if (parts.length == 3) {
@@ -91,39 +91,39 @@ class _EditInvoiceDatesWidgetState extends State<EditInvoiceDatesWidget> {
         if (state is EditInvoiceLoaded) {
           _initControllers(context.read<EditInvoiceCubit>());
         }
-        
+
         return SizedBox(
           height: 140,
           child: sc.Card(
             padding: const EdgeInsets.all(AppConstants.cardPadding),
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionTitle(sc.LucideIcons.calendar, 'التواريخ'),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildDateField(
-                          _invoiceDateController,
-                          'تاريخ الفاتورة',
-                          sc.LucideIcons.calendar,
-                          'invoice',
-                        ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle(sc.LucideIcons.calendar, 'التواريخ'),
+                const Spacer(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDateField(
+                        _invoiceDateController,
+                        'تاريخ الفاتورة',
+                        sc.LucideIcons.calendar,
+                        'invoice',
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildDateField(
-                          _dueDateController,
-                          'تاريخ الاستحقاق',
-                          sc.LucideIcons.calendarCheck,
-                          'due',
-                        ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildDateField(
+                        _dueDateController,
+                        'تاريخ الاستحقاق',
+                        sc.LucideIcons.calendarCheck,
+                        'due',
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

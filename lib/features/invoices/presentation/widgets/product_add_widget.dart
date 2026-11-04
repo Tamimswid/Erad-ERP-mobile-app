@@ -1,435 +1,401 @@
-import 'package:erad/features/invoices/presentation/widgets/product_add_fullscreen_widget.dart';
+import 'dart:async';
+
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/utils/number_formatter.dart';
+import 'package:erad/features/invoices/data/models/invoice_item.dart';
+import 'package:erad/features/invoices/presentation/bloc/invoice_cubit.dart';
 import 'package:erad/features/invoices/presentation/widgets/product_list_widget.dart';
+import 'package:erad/features/products/data/models/product.dart';
+import 'package:erad/features/products/presentation/bloc/product_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
-import '../../../../core/constants/app_constants.dart';
-import '../../../products/data/models/product.dart';
-import '../../../products/presentation/bloc/product_cubit.dart';
-import '../../data/models/invoice_item.dart';
-import '../bloc/invoice_cubit.dart';
 
 class ProductAddWidget extends StatefulWidget {
-  const ProductAddWidget({super.key});
+  final FocusNode searchFocusNode;
+
+  const ProductAddWidget({super.key, required this.searchFocusNode});
 
   @override
   State<ProductAddWidget> createState() => _ProductAddWidgetState();
 }
 
 class _ProductAddWidgetState extends State<ProductAddWidget> {
+  static const _searchDebounce = Duration(milliseconds: 300);
+  static const _maxSuggestions = 8;
+
   final _searchController = TextEditingController();
-  final _quantityController = TextEditingController();
-  final _searchFocusNode = FocusNode();
+  final _quantityController = TextEditingController(text: '1');
   final _quantityFocusNode = FocusNode();
+  Timer? _debounce;
 
-  List<ProductModel> _allProducts = [];
-  List<ProductModel> _searchResults = [];
-  ProductModel? _selectedProduct;
-  List<InvoiceItem> _cachedItems = [];
-
-  @override
-  void initState() {
-    super.initState();
-    // _searchFocusNode.requestFocus();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<ProductCubit>().getProducts();
-      }
-    });
-  }
+  String _query = '';
+  bool _isSearching = false;
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     _quantityController.dispose();
-    _searchFocusNode.dispose();
     _quantityFocusNode.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged(String query) {
+  List<ProductModel> get _results {
+    if (_query.isEmpty) return const [];
+    final state = context.read<ProductCubit>().state;
+    if (state is! ProductsLoaded) return const [];
+    return state.products.take(_maxSuggestions).toList();
+  }
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    final query = value.trim();
+
+    setState(() {
+      _query = query;
+      _isSearching = query.isNotEmpty;
+    });
+
+    if (query.isEmpty) return;
+
+    _debounce = Timer(_searchDebounce, () async {
+      if (!mounted) return;
+      await context.read<ProductCubit>().searchProducts(query);
+      if (!mounted || _searchController.text.trim() != query) return;
+      setState(() => _isSearching = false);
+    });
+  }
+
+  Future<void> _submitSearch() async {
+    final query = _searchController.text.trim();
     if (query.isEmpty) {
-      setState(() {
-        _searchResults = [];
-        _selectedProduct = null;
-      });
+      _quantityFocusNode.requestFocus();
       return;
     }
 
-    if (_allProducts.isEmpty) return;
+    _debounce?.cancel();
+    var results = _results;
 
-    final results = _allProducts.where((product) {
-      return product.name.toLowerCase().contains(query.toLowerCase()) ||
-          product.code.toLowerCase().contains(query.toLowerCase());
-    }).toList();
-
-    setState(() {
-      _searchResults = results.take(10).toList();
-      _selectedProduct = null;
-    });
-  }
-
-  void _onSearchSubmitted(String query) {
-    if (_searchResults.isNotEmpty) {
-      _onProductSelected(_searchResults.first);
+    if (results.isEmpty) {
+      setState(() => _isSearching = true);
+      await context.read<ProductCubit>().searchProducts(query);
+      if (!mounted || _searchController.text.trim() != query) return;
+      results = _results;
+      setState(() => _isSearching = false);
     }
-  }
 
-  void _onProductSelected(ProductModel product) {
-    setState(() {
-      _selectedProduct = product;
-      _searchResults = [];
-    });
-    _searchController.text = '${product.name} (${product.unit})';
-    _quantityFocusNode.requestFocus();
-  }
-
-  void _onQuantitySubmitted() {
-    if (_selectedProduct != null) {
-      final quantity = int.tryParse(_quantityController.text);
-      if (quantity != null && quantity > 0) {
-        final invoiceCubit = context.read<InvoiceCubit>();
-        final isSale = invoiceCubit.invoiceType == 'sale';
-        final unitPrice = isSale ? _selectedProduct!.salePrice : _selectedProduct!.purchasePrice;
-      final invoiceItem = InvoiceItem(
-          measurement: _selectedProduct!.measurement,
-          productId: _selectedProduct!.id,
-          productName: _selectedProduct!.name,
-          quantity: quantity,
-          unitPrice: unitPrice,
-          purchasePrice: _selectedProduct!.purchasePrice,
-          totalPrice: unitPrice * quantity,
-          unit: _selectedProduct!.unit,
-        );
-        invoiceCubit.addInvoiceItem(invoiceItem);
-
-        setState(() {
-          _searchController.clear();
-        _quantityController.clear();
-          _selectedProduct = null;
-        });
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _searchFocusNode.requestFocus();
-        });
-      }
-    } else {
-      _confirmAddProduct();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _searchFocusNode.requestFocus();
-      });
-    }
-  }
-
-  void _confirmAddProduct() {
-    var name = _searchController.text.trim();
-    final quantity = int.tryParse(_quantityController.text);
-
-    if (name.isEmpty) {
+    if (results.isEmpty) {
+      _showMessage('لم يتم العثور على المنتج');
       return;
     }
 
-    if (quantity == null || quantity <= 0) {
+    _addProduct(results.first);
+  }
+
+  void _addProduct(ProductModel product) {
+    final quantity = int.tryParse(_quantityController.text) ?? 0;
+    if (quantity <= 0) {
+      _showMessage('أدخل كمية صحيحة');
       return;
     }
 
-    ProductModel? existingProduct;
-    try {
-      existingProduct = _allProducts.firstWhere(
-        (product) => product.name.toLowerCase() == name.toLowerCase(),
-      );
-    } catch (e) {
-      existingProduct = null;
-    }
+    final cubit = context.read<InvoiceCubit>();
+    final isSale = cubit.invoiceType == 'sale';
+    final unitPrice = isSale ? product.salePrice : product.purchasePrice;
 
-    if (existingProduct != null) {
-      name = '${existingProduct.name} (${existingProduct.unit})';
-    }
-
-    final invoiceCubit = context.read<InvoiceCubit>();
-    final isSale = invoiceCubit.invoiceType == 'sale';
-    final unitPrice = isSale ? existingProduct!.salePrice : existingProduct!.purchasePrice;
-
-    final invoiceItem = InvoiceItem(
-      measurement: existingProduct.measurement ,
-      
-      unit: existingProduct.unit ,
-      productId: existingProduct.id,
-      productName: name,
-      quantity: quantity,
-      unitPrice: unitPrice,
-      purchasePrice: existingProduct.purchasePrice,
-      totalPrice: unitPrice * quantity,
+    cubit.addInvoiceItem(
+      InvoiceItem(
+        measurement: product.measurement,
+        unit: product.unit,
+        productId: product.id,
+        productName: product.name,
+        quantity: quantity,
+        unitPrice: unitPrice,
+        purchasePrice: product.purchasePrice,
+        totalPrice: unitPrice * quantity,
+      ),
     );
 
-    invoiceCubit.addInvoiceItem(invoiceItem);
-
+    _debounce?.cancel();
+    _searchController.clear();
+    _quantityController.text = '1';
     setState(() {
-      _searchController.clear();
-      _quantityController.text = '1';
-      _selectedProduct = null;
+      _query = '';
+      _isSearching = false;
     });
+    widget.searchFocusNode.requestFocus();
+  }
+
+  void _resetInputs() {
+    _debounce?.cancel();
+    _searchController.clear();
+    _quantityController.text = '1';
+    if (!mounted) return;
+    setState(() {
+      _query = '';
+      _isSearching = false;
+    });
+  }
+
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
   }
 
   @override
-  Widget build(BuildContext context) {    
+  Widget build(BuildContext context) {
     return BlocListener<InvoiceCubit, InvoiceState>(
-      listener: (context, state) {
-        if (state is InvoiceFormUpdated) {
-          setState(() {});
-        }
-      },
-      child: BlocBuilder<ProductCubit, ProductState>(
-        builder: (context, productState) {
-          if (productState is ProductsLoaded) {
-            _allProducts = productState.products;
-          }
-
-          final invoiceCubit = context.read<InvoiceCubit>();
-          final itemCount = invoiceCubit.invoiceItems.length;
-
-          if (itemCount != _cachedItems.length) {
-            _cachedItems = List.from(invoiceCubit.invoiceItems);
-          }
+      listenWhen: (previous, current) =>
+          current is InvoiceFormUpdated && current.updateType == 'clearAll',
+      listener: (context, state) => _resetInputs(),
+      child: BlocBuilder<InvoiceCubit, InvoiceState>(
+        builder: (context, invoiceState) {
+          final itemCount = context.read<InvoiceCubit>().invoiceItems.length;
 
           return sc.Card(
             padding: const EdgeInsets.all(AppConstants.cardPadding),
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _buildSectionTitle(
-                        sc.LucideIcons.package,
-                        'إضافة منتج',
-                      ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.muted,
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: AppColors.divider),
-                        ),
-                        child: Text(
-                          '${_cachedItems.length} منتج',
-                          style: const TextStyle(
-                            color: AppColors.text,
-                            fontWeight: AppFonts.fontWeightSemiBold,
-                            fontSize: AppFonts.fontSizeSmall,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      _buildExpandButton(),
-                    ],
-                  ),
-                  const SizedBox(height: AppConstants.spacingMd),
-
-               
-                    _buildMobileAddForm() ,
-
-
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.divider),
-                      borderRadius: BorderRadius.circular(8),
-                      color: AppColors.muted,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(itemCount),
+                const SizedBox(height: AppConstants.spacingMd),
+                _buildInputRow(),
+                BlocBuilder<ProductCubit, ProductState>(
+                  builder: (context, productState) =>
+                      _buildSuggestions(productState),
+                ),
+                const SizedBox(height: 12),
+                const Row(
+                  children: [
+                    Icon(
+                      sc.LucideIcons.info,
+                      size: 14,
+                      color: AppColors.textSecondary,
                     ),
-                    child: const Center(
-                      child: Text(
-                        'اسحب لليمين لحذف المنتج',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: AppFonts.fontSizeMedium,
-                        ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Enter لإضافة أول نتيجة، واسحب العنصر لحذفه',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  ProductListWidget(
-                    onItemRemoved: () {
-                      setState(() {});
-                    },
-                  ),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ProductListWidget(
+                  onItemRemoved: () {
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildExpandButton() {
-    return sc.Clickable(
-      onPressed: _openFullscreen,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.muted,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: AppColors.divider),
-        ),
-        child: const Icon(
-          sc.LucideIcons.maximize,
-          size: 18,
-          color: AppColors.text,
-        ),
-      ),
-    );
-  }
-
-  void _openFullscreen() {
-    final invoiceCubit = context.read<InvoiceCubit>();
-    final productCubit = context.read<ProductCubit>();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => MultiBlocProvider(
-          providers: [
-            BlocProvider.value(value: invoiceCubit),
-            BlocProvider.value(value: productCubit),
-          ],
-          child: const ProductAddFullscreenPage(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(IconData icon, String title) {
+  Widget _buildHeader(int itemCount) {
     return Row(
       children: [
-        Text(
-          title,
-          style: const TextStyle(
+        const Text(
+          'المنتجات',
+          style: TextStyle(
             fontSize: AppFonts.fontSizeMedium,
             fontWeight: AppFonts.fontWeightSemiBold,
             color: AppColors.text,
           ),
         ),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.muted,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Text(
+            '$itemCount منتج',
+            style: const TextStyle(
+              color: AppColors.text,
+              fontWeight: AppFonts.fontWeightSemiBold,
+              fontSize: AppFonts.fontSizeSmall,
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildMobileAddForm() {
-    return Column(
+  Widget _buildInputRow() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: _searchController,
-          focusNode: _searchFocusNode,
-          decoration: InputDecoration(
-            labelText: 'اسم المنتج',
-            hintText: 'ابحث عن منتج أو اكتب اسم المنتج...',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: AppColors.surface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        Expanded(
+          child: TextField(
+            controller: _searchController,
+            focusNode: widget.searchFocusNode,
+            textInputAction: TextInputAction.search,
+            onChanged: _onQueryChanged,
+            onSubmitted: (_) => _submitSearch(),
+            decoration:
+                _inputDecoration(
+                  hint: 'اسم المنتج أو الكود',
+                  icon: sc.LucideIcons.search,
+                ).copyWith(
+                  suffixIcon: _isSearching
+                      ? const Padding(
+                          padding: EdgeInsets.all(14),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : null,
+                ),
           ),
-          onChanged: _onSearchChanged,
-          onSubmitted: _onSearchSubmitted,
         ),
-        if (_searchResults.isNotEmpty)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 150),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.border),
-              borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-              color: AppColors.surface,
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 76,
+          child: TextField(
+            controller: _quantityController,
+            focusNode: _quantityFocusNode,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.done,
+            textAlign: TextAlign.center,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onTap: () => _quantityController.selection = TextSelection(
+              baseOffset: 0,
+              extentOffset: _quantityController.text.length,
             ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _searchResults.length,
-              itemBuilder: (context, index) {
-                final product = _searchResults[index];
-                return ListTile(
-                  dense: true,
-                  title: Text(
-                    product.nameWithMeasurementUnit,
+            onSubmitted: (_) => _submitSearch(),
+            decoration: _inputDecoration(hint: 'الكمية'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration({required String hint, IconData? icon}) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: icon == null
+          ? null
+          : Icon(icon, color: AppColors.textSecondary, size: 20),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+      filled: true,
+      fillColor: AppColors.surface,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    );
+  }
+
+  Widget _buildSuggestions(ProductState productState) {
+    if (_query.isEmpty) return const SizedBox.shrink();
+
+    final results = _results;
+
+    if (results.isEmpty) {
+      if (_isSearching) return const SizedBox(height: 4);
+      return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Text(
+          productState is ProductError
+              ? productState.message
+              : 'لا توجد نتائج مطابقة',
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+      );
+    }
+
+    final isSale = context.read<InvoiceCubit>().invoiceType == 'sale';
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      constraints: const BoxConstraints(maxHeight: 260),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        itemCount: results.length,
+        separatorBuilder: (_, _) => const Divider(height: 1),
+        itemBuilder: (context, index) {
+          final product = results[index];
+          final price = isSale ? product.salePrice : product.purchasePrice;
+
+          return InkWell(
+            onTap: () => _addProduct(product),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: AppFonts.fontWeightMedium,
+                            fontSize: AppFonts.fontSizeSmall,
+                            color: AppColors.text,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${product.unit} · ${product.code}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${NumberFormatter.format(price)} ${NumberFormatter.getCurrencySymbol()}',
                     style: const TextStyle(
                       fontWeight: AppFonts.fontWeightSemiBold,
                       fontSize: AppFonts.fontSizeSmall,
+                      color: AppColors.primary,
                     ),
                   ),
-                  onTap: () => _onProductSelected(product),
-                );
-              },
-            ),
-          ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _quantityController,
-                focusNode: _quantityFocusNode,
-                decoration: InputDecoration(
-                  labelText: 'الكمية',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                ),
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                textAlign: TextAlign.center,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                onSubmitted: (_) => _onQuantitySubmitted(),
+                ],
               ),
             ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 100,
-              height: 48,
-              child: sc.Button(
-                style: sc.ButtonStyle.primary(),
-                onPressed: _onQuantitySubmitted,
-                child: const Text('إضافة'),
-              ),
-            ),
-          ],
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// 

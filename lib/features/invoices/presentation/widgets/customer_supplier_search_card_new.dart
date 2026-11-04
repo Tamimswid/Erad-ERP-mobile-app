@@ -20,10 +20,12 @@ class CustomerSupplierSearchCard extends StatefulWidget {
   });
 
   @override
-  State<CustomerSupplierSearchCard> createState() => _CustomerSupplierSearchCardState();
+  State<CustomerSupplierSearchCard> createState() =>
+      _CustomerSupplierSearchCardState();
 }
 
-class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard> {
+class _CustomerSupplierSearchCardState
+    extends State<CustomerSupplierSearchCard> {
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
 
@@ -73,7 +75,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
   void _loadCustomers() async {
     final cubit = context.read<CustomerCubit>();
     await cubit.getCustomers();
-    
+
     if (mounted) {
       final state = cubit.state;
       if (state is CustomerLoaded) {
@@ -93,7 +95,7 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
   void _loadSuppliers() async {
     final cubit = context.read<SupplierCubit>();
     await cubit.getSuppliers();
-    
+
     if (mounted) {
       final state = cubit.state;
       if (state is SuppliersLoaded) {
@@ -118,7 +120,9 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
       return;
     }
 
-    final List<dynamic> allEntities = widget.invoiceType == 'sale' ? _allCustomers : _allSuppliers;
+    final List<dynamic> allEntities = widget.invoiceType == 'sale'
+        ? _allCustomers
+        : _allSuppliers;
 
     if (allEntities.isEmpty) {
       setState(() {
@@ -130,11 +134,11 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
     final results = allEntities.where((entity) {
       if (entity is CustomerModel) {
         return entity.name.toLowerCase().contains(query.toLowerCase()) ||
-               entity.code.toLowerCase().contains(query.toLowerCase()) ||
-               (entity.phone?.contains(query) ?? false);
+            entity.code.toLowerCase().contains(query.toLowerCase()) ||
+            (entity.phone?.contains(query) ?? false);
       } else if (entity is SupplierModel) {
         return entity.name.toLowerCase().contains(query.toLowerCase()) ||
-               (entity.phone?.contains(query) ?? false);
+            (entity.phone?.contains(query) ?? false);
       }
       return false;
     }).toList();
@@ -173,7 +177,8 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
     }
   }
 
-  Color get _primaryColor => widget.invoiceType == 'sale' ? AppColors.primary : AppColors.success;
+  Color get _primaryColor =>
+      widget.invoiceType == 'sale' ? AppColors.primary : AppColors.success;
 
   @override
   Widget build(BuildContext context) {
@@ -197,14 +202,18 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  widget.invoiceType == 'sale' ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                  widget.invoiceType == 'sale'
+                      ? sc.LucideIcons.user
+                      : sc.LucideIcons.building2,
                   color: _primaryColor,
                   size: 24,
                 ),
               ),
               const SizedBox(width: 12),
               Text(
-                widget.invoiceType == 'sale' ? 'اختيار العميل' : 'اختيار المورد',
+                widget.invoiceType == 'sale'
+                    ? 'اختيار العميل'
+                    : 'اختيار المورد',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -229,11 +238,16 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
               decoration: BoxDecoration(
                 color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  const Icon(sc.LucideIcons.circleAlert, color: AppColors.error),
+                  const Icon(
+                    sc.LucideIcons.circleAlert,
+                    color: AppColors.error,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -256,7 +270,9 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
               controller: _searchController,
               focusNode: _searchFocusNode,
               decoration: InputDecoration(
-                labelText: widget.invoiceType == 'sale' ? 'بحث عن عميل' : 'بحث عن مورد',
+                labelText: widget.invoiceType == 'sale'
+                    ? 'بحث عن عميل'
+                    : 'بحث عن مورد',
                 hintText: widget.invoiceType == 'sale'
                     ? 'اكتب اسم العميل أو الكود أو الهاتف...'
                     : 'اكتب اسم المورد أو الهاتف...',
@@ -313,9 +329,13 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
 
                   return Container(
                     decoration: BoxDecoration(
-                      color: isFirst ? _primaryColor.withValues(alpha: 0.08) : Colors.transparent,
+                      color: isFirst
+                          ? _primaryColor.withValues(alpha: 0.08)
+                          : Colors.transparent,
                       border: index > 0
-                          ? const Border(top: BorderSide(color: AppColors.divider))
+                          ? const Border(
+                              top: BorderSide(color: AppColors.divider),
+                            )
                           : null,
                     ),
                     child: ListTile(
@@ -323,7 +343,9 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                       leading: CircleAvatar(
                         backgroundColor: _primaryColor.withValues(alpha: 0.15),
                         child: Icon(
-                          isCustomer ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                          isCustomer
+                              ? sc.LucideIcons.user
+                              : sc.LucideIcons.building2,
                           color: _primaryColor,
                           size: 20,
                         ),
@@ -331,29 +353,42 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                       title: Text(
                         entity.name,
                         style: TextStyle(
-                          fontWeight: isFirst ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: isFirst
+                              ? FontWeight.bold
+                              : FontWeight.normal,
                           color: isFirst ? _primaryColor : AppColors.text,
                         ),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
                           Text(
                             '${entity.phone ?? 'لا يوجد'}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                          if (isCustomer && entity.address != null && entity.address!.isNotEmpty)
+                          if (isCustomer &&
+                              entity.address != null &&
+                              entity.address!.isNotEmpty)
                             Text(
                               '${entity.address}',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                         ],
                       ),
                       trailing: isFirst
-                          ? Icon(sc.LucideIcons.cornerDownLeft, color: _primaryColor, size: 18)
+                          ? Icon(
+                              sc.LucideIcons.cornerDownLeft,
+                              color: _primaryColor,
+                              size: 18,
+                            )
                           : null,
                       onTap: () => _onEntitySelected(entity),
                     ),
@@ -384,7 +419,9 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                   CircleAvatar(
                     backgroundColor: _primaryColor.withValues(alpha: 0.15),
                     child: Icon(
-                      widget.invoiceType == 'sale' ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                      widget.invoiceType == 'sale'
+                          ? sc.LucideIcons.user
+                          : sc.LucideIcons.building2,
                       color: _primaryColor,
                       size: 20,
                     ),
@@ -404,7 +441,10 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
                         ),
                         Text(
                           '📱 ${_selectedEntity.phone ?? 'لا يوجد'}',
-                          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
@@ -422,17 +462,27 @@ class _CustomerSupplierSearchCardState extends State<CustomerSupplierSearchCard>
             ),
 
           // No results message
-          if (_searchController.text.isNotEmpty && _searchResults.isEmpty && !_isLoading && _errorMessage == null)
+          if (_searchController.text.isNotEmpty &&
+              _searchResults.isEmpty &&
+              !_isLoading &&
+              _errorMessage == null)
             Container(
               padding: const EdgeInsets.all(24),
               child: Center(
                 child: Column(
                   children: [
-                    Icon(sc.LucideIcons.search, size: 48, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                    Icon(
+                      sc.LucideIcons.search,
+                      size: 48,
+                      color: AppColors.textSecondary.withValues(alpha: 0.5),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'لا توجد نتائج',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),

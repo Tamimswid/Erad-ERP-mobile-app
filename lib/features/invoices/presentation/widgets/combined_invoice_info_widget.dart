@@ -1,355 +1,340 @@
+import 'dart:async';
+
+import 'package:erad/core/constants/app_constants.dart';
+import 'package:erad/core/widgets/app_period_selector.dart';
+import 'package:erad/features/customers/presentation/bloc/customer_cubit.dart';
+import 'package:erad/features/invoices/presentation/bloc/invoice_cubit.dart';
+import 'package:erad/features/suppliers/presentation/bloc/supplier_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
-import '../../../../core/constants/app_constants.dart';
-import '../bloc/invoice_cubit.dart';
-import '../../../customers/presentation/bloc/customer_cubit.dart';
-import '../../../suppliers/presentation/bloc/supplier_cubit.dart';
 
 class CombinedInvoiceInfoWidget extends StatefulWidget {
-  const CombinedInvoiceInfoWidget({super.key});
+  final FocusNode partySearchFocusNode;
+  final VoidCallback onPartySelected;
+
+  const CombinedInvoiceInfoWidget({
+    super.key,
+    required this.partySearchFocusNode,
+    required this.onPartySelected,
+  });
 
   @override
-  State<CombinedInvoiceInfoWidget> createState() => _CombinedInvoiceInfoWidgetState();
+  State<CombinedInvoiceInfoWidget> createState() =>
+      _CombinedInvoiceInfoWidgetState();
 }
 
 class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
+  static const _searchDebounce = Duration(milliseconds: 300);
+
   final _searchController = TextEditingController();
-  final _searchFocusNode = FocusNode();
-  List<dynamic> _searchResults = [];
+  Timer? _debounce;
+  String _query = '';
+  bool _isSearching = false;
   dynamic _selectedEntity;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final invoiceCubit = context.read<InvoiceCubit>();
-    final isSale = invoiceCubit.invoiceType == 'sale';
-
-    // Detect invoice type change and reset selection
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        if (isSale) {
-          invoiceCubit.setSupplier(null);
-        } else {
-          invoiceCubit.setCustomer(null);
-        }
-      }
-    });
-  }
-
-  @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
-    _searchFocusNode.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged(String query) {
+  bool get _isSale => context.read<InvoiceCubit>().invoiceType == 'sale';
+
+  void _focusPartySearch() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.partySearchFocusNode.requestFocus();
+    });
+  }
+
+  void _onSearchChanged(String value) {
+    _debounce?.cancel();
+    final query = value.trim();
+
     if (query.isEmpty) {
       setState(() {
-        _searchResults = [];
+        _query = '';
+        _isSearching = false;
       });
       return;
     }
 
-    final invoiceCubit = context.read<InvoiceCubit>();
-    final isSale = invoiceCubit.invoiceType == 'sale';
+    setState(() {
+      _query = query;
+      _isSearching = true;
+    });
 
-    if (isSale) {
-      if (context.read<CustomerCubit>().state is CustomerLoaded) {
-        final customers = (context.read<CustomerCubit>().state as CustomerLoaded).customers;
-        final results = customers.where((customer) {
-          return customer.name.toLowerCase().contains(query.toLowerCase()) ||
-                 customer.code.toLowerCase().contains(query.toLowerCase()) ||
-                 (customer.phone?.contains(query) ?? false);
-        }).toList();
-
-        setState(() {
-          _searchResults = results.take(10).toList();
-        });
+    _debounce = Timer(_searchDebounce, () async {
+      if (!mounted) return;
+      if (_isSale) {
+        await context.read<CustomerCubit>().searchCustomers(query);
+      } else {
+        await context.read<SupplierCubit>().searchSuppliers(query);
       }
-    } else {
-      if (context.read<SupplierCubit>().state is SuppliersLoaded) {
-        final suppliers = (context.read<SupplierCubit>().state as SuppliersLoaded).suppliers;
-        final results = suppliers.where((supplier) {
-          return supplier.name.toLowerCase().contains(query.toLowerCase()) ||
-                 (supplier.phone?.contains(query) ?? false);
-        }).toList();
+      if (!mounted || _searchController.text.trim() != query) return;
+      setState(() => _isSearching = false);
+    });
+  }
 
-        setState(() {
-          _searchResults = results.take(10).toList();
-        });
-      }
+  List<dynamic> get _searchResults {
+    if (_query.isEmpty) return const [];
+
+    if (_isSale) {
+      final state = context.read<CustomerCubit>().state;
+      if (state is! CustomerLoaded) return const [];
+      return state.customers.take(10).toList();
     }
+
+    final state = context.read<SupplierCubit>().state;
+    if (state is! SuppliersLoaded) return const [];
+    return state.suppliers.take(10).toList();
   }
 
   void _onEntitySelected(dynamic entity) {
+    final cubit = context.read<InvoiceCubit>();
     setState(() {
       _selectedEntity = entity;
-      _searchResults = [];
-      _searchFocusNode.unfocus();
+      _query = '';
+      _isSearching = false;
     });
-    _searchController.text = entity.name;
-    
-    final invoiceCubit = context.read<InvoiceCubit>();
-    final isSale = invoiceCubit.invoiceType == 'sale';
-    
-    if (isSale) {
-      invoiceCubit.setCustomer(entity.id);
+    _searchController.clear();
+    widget.partySearchFocusNode.unfocus();
+
+    if (_isSale) {
+      cubit.setCustomer(entity.id);
     } else {
-      invoiceCubit.setSupplier(entity.id);
+      cubit.setSupplier(entity.id);
     }
+    widget.onPartySelected();
   }
 
-  void _clearSelection() {
+  void _clearSelection({bool focus = true}) {
+    final cubit = context.read<InvoiceCubit>();
+    _debounce?.cancel();
     _searchController.clear();
     setState(() {
       _selectedEntity = null;
-      _searchResults = [];
+      _query = '';
+      _isSearching = false;
     });
-    _searchFocusNode.requestFocus();
-    
-    final invoiceCubit = context.read<InvoiceCubit>();
-    final isSale = invoiceCubit.invoiceType == 'sale';
-    
-    if (isSale) {
-      invoiceCubit.setSupplier(null);
+    if (_isSale) {
+      cubit.setCustomer(null);
     } else {
-      invoiceCubit.setCustomer(null);
+      cubit.setSupplier(null);
     }
+    if (focus) {
+      _focusPartySearch();
+    }
+  }
+
+  void _onInvoiceTypeChanged(String type) {
+    final cubit = context.read<InvoiceCubit>();
+    if (cubit.invoiceType == type) return;
+    cubit.setInvoiceType(type);
+    _debounce?.cancel();
+    _searchController.clear();
+    setState(() {
+      _selectedEntity = null;
+      _query = '';
+      _isSearching = false;
+    });
+    _focusPartySearch();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<InvoiceCubit, InvoiceState>(
-      builder: (context, state) {
-        final isSale = context.read<InvoiceCubit>().invoiceType == 'sale';
-        
-        return sc.Card(
-          padding: const EdgeInsets.all(AppConstants.cardPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Invoice Type and Payment Type Dropdowns
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInvoiceTypeDropdown(state),
-                  ),
-          
-            
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              // Search Bar
-              _buildSearchBar(isSale),
-              const SizedBox(height: 16),
-              
-              // Search Results List
-              if (_searchResults.isNotEmpty)
-                _buildSearchResultsList(isSale),
-              
-              // Selected Entity Display
-              if (_selectedEntity != null)
-                _buildSelectedEntityDisplay(isSale),
-            ],
-          ),
-        );
+    return BlocListener<InvoiceCubit, InvoiceState>(
+      listenWhen: (previous, current) =>
+          current is InvoiceFormUpdated && current.updateType == 'clearAll',
+      listener: (context, state) {
+        _clearSelection(focus: false);
+        _focusPartySearch();
       },
-    );
-  }
+      child: BlocBuilder<InvoiceCubit, InvoiceState>(
+        builder: (context, state) {
+          final isSale = context.read<InvoiceCubit>().invoiceType == 'sale';
 
-  Widget _buildInvoiceTypeDropdown(InvoiceState state) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: context.read<InvoiceCubit>().invoiceType,
-          isExpanded: true,
-          icon: const Icon(sc.LucideIcons.chevronDown),
-          items: const [
-            DropdownMenuItem(value: 'sale', child: Text('مبيع')),
-            DropdownMenuItem(value: 'purchase', child: Text('شراء')),
-          ],
-          onChanged: (value) {
-            if (value != null) {
-              context.read<InvoiceCubit>().setInvoiceType(value);
-              _clearSelection();
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentTypeDropdown(InvoiceState state) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: context.read<InvoiceCubit>().debtType ?? 'debtor',
-          isExpanded: true,
-          icon: const Icon(sc.LucideIcons.chevronDown),
-          items: const [
-            DropdownMenuItem(value: 'debtor', child: Text('آجل')),
-            DropdownMenuItem(value: 'creditor', child: Text('نقدي')),
-          ],
-          onChanged: (value) {
-            if (value != null) {
-              context.read<InvoiceCubit>().setDebtType(value);
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(bool isSale) {
-    return TextField(
-      controller: _searchController,
-      focusNode: _searchFocusNode,
-      decoration: InputDecoration(
-        hintText: isSale ? 'ابحث عن عميل...' : 'ابحث عن مورد...',
-        prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-          borderSide: const BorderSide(color: AppColors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-          borderSide: const BorderSide(color: AppColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-          borderSide: const BorderSide(color: AppColors.primary),
-        ),
-        filled: true,
-        fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-        suffixIcon: _selectedEntity != null
-            ? IconButton(
-                icon: const Icon(sc.LucideIcons.x),
-                onPressed: _clearSelection,
-              )
-            : null,
-      ),
-      onChanged: _onSearchChanged,
-    );
-  }
-
-  Widget _buildSearchResultsList(bool isSale) {
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 200),
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(AppConstants.borderRadiusMd),
-          bottomRight: Radius.circular(AppConstants.borderRadiusMd),
-        ),
-        color: AppColors.surface,
-        boxShadow: AppConstants.cardShadow,
-      ),
-      child: ListView.builder(
-        shrinkWrap: true,
-        itemCount: _searchResults.length,
-        itemBuilder: (context, index) {
-          final entity = _searchResults[index];
-          return ListTile(
-            dense: true,
-            leading: CircleAvatar(
-              backgroundColor: AppColors.muted,
-              child: Icon(
-                isSale ? sc.LucideIcons.user : sc.LucideIcons.building2,
-                color: AppColors.text,
-                size: 20,
-              ),
+          return sc.Card(
+            padding: const EdgeInsets.all(AppConstants.cardPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppPeriodSelector<String>(
+                  expanded: true,
+                  options: const [
+                    AppPeriodOption(value: 'sale', label: 'بيع'),
+                    AppPeriodOption(value: 'purchase', label: 'شراء'),
+                  ],
+                  selected: isSale ? 'sale' : 'purchase',
+                  onChanged: _onInvoiceTypeChanged,
+                ),
+                const SizedBox(height: 16),
+                if (_selectedEntity == null)
+                  _buildPartySearch(isSale)
+                else
+                  _buildSelectedParty(isSale),
+              ],
             ),
-            title: Text(
-              entity.name,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                color: AppColors.text,
-              ),
-            ),
-            subtitle: entity.phone != null
-                ? Text(
-                    entity.phone,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                    ),
-                  )
-                : null,
-            trailing: const Icon(
-              sc.LucideIcons.chevronLeft,
-              color: AppColors.textSecondary,
-              size: 16,
-            ),
-            onTap: () => _onEntitySelected(entity),
           );
         },
       ),
     );
   }
 
-  Widget _buildSelectedEntityDisplay(bool isSale) {
-    return Container(
-      margin: const EdgeInsets.only(top: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.muted,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: AppColors.muted,
-            child: Icon(
-              isSale ? sc.LucideIcons.user : sc.LucideIcons.building2,
-              color: AppColors.text,
+  Widget _buildPartySearch(bool isSale) {
+    final results = _searchResults;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _searchController,
+          focusNode: widget.partySearchFocusNode,
+          textInputAction: TextInputAction.search,
+          decoration: InputDecoration(
+            hintText: isSale
+                ? 'ابحث عن عميل بالاسم أو الهاتف'
+                : 'ابحث عن مورد بالاسم أو الهاتف',
+            prefixIcon: const Icon(
+              sc.LucideIcons.search,
+              color: AppColors.textSecondary,
               size: 20,
             ),
+            suffixIcon: _isSearching
+                ? const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+            ),
+            filled: true,
+            fillColor: AppColors.surface,
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _selectedEntity.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.text,
+          onChanged: _onSearchChanged,
+        ),
+        if (results.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            constraints: const BoxConstraints(maxHeight: 240),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              itemCount: results.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final entity = results[index];
+                return ListTile(
+                  dense: true,
+                  leading: Icon(
+                    isSale ? sc.LucideIcons.user : sc.LucideIcons.building2,
+                    color: AppColors.textSecondary,
+                    size: 20,
                   ),
-                ),
-                if (_selectedEntity.phone != null)
-                  Text(
-                    _selectedEntity.phone,
+                  title: Text(
+                    entity.name,
                     style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.text,
                     ),
                   ),
-              ],
+                  subtitle: entity.phone != null
+                      ? Text(
+                          entity.phone,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        )
+                      : null,
+                  trailing: const Icon(
+                    sc.LucideIcons.chevronLeft,
+                    color: AppColors.textSecondary,
+                    size: 16,
+                  ),
+                  onTap: () => _onEntitySelected(entity),
+                );
+              },
             ),
           ),
-          IconButton(
-            icon: const Icon(sc.LucideIcons.x, size: 20),
-            onPressed: _clearSelection,
-            color: AppColors.textSecondary,
+        ] else if (_query.isNotEmpty && !_isSearching) ...[
+          const SizedBox(height: 10),
+          Text(
+            'لا توجد نتائج مطابقة',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
         ],
-      ),
+      ],
+    );
+  }
+
+  Widget _buildSelectedParty(bool isSale) {
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppColors.muted,
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMd),
+          ),
+          child: Icon(
+            isSale ? sc.LucideIcons.user : sc.LucideIcons.building2,
+            color: AppColors.primary,
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _selectedEntity.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.text,
+                ),
+              ),
+              if (_selectedEntity.phone != null)
+                Text(
+                  _selectedEntity.phone,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        sc.Button(
+          style: sc.ButtonStyle.ghost(),
+          onPressed: () => _clearSelection(),
+          leading: const Icon(sc.LucideIcons.x, size: 16),
+          child: const Text('تغيير'),
+        ),
+      ],
     );
   }
 }

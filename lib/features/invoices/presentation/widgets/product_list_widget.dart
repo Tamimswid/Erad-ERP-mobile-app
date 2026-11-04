@@ -92,7 +92,11 @@ class _ProductListWidgetState extends State<ProductListWidget> {
               color: AppColors.error,
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
-              child: const Icon(sc.LucideIcons.trash2, color: AppColors.surface, size: 24),
+              child: const Icon(
+                sc.LucideIcons.trash2,
+                color: AppColors.surface,
+                size: 24,
+              ),
             ),
             onDismissed: (direction) {
               _removeItem(index);
@@ -141,7 +145,7 @@ class _ProductListWidgetState extends State<ProductListWidget> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                         '${AppUtils.formatNumber(item.totalPrice?.toDouble() ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
+                        '${AppUtils.formatNumber(item.totalPrice?.toDouble() ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
                         style: const TextStyle(
                           fontWeight: AppFonts.fontWeightBold,
                           color: AppColors.primary,

@@ -29,7 +29,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
   final _quantityController = TextEditingController(text: '1');
   final _searchFocusNode = FocusNode();
   final _quantityFocusNode = FocusNode();
-  
+
   List<ProductModel> _searchResults = [];
   ProductModel? _selectedProduct;
 
@@ -37,7 +37,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
   void initState() {
     super.initState();
     _searchFocusNode.requestFocus();
-    
+
     // Load products when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProductCubit>().getProducts();
@@ -61,13 +61,13 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
       });
       return;
     }
-    
+
     final productState = context.read<ProductCubit>().state;
     if (productState is ProductsLoaded) {
       final results = productState.products.where((product) {
         return product.name.toLowerCase().contains(query.toLowerCase());
       }).toList();
-      
+
       setState(() {
         _searchResults = results.take(10).toList(); // Limit to 10 results
         _selectedProduct = null; // Clear selected product when searching
@@ -87,7 +87,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
       _selectedProduct = product;
       _searchResults = [];
     });
-    
+
     _searchController.text = product.name;
     _quantityFocusNode.requestFocus();
   }
@@ -97,7 +97,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
     if (_selectedProduct != null && quantity != null && quantity > 0) {
       final invoiceItem = InvoiceItem.fromProduct(_selectedProduct!, quantity);
       widget.onItemAdded(invoiceItem);
-      
+
       // Reset form
       _searchController.clear();
       _quantityController.text = '1';
@@ -124,13 +124,10 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
           children: [
             const Text(
               'Hızlı Ürün Ekleme',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            
+
             // Search and Quantity Row
             Row(
               children: [
@@ -163,14 +160,17 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                         onChanged: _onSearchChanged,
                         onSubmitted: _onSearchSubmitted,
                       ),
-                      
+
                       // Search Results Dropdown
                       if (_searchResults.isNotEmpty)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.muted,
                                 borderRadius: const BorderRadius.only(
@@ -208,7 +208,9 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                 color: AppColors.surface,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.text.withValues(alpha: 0.1),
+                                    color: AppColors.text.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -222,9 +224,15 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                   final isFirst = index == 0;
                                   return Container(
                                     decoration: BoxDecoration(
-                                      color: isFirst ? AppColors.muted : Colors.transparent,
-                                      border: isFirst 
-                                          ? Border(top: BorderSide(color: AppColors.border))
+                                      color: isFirst
+                                          ? AppColors.muted
+                                          : Colors.transparent,
+                                      border: isFirst
+                                          ? Border(
+                                              top: BorderSide(
+                                                color: AppColors.border,
+                                              ),
+                                            )
                                           : null,
                                     ),
                                     child: ListTile(
@@ -240,14 +248,18 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                       title: Text(
                                         product.name,
                                         style: TextStyle(
-                                          fontWeight: isFirst ? FontWeight.bold : FontWeight.normal,
-                                          color: isFirst ? AppColors.textSecondary : AppColors.text,
+                                          fontWeight: isFirst
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          color: isFirst
+                                              ? AppColors.textSecondary
+                                              : AppColors.text,
                                         ),
                                       ),
                                       subtitle: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-     
                                           Text(
                                             'فيات: ${product.salePrice.toStringAsFixed(2)} TL',
                                             style: TextStyle(
@@ -258,7 +270,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                                           ),
                                         ],
                                       ),
-                                      trailing: isFirst 
+                                      trailing: isFirst
                                           ? Icon(
                                               sc.LucideIcons.cornerDownLeft,
                                               color: AppColors.textSecondary,
@@ -276,9 +288,9 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 // Quantity Field
                 Expanded(
                   flex: 1,
@@ -297,9 +309,9 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Excel-like Table
             _buildInvoiceTable(),
           ],
@@ -337,16 +349,55 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
             ),
             child: const Row(
               children: [
-                Expanded(flex: 1, child: Text('Ürün Kodu', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(flex: 3, child: Text('Ürün Adı', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(flex: 1, child: Text('Adet', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
-                Expanded(flex: 1, child: Text('Birim Fiyat', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
-                Expanded(flex: 1, child: Text('Toplam', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
-                Expanded(flex: 1, child: Text('', style: TextStyle(fontWeight: FontWeight.bold))), // Actions column
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Ürün Kodu',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    'Ürün Adı',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Adet',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Birim Fiyat',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    'Toplam',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    '',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ), // Actions column
               ],
             ),
           ),
-          
+
           // Table Rows
           ...widget.items.asMap().entries.map((entry) {
             final index = entry.key;
@@ -359,10 +410,31 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
               ),
               child: Row(
                 children: [
-                  Expanded(flex: 3, child: Text(item.productName ?? 'null_data')),
-                  Expanded(flex: 1, child: Text((item.quantity ?? 0).toString(), textAlign: TextAlign.center)),
-                  Expanded(flex: 1, child: Text((item.unitPrice ?? 0.0).toStringAsFixed(2), textAlign: TextAlign.right)),
-                  Expanded(flex: 1, child: Text((item.totalPrice ?? 0.0).toStringAsFixed(2), textAlign: TextAlign.right)),
+                  Expanded(
+                    flex: 3,
+                    child: Text(item.productName ?? 'null_data'),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      (item.quantity ?? 0).toString(),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      (item.unitPrice ?? 0.0).toStringAsFixed(2),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      (item.totalPrice ?? 0.0).toStringAsFixed(2),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
                   Expanded(
                     flex: 1,
                     child: Row(
@@ -375,7 +447,11 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
                           },
                         ),
                         IconButton(
-                          icon: const Icon(sc.LucideIcons.trash2, size: 18, color: AppColors.error),
+                          icon: const Icon(
+                            sc.LucideIcons.trash2,
+                            size: 18,
+                            color: AppColors.error,
+                          ),
                           onPressed: () => _removeItem(item),
                         ),
                       ],
@@ -385,7 +461,7 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
               ),
             );
           }).toList(),
-          
+
           // Total Row
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -395,11 +471,22 @@ class _QuickProductAddCardState extends State<QuickProductAddCard> {
             ),
             child: Row(
               children: [
-                const Expanded(flex: 6, child: Text('TOPLAM:', style: TextStyle(fontWeight: FontWeight.bold))),
+                const Expanded(
+                  flex: 6,
+                  child: Text(
+                    'TOPLAM:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
                 Expanded(
                   flex: 1,
                   child: Text(
-                     widget.items.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0.0)).toStringAsFixed(2),
+                    widget.items
+                        .fold<double>(
+                          0,
+                          (sum, item) => sum + (item.totalPrice ?? 0.0),
+                        )
+                        .toStringAsFixed(2),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                     textAlign: TextAlign.right,
                   ),

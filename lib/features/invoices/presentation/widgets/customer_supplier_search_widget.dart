@@ -12,10 +12,12 @@ class CustomerSupplierSearchWidget extends StatefulWidget {
   const CustomerSupplierSearchWidget({super.key});
 
   @override
-  State<CustomerSupplierSearchWidget> createState() => _CustomerSupplierSearchWidgetState();
+  State<CustomerSupplierSearchWidget> createState() =>
+      _CustomerSupplierSearchWidgetState();
 }
 
-class _CustomerSupplierSearchWidgetState extends State<CustomerSupplierSearchWidget> {
+class _CustomerSupplierSearchWidgetState
+    extends State<CustomerSupplierSearchWidget> {
   String? _previousInvoiceType;
 
   @override
@@ -25,7 +27,8 @@ class _CustomerSupplierSearchWidgetState extends State<CustomerSupplierSearchWid
     final isSale = invoiceCubit.invoiceType == 'sale';
 
     // Detect invoice type change and reset cubit selection
-    if (_previousInvoiceType != null && _previousInvoiceType != invoiceCubit.invoiceType) {
+    if (_previousInvoiceType != null &&
+        _previousInvoiceType != invoiceCubit.invoiceType) {
       // Clear the selection when switching between customer/supplier
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -117,8 +120,8 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
       final customers = (widget.state as CustomerLoaded).customers;
       final results = customers.where((customer) {
         return customer.name.toLowerCase().contains(query.toLowerCase()) ||
-               customer.code.toLowerCase().contains(query.toLowerCase()) ||
-               (customer.phone?.contains(query) ?? false);
+            customer.code.toLowerCase().contains(query.toLowerCase()) ||
+            (customer.phone?.contains(query) ?? false);
       }).toList();
 
       setState(() {
@@ -164,7 +167,8 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
             _buildSectionTitle(sc.LucideIcons.user, 'العميل'),
             const SizedBox(height: AppConstants.spacingMd),
 
-            if (widget.state is CustomerInitial || widget.state is CustomerLoading)
+            if (widget.state is CustomerInitial ||
+                widget.state is CustomerLoading)
               const Padding(
                 padding: EdgeInsets.all(24),
                 child: Center(child: CircularProgressIndicator()),
@@ -176,11 +180,16 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(sc.LucideIcons.circleAlert, color: AppColors.error),
+                    const Icon(
+                      sc.LucideIcons.circleAlert,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -207,18 +216,30 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                     focusNode: _searchFocusNode,
                     decoration: InputDecoration(
                       hintText: 'ابحث عن عميل...',
-                      prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary),
+                      prefixIcon: const Icon(
+                        sc.LucideIcons.search,
+                        color: AppColors.textSecondary,
+                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
                         borderSide: BorderSide(color: AppColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
                         borderSide: BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
                       ),
                       filled: true,
                       fillColor: AppColors.surface,
@@ -239,8 +260,12 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                       decoration: BoxDecoration(
                         border: Border.all(color: AppColors.border),
                         borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(AppConstants.borderRadius),
-                          bottomRight: Radius.circular(AppConstants.borderRadius),
+                          bottomLeft: Radius.circular(
+                            AppConstants.borderRadius,
+                          ),
+                          bottomRight: Radius.circular(
+                            AppConstants.borderRadius,
+                          ),
                         ),
                         color: AppColors.surface,
                         boxShadow: AppConstants.cardShadow,
@@ -249,12 +274,19 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                         shrinkWrap: true,
                         itemCount: _searchResults.length,
                         itemBuilder: (context, index) {
-                          final customer = _searchResults[index] as CustomerModel;
+                          final customer =
+                              _searchResults[index] as CustomerModel;
                           return ListTile(
                             dense: true,
                             leading: CircleAvatar(
-                              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                              child: const Icon(sc.LucideIcons.user, color: AppColors.primary, size: 20),
+                              backgroundColor: AppColors.primary.withValues(
+                                alpha: 0.1,
+                              ),
+                              child: const Icon(
+                                sc.LucideIcons.user,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
                             ),
                             title: Text(
                               customer.name,
@@ -296,7 +328,11 @@ class _CustomerSearchContentState extends State<_CustomerSearchContent> {
                   children: [
                     CircleAvatar(
                       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      child: const Icon(sc.LucideIcons.user, color: AppColors.primary, size: 20),
+                      child: const Icon(
+                        sc.LucideIcons.user,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -399,7 +435,7 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
       final suppliers = (widget.state as SuppliersLoaded).suppliers;
       final results = suppliers.where((supplier) {
         return supplier.name.toLowerCase().contains(query.toLowerCase()) ||
-               (supplier.phone?.contains(query) ?? false);
+            (supplier.phone?.contains(query) ?? false);
       }).toList();
 
       setState(() {
@@ -445,7 +481,8 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
             _buildSectionTitle(sc.LucideIcons.building2, 'المورد'),
             const SizedBox(height: AppConstants.spacingMd),
 
-            if (widget.state is SupplierInitial || widget.state is SupplierLoading)
+            if (widget.state is SupplierInitial ||
+                widget.state is SupplierLoading)
               const Padding(
                 padding: EdgeInsets.all(24),
                 child: Center(child: CircularProgressIndicator()),
@@ -457,11 +494,16 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(sc.LucideIcons.circleAlert, color: AppColors.error),
+                    const Icon(
+                      sc.LucideIcons.circleAlert,
+                      color: AppColors.error,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -488,18 +530,30 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                     focusNode: _searchFocusNode,
                     decoration: InputDecoration(
                       hintText: 'ابحث عن مورد...',
-                      prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary),
+                      prefixIcon: const Icon(
+                        sc.LucideIcons.search,
+                        color: AppColors.textSecondary,
+                      ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
                         borderSide: BorderSide(color: AppColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
                         borderSide: BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadius,
+                        ),
+                        borderSide: const BorderSide(
+                          color: AppColors.primary,
+                          width: 2,
+                        ),
                       ),
                       filled: true,
                       fillColor: AppColors.surface,
@@ -520,8 +574,12 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                       decoration: BoxDecoration(
                         border: Border.all(color: AppColors.border),
                         borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(AppConstants.borderRadius),
-                          bottomRight: Radius.circular(AppConstants.borderRadius),
+                          bottomLeft: Radius.circular(
+                            AppConstants.borderRadius,
+                          ),
+                          bottomRight: Radius.circular(
+                            AppConstants.borderRadius,
+                          ),
                         ),
                         color: AppColors.surface,
                         boxShadow: AppConstants.cardShadow,
@@ -530,12 +588,19 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                         shrinkWrap: true,
                         itemCount: _searchResults.length,
                         itemBuilder: (context, index) {
-                          final supplier = _searchResults[index] as SupplierModel;
+                          final supplier =
+                              _searchResults[index] as SupplierModel;
                           return ListTile(
                             dense: true,
                             leading: CircleAvatar(
-                              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                              child: const Icon(sc.LucideIcons.building2, color: AppColors.primary, size: 20),
+                              backgroundColor: AppColors.primary.withValues(
+                                alpha: 0.1,
+                              ),
+                              child: const Icon(
+                                sc.LucideIcons.building2,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
                             ),
                             title: Text(
                               supplier.name,
@@ -577,7 +642,11 @@ class _SupplierSearchContentState extends State<_SupplierSearchContent> {
                   children: [
                     CircleAvatar(
                       backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      child: const Icon(sc.LucideIcons.building2, color: AppColors.primary, size: 20),
+                      child: const Icon(
+                        sc.LucideIcons.building2,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

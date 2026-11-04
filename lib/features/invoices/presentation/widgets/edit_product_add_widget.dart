@@ -81,7 +81,9 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
       final quantity = int.tryParse(_quantityController.text);
       if (quantity != null && quantity > 0) {
         final editCubit = context.read<EditInvoiceCubit>();
-        final unitPrice = editCubit.isSales ? _selectedProduct!.salePrice : _selectedProduct!.purchasePrice;
+        final unitPrice = editCubit.isSales
+            ? _selectedProduct!.salePrice
+            : _selectedProduct!.purchasePrice;
         final invoiceItem = InvoiceItem(
           measurement: _selectedProduct!.measurement,
           productId: _selectedProduct!.id,
@@ -131,19 +133,18 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
     }
 
     final editCubit = context.read<EditInvoiceCubit>();
-    final unitPrice = editCubit.isSales 
-        ? (existingProduct?.salePrice ?? 0) 
+    final unitPrice = editCubit.isSales
+        ? (existingProduct?.salePrice ?? 0)
         : (existingProduct?.purchasePrice ?? 0);
 
     final invoiceItem = InvoiceItem(
-      
       productId: existingProduct?.id ?? '',
       productName: name,
       quantity: quantity,
       unitPrice: unitPrice,
       purchasePrice: existingProduct?.purchasePrice ?? 0,
       totalPrice: unitPrice * quantity,
-      unit: existingProduct!.unit ,
+      unit: existingProduct!.unit,
       measurement: existingProduct.measurement,
       createdAt: DateTime.now(),
     );
@@ -160,7 +161,7 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
-    
+
     return BlocBuilder<ProductCubit, ProductState>(
       builder: (context, productState) {
         if (productState is ProductsLoaded) {
@@ -169,49 +170,51 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
 
         return BlocBuilder<EditInvoiceCubit, EditInvoiceState>(
           builder: (context, state) {
-            final items = state is EditInvoiceLoaded ? state.items : <InvoiceItem>[];
-            
+            final items = state is EditInvoiceLoaded
+                ? state.items
+                : <InvoiceItem>[];
+
             return sc.Card(
               padding: const EdgeInsets.all(AppConstants.cardPadding),
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        _buildSectionTitle(sc.LucideIcons.package, 'المنتجات'),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.muted,
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: AppColors.divider),
-                          ),
-                          child: Text(
-                            '${items.length} منتج',
-                            style: const TextStyle(
-                              color: AppColors.text,
-                              fontWeight: AppFonts.fontWeightSemiBold,
-                              fontSize: AppFonts.fontSizeSmall,
-                            ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _buildSectionTitle(sc.LucideIcons.package, 'المنتجات'),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.muted,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: AppColors.divider),
+                        ),
+                        child: Text(
+                          '${items.length} منتج',
+                          style: const TextStyle(
+                            color: AppColors.text,
+                            fontWeight: AppFonts.fontWeightSemiBold,
+                            fontSize: AppFonts.fontSizeSmall,
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: AppConstants.spacingMd),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppConstants.spacingMd),
 
-                    if (isMobile)
-                      _buildMobileAddForm()
-                    else
-                      _buildDesktopAddForm(),
+                  if (isMobile)
+                    _buildMobileAddForm()
+                  else
+                    _buildDesktopAddForm(),
 
-                    const SizedBox(height: 16),
-                    _buildProductList(items),
-                  ],
-                ),
+                  const SizedBox(height: 16),
+                  _buildProductList(items),
+                ],
+              ),
             );
           },
         );
@@ -241,7 +244,10 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
             ),
             filled: true,
             fillColor: AppColors.surface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
           ),
           onChanged: _onSearchChanged,
           onSubmitted: _onSearchSubmitted,
@@ -287,19 +293,31 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                 decoration: InputDecoration(
                   labelText: 'الكمية',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.borderRadius,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.borderRadius,
+                    ),
                     borderSide: BorderSide(color: AppColors.border),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.borderRadius,
+                    ),
+                    borderSide: const BorderSide(
+                      color: AppColors.primary,
+                      width: 2,
+                    ),
                   ),
                   filled: true,
                   fillColor: AppColors.surface,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
@@ -355,20 +373,32 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                   decoration: InputDecoration(
                     hintText: 'ابحث عن منتج أو اكتب اسم المنتج...',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
                       borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
                       borderSide: BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
                     fillColor: AppColors.surface,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     isDense: true,
                   ),
                   onChanged: _onSearchChanged,
@@ -395,7 +425,11 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                           dense: true,
                           leading: CircleAvatar(
                             backgroundColor: AppColors.surface,
-                            child: Icon(sc.LucideIcons.package, color: AppColors.text, size: 18),
+                            child: Icon(
+                              sc.LucideIcons.package,
+                              color: AppColors.text,
+                              size: 18,
+                            ),
                           ),
                           title: Text(
                             product.name,
@@ -437,20 +471,32 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                   focusNode: _quantityFocusNode,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
                       borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
                       borderSide: BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
                     ),
                     filled: true,
                     fillColor: AppColors.surface,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     isDense: true,
                   ),
                   keyboardType: TextInputType.number,
@@ -516,7 +562,11 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(sc.LucideIcons.package, size: 40, color: AppColors.textSecondary.withValues(alpha: 0.5)),
+            Icon(
+              sc.LucideIcons.package,
+              size: 40,
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 8),
             Text(
               'لم تتم إضافة منتجات بعد',
@@ -532,7 +582,9 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
 
     for (int i = 0; i < items.length; i++) {
       if (!_priceControllers.containsKey(i)) {
-        _priceControllers[i] = TextEditingController(text: items[i].unitPrice?.toStringAsFixed(2) ?? "0.00");
+        _priceControllers[i] = TextEditingController(
+          text: items[i].unitPrice?.toStringAsFixed(2) ?? "0.00",
+        );
       }
     }
 
@@ -561,13 +613,26 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.productName??'', style: const TextStyle(fontWeight: FontWeight.w600)),
-                        Text(item.unit ?? '', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          item.productName ?? '',
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          item.unit ?? '',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   IconButton(
-                    icon: Icon(sc.LucideIcons.trash2, size: 20, color: AppColors.error),
+                    icon: Icon(
+                      sc.LucideIcons.trash2,
+                      size: 20,
+                      color: AppColors.error,
+                    ),
                     onPressed: () {
                       _priceControllers.remove(index);
                       context.read<EditInvoiceCubit>().removeItem(index);
@@ -582,12 +647,21 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('الكمية', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          'الكمية',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         GestureDetector(
                           onTap: () => _showEditQuantityDialog(index, item),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.muted,
                               borderRadius: BorderRadius.circular(6),
@@ -596,9 +670,19 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.text)),
+                                Text(
+                                  '${item.quantity}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.text,
+                                  ),
+                                ),
                                 const SizedBox(width: 4),
-                                const Icon(sc.LucideIcons.pencil, size: 14, color: AppColors.textSecondary),
+                                const Icon(
+                                  sc.LucideIcons.pencil,
+                                  size: 14,
+                                  color: AppColors.textSecondary,
+                                ),
                               ],
                             ),
                           ),
@@ -611,17 +695,28 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('السعر', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          'السعر',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         SizedBox(
                           height: 36,
                           child: TextField(
                             controller: _priceControllers[index],
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontSize: 14),
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(6),
                                 borderSide: BorderSide(color: AppColors.border),
@@ -632,7 +727,10 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(6),
-                                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 2,
+                                ),
                               ),
                               filled: true,
                               fillColor: AppColors.surface,
@@ -643,17 +741,22 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                                 final updatedItem = InvoiceItem(
                                   id: item.id,
                                   productId: item.productId,
-                                   productName: item.productName ?? 'null_data',
-                                   quantity: item.quantity ?? 0,
-                                   unitPrice: newPrice,
-                                   purchasePrice: item.purchasePrice ?? 0.0,
-                                   discountAmount: item.discountAmount ?? 0.0,
-                                   totalPrice: (item.quantity?.toDouble() ?? 0.0) * newPrice,
-                                   unit: item.unit ?? 'null_data',
-                                   measurement: item.measurement ?? 'null_data',
-                                   createdAt: item.createdAt,
+                                  productName: item.productName ?? 'null_data',
+                                  quantity: item.quantity ?? 0,
+                                  unitPrice: newPrice,
+                                  purchasePrice: item.purchasePrice ?? 0.0,
+                                  discountAmount: item.discountAmount ?? 0.0,
+                                  totalPrice:
+                                      (item.quantity?.toDouble() ?? 0.0) *
+                                      newPrice,
+                                  unit: item.unit ?? 'null_data',
+                                  measurement: item.measurement ?? 'null_data',
+                                  createdAt: item.createdAt,
                                 );
-                                context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
+                                context.read<EditInvoiceCubit>().updateItem(
+                                  index,
+                                  updatedItem,
+                                );
                               }
                             },
                           ),
@@ -666,11 +769,20 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('الإجمالي', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(
+                          'الإجمالي',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         Text(
                           '${item.totalPrice?.toStringAsFixed(2) ?? "0.00"} ${NumberFormatter.getCurrencySymbol()}',
-                          style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.text),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
+                          ),
                         ),
                       ],
                     ),
@@ -685,8 +797,10 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
   }
 
   void _showEditQuantityDialog(int index, InvoiceItem item) {
-    final quantityController = TextEditingController(text: item.quantity.toString());
-    
+    final quantityController = TextEditingController(
+      text: item.quantity.toString(),
+    );
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -720,17 +834,21 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                         final updatedItem = InvoiceItem(
                           id: item.id,
                           productId: item.productId,
-                           productName: item.productName ?? 'null_data',
-                           quantity: newQuantity,
-                           unitPrice: item.unitPrice ?? 0.0,
-                           purchasePrice: item.purchasePrice ?? 0.0,
-                           discountAmount: item.discountAmount ?? 0.0,
-                           totalPrice: newQuantity.toDouble() * (item.unitPrice ?? 0.0),
-                           unit: item.unit ?? 'null_data',
-                           measurement: item.measurement ?? 'null_data',
-                           createdAt: item.createdAt,
+                          productName: item.productName ?? 'null_data',
+                          quantity: newQuantity,
+                          unitPrice: item.unitPrice ?? 0.0,
+                          purchasePrice: item.purchasePrice ?? 0.0,
+                          discountAmount: item.discountAmount ?? 0.0,
+                          totalPrice:
+                              newQuantity.toDouble() * (item.unitPrice ?? 0.0),
+                          unit: item.unit ?? 'null_data',
+                          measurement: item.measurement ?? 'null_data',
+                          createdAt: item.createdAt,
                         );
-                        this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
+                        this.context.read<EditInvoiceCubit>().updateItem(
+                          index,
+                          updatedItem,
+                        );
                       }
                       Navigator.pop(context);
                     },
@@ -746,8 +864,10 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
   }
 
   void _showEditPriceDialog(int index, InvoiceItem item) {
-    final priceController = TextEditingController(text: item.unitPrice?.toStringAsFixed(2) ?? "0.00");
-    
+    final priceController = TextEditingController(
+      text: item.unitPrice?.toStringAsFixed(2) ?? "0.00",
+    );
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -781,17 +901,21 @@ class _EditProductAddWidgetState extends State<EditProductAddWidget> {
                         final updatedItem = InvoiceItem(
                           id: item.id,
                           productId: item.productId,
-                           productName: item.productName ?? 'null_data',
-                           quantity: item.quantity ?? 0,
-                           unitPrice: newPrice,
-                           purchasePrice: item.purchasePrice ?? 0.0,
-                           discountAmount: item.discountAmount ?? 0.0,
-                           totalPrice: (item.quantity?.toDouble() ?? 0.0) * newPrice,
-                           unit: item.unit ?? 'null_data',
-                           measurement: item.measurement ?? 'null_data',
-                           createdAt: item.createdAt,
+                          productName: item.productName ?? 'null_data',
+                          quantity: item.quantity ?? 0,
+                          unitPrice: newPrice,
+                          purchasePrice: item.purchasePrice ?? 0.0,
+                          discountAmount: item.discountAmount ?? 0.0,
+                          totalPrice:
+                              (item.quantity?.toDouble() ?? 0.0) * newPrice,
+                          unit: item.unit ?? 'null_data',
+                          measurement: item.measurement ?? 'null_data',
+                          createdAt: item.createdAt,
                         );
-                        this.context.read<EditInvoiceCubit>().updateItem(index, updatedItem);
+                        this.context.read<EditInvoiceCubit>().updateItem(
+                          index,
+                          updatedItem,
+                        );
                       }
                       Navigator.pop(context);
                     },

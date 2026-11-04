@@ -72,9 +72,7 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(sc.LucideIcons.save, size: 20),
-                    child: Text(
-                      _isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات',
-                    ),
+                    child: Text(_isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'),
                   ),
                 ),
               ),

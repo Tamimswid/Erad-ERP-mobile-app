@@ -11,7 +11,8 @@ class EditInvoiceSummaryWidget extends StatefulWidget {
   const EditInvoiceSummaryWidget({super.key});
 
   @override
-  State<EditInvoiceSummaryWidget> createState() => _EditInvoiceSummaryWidgetState();
+  State<EditInvoiceSummaryWidget> createState() =>
+      _EditInvoiceSummaryWidgetState();
 }
 
 class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
@@ -65,7 +66,11 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
                       const SizedBox(height: 8),
                       _buildDiscountRow(discountAmount),
                       const SizedBox(height: 8),
-                      _buildSummaryRow('المجموع الكلي', totalAmount, isTotal: true),
+                      _buildSummaryRow(
+                        'المجموع الكلي',
+                        totalAmount,
+                        isTotal: true,
+                      ),
                     ],
                   ),
                 ),
@@ -101,16 +106,24 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
           Text(
             label,
             style: TextStyle(
-              fontWeight: isTotal ? AppFonts.fontWeightSemiBold : AppFonts.fontWeightMedium,
-              fontSize: isTotal ? AppFonts.fontSizeMedium : AppFonts.fontSizeSmall,
+              fontWeight: isTotal
+                  ? AppFonts.fontWeightSemiBold
+                  : AppFonts.fontWeightMedium,
+              fontSize: isTotal
+                  ? AppFonts.fontSizeMedium
+                  : AppFonts.fontSizeSmall,
               color: isTotal ? AppColors.text : AppColors.textSecondary,
             ),
           ),
           Text(
             '${AppUtils.formatNumber(amount)} ${NumberFormatter.getCurrencySymbol()}',
             style: TextStyle(
-              fontWeight: isTotal ? AppFonts.fontWeightSemiBold : AppFonts.fontWeightMedium,
-              fontSize: isTotal ? AppFonts.fontSizeLarge : AppFonts.fontSizeSmall,
+              fontWeight: isTotal
+                  ? AppFonts.fontWeightSemiBold
+                  : AppFonts.fontWeightMedium,
+              fontSize: isTotal
+                  ? AppFonts.fontSizeLarge
+                  : AppFonts.fontSizeSmall,
               color: isTotal ? AppColors.primary : AppColors.text,
             ),
           ),
@@ -153,14 +166,22 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
               ),
               filled: true,
               fillColor: AppColors.surface,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 8,
+              ),
               isDense: true,
             ),
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))],
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+            ],
           ),
         ),
         const SizedBox(width: 8),
