@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
-import '../../../../core/constants/app_constants.dart';
 import '../bloc/edit_invoice_cubit.dart';
 
 class EditInvoiceActionsWidget extends StatefulWidget {
@@ -15,38 +14,11 @@ class EditInvoiceActionsWidget extends StatefulWidget {
 class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
   bool _isSaving = false;
 
-  void _saveInvoice() async {
-    final cubit = context.read<EditInvoiceCubit>();
-
-    if (!cubit.canSave) {
-      _showToast('يرجى إكمال جميع الحقول المطلوبة', isError: true);
-      return;
-    }
-
+  Future<void> _saveInvoice() async {
     setState(() => _isSaving = true);
-
-    try {
-      await cubit.saveInvoice();
-      _showToast('تم تحديث الفاتورة بنجاح');
-    } catch (e) {
-      _showToast('فشل تحديث الفاتورة', isError: true);
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
-    }
-  }
-
-  void _showToast(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? AppColors.error : null,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    // The page listener surfaces success/error and pops on success.
+    await context.read<EditInvoiceCubit>().saveInvoice();
+    if (mounted) setState(() => _isSaving = false);
   }
 
   @override
@@ -63,16 +35,25 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
                 child: SizedBox(
                   height: 50,
                   child: sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.primary(),
                     onPressed: _isSaving ? null : _saveInvoice,
-                    leading: _isSaving
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(sc.LucideIcons.save, size: 20),
-                    child: Text(_isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _isSaving
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(sc.LucideIcons.save, size: 20),
+                        const SizedBox(width: 8),
+                        Text(_isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -81,10 +62,17 @@ class _EditInvoiceActionsWidgetState extends State<EditInvoiceActionsWidget> {
                 child: SizedBox(
                   height: 50,
                   child: sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.outline(),
                     onPressed: _isSaving ? null : () => Navigator.pop(context),
-                    leading: const Icon(sc.LucideIcons.x, size: 20),
-                    child: const Text('إلغاء'),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(sc.LucideIcons.x, size: 20),
+                        SizedBox(width: 8),
+                        Text('إلغاء'),
+                      ],
+                    ),
                   ),
                 ),
               ),

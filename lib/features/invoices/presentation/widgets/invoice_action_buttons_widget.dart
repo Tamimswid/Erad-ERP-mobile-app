@@ -81,15 +81,22 @@ class InvoiceActionButtonsWidget extends StatelessWidget {
     required sc.ButtonStyle style,
   }) {
     return sc.Button(
+      alignment: Alignment.center,
       style: style,
       onPressed: onPressed,
-      leading: Icon(icon, size: 18),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: AppFonts.fontSizeSmall,
-          fontWeight: AppFonts.fontWeightSemiBold,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: AppFonts.fontSizeSmall,
+              fontWeight: AppFonts.fontWeightSemiBold,
+            ),
+          ),
+        ],
       ),
     );
   }

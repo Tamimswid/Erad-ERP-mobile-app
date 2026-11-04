@@ -53,12 +53,14 @@ class _InvoiceStatusDialogState extends State<InvoiceStatusDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 sc.Button(
+                  alignment: Alignment.center,
                   style: sc.ButtonStyle.ghost(),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('إلغاء'),
                 ),
                 const SizedBox(width: 8),
                 sc.Button(
+                  alignment: Alignment.center,
                   style: sc.ButtonStyle.primary(),
                   onPressed: () {
                     widget.onUpdate(selectedStatus);

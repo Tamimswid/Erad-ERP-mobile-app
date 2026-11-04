@@ -329,6 +329,7 @@ class _CombinedInvoiceInfoWidgetState extends State<CombinedInvoiceInfoWidget> {
           ),
         ),
         sc.Button(
+          alignment: Alignment.center,
           style: sc.ButtonStyle.ghost(),
           onPressed: () => _clearSelection(),
           leading: const Icon(sc.LucideIcons.x, size: 16),

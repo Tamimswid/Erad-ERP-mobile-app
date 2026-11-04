@@ -1,20 +1,26 @@
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
 import 'package:erad/features/invoices/data/models/payment_status.dart';
 import 'package:erad/features/invoices/data/repositories/edit_invoice_repository.dart';
+import 'package:erad/features/products/data/models/product.dart';
 
 part 'edit_invoice_state.dart';
 
 class EditInvoiceCubit extends Cubit<EditInvoiceState> {
+  static const _placeholder = 'null_data';
+
   final EditInvoiceRepository _repository;
   final DataChangeNotifier _dataChanges;
 
   dynamic _originalInvoice;
   bool _isSales = true;
+  int _revision = 0;
+  bool _isSaving = false;
+  List<ProductModel> _productCatalog = const [];
 
   List<InvoiceItem> _items = [];
   String? _customerId;
@@ -41,6 +47,79 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
   String get paymentMethod => _paymentMethod;
   String get paymentType => _paymentType;
   bool get isSales => _isSales;
+  bool get isSaving => _isSaving;
+
+  /// Full product list from the picker cubit; used to backfill names/units that
+  /// older invoice rows stored as null or `null_data`.
+  void setProductCatalog(List<ProductModel> products) {
+    _productCatalog = products;
+  }
+
+  ProductModel? _productFor(InvoiceItem item) {
+    final id = item.productId?.trim() ?? '';
+    if (id.isNotEmpty && id != _placeholder) {
+      for (final product in _productCatalog) {
+        if (product.id == id) return product;
+      }
+    }
+    final name = item.productName?.trim() ?? '';
+    if (name.isNotEmpty && name != _placeholder) {
+      for (final product in _productCatalog) {
+        if (product.name == name) return product;
+      }
+    }
+    return null;
+  }
+
+  String _clean(String? value) {
+    final trimmed = value?.trim() ?? '';
+    return trimmed == _placeholder ? '' : trimmed;
+  }
+
+  String displayName(InvoiceItem item) {
+    final stored = _clean(item.productName);
+    if (stored.isNotEmpty) return stored;
+    return _productFor(item)?.name ?? '';
+  }
+
+  String displayUnit(InvoiceItem item) {
+    final stored = _clean(item.unit);
+    if (stored.isNotEmpty) return stored;
+    return _productFor(item)?.unit ?? '';
+  }
+
+  String displayMeasurement(InvoiceItem item) {
+    final stored = _clean(item.measurement);
+    if (stored.isNotEmpty) return stored;
+    return _productFor(item)?.measurement ?? '';
+  }
+
+  /// "name measurement unit" — the same format used by the product cards.
+  String displayLabel(InvoiceItem item) {
+    return [
+      displayName(item),
+      displayMeasurement(item),
+      displayUnit(item),
+    ].where((part) => part.isNotEmpty).join(' ');
+  }
+
+  List<InvoiceItem> _resolvedItems() {
+    return _items.map((item) {
+      return InvoiceItem(
+        id: item.id,
+        productId: item.productId,
+        productName: displayName(item),
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        purchasePrice: item.purchasePrice,
+        discountAmount: item.discountAmount,
+        totalPrice: item.totalPrice,
+        unit: displayUnit(item),
+        measurement: displayMeasurement(item),
+        createdAt: item.createdAt,
+      );
+    }).toList();
+  }
 
   Future<void> loadSalesInvoice(String id) async {
     emit(EditInvoiceLoading());
@@ -52,7 +131,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
       _originalInvoice = invoice;
       _isSales = true;
 
-      final invoiceItems = invoice.items ?? [];
+      final invoiceItems = invoice.items;
       _items = invoiceItems
           .map(
             (item) => InvoiceItem(
@@ -72,12 +151,12 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           .toList();
 
       _customerId = invoice.customerId;
-      _invoiceDate = invoice.invoiceDate ?? DateTime.now();
+      _invoiceDate = invoice.invoiceDate;
       _dueDate = invoice.dueDate;
-      _discountAmount = invoice.discountAmount ?? 0;
-      _paidAmount = invoice.paidAmount ?? 0;
+      _discountAmount = invoice.discountAmount;
+      _paidAmount = invoice.paidAmount;
       _notes = invoice.notes ?? '';
-      _paymentMethod = invoice.paymentMethod ?? 'cash';
+      _paymentMethod = invoice.paymentMethod;
       _paymentType = invoice.paymentStatus == PaymentStatus.cash
           ? 'cash'
           : 'debt';
@@ -86,7 +165,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
         EditInvoiceLoaded(
           invoice: invoice,
           isSales: true,
-          items: _items,
+          items: List<InvoiceItem>.unmodifiable(_items),
           customerId: _customerId,
           supplierId: null,
           invoiceDate: _invoiceDate!,
@@ -99,6 +178,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           notes: _notes,
           paymentMethod: _paymentMethod,
           paymentType: _paymentType,
+          revision: ++_revision,
         ),
       );
     });
@@ -114,7 +194,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
       _originalInvoice = invoice;
       _isSales = false;
 
-      final invoiceItems = invoice.items ?? [];
+      final invoiceItems = invoice.items;
       _items = invoiceItems
           .map(
             (item) => InvoiceItem(
@@ -148,7 +228,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
         EditInvoiceLoaded(
           invoice: invoice,
           isSales: false,
-          items: _items,
+          items: List<InvoiceItem>.unmodifiable(_items),
           customerId: null,
           supplierId: _supplierId,
           invoiceDate: _invoiceDate!,
@@ -161,6 +241,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           notes: _notes,
           paymentMethod: _paymentMethod,
           paymentType: _paymentType,
+          revision: ++_revision,
         ),
       );
     });
@@ -206,7 +287,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
   }
 
   void setDiscountAmount(double amount) {
-    _discountAmount = amount;
+    _discountAmount = amount.isNaN || amount < 0 ? 0 : amount;
     _emitUpdated();
   }
 
@@ -247,31 +328,47 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
   }
 
   double _calculateRemaining() {
-    return _calculateTotal() - _paidAmount;
+    return _calculateTotal() - _safePaidAmount();
+  }
+
+  double _safePaidAmount() {
+    final total = _calculateTotal();
+    if (_paymentType == 'cash') return total;
+    if (total <= 0) return 0;
+    return _paidAmount.clamp(0.0, total).toDouble();
   }
 
   void _emitUpdated() {
-    if (_originalInvoice != null) {
-      emit(
-        EditInvoiceLoaded(
-          invoice: _originalInvoice,
-          isSales: _isSales,
-          items: _items,
-          customerId: _customerId,
-          supplierId: _supplierId,
-          invoiceDate: _invoiceDate ?? DateTime.now(),
-          dueDate: _dueDate,
-          subtotal: _calculateSubtotal(),
-          discountAmount: _discountAmount,
-          totalAmount: _calculateTotal(),
-          paidAmount: _paidAmount,
-          remainingAmount: _calculateRemaining(),
-          notes: _notes,
-          paymentMethod: _paymentMethod,
-          paymentType: _paymentType,
-        ),
-      );
-    }
+    if (_originalInvoice == null) return;
+    // A shrinking invoice must never leave a negative remaining balance.
+    _paidAmount = _safePaidAmount();
+    emit(
+      EditInvoiceLoaded(
+        invoice: _originalInvoice,
+        isSales: _isSales,
+        items: List<InvoiceItem>.unmodifiable(_items),
+        customerId: _customerId,
+        supplierId: _supplierId,
+        invoiceDate: _invoiceDate ?? DateTime.now(),
+        dueDate: _dueDate,
+        subtotal: _calculateSubtotal(),
+        discountAmount: _discountAmount,
+        totalAmount: _calculateTotal(),
+        paidAmount: _paidAmount,
+        remainingAmount: _calculateRemaining(),
+        notes: _notes,
+        paymentMethod: _paymentMethod,
+        paymentType: _paymentType,
+        revision: ++_revision,
+      ),
+    );
+  }
+
+  double _calculatePurchaseTotal(List<InvoiceItem> items) {
+    return items.fold<double>(
+      0,
+      (sum, item) => sum + (item.purchasePrice ?? 0.0) * (item.quantity ?? 0),
+    );
   }
 
   bool get canSave {
@@ -279,42 +376,35 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
     if (!_isSales && _supplierId == null) return false;
     if (_items.isEmpty) return false;
     if (_invoiceDate == null) return false;
+    if (_discountAmount < 0 || _discountAmount > _calculateSubtotal()) {
+      return false;
+    }
+    if (_items.any(
+      (item) => (item.quantity ?? 0) <= 0 || displayName(item).isEmpty,
+    )) {
+      return false;
+    }
     return true;
   }
 
-  Future<void> saveInvoice() async {
+  Future<bool> saveInvoice() async {
+    if (_isSaving) return false;
     if (!canSave) {
       emit(EditInvoiceError('يرجى إكمال جميع الحقول المطلوبة'));
-      return;
+      _emitUpdated();
+      return false;
     }
 
-    emit(EditInvoiceLoading());
-
+    _isSaving = true;
     try {
-      final newItems = _items
-          .map(
-            (item) => InvoiceItem(
-              id: '',
-              productId: item.productId,
-              productName: item.productName,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              purchasePrice: item.purchasePrice,
-              discountAmount: item.discountAmount,
-              totalPrice: item.totalPrice,
-              unit: item.unit,
-              measurement: item.measurement,
-              createdAt: DateTime.now(),
-            ),
-          )
-          .toList();
-
+      final original = _originalInvoice;
+      final newItems = _resolvedItems();
       final paymentStatus = _paymentType == 'cash'
           ? PaymentStatus.cash
           : PaymentStatus.debt;
 
-      if (_isSales && _originalInvoice is SalesInvoice) {
-        final original = _originalInvoice as SalesInvoice;
+      if (_isSales && original is SalesInvoice) {
+        final purchaseTotal = _calculatePurchaseTotal(newItems);
         final updatedInvoice = SalesInvoice(
           id: original.id,
           userId: original.userId,
@@ -328,15 +418,17 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           taxPercentage: original.taxPercentage,
           shippingCost: original.shippingCost,
           totalAmount: _calculateTotal(),
-          paidAmount: _paidAmount,
+          paidAmount: _safePaidAmount(),
           remainingAmount: _calculateRemaining(),
-          paymentMethod: _paymentMethod,
+          paymentMethod: _paymentType,
           paymentStatus: paymentStatus,
           notes: _notes.isEmpty ? null : _notes,
           isFinalized: original.isFinalized,
           createdAt: original.createdAt,
           updatedAt: DateTime.now(),
           status: original.status,
+          totalPurchaseAmount: purchaseTotal,
+          profit: _calculateTotal() - purchaseTotal,
         );
 
         final result = await _repository.updateSalesInvoice(
@@ -344,15 +436,20 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           newItems,
         );
 
-        result.fold((failure) => emit(EditInvoiceError(failure.message)), (
-          invoice,
-        ) {
-          _originalInvoice = invoice;
-          emit(const EditInvoiceUpdated('تم تحديث الفاتورة بنجاح'));
-          _dataChanges.notifyChanged(DataDomain.invoices);
-        });
-      } else if (!_isSales && _originalInvoice is PurchaseInvoice) {
-        final original = _originalInvoice as PurchaseInvoice;
+        final saved = result.fold<SalesInvoice?>((failure) {
+          _failSave(failure.message);
+          return null;
+        }, (invoice) => invoice);
+        if (saved == null) return false;
+
+        await _adjustBalanceSafely(
+          () => _adjustCustomerBalance(original, updatedInvoice),
+        );
+        _finishSave(saved, DataDomain.customerDebts);
+        return true;
+      }
+
+      if (!_isSales && original is PurchaseInvoice) {
         final updatedInvoice = PurchaseInvoice(
           id: original.id,
           userId: original.userId,
@@ -365,7 +462,7 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           taxAmount: original.taxAmount,
           shippingCost: original.shippingCost,
           totalAmount: _calculateTotal(),
-          paidAmount: _paidAmount,
+          paidAmount: _safePaidAmount(),
           remainingAmount: _calculateRemaining(),
           paymentStatus: paymentStatus,
           notes: _notes.isEmpty ? null : _notes,
@@ -380,16 +477,107 @@ class EditInvoiceCubit extends Cubit<EditInvoiceState> {
           newItems,
         );
 
-        result.fold((failure) => emit(EditInvoiceError(failure.message)), (
-          invoice,
-        ) {
-          _originalInvoice = invoice;
-          emit(const EditInvoiceUpdated('تم تحديث الفاتورة بنجاح'));
-          _dataChanges.notifyChanged(DataDomain.invoices);
-        });
+        final saved = result.fold<PurchaseInvoice?>((failure) {
+          _failSave(failure.message);
+          return null;
+        }, (invoice) => invoice);
+        if (saved == null) return false;
+
+        await _adjustBalanceSafely(
+          () => _adjustSupplierBalance(original, updatedInvoice),
+        );
+        _finishSave(saved, DataDomain.supplierDebts);
+        return true;
       }
+
+      _failSave('تعذر تحديد نوع الفاتورة');
+      return false;
     } catch (e) {
-      emit(EditInvoiceError('فشل تحديث الفاتورة: ${e.toString()}'));
+      _failSave('فشل تحديث الفاتورة: ${e.toString()}');
+      return false;
+    } finally {
+      _isSaving = false;
+    }
+  }
+
+  void _finishSave(dynamic invoice, DataDomain debtDomain) {
+    _originalInvoice = invoice;
+    emit(const EditInvoiceUpdated('تم تحديث الفاتورة بنجاح'));
+    _dataChanges.notifyChangedAll([DataDomain.invoices, debtDomain]);
+  }
+
+  void _failSave(String message) {
+    emit(EditInvoiceError(message));
+    _emitUpdated();
+  }
+
+  /// The invoice row is already persisted at this point; a balance sync failure
+  /// must not be reported as a failed save.
+  Future<void> _adjustBalanceSafely(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (_) {}
+  }
+
+  double _debtAmount(double total, PaymentStatus status) {
+    return status == PaymentStatus.debt ? total : 0;
+  }
+
+  Future<void> _adjustCustomerBalance(
+    SalesInvoice original,
+    SalesInvoice updated,
+  ) async {
+    final oldDebt = _debtAmount(
+      original.remainingAmount,
+      original.paymentStatus,
+    );
+    final newDebt = _debtAmount(updated.remainingAmount, updated.paymentStatus);
+    final oldId = original.customerId;
+    final newId = updated.customerId;
+
+    if (oldId == newId) {
+      if (oldId == null) return;
+      final delta = newDebt - oldDebt;
+      if (delta.abs() < 0.01) return;
+      await _repository.updateCustomerBalance(oldId, delta);
+      return;
+    }
+
+    // The invoice moved to another customer: release the old debt and apply
+    // the full new one instead of a delta against the wrong customer.
+    if (oldId != null && oldDebt.abs() >= 0.01) {
+      await _repository.updateCustomerBalance(oldId, -oldDebt);
+    }
+    if (newId != null && newDebt.abs() >= 0.01) {
+      await _repository.updateCustomerBalance(newId, newDebt);
+    }
+  }
+
+  Future<void> _adjustSupplierBalance(
+    PurchaseInvoice original,
+    PurchaseInvoice updated,
+  ) async {
+    final oldDebt = _debtAmount(
+      original.remainingAmount,
+      original.paymentStatus,
+    );
+    final newDebt = _debtAmount(updated.remainingAmount, updated.paymentStatus);
+    final oldId = original.supplierId;
+    final newId = updated.supplierId;
+
+    if (oldId == newId) {
+      if (oldId == null) return;
+      final delta = newDebt - oldDebt;
+      if (delta.abs() < 0.01) return;
+      await _repository.updateSupplierBalance(oldId, delta);
+      return;
+    }
+
+    if (oldId != null && oldDebt.abs() >= 0.01) {
+      await _repository.updateSupplierBalance(oldId, -oldDebt);
+    }
+    if (newId != null && newDebt.abs() >= 0.01) {
+      await _repository.updateSupplierBalance(newId, newDebt);
     }
   }
 }

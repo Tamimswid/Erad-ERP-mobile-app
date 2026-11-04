@@ -5,7 +5,6 @@ import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/notifications/data_change_notifier.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../bloc/edit_invoice_cubit.dart';
-import '../widgets/edit_invoice_type_widget.dart';
 import '../widgets/edit_invoice_dates_widget.dart';
 import '../widgets/edit_customer_supplier_widget.dart';
 import '../widgets/edit_product_add_widget.dart';

@@ -64,6 +64,7 @@ class InvoiceHeaderWidget extends StatelessWidget {
 
           // Button
           sc.Button(
+            alignment: Alignment.center,
             style: sc.ButtonStyle.primary(),
             onPressed: onNewInvoice,
             leading: const Icon(sc.LucideIcons.plus, size: 18),

@@ -221,6 +221,7 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
     VoidCallback onPressed,
   ) {
     return sc.Button(
+      alignment: Alignment.center,
       style: style,
       onPressed: onPressed,
       leading: Icon(icon, size: 18),

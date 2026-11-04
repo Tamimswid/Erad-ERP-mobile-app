@@ -46,6 +46,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   String _paymentMethod = '';
   String? _paymentType; // 'debt' or 'cash' - no default selection
   String _status = 'completed';
+  int _formUpdateRevision = 0;
 
   // Getters for accessing filter state
   String get selectedType => _selectedType;
@@ -479,6 +480,15 @@ class InvoiceCubit extends Cubit<InvoiceState> {
   }
 
   // Invoice creation methods
+  void _emitFormUpdated(String updateType) {
+    emit(
+      InvoiceFormUpdated(
+        updateType: updateType,
+        revision: ++_formUpdateRevision,
+      ),
+    );
+  }
+
   void setInvoiceType(String type) {
     _invoiceType = type;
     if (type == 'sale') {
@@ -486,24 +496,24 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     } else {
       _selectedCustomerId = null;
     }
-    emit(InvoiceFormUpdated(updateType: 'invoiceType'));
+    _emitFormUpdated('invoiceType');
   }
 
   void setCustomer(String? customerId) {
     _selectedCustomerId = customerId;
-    emit(InvoiceFormUpdated(updateType: 'customer'));
+    _emitFormUpdated('customer');
   }
 
   void setSupplier(String? supplierId) {
     _selectedSupplierId = supplierId;
-    emit(InvoiceFormUpdated(updateType: 'supplier'));
+    _emitFormUpdated('supplier');
   }
 
   void addInvoiceItem(InvoiceItem item) {
     _invoiceItems.insert(0, item);
     // Calculate totals immediately after adding item
     _calculateAndUpdateTotals();
-    emit(InvoiceFormUpdated(updateType: 'addItem'));
+    _emitFormUpdated('addItem');
   }
 
   void removeInvoiceItem(int index) {
@@ -511,7 +521,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
       _invoiceItems.removeAt(index);
       // Calculate totals immediately after removing item
       _calculateAndUpdateTotals();
-      emit(InvoiceFormUpdated(updateType: 'removeItem'));
+      _emitFormUpdated('removeItem');
     }
   }
 
@@ -529,7 +539,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         totalPrice: newPrice * (item.quantity ?? 0).toDouble(),
       );
       _calculateAndUpdateTotals();
-      emit(InvoiceFormUpdated(updateType: 'updatePrice'));
+      _emitFormUpdated('updatePrice');
     }
   }
 
@@ -538,14 +548,14 @@ class InvoiceCubit extends Cubit<InvoiceState> {
       _paidAmount = calculateGrandTotal();
     }
 
-    emit(InvoiceFormUpdated(updateType: 'calculateTotals'));
+    _emitFormUpdated('calculateTotals');
   }
 
   void removeInvoiceItemById(String itemId) {
     _invoiceItems.removeWhere((item) => item.id == itemId);
     // Calculate totals immediately after removing item
     _calculateAndUpdateTotals();
-    emit(InvoiceFormUpdated(updateType: 'removeItem'));
+    _emitFormUpdated('removeItem');
   }
 
   void setDiscountAmount(double amount) {
@@ -554,43 +564,43 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     if (_paymentType == 'cash') {
       _paidAmount = calculateGrandTotal();
     }
-    emit(InvoiceFormUpdated(updateType: 'discount'));
+    _emitFormUpdated('discount');
   }
 
   void setPaidAmount(double amount) {
     _paidAmount = amount;
-    emit(InvoiceFormUpdated(updateType: 'paidAmount'));
+    _emitFormUpdated('paidAmount');
   }
 
   void setNotes(String notes) {
     _notes = notes;
-    emit(InvoiceFormUpdated(updateType: 'notes'));
+    _emitFormUpdated('notes');
   }
 
   void setReference(String reference) {
     _reference = reference;
-    emit(InvoiceFormUpdated(updateType: 'reference'));
+    _emitFormUpdated('reference');
   }
 
   void setProject(String project) {
     _project = project;
-    emit(InvoiceFormUpdated(updateType: 'project'));
+    _emitFormUpdated('project');
   }
 
   void setPaymentMethod(String method) {
     _paymentMethod = method;
-    emit(InvoiceFormUpdated(updateType: 'paymentMethod'));
+    _emitFormUpdated('paymentMethod');
   }
 
   void setPaymentType(String? type) {
     _paymentType = type;
     _paidAmount = type == 'cash' ? calculateGrandTotal() : 0.0;
-    emit(InvoiceFormUpdated(updateType: 'paymentType'));
+    _emitFormUpdated('paymentType');
   }
 
   void setStatus(String status) {
     _status = status;
-    emit(InvoiceFormUpdated(updateType: 'status'));
+    _emitFormUpdated('status');
   }
 
   void clearInvoiceData() {
@@ -606,7 +616,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     _paymentMethod = '';
     _paymentType = null;
     _status = 'completed';
-    emit(InvoiceFormUpdated(updateType: 'clearAll'));
+    _emitFormUpdated('clearAll');
   }
 
   // Calculation methods

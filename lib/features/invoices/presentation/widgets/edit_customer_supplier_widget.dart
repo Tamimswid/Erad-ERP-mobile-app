@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
-import '../../../customers/data/models/customer.dart';
 import '../../../customers/presentation/bloc/customer_cubit.dart';
-import '../../../suppliers/data/models/supplier.dart';
 import '../../../suppliers/presentation/bloc/supplier_cubit.dart';
 import '../bloc/edit_invoice_cubit.dart';
 
@@ -64,6 +62,17 @@ class _EditCustomerSupplierWidgetState
   }
 
   void _onSearchChanged(String query) {
+    if (_selectedEntity != null && query != _selectedEntity.name) {
+      setState(() {
+        _selectedEntity = null;
+      });
+      if (widget.isSales) {
+        context.read<EditInvoiceCubit>().setCustomer(null);
+      } else {
+        context.read<EditInvoiceCubit>().setSupplier(null);
+      }
+    }
+
     if (query.isEmpty) {
       setState(() {
         _searchResults = [];
@@ -131,90 +140,148 @@ class _EditCustomerSupplierWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<EditInvoiceCubit, EditInvoiceState>(
-      builder: (context, state) {
-        if (state is EditInvoiceLoaded) {
-          _initSelection(context.read<EditInvoiceCubit>());
-        }
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CustomerCubit, CustomerState>(
+          listener: (context, state) {
+            if (state is CustomerLoaded && mounted) setState(() {});
+          },
+        ),
+        BlocListener<SupplierCubit, SupplierState>(
+          listener: (context, state) {
+            if (state is SuppliersLoaded && mounted) setState(() {});
+          },
+        ),
+      ],
+      child: BlocBuilder<EditInvoiceCubit, EditInvoiceState>(
+        builder: (context, state) {
+          if (state is EditInvoiceLoaded) {
+            _initSelection(context.read<EditInvoiceCubit>());
+          }
 
-        final title = widget.isSales ? 'العميل' : 'المورد';
-        final hintText = widget.isSales ? 'ابحث عن عميل...' : 'ابحث عن مورد...';
+          final title = widget.isSales ? 'العميل' : 'المورد';
+          final hintText = widget.isSales
+              ? 'ابحث عن عميل...'
+              : 'ابحث عن مورد...';
 
-        return sc.Card(
-          padding: const EdgeInsets.all(AppConstants.cardPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle(
-                widget.isSales ? sc.LucideIcons.user : sc.LucideIcons.building2,
-                title,
-              ),
-              const SizedBox(height: AppConstants.spacingMd),
-
-              TextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  prefixIcon: Icon(
-                    widget.isSales
-                        ? sc.LucideIcons.search
-                        : sc.LucideIcons.search,
-                    color: AppColors.textSecondary,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.borderRadius,
-                    ),
-                    borderSide: const BorderSide(
-                      color: AppColors.primary,
-                      width: 2,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  suffixIcon: _selectedEntity != null
-                      ? IconButton(
-                          icon: const Icon(sc.LucideIcons.x),
-                          onPressed: _clearSelection,
-                        )
-                      : null,
+          return sc.Card(
+            padding: const EdgeInsets.all(AppConstants.cardPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle(
+                  widget.isSales
+                      ? sc.LucideIcons.user
+                      : sc.LucideIcons.building2,
+                  title,
                 ),
-                onChanged: _onSearchChanged,
-              ),
+                const SizedBox(height: AppConstants.spacingMd),
 
-              if (_searchResults.isNotEmpty)
-                Container(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.border),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(AppConstants.borderRadius),
-                      bottomRight: Radius.circular(AppConstants.borderRadius),
+                TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    prefixIcon: Icon(
+                      widget.isSales
+                          ? sc.LucideIcons.search
+                          : sc.LucideIcons.search,
+                      color: AppColors.textSecondary,
                     ),
-                    color: AppColors.surface,
-                    boxShadow: AppConstants.cardShadow,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppConstants.borderRadius,
+                      ),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 2,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    suffixIcon: _selectedEntity != null
+                        ? IconButton(
+                            icon: const Icon(sc.LucideIcons.x),
+                            onPressed: _clearSelection,
+                          )
+                        : null,
                   ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _searchResults.length,
-                    itemBuilder: (context, index) {
-                      final entity = _searchResults[index];
-                      return ListTile(
-                        dense: true,
-                        leading: CircleAvatar(
+                  onChanged: _onSearchChanged,
+                ),
+
+                if (_searchResults.isNotEmpty)
+                  Container(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(AppConstants.borderRadius),
+                        bottomRight: Radius.circular(AppConstants.borderRadius),
+                      ),
+                      color: AppColors.surface,
+                      boxShadow: AppConstants.cardShadow,
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _searchResults.length,
+                      itemBuilder: (context, index) {
+                        final entity = _searchResults[index];
+                        return ListTile(
+                          dense: true,
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.muted,
+                            child: Icon(
+                              widget.isSales
+                                  ? sc.LucideIcons.user
+                                  : sc.LucideIcons.building2,
+                              color: AppColors.text,
+                              size: 20,
+                            ),
+                          ),
+                          title: Text(
+                            entity.name,
+                            style: const TextStyle(
+                              fontWeight: AppFonts.fontWeightMedium,
+                              color: AppColors.text,
+                            ),
+                          ),
+                          subtitle: Text(
+                            entity.phone ?? '-',
+                            style: const TextStyle(
+                              fontSize: AppFonts.fontSizeSmall,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          onTap: () => _onEntitySelected(entity),
+                        );
+                      },
+                    ),
+                  ),
+
+                if (_selectedEntity != null)
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.muted,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
                           backgroundColor: AppColors.muted,
                           child: Icon(
                             widget.isSales
@@ -224,82 +291,42 @@ class _EditCustomerSupplierWidgetState
                             size: 20,
                           ),
                         ),
-                        title: Text(
-                          entity.name,
-                          style: const TextStyle(
-                            fontWeight: AppFonts.fontWeightMedium,
-                            color: AppColors.text,
-                          ),
-                        ),
-                        subtitle: Text(
-                          entity.phone ?? '-',
-                          style: const TextStyle(
-                            fontSize: AppFonts.fontSizeSmall,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        onTap: () => _onEntitySelected(entity),
-                      );
-                    },
-                  ),
-                ),
-
-              if (_selectedEntity != null)
-                Container(
-                  margin: const EdgeInsets.only(top: 12),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.muted,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.divider),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: AppColors.muted,
-                        child: Icon(
-                          widget.isSales
-                              ? sc.LucideIcons.user
-                              : sc.LucideIcons.building2,
-                          color: AppColors.text,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _selectedEntity.name,
-                              style: const TextStyle(
-                                fontWeight: AppFonts.fontWeightSemiBold,
-                                color: AppColors.text,
-                              ),
-                            ),
-                            if (_selectedEntity.phone != null)
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
-                                _selectedEntity.phone ?? '-',
+                                _selectedEntity.name,
                                 style: const TextStyle(
-                                  fontSize: AppFonts.fontSizeSmall,
-                                  color: AppColors.textSecondary,
+                                  fontWeight: AppFonts.fontWeightSemiBold,
+                                  color: AppColors.text,
                                 ),
                               ),
-                          ],
+                              if (_selectedEntity.phone != null)
+                                Text(
+                                  _selectedEntity.phone ?? '-',
+                                  style: const TextStyle(
+                                    fontSize: AppFonts.fontSizeSmall,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(sc.LucideIcons.x, size: 20),
-                        onPressed: _clearSelection,
-                        color: AppColors.textSecondary,
-                      ),
-                    ],
+                        IconButton(
+                          icon: const Icon(sc.LucideIcons.x, size: 20),
+                          onPressed: _clearSelection,
+                          color: AppColors.textSecondary,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

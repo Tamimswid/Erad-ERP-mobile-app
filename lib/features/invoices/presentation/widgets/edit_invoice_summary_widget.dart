@@ -150,6 +150,10 @@ class _EditInvoiceSummaryWidgetState extends State<EditInvoiceSummaryWidget> {
             controller: _discountController,
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.done,
+            onChanged: (value) {
+              final amount = double.tryParse(value) ?? 0.0;
+              context.read<EditInvoiceCubit>().setDiscountAmount(amount);
+            },
             onSubmitted: (value) {
               final amount = double.tryParse(value) ?? 0.0;
               context.read<EditInvoiceCubit>().setDiscountAmount(amount);

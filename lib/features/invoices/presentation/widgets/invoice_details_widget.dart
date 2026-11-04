@@ -411,6 +411,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                       children: [
                         if (invoice.status.name == 'draft') ...[
                           sc.Button(
+                            alignment: Alignment.center,
                             style: sc.ButtonStyle.primary(),
                             onPressed: () =>
                                 _updateInvoiceStatus(context, 'sent'),
@@ -420,6 +421,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         ],
                         if (invoice.status.name == 'sent') ...[
                           sc.Button(
+                            alignment: Alignment.center,
                             style: sc.ButtonStyle.primary(),
                             onPressed: () =>
                                 _updateInvoiceStatus(context, 'paid'),
@@ -432,6 +434,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         ],
                         if (invoice.status.name == 'paid') ...[
                           sc.Button(
+                            alignment: Alignment.center,
                             style: sc.ButtonStyle.primary(),
                             onPressed: () =>
                                 _updateInvoiceStatus(context, 'overdue'),
@@ -444,6 +447,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         ],
                         if (invoice.status.name != 'cancelled') ...[
                           sc.Button(
+                            alignment: Alignment.center,
                             style: sc.ButtonStyle.outline(),
                             onPressed: () =>
                                 _updateInvoiceStatus(context, 'cancelled'),
@@ -482,6 +486,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                       children: [
                         if (invoice.paymentStatus.name == 'debt') ...[
                           sc.Button(
+                            alignment: Alignment.center,
                             style: sc.ButtonStyle.primary(),
                             onPressed: () =>
                                 _updatePaymentStatus(context, 'cash'),
@@ -494,6 +499,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         ],
                         if (invoice.paymentStatus.name == 'cash') ...[
                           sc.Button(
+                            alignment: Alignment.center,
                             style: sc.ButtonStyle.outline(),
                             onPressed: () =>
                                 _updatePaymentStatus(context, 'debt'),
@@ -615,12 +621,14 @@ class InvoiceDetailsWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.ghost(),
                     onPressed: () => Navigator.pop(dialogContext),
                     child: const Text('إلغاء'),
                   ),
                   const SizedBox(width: 8),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.destructive(),
                     onPressed: () async {
                       Navigator.pop(dialogContext);

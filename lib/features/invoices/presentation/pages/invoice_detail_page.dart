@@ -12,7 +12,6 @@ import '../../data/models/purchase_invoice.dart';
 import '../../data/models/invoice_status.dart';
 import '../../data/models/payment_status.dart';
 import '../bloc/invoice_cubit.dart';
-import '../../data/repositories/invoice_repository.dart';
 import '../../../../core/services/pdf_invoice_service.dart';
 import '../widgets/payment_status_dialog.dart';
 import '../widgets/invoice_status_dialog.dart';
@@ -39,8 +38,16 @@ class InvoiceDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl.sl<InvoiceCubit>(),
+    return MultiProvider(
+      providers: [
+        BlocProvider(create: (context) => sl.sl<InvoiceCubit>()),
+        BlocProvider(
+          create: (context) => ProductCubit(
+            productRepository: sl.sl<ProductRepository>(),
+            dataChanges: sl.sl<DataChangeNotifier>(),
+          ),
+        ),
+      ],
       child: InvoiceDetailView(invoiceId: invoiceId, type: type),
     );
   }
@@ -67,12 +74,41 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
   bool isGeneratingPdf = false;
   List<Map<String, dynamic>> products = [];
 
+  late final DataChangeNotifier _dataChanges;
+  late int _invoicesVersion;
+  bool _reloadScheduled = false;
+
   @override
   void initState() {
     super.initState();
+    _dataChanges = sl.sl<DataChangeNotifier>();
+    _invoicesVersion = _dataChanges.versionOf(DataDomain.invoices);
+    _dataChanges.addListener(_handleDataChange);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadInvoice(context);
+    });
   }
 
-  bool _hasLoadedInvoice = false;
+  @override
+  void dispose() {
+    _dataChanges.removeListener(_handleDataChange);
+    super.dispose();
+  }
+
+  void _handleDataChange() {
+    if (!mounted) return;
+    final version = _dataChanges.versionOf(DataDomain.invoices);
+    if (version == _invoicesVersion) return;
+    _invoicesVersion = version;
+    if (_reloadScheduled) return;
+
+    _reloadScheduled = true;
+    Future.microtask(() {
+      _reloadScheduled = false;
+      if (!mounted) return;
+      _loadInvoice(context);
+    });
+  }
 
   Future<void> _loadInvoice(BuildContext context) async {
     try {
@@ -92,110 +128,78 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => InvoiceCubit(
-            sl.sl<InvoiceRepository>(),
-            sl.sl<DataChangeNotifier>(),
-          ),
-        ),
-        BlocProvider(
-          create: (context) => ProductCubit(
-            productRepository: sl.sl<ProductRepository>(),
-            dataChanges: sl.sl<DataChangeNotifier>(),
-          ),
-        ),
-      ],
-      child: Builder(
-        builder: (context) {
-          if (!_hasLoadedInvoice) {
-            _hasLoadedInvoice = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _loadInvoice(context);
-            });
-          }
-
-          return sc.Scaffold(
-            child: SafeArea(
-              child: BlocListener<ProductCubit, ProductState>(
-                listener: (context, state) {
-                  if (state is ProductSingleLoaded) {
-                    setState(() {
-                      for (int i = 0; i < products.length; i++) {
-                        if (products[i]['item'].productId == state.product.id) {
-                          products[i]['product'] = state.product;
-                        }
-                      }
-                    });
+    return sc.Scaffold(
+      child: SafeArea(
+        child: BlocListener<ProductCubit, ProductState>(
+          listener: (context, state) {
+            if (state is ProductSingleLoaded) {
+              setState(() {
+                for (int i = 0; i < products.length; i++) {
+                  if (products[i]['item'].productId == state.product.id) {
+                    products[i]['product'] = state.product;
                   }
-                },
-                child: BlocListener<InvoiceCubit, InvoiceState>(
-                  listener: (context, state) {
-                    if (state is SalesInvoiceLoaded ||
-                        state is PurchaseInvoiceLoaded) {
-                      setState(() {
-                        invoice = state is SalesInvoiceLoaded
-                            ? state.invoice
-                            : (state as PurchaseInvoiceLoaded).invoice;
-                        isLoading = false;
-                        products = (invoice.items as List)
-                            .map<Map<String, dynamic>>(
-                              (item) => {'item': item, 'product': null},
-                            )
-                            .toList();
-                      });
-                      for (var item in invoice.items) {
-                        if (item.productId != null &&
-                            item.productId!.isNotEmpty) {
-                          context.read<ProductCubit>().getProduct(
-                            item.productId!,
-                          );
-                        }
-                      }
-                    } else if (state is InvoiceError) {
-                      ScaffoldMessenger.of(
-                        context,
-                      ).showSnackBar(SnackBar(content: Text(state.message)));
-                      setState(() {
-                        isLoading = false;
-                      });
-                    } else if (state is SalesInvoiceUpdated ||
-                        state is PurchaseInvoiceUpdated) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('تم تحديث الفاتورة بنجاح'),
-                        ),
-                      );
-                      _loadInvoice(context); // Fix: Pass context parameter
-                    } else if (state is SalesInvoiceDeleted ||
-                        state is PurchaseInvoiceDeleted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('تم حذف الفاتورة')),
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: BlocBuilder<InvoiceCubit, InvoiceState>(
-                    builder: (context, state) {
-                      if (isLoading || state is InvoiceLoading || isDeleting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+                }
+              });
+            }
+          },
+          child: BlocListener<InvoiceCubit, InvoiceState>(
+            listener: (context, state) {
+              if (state is SalesInvoiceLoaded ||
+                  state is PurchaseInvoiceLoaded) {
+                setState(() {
+                  invoice = state is SalesInvoiceLoaded
+                      ? state.invoice
+                      : (state as PurchaseInvoiceLoaded).invoice;
+                  isLoading = false;
+                  products = (invoice.items as List)
+                      .map<Map<String, dynamic>>(
+                        (item) => {'item': item, 'product': null},
+                      )
+                      .toList();
+                });
+                for (var item in invoice.items) {
+                  if (item.productId != null && item.productId!.isNotEmpty) {
+                    context.read<ProductCubit>().getProduct(item.productId!);
+                  }
+                }
+              } else if (state is InvoiceError) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
+                setState(() {
+                  isLoading = false;
+                });
+              } else if (state is SalesInvoiceUpdated ||
+                  state is PurchaseInvoiceUpdated) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تم تحديث الفاتورة بنجاح')),
+                );
+                _loadInvoice(context);
+              } else if (state is SalesInvoiceDeleted ||
+                  state is PurchaseInvoiceDeleted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تم حذف الفاتورة')),
+                );
+                Navigator.pop(context);
+              }
+            },
+            child: BlocBuilder<InvoiceCubit, InvoiceState>(
+              builder: (context, state) {
+                if (isLoading || state is InvoiceLoading || isDeleting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                      if (invoice == null) {
-                        return const Center(
-                          child: Text('لم يتم العثور على الفاتورة'),
-                        );
-                      }
+                if (invoice == null) {
+                  return const Center(
+                    child: Text('لم يتم العثور على الفاتورة'),
+                  );
+                }
 
-                      return _buildNewInvoiceDetail();
-                    },
-                  ),
-                ),
-              ),
+                return _buildNewInvoiceDetail();
+              },
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
@@ -268,14 +272,18 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
     );
   }
 
-  void _editInvoice() {
+  Future<void> _editInvoice() async {
     final isSales = widget.type == 'sale';
-    Navigator.of(context).push(
+    final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (context) =>
             EditInvoicePage(invoiceId: widget.invoiceId, isSales: isSales),
       ),
     );
+    if (!mounted) return;
+    if (saved == true) {
+      _loadInvoice(context);
+    }
   }
 
   void _updateInvoiceStatus({required Function(String newState) onUpdate}) {
@@ -446,6 +454,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
         filename: 'invoice_${_getInvoiceNumber()}.pdf',
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('فشل إنشاء PDF: $e')));

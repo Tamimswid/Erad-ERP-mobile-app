@@ -32,6 +32,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
 
   String _query = '';
   bool _isSearching = false;
+  ProductModel? _pendingProduct;
 
   @override
   void dispose() {
@@ -55,6 +56,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
 
     setState(() {
       _query = query;
+      _pendingProduct = null;
       _isSearching = query.isNotEmpty;
     });
 
@@ -69,6 +71,11 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
   }
 
   Future<void> _submitSearch() async {
+    if (_pendingProduct != null) {
+      _quantityFocusNode.requestFocus();
+      return;
+    }
+
     final query = _searchController.text.trim();
     if (query.isEmpty) {
       _quantityFocusNode.requestFocus();
@@ -91,7 +98,28 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
       return;
     }
 
-    _addProduct(results.first);
+    _selectProduct(results.first);
+  }
+
+  void _selectProduct(ProductModel product) {
+    _debounce?.cancel();
+    _searchController.text = product.name;
+    setState(() {
+      _pendingProduct = product;
+      _query = '';
+      _isSearching = false;
+    });
+    _quantityController.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: _quantityController.text.length,
+    );
+    _quantityFocusNode.requestFocus();
+  }
+
+  void _confirmPendingProduct() {
+    final product = _pendingProduct;
+    if (product == null) return;
+    _addProduct(product);
   }
 
   void _addProduct(ProductModel product) {
@@ -122,6 +150,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
     _searchController.clear();
     _quantityController.text = '1';
     setState(() {
+      _pendingProduct = null;
       _query = '';
       _isSearching = false;
     });
@@ -134,6 +163,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
     _quantityController.text = '1';
     if (!mounted) return;
     setState(() {
+      _pendingProduct = null;
       _query = '';
       _isSearching = false;
     });
@@ -175,19 +205,25 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
                       _buildSuggestions(productState),
                 ),
                 const SizedBox(height: 12),
-                const Row(
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       sc.LucideIcons.info,
                       size: 14,
                       color: AppColors.textSecondary,
                     ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Enter لإضافة أول نتيجة، واسحب العنصر لحذفه',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _pendingProduct == null
+                            ? 'ابحث عن منتج واختره، ثم أدخل الكمية واضغط Enter'
+                            : 'أدخل الكمية ثم اضغط Enter لإضافة ${_pendingProduct!.name}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
                   ],
@@ -251,7 +287,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
             onSubmitted: (_) => _submitSearch(),
             decoration:
                 _inputDecoration(
-                  hint: 'اسم المنتج أو الكود',
+                  hint: 'اسم المنتج',
                   icon: sc.LucideIcons.search,
                 ).copyWith(
                   suffixIcon: _isSearching
@@ -281,7 +317,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
               baseOffset: 0,
               extentOffset: _quantityController.text.length,
             ),
-            onSubmitted: (_) => _submitSearch(),
+            onSubmitted: (_) => _confirmPendingProduct(),
             decoration: _inputDecoration(hint: 'الكمية'),
           ),
         ),
@@ -351,7 +387,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
           final price = isSale ? product.salePrice : product.purchasePrice;
 
           return InkWell(
-            onTap: () => _addProduct(product),
+            onTap: () => _selectProduct(product),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
@@ -361,7 +397,7 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          product.name,
+                          product.nameWithMeasurementUnit,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -370,14 +406,16 @@ class _ProductAddWidgetState extends State<ProductAddWidget> {
                             color: AppColors.text,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${product.unit} · ${product.code}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
+                        if (product.code.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            product.code,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),

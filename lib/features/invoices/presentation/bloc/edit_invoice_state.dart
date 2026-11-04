@@ -30,6 +30,10 @@ class EditInvoiceLoaded extends EditInvoiceState {
   final String paymentMethod;
   final String paymentType;
 
+  /// Monotonic counter so every edit emits a distinct state even when the
+  /// scalar values are unchanged (Equatable would otherwise swallow it).
+  final int revision;
+
   const EditInvoiceLoaded({
     required this.invoice,
     required this.isSales,
@@ -46,6 +50,7 @@ class EditInvoiceLoaded extends EditInvoiceState {
     required this.notes,
     required this.paymentMethod,
     required this.paymentType,
+    this.revision = 0,
   });
 
   @override
@@ -65,6 +70,7 @@ class EditInvoiceLoaded extends EditInvoiceState {
     notes,
     paymentMethod,
     paymentType,
+    revision,
   ];
 }
 

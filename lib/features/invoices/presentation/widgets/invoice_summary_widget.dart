@@ -138,6 +138,7 @@ class _InvoiceSummaryWidgetState extends State<InvoiceSummaryWidget> {
                   SizedBox(
                     height: 42,
                     child: sc.Button(
+                      alignment: Alignment.center,
                       style: sc.ButtonStyle.secondary(),
                       onPressed: _applyDiscount,
                       child: const Text('تطبيق'),

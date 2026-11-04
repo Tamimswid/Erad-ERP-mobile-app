@@ -20,11 +20,13 @@ class DeleteInvoiceDialog extends StatelessWidget {
       ),
       actions: [
         sc.Button(
+          alignment: Alignment.center,
           style: sc.ButtonStyle.ghost(),
           onPressed: () => Navigator.pop(context),
           child: const Text('إلغاء'),
         ),
         sc.Button(
+          alignment: Alignment.center,
           style: sc.ButtonStyle.destructive(),
           onPressed: () {
             onConfirm();

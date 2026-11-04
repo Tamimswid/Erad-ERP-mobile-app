@@ -222,6 +222,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                   ),
                   const SizedBox(height: 16),
                   sc.Button(
+                    alignment: Alignment.center,
                     style: sc.ButtonStyle.primary(),
                     onPressed: () =>
                         context.read<InvoiceCubit>().getAllInvoices(),

@@ -19,11 +19,13 @@ class CancelInvoiceDialog extends StatelessWidget {
       content: Text('هل أنت متأكد من إلغاء فاتورة #$invoiceNumber؟'),
       actions: [
         sc.Button(
+          alignment: Alignment.center,
           style: sc.ButtonStyle.ghost(),
           onPressed: () => Navigator.pop(context),
           child: const Text('لا'),
         ),
         sc.Button(
+          alignment: Alignment.center,
           style: sc.ButtonStyle.primary(),
           onPressed: () {
             onConfirm();

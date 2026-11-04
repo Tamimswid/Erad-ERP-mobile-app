@@ -116,16 +116,25 @@ class _InvoiceActionsWidgetState extends State<InvoiceActionsWidget> {
                 width: double.infinity,
                 height: 48,
                 child: sc.Button(
+                  alignment: Alignment.center,
                   style: sc.ButtonStyle.primary(),
                   onPressed: _isSaving ? null : _saveInvoice,
-                  leading: _isSaving
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: sc.CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(sc.LucideIcons.save, size: 18),
-                  child: Text(_isSaving ? 'جاري الحفظ...' : 'حفظ الفاتورة'),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _isSaving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: sc.CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(sc.LucideIcons.save, size: 18),
+                      const SizedBox(width: 8),
+                      Text(_isSaving ? 'جاري الحفظ...' : 'حفظ الفاتورة'),
+                    ],
+                  ),
                 ),
               ),
             ],

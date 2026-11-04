@@ -146,11 +146,12 @@ class InvoiceError extends InvoiceState {
 // Real-time form update state - triggers UI rebuild without saving to database
 class InvoiceFormUpdated extends InvoiceState {
   final String? updateType;
+  final int revision;
 
-  const InvoiceFormUpdated({this.updateType});
+  const InvoiceFormUpdated({this.updateType, this.revision = 0});
 
   @override
-  List<Object?> get props => [updateType];
+  List<Object?> get props => [updateType, revision];
 }
 
 // New Filtered State
