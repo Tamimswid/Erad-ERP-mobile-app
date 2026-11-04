@@ -15,7 +15,8 @@ import 'package:erad/core/constants/app_constants.dart';
 class InvoiceDetailsWidget extends StatelessWidget {
   final dynamic invoice; // Can be SalesInvoice or PurchaseInvoice
 
-  const InvoiceDetailsWidget({Key? key, required this.invoice}) : super(key: key);
+  const InvoiceDetailsWidget({Key? key, required this.invoice})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Invoice Header Card
-            sc.Card(padding: EdgeInsets.zero, 
+            sc.Card(
+              padding: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -88,7 +90,9 @@ class InvoiceDetailsWidget extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: _getPaymentStatusColor().withValues(alpha: 0.2),
+                            color: _getPaymentStatusColor().withValues(
+                              alpha: 0.2,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -114,7 +118,9 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          invoice is SalesInvoice ? 'فاتورة بيع' : 'فاتورة شراء',
+                          invoice is SalesInvoice
+                              ? 'فاتورة بيع'
+                              : 'فاتورة شراء',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -129,7 +135,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Customer/Supplier Information Card
-            sc.Card(padding: EdgeInsets.zero, 
+            sc.Card(
+              padding: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -144,13 +151,23 @@ class InvoiceDetailsWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     if (invoice is SalesInvoice) ...[
-                      _buildInfoRow('العميل:', invoice.customerName ?? 'غير محدد'),
+                      _buildInfoRow(
+                        'العميل:',
+                        invoice.customerName ?? 'غير محدد',
+                      ),
                     ] else ...[
-                      _buildInfoRow('المورد:', (invoice as PurchaseInvoice).supplierName ?? 'غير محدد'),
+                      _buildInfoRow(
+                        'المورد:',
+                        (invoice as PurchaseInvoice).supplierName ?? 'غير محدد',
+                      ),
                     ],
                     _buildInfoRow(
                       'تاريخ الإصدار:',
-                      DateFormat('yyyy-MM-dd').format(invoice is SalesInvoice ? invoice.invoiceDate : (invoice as PurchaseInvoice).invoiceDate),
+                      DateFormat('yyyy-MM-dd').format(
+                        invoice is SalesInvoice
+                            ? invoice.invoiceDate
+                            : (invoice as PurchaseInvoice).invoiceDate,
+                      ),
                     ),
                     if (invoice is SalesInvoice && invoice.dueDate != null)
                       _buildInfoRow(
@@ -169,7 +186,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Items Card
-            sc.Card(padding: EdgeInsets.zero, 
+            sc.Card(
+              padding: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -195,9 +213,7 @@ class InvoiceDetailsWidget extends StatelessWidget {
                       children: [
                         // Header
                         TableRow(
-                          decoration: BoxDecoration(
-                            color: AppColors.border,
-                          ),
+                          decoration: BoxDecoration(color: AppColors.border),
                           children: const [
                             Padding(
                               padding: EdgeInsets.all(8),
@@ -241,43 +257,49 @@ class InvoiceDetailsWidget extends StatelessWidget {
                           ],
                         ),
                         // Items
-                        ...invoice.items.map((item) => TableRow(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(item.productName),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                AppUtils.formatNumber(item.quantity),
-                                textAlign: TextAlign.center,
+                        ...invoice.items
+                            .map(
+                              (item) => TableRow(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(item.productName),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      AppUtils.formatNumber(item.quantity),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      '${AppUtils.formatNumber(item.unitPrice)} ${NumberFormatter.getCurrencySymbol()}',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      '${AppUtils.formatNumber(item.discountAmount)} ${NumberFormatter.getCurrencySymbol()}',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      '${AppUtils.formatNumber(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                '${AppUtils.formatNumber(item.unitPrice)} ${NumberFormatter.getCurrencySymbol()}',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                '${AppUtils.formatNumber(item.discountAmount)} ${NumberFormatter.getCurrencySymbol()}',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Text(
-                                '${AppUtils.formatNumber(item.totalPrice)} ${NumberFormatter.getCurrencySymbol()}',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        )).toList(),
+                            )
+                            .toList(),
                       ],
                     ),
                   ],
@@ -287,7 +309,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Totals Card
-            sc.Card(padding: EdgeInsets.zero, 
+            sc.Card(
+              padding: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -302,7 +325,10 @@ class InvoiceDetailsWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     _buildTotalRow('المجموع الفرعي:', invoice.subtotal),
-                    _buildTotalRow('الضريبة (${invoice.taxRate}%):', invoice.taxAmount),
+                    _buildTotalRow(
+                      'الضريبة (${invoice.taxRate}%):',
+                      invoice.taxAmount,
+                    ),
                     _buildTotalRow('الخصم:', invoice.discountAmount),
                     const Divider(),
                     _buildTotalRow(
@@ -326,7 +352,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
 
             // Notes and Terms Card
             if (invoice.notes != null || invoice.terms != null)
-              sc.Card(padding: EdgeInsets.zero, 
+              sc.Card(
+                padding: EdgeInsets.zero,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -364,7 +391,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Invoice Status Actions Card
-            sc.Card(padding: EdgeInsets.zero, 
+            sc.Card(
+              padding: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -384,7 +412,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         if (invoice.status.name == 'draft') ...[
                           sc.Button(
                             style: sc.ButtonStyle.primary(),
-                            onPressed: () => _updateInvoiceStatus(context, 'sent'),
+                            onPressed: () =>
+                                _updateInvoiceStatus(context, 'sent'),
                             leading: const Icon(sc.LucideIcons.send, size: 18),
                             child: const Text('إرسال'),
                           ),
@@ -392,7 +421,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         if (invoice.status.name == 'sent') ...[
                           sc.Button(
                             style: sc.ButtonStyle.primary(),
-                            onPressed: () => _updateInvoiceStatus(context, 'paid'),
+                            onPressed: () =>
+                                _updateInvoiceStatus(context, 'paid'),
                             leading: const Icon(
                               sc.LucideIcons.circleCheck,
                               size: 18,
@@ -403,7 +433,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
                         if (invoice.status.name == 'paid') ...[
                           sc.Button(
                             style: sc.ButtonStyle.primary(),
-                            onPressed: () => _updateInvoiceStatus(context, 'overdue'),
+                            onPressed: () =>
+                                _updateInvoiceStatus(context, 'overdue'),
                             leading: const Icon(
                               sc.LucideIcons.triangleAlert,
                               size: 18,
@@ -416,7 +447,10 @@ class InvoiceDetailsWidget extends StatelessWidget {
                             style: sc.ButtonStyle.outline(),
                             onPressed: () =>
                                 _updateInvoiceStatus(context, 'cancelled'),
-                            leading: const Icon(sc.LucideIcons.circleX, size: 18),
+                            leading: const Icon(
+                              sc.LucideIcons.circleX,
+                              size: 18,
+                            ),
                             child: const Text('إلغاء'),
                           ),
                         ],
@@ -428,7 +462,8 @@ class InvoiceDetailsWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             // Payment Status Actions Card
-            sc.Card(padding: EdgeInsets.zero, 
+            sc.Card(
+              padding: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -498,7 +533,12 @@ class InvoiceDetailsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalRow(String label, double amount, {bool isBold = false, bool isLarge = false}) {
+  Widget _buildTotalRow(
+    String label,
+    double amount, {
+    bool isBold = false,
+    bool isLarge = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -525,30 +565,38 @@ class InvoiceDetailsWidget extends StatelessWidget {
   }
 
   Color _getStatusColor() {
-    final status = invoice is SalesInvoice ? invoice.status.name : (invoice as PurchaseInvoice).status.name;
+    final status = invoice is SalesInvoice
+        ? invoice.status.name
+        : (invoice as PurchaseInvoice).status.name;
     return InvoiceStatus.fromString(status).getColor;
   }
 
   String _getStatusText() {
-    final status = invoice is SalesInvoice ? invoice.status.name : (invoice as PurchaseInvoice).status.name;
+    final status = invoice is SalesInvoice
+        ? invoice.status.name
+        : (invoice as PurchaseInvoice).status.name;
     return InvoiceStatus.fromString(status).getArabicName;
   }
 
   Color _getPaymentStatusColor() {
-    final status = invoice is SalesInvoice ? invoice.paymentStatus.name : (invoice as PurchaseInvoice).paymentStatus.name;
+    final status = invoice is SalesInvoice
+        ? invoice.paymentStatus.name
+        : (invoice as PurchaseInvoice).paymentStatus.name;
     return PaymentStatus.fromString(status).getColor;
   }
 
   String _getPaymentStatusText() {
-    final status = invoice is SalesInvoice ? invoice.paymentStatus.name : (invoice as PurchaseInvoice).paymentStatus.name;
+    final status = invoice is SalesInvoice
+        ? invoice.paymentStatus.name
+        : (invoice as PurchaseInvoice).paymentStatus.name;
     return PaymentStatus.fromString(status).getArabicName;
   }
 
   void _editInvoice(BuildContext context) {
     // TODO: Navigate to edit invoice
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('قريباً: تعديل الفاتورة')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('قريباً: تعديل الفاتورة')));
   }
 
   void _deleteInvoice(BuildContext context) {
@@ -596,9 +644,15 @@ class InvoiceDetailsWidget extends StatelessWidget {
 
                       try {
                         if (invoice is SalesInvoice) {
-                          await context.read<InvoiceCubit>().deleteSalesInvoiceWithBalanceAdjustment(invoice as SalesInvoice);
+                          await context
+                              .read<InvoiceCubit>()
+                              .deleteSalesInvoiceWithBalanceAdjustment(
+                                invoice as SalesInvoice,
+                              );
                         } else if (invoice is PurchaseInvoice) {
-                          await context.read<InvoiceCubit>().deletePurchaseInvoice(invoice.id);
+                          await context
+                              .read<InvoiceCubit>()
+                              .deletePurchaseInvoice(invoice.id);
                         }
                       } finally {
                         if (context.mounted) {
@@ -625,13 +679,19 @@ class InvoiceDetailsWidget extends StatelessWidget {
   void _updateInvoiceStatus(BuildContext context, String newStatus) {
     if (invoice is SalesInvoice) {
       final updatedInvoice = invoice.copyWith(
-        status: InvoiceStatus.values.firstWhere((e) => e.name == newStatus, orElse: () => InvoiceStatus.draft),
+        status: InvoiceStatus.values.firstWhere(
+          (e) => e.name == newStatus,
+          orElse: () => InvoiceStatus.draft,
+        ),
         updatedAt: DateTime.now(),
       );
       context.read<InvoiceCubit>().updateSalesInvoice(updatedInvoice);
     } else if (invoice is PurchaseInvoice) {
       final updatedInvoice = invoice.copyWith(
-        status: InvoiceStatus.values.firstWhere((e) => e.name == newStatus, orElse: () => InvoiceStatus.draft),
+        status: InvoiceStatus.values.firstWhere(
+          (e) => e.name == newStatus,
+          orElse: () => InvoiceStatus.draft,
+        ),
         updatedAt: DateTime.now(),
       );
       context.read<InvoiceCubit>().updatePurchaseInvoice(updatedInvoice);
@@ -649,12 +709,17 @@ class InvoiceDetailsWidget extends StatelessWidget {
       // Show success message
       if (newStatus == 'cash') {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم تحديد الفاتورة كمدفوعة وتم تحديث رصيد العميل')),
+          const SnackBar(
+            content: Text('تم تحديد الفاتورة كمدفوعة وتم تحديث رصيد العميل'),
+          ),
         );
       }
     } else if (invoice is PurchaseInvoice) {
       final updatedInvoice = (invoice as PurchaseInvoice).copyWith(
-        paymentStatus: PaymentStatus.values.firstWhere((e) => e.name == newStatus, orElse: () => PaymentStatus.cash),
+        paymentStatus: PaymentStatus.values.firstWhere(
+          (e) => e.name == newStatus,
+          orElse: () => PaymentStatus.cash,
+        ),
         updatedAt: DateTime.now(),
       );
       context.read<InvoiceCubit>().updatePurchaseInvoice(updatedInvoice);

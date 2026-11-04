@@ -8,10 +8,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 class InvoiceProductListWidget extends StatelessWidget {
   final List<InvoiceItem> items;
 
-  const InvoiceProductListWidget({
-    super.key,
-    required this.items,
-  });
+  const InvoiceProductListWidget({super.key, required this.items});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +18,11 @@ class InvoiceProductListWidget extends StatelessWidget {
         // Header
         Row(
           children: [
-            Icon(sc.LucideIcons.package, size: 20, color: AppColors.textSecondary),
+            Icon(
+              sc.LucideIcons.package,
+              size: 20,
+              color: AppColors.textSecondary,
+            ),
             const SizedBox(width: 8),
             Text(
               'Products',
@@ -196,7 +197,7 @@ class InvoiceProductListWidget extends StatelessWidget {
           // Unit Price
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(item.unitPrice??0.0)} ${NumberFormatter.getCurrencySymbol()}',
+              '${AppUtils.formatNumber(item.unitPrice ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,
@@ -208,7 +209,7 @@ class InvoiceProductListWidget extends StatelessWidget {
           // Total
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(item.totalPrice??0.0)} ${NumberFormatter.getCurrencySymbol()} ',
+              '${AppUtils.formatNumber(item.totalPrice ?? 0.0)} ${NumberFormatter.getCurrencySymbol()} ',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeMedium,

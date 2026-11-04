@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/di/services_locator.dart' as sl;
+import '../../../../core/notifications/data_change_notifier.dart';
 import '../../../../core/widgets/app_pagination_list.dart';
 import '../../../../core/widgets/date_filter_sheet.dart';
 import '../bloc/invoice_cubit.dart';
@@ -21,10 +23,15 @@ class InvoicesPage extends StatefulWidget {
 
 class _InvoicesPageState extends State<InvoicesPage> {
   final TextEditingController _searchController = TextEditingController();
+  final DataChangeNotifier _dataChanges = sl.sl<DataChangeNotifier>();
+  late int _invoicesVersion;
+  bool _reloadScheduled = false;
 
   @override
   void initState() {
     super.initState();
+    _invoicesVersion = _dataChanges.versionOf(DataDomain.invoices);
+    _dataChanges.addListener(_handleDataChange);
     _searchController.addListener(() {
       context.read<InvoiceCubit>().setSearchQuery(_searchController.text);
     });
@@ -32,8 +39,24 @@ class _InvoicesPageState extends State<InvoicesPage> {
 
   @override
   void dispose() {
+    _dataChanges.removeListener(_handleDataChange);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _handleDataChange() {
+    if (!mounted) return;
+    final version = _dataChanges.versionOf(DataDomain.invoices);
+    if (version == _invoicesVersion) return;
+    _invoicesVersion = version;
+    if (_reloadScheduled) return;
+
+    _reloadScheduled = true;
+    Future.microtask(() {
+      _reloadScheduled = false;
+      if (!mounted) return;
+      context.read<InvoiceCubit>().loadFirstPage(showLoading: false);
+    });
   }
 
   void _showDateFilter(BuildContext context) {
@@ -156,11 +179,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                   MaterialPageRoute(
                     builder: (context) => const CreateInvoicePage(),
                   ),
-                ).then((_) {
-                  if (context.mounted) {
-                    context.read<InvoiceCubit>().loadFirstPage();
-                  }
-                });
+                );
               },
             ),
       body: BlocConsumer<InvoiceCubit, InvoiceState>(
@@ -262,11 +281,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                                   type: type,
                                 ),
                               ),
-                            ).then((_) {
-                              if (context.mounted) {
-                                context.read<InvoiceCubit>().loadFirstPage();
-                              }
-                            });
+                            );
                           },
                         ),
                       );

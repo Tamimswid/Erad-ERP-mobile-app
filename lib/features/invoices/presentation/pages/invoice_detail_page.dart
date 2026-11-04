@@ -23,6 +23,7 @@ import '../widgets/invoice_totals_widget.dart';
 import '../widgets/invoice_action_buttons_widget.dart';
 import 'package:erad/features/products/presentation/bloc/product_cubit.dart';
 import '../../../../core/di/services_locator.dart' as sl;
+import '../../../../core/notifications/data_change_notifier.dart';
 import 'package:erad/features/products/data/repositories/product_repository.dart';
 import 'edit_invoice_page.dart';
 
@@ -94,11 +95,16 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
     return MultiProvider(
       providers: [
         BlocProvider(
-          create: (context) => InvoiceCubit(sl.sl<InvoiceRepository>()),
+          create: (context) => InvoiceCubit(
+            sl.sl<InvoiceRepository>(),
+            sl.sl<DataChangeNotifier>(),
+          ),
         ),
         BlocProvider(
-          create: (context) =>
-              ProductCubit(productRepository: sl.sl<ProductRepository>()),
+          create: (context) => ProductCubit(
+            productRepository: sl.sl<ProductRepository>(),
+            dataChanges: sl.sl<DataChangeNotifier>(),
+          ),
         ),
       ],
       child: Builder(
@@ -138,7 +144,6 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                               (item) => {'item': item, 'product': null},
                             )
                             .toList();
-                   
                       });
                       for (var item in invoice.items) {
                         if (item.productId != null &&
@@ -196,7 +201,6 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
   }
 
   Widget _buildNewInvoiceDetail() {
-
     final cubit = context.read<InvoiceCubit>();
 
     return Stack(
@@ -219,7 +223,6 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                 products: _getProductsList(),
               ),
 
-
               // Totals
               InvoiceTotalsWidget(
                 subtotal: _getSubtotal(),
@@ -227,16 +230,17 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
                 total: _getTotalAmount(),
               ),
 
-
               // Action Buttons
               InvoiceActionButtonsWidget(
                 onExportPdf: _generatePdf,
                 onEdit: _editInvoice,
                 onUpdateInvoiceStatus: () => _updateInvoiceStatus(
-                  onUpdate: (newState) => _updateInvoiceStatusOptimistic(newState, cubit),
+                  onUpdate: (newState) =>
+                      _updateInvoiceStatusOptimistic(newState, cubit),
                 ),
                 onUpdatePaymentStatus: () => _updatePaymentStatus(
-                  onUpdate: (paymentStatus) => _updatePaymentStatusOptimistic(paymentStatus, cubit),
+                  onUpdate: (paymentStatus) =>
+                      _updatePaymentStatusOptimistic(paymentStatus, cubit),
                 ),
                 onDelete: _deleteInvoice,
               ),
@@ -268,10 +272,8 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
     final isSales = widget.type == 'sale';
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => EditInvoicePage(
-          invoiceId: widget.invoiceId,
-          isSales: isSales,
-        ),
+        builder: (context) =>
+            EditInvoicePage(invoiceId: widget.invoiceId, isSales: isSales),
       ),
     );
   }
@@ -299,129 +301,107 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
   }
 
   /// Optimistic update for invoice status - UI first, then API
-  Future<void> _updateInvoiceStatusOptimistic(String newState, InvoiceCubit cubit) async {
+  Future<void> _updateInvoiceStatusOptimistic(
+    String newState,
+    InvoiceCubit cubit,
+  ) async {
     log('Optimistic update: Invoice status to $newState');
-    
-    // 1. Save old state for rollback
+
     final oldInvoice = invoice;
-    
-    // 2. Update UI immediately (optimistic)
+
     setState(() {
       if (invoice is SalesInvoice) {
-        final updatedStatus = InvoiceStatus.fromString(newState);
         invoice = (invoice as SalesInvoice).copyWith(
-          status: updatedStatus,
+          status: InvoiceStatus.fromString(newState),
           updatedAt: DateTime.now(),
         );
       } else if (invoice is PurchaseInvoice) {
-        final updatedStatus = InvoiceStatus.fromString(newState);
         invoice = (invoice as PurchaseInvoice).copyWith(
-          status: updatedStatus,
+          status: InvoiceStatus.fromString(newState),
           updatedAt: DateTime.now(),
         );
       }
     });
-    
-    // 3. Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('جاري تحديث حالة الفاتورة...')),
-    );
-    
-    try {
-      // 4. Send to API
-      if (oldInvoice is SalesInvoice) {
-        final updatedStatus = InvoiceStatus.fromString(newState);
-        final updatedInvoice = oldInvoice.copyWith(
-          status: updatedStatus,
+
+    bool updated;
+    if (oldInvoice is SalesInvoice) {
+      updated = await cubit.updateSalesInvoice(
+        oldInvoice.copyWith(
+          status: InvoiceStatus.fromString(newState),
           updatedAt: DateTime.now(),
-        );
-        await cubit.updateSalesInvoice(updatedInvoice, optimisticUpdate: true);
-      } else if (oldInvoice is PurchaseInvoice) {
-        final updatedStatus = InvoiceStatus.fromString(newState);
-        final updatedInvoice = oldInvoice.copyWith(
-          status: updatedStatus,
+        ),
+      );
+    } else if (oldInvoice is PurchaseInvoice) {
+      updated = await cubit.updatePurchaseInvoice(
+        oldInvoice.copyWith(
+          status: InvoiceStatus.fromString(newState),
           updatedAt: DateTime.now(),
-        );
-        await cubit.updatePurchaseInvoice(updatedInvoice, optimisticUpdate: true);
-      }
-      
-      // 5. Success - keep the change
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم تحديث حالة الفاتورة بنجاح')),
+        ),
       );
-    } catch (e) {
-      // 6. Error - rollback to old state
-      log('Error updating invoice status: $e');
-      setState(() {
-        invoice = oldInvoice;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل تحديث حالة الفاتورة: ${e.toString()}')),
-      );
+    } else {
+      updated = false;
     }
+
+    if (!mounted) return;
+    if (!updated) {
+      setState(() => invoice = oldInvoice);
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('تم تحديث حالة الفاتورة بنجاح')),
+    );
   }
 
   /// Optimistic update for payment status - UI first, then API
-  Future<void> _updatePaymentStatusOptimistic(String paymentStatus, InvoiceCubit cubit) async {
+  Future<void> _updatePaymentStatusOptimistic(
+    String paymentStatus,
+    InvoiceCubit cubit,
+  ) async {
     log('Optimistic update: Payment status to $paymentStatus');
-    
-    // 1. Save old state for rollback
+
     final oldInvoice = invoice;
-    
-    // 2. Update UI immediately (optimistic)
+
     setState(() {
       if (invoice is SalesInvoice) {
-        final updatedStatus = PaymentStatus.fromString(paymentStatus);
         invoice = (invoice as SalesInvoice).copyWith(
-          paymentStatus: updatedStatus,
+          paymentStatus: PaymentStatus.fromString(paymentStatus),
           updatedAt: DateTime.now(),
         );
       } else if (invoice is PurchaseInvoice) {
-        final updatedStatus = PaymentStatus.fromString(paymentStatus);
         invoice = (invoice as PurchaseInvoice).copyWith(
-          paymentStatus: updatedStatus,
+          paymentStatus: PaymentStatus.fromString(paymentStatus),
           updatedAt: DateTime.now(),
         );
       }
     });
-    
-    // 3. Show loading message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('جاري تحديث حالة الدفع...')),
-    );
-    
-    try {
-      // 4. Send to API
-      if (oldInvoice is SalesInvoice) {
-        await cubit.updateInvoicePaymentStatusWithBalance(
-          oldInvoice,
-          paymentStatus,
-        );
-      } else if (oldInvoice is PurchaseInvoice) {
-        final updatedStatus = PaymentStatus.fromString(paymentStatus);
-        final updatedInvoice = oldInvoice.copyWith(
-          paymentStatus: updatedStatus,
+
+    bool updated;
+    if (oldInvoice is SalesInvoice) {
+      updated = await cubit.updateInvoicePaymentStatusWithBalance(
+        oldInvoice,
+        paymentStatus,
+      );
+    } else if (oldInvoice is PurchaseInvoice) {
+      updated = await cubit.updatePurchaseInvoice(
+        oldInvoice.copyWith(
+          paymentStatus: PaymentStatus.fromString(paymentStatus),
           updatedAt: DateTime.now(),
-        );
-        await cubit.updatePurchaseInvoice(updatedInvoice, optimisticUpdate: true);
-      }
-      
-      // 5. Success - keep the change
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم تحديث حالة الدفع بنجاح')),
+        ),
       );
-    } catch (e) {
-      // 6. Error - rollback to old state
-      log('Error updating payment status: $e');
-      setState(() {
-        invoice = oldInvoice;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('فشل تحديث حالة الدفع: ${e.toString()}')),
-      );
+    } else {
+      updated = false;
     }
+
+    if (!mounted) return;
+    if (!updated) {
+      setState(() => invoice = oldInvoice);
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('تم تحديث حالة الدفع بنجاح')));
   }
 
   void _deleteInvoice() {
@@ -514,8 +494,7 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
     }).toList();
   }
 
-
-    Color getStatusColor(String status) {
+  Color getStatusColor(String status) {
     return InvoiceStatus.fromString(status).getColor;
   }
 
@@ -530,7 +509,6 @@ class _InvoiceDetailViewState extends State<InvoiceDetailView> {
   String getPaymentStatusText(String paymentStatus) {
     return PaymentStatus.fromString(paymentStatus).getArabicName;
   }
-
 
   // Helper methods
   String _getInvoiceNumber() {

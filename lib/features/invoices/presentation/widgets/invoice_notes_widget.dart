@@ -103,20 +103,32 @@ class _InvoiceNotesWidgetState extends State<InvoiceNotesWidget> {
                       decoration: InputDecoration(
                         hintText: 'Fatura notları...',
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadius,
+                          ),
                           borderSide: BorderSide(color: AppColors.border),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadius,
+                          ),
                           borderSide: BorderSide(color: AppColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                          borderRadius: BorderRadius.circular(
+                            AppConstants.borderRadius,
+                          ),
+                          borderSide: const BorderSide(
+                            color: AppColors.primary,
+                            width: 2,
+                          ),
                         ),
                         filled: true,
                         fillColor: AppColors.surface,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
                       ),
                       maxLines: 2,
                       onChanged: _onNotesChanged,
@@ -124,7 +136,7 @@ class _InvoiceNotesWidgetState extends State<InvoiceNotesWidget> {
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacingMd),
-                
+
                 // Additional Fields Row
                 Row(
                   children: [
@@ -146,9 +158,7 @@ class _InvoiceNotesWidgetState extends State<InvoiceNotesWidget> {
                       ),
                     ),
                     const SizedBox(width: AppConstants.spacingMd),
-                    Expanded(
-                      child: _buildPaymentMethodDropdown(),
-                    ),
+                    Expanded(child: _buildPaymentMethodDropdown()),
                   ],
                 ),
               ],
@@ -168,11 +178,7 @@ class _InvoiceNotesWidgetState extends State<InvoiceNotesWidget> {
             color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            color: AppColors.primary,
-            size: 20,
-          ),
+          child: Icon(icon, color: AppColors.primary, size: 20),
         ),
         const SizedBox(width: 8),
         Text(
@@ -223,7 +229,10 @@ class _InvoiceNotesWidgetState extends State<InvoiceNotesWidget> {
             ),
             filled: true,
             fillColor: AppColors.surface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
           ),
           onChanged: onChanged,
         ),
@@ -262,13 +271,19 @@ class _InvoiceNotesWidgetState extends State<InvoiceNotesWidget> {
             ),
             filled: true,
             fillColor: AppColors.surface,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
           ),
           items: const [
             DropdownMenuItem(value: 'cash', child: Text('Nakit')),
             DropdownMenuItem(value: 'card', child: Text('Kredi Kartı')),
             DropdownMenuItem(value: 'transfer', child: Text('Havale/EFT')),
-            DropdownMenuItem(value: 'electronic', child: Text('Elektronik Ödeme')),
+            DropdownMenuItem(
+              value: 'electronic',
+              child: Text('Elektronik Ödeme'),
+            ),
           ],
           onChanged: _onPaymentMethodChanged,
         ),

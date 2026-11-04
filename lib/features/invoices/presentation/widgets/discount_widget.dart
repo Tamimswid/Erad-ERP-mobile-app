@@ -25,7 +25,9 @@ class _DiscountWidgetState extends State<DiscountWidget> {
   @override
   void initState() {
     super.initState();
-    _amountController = TextEditingController(text: widget.discountAmount.toStringAsFixed(2));
+    _amountController = TextEditingController(
+      text: widget.discountAmount.toStringAsFixed(2),
+    );
   }
 
   @override
@@ -51,14 +53,14 @@ class _DiscountWidgetState extends State<DiscountWidget> {
         children: [
           Row(
             children: [
-              const Icon(sc.LucideIcons.percent, color: AppColors.textSecondary),
+              const Icon(
+                sc.LucideIcons.percent,
+                color: AppColors.textSecondary,
+              ),
               const SizedBox(width: 8),
               const Text(
                 'الخصم',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
               ),
             ],
           ),
@@ -68,7 +70,9 @@ class _DiscountWidgetState extends State<DiscountWidget> {
               Expanded(
                 child: TextField(
                   controller: _amountController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
                     labelText: 'مبلغ الخصم',
                     border: OutlineInputBorder(

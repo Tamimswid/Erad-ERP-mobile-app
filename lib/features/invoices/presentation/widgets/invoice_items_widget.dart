@@ -5,14 +5,16 @@ class InvoiceItemsWidget extends StatelessWidget {
   final List items;
   final double? invoiceDiscountAmount;
 
-  const InvoiceItemsWidget({super.key, required this.items, this.invoiceDiscountAmount});
+  const InvoiceItemsWidget({
+    super.key,
+    required this.items,
+    this.invoiceDiscountAmount,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const Center(
-        child: Text('لا توجد صنفات في هذه الفاتورة'),
-      );
+      return const Center(child: Text('لا توجد صنفات في هذه الفاتورة'));
     }
 
     return Column(
@@ -26,11 +28,41 @@ class InvoiceItemsWidget extends StatelessWidget {
           ),
           child: const Row(
             children: [
-              Expanded(flex: 3, child: Text('الصنف', style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 1, child: Text('الكمية', style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 1, child: Text('السعر', style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 1, child: Text('الخصم', style: TextStyle(fontWeight: FontWeight.bold))),
-              Expanded(flex: 1, child: Text('الإجمالي', style: TextStyle(fontWeight: FontWeight.bold))),
+              Expanded(
+                flex: 3,
+                child: Text(
+                  'الصنف',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'الكمية',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'السعر',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'الخصم',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'الإجمالي',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
             ],
           ),
         ),
@@ -81,7 +113,10 @@ class InvoiceItemsWidget extends StatelessWidget {
             ),
           ),
           Expanded(flex: 1, child: Text('${item.quantity ?? 0}')),
-          Expanded(flex: 1, child: Text('${(item.unitPrice ?? 0.0).toStringAsFixed(2)}')),
+          Expanded(
+            flex: 1,
+            child: Text('${(item.unitPrice ?? 0.0).toStringAsFixed(2)}'),
+          ),
           Expanded(
             flex: 1,
             child: Text(

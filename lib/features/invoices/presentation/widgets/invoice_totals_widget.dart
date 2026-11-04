@@ -63,8 +63,12 @@ class InvoiceTotalsWidget extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: isLarge ? AppFonts.fontSizeMedium : AppFonts.fontSizeMedium,
-                fontWeight: isLarge ? AppFonts.fontWeightBold : AppFonts.fontWeightRegular,
+                fontSize: isLarge
+                    ? AppFonts.fontSizeMedium
+                    : AppFonts.fontSizeMedium,
+                fontWeight: isLarge
+                    ? AppFonts.fontWeightBold
+                    : AppFonts.fontWeightRegular,
                 color: AppColors.textSecondary,
               ),
             ),
@@ -73,8 +77,12 @@ class InvoiceTotalsWidget extends StatelessWidget {
         Text(
           '${isDiscount ? '-' : ''}${AppUtils.formatNumber(value)} ${NumberFormatter.getCurrencySymbol()}',
           style: TextStyle(
-            fontSize: isLarge ? AppFonts.fontSizeXLarge : AppFonts.fontSizeMedium,
-            fontWeight: isLarge ? AppFonts.fontWeightBold : AppFonts.fontWeightSemiBold,
+            fontSize: isLarge
+                ? AppFonts.fontSizeXLarge
+                : AppFonts.fontSizeMedium,
+            fontWeight: isLarge
+                ? AppFonts.fontWeightBold
+                : AppFonts.fontWeightSemiBold,
             color: color,
           ),
         ),

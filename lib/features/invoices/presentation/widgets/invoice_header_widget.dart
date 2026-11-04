@@ -35,7 +35,7 @@ class InvoiceHeaderWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // Title and count
           Expanded(
             child: Column(
@@ -61,7 +61,7 @@ class InvoiceHeaderWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Button
           sc.Button(
             style: sc.ButtonStyle.primary(),

@@ -11,7 +11,8 @@ class PurchaseInvoiceListWidget extends StatefulWidget {
   const PurchaseInvoiceListWidget({Key? key}) : super(key: key);
 
   @override
-  State<PurchaseInvoiceListWidget> createState() => _PurchaseInvoiceListWidgetState();
+  State<PurchaseInvoiceListWidget> createState() =>
+      _PurchaseInvoiceListWidgetState();
 }
 
 class _PurchaseInvoiceListWidgetState extends State<PurchaseInvoiceListWidget> {
@@ -72,12 +73,17 @@ class _PurchaseInvoiceListWidgetState extends State<PurchaseInvoiceListWidget> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(sc.LucideIcons.circleAlert, size: 64, color: AppColors.error),
+                      Icon(
+                        sc.LucideIcons.circleAlert,
+                        size: 64,
+                        color: AppColors.error,
+                      ),
                       const SizedBox(height: 16),
                       Text(state.message),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => context.read<InvoiceCubit>().getPurchaseInvoices(),
+                        onPressed: () =>
+                            context.read<InvoiceCubit>().getPurchaseInvoices(),
                         child: const Text('إعادة المحاولة'),
                       ),
                     ],
@@ -89,7 +95,11 @@ class _PurchaseInvoiceListWidgetState extends State<PurchaseInvoiceListWidget> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(sc.LucideIcons.shoppingCart, size: 64, color: AppColors.textSecondary),
+                        Icon(
+                          sc.LucideIcons.shoppingCart,
+                          size: 64,
+                          color: AppColors.textSecondary,
+                        ),
                         const SizedBox(height: 16),
                         Text('لا توجد فواتير شراء'),
                         const SizedBox(height: 8),
@@ -99,7 +109,8 @@ class _PurchaseInvoiceListWidgetState extends State<PurchaseInvoiceListWidget> {
                   );
                 }
                 return RefreshIndicator(
-                  onRefresh: () => context.read<InvoiceCubit>().getPurchaseInvoices(),
+                  onRefresh: () =>
+                      context.read<InvoiceCubit>().getPurchaseInvoices(),
                   child: ListView.builder(
                     itemCount: state.invoices.length,
                     itemBuilder: (context, index) {
@@ -133,7 +144,8 @@ class _PurchaseInvoiceListWidgetState extends State<PurchaseInvoiceListWidget> {
 class PurchaseInvoiceCard extends StatelessWidget {
   final PurchaseInvoice invoice;
 
-  const PurchaseInvoiceCard({Key? key, required this.invoice}) : super(key: key);
+  const PurchaseInvoiceCard({Key? key, required this.invoice})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +175,9 @@ class PurchaseInvoiceCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text('التاريخ: ${invoice.invoiceDate.toString().split(' ')[0]}'),
             if (invoice.dueDate != null)
-              Text('تاريخ الاستحقاق: ${invoice.dueDate!.toString().split(' ')[0]}'),
+              Text(
+                'تاريخ الاستحقاق: ${invoice.dueDate!.toString().split(' ')[0]}',
+              ),
           ],
         ),
         trailing: Column(
@@ -227,13 +241,19 @@ class PurchaseInvoiceCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text('المورد: ${invoice.supplierName ?? "غير محدد"}'),
               const SizedBox(height: 8),
-              Text('تاريخ الإصدار: ${invoice.invoiceDate.toString().split(' ')[0]}'),
+              Text(
+                'تاريخ الإصدار: ${invoice.invoiceDate.toString().split(' ')[0]}',
+              ),
               if (invoice.dueDate != null) ...[
                 const SizedBox(height: 4),
-                Text('تاريخ الاستحقاق: ${invoice.dueDate!.toString().split(' ')[0]}'),
+                Text(
+                  'تاريخ الاستحقاق: ${invoice.dueDate!.toString().split(' ')[0]}',
+                ),
               ],
               const SizedBox(height: 8),
-              Text('المجموع الفرعي: ${invoice.subtotal.toStringAsFixed(2)} ل.س'),
+              Text(
+                'المجموع الفرعي: ${invoice.subtotal.toStringAsFixed(2)} ل.س',
+              ),
               Text('الضريبة: ${invoice.taxAmount.toStringAsFixed(2)} ل.س'),
               Text('الخصم: ${invoice.discountAmount.toStringAsFixed(2)} ل.س'),
               Text(
@@ -246,7 +266,9 @@ class PurchaseInvoiceCard extends StatelessWidget {
               ],
               if (invoice.remainingAmount > 0) ...[
                 const SizedBox(height: 4),
-                Text('المتبقي: ${invoice.remainingAmount.toStringAsFixed(2)} ل.س'),
+                Text(
+                  'المتبقي: ${invoice.remainingAmount.toStringAsFixed(2)} ل.س',
+                ),
               ],
               if (invoice.notes != null && invoice.notes!.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -282,7 +304,9 @@ class PurchaseInvoiceCard extends StatelessWidget {
                       Navigator.pop(context);
                       _showDeleteConfirmation(context, invoice);
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                    ),
                     child: const Text('حذف'),
                   ),
                 ],
@@ -335,9 +359,13 @@ class PurchaseInvoiceCard extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      context.read<InvoiceCubit>().deletePurchaseInvoice(invoice.id);
+                      context.read<InvoiceCubit>().deletePurchaseInvoice(
+                        invoice.id,
+                      );
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                    ),
                     child: const Text('حذف'),
                   ),
                 ],

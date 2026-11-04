@@ -81,13 +81,9 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
   Widget _buildSecondRow() {
     return Row(
       children: [
-        Expanded(
-          child: _buildTypeFilter(),
-        ),
+        Expanded(child: _buildTypeFilter()),
         const SizedBox(width: 10),
-        Expanded(
-          child: _buildStatusFilter(),
-        ),
+        Expanded(child: _buildStatusFilter()),
       ],
     );
   }
@@ -106,9 +102,27 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
           icon: const Icon(sc.LucideIcons.chevronDown, size: 18),
           style: const TextStyle(fontSize: 14),
           items: const [
-            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(color: AppColors.text ,fontSize: 14),)),
-            DropdownMenuItem(value: 'sale', child: Text('بيع',style: TextStyle(color: AppColors.text,fontSize: 14),)),
-            DropdownMenuItem(value: 'purchase', child: Text('شراء',style: TextStyle(color: AppColors.text,fontSize: 14),)),
+            DropdownMenuItem(
+              value: 'all',
+              child: Text(
+                'الكل',
+                style: TextStyle(color: AppColors.text, fontSize: 14),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'sale',
+              child: Text(
+                'بيع',
+                style: TextStyle(color: AppColors.text, fontSize: 14),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'purchase',
+              child: Text(
+                'شراء',
+                style: TextStyle(color: AppColors.text, fontSize: 14),
+              ),
+            ),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -126,7 +140,11 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
       decoration: InputDecoration(
         hintText: 'بحث عن فاتورة أو عميل أو مورد...',
         hintStyle: const TextStyle(fontSize: 14),
-        prefixIcon: const Icon(sc.LucideIcons.search, color: AppColors.textSecondary, size: 20),
+        prefixIcon: const Icon(
+          sc.LucideIcons.search,
+          color: AppColors.textSecondary,
+          size: 20,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.border),
@@ -160,10 +178,27 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
           icon: const Icon(sc.LucideIcons.chevronDown, size: 18),
           style: const TextStyle(fontSize: 14),
           items: const [
-            DropdownMenuItem(value: 'all', child: Text('الكل',style: TextStyle(fontSize: 14,color: AppColors.text))),
-            DropdownMenuItem(value: 'debt', child: Text('دين',style: TextStyle(fontSize: 14,color: AppColors.text))),
-            DropdownMenuItem(value: 'cash', child: Text(  'نقدي',style: TextStyle(fontSize: 14,color: AppColors.text))),
-
+            DropdownMenuItem(
+              value: 'all',
+              child: Text(
+                'الكل',
+                style: TextStyle(fontSize: 14, color: AppColors.text),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'debt',
+              child: Text(
+                'دين',
+                style: TextStyle(fontSize: 14, color: AppColors.text),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'cash',
+              child: Text(
+                'نقدي',
+                style: TextStyle(fontSize: 14, color: AppColors.text),
+              ),
+            ),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -174,8 +209,4 @@ class _InvoiceFiltersWidgetState extends State<InvoiceFiltersWidget> {
       ),
     );
   }
-
-
-
-
 }

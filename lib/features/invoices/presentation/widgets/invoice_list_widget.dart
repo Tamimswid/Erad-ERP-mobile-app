@@ -19,7 +19,7 @@ class InvoiceListWidget extends StatelessWidget {
         if (state is InvoiceLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         // Sales invoices
         if (type == 'sale' && state is SalesInvoicesLoaded) {
           final invoices = state.invoices;
@@ -28,7 +28,11 @@ class InvoiceListWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(sc.LucideIcons.receiptText, size: 64, color: AppColors.textSecondary),
+                  Icon(
+                    sc.LucideIcons.receiptText,
+                    size: 64,
+                    color: AppColors.textSecondary,
+                  ),
                   SizedBox(height: 16),
                   Text('لا يوجد فواتير بيع'),
                   SizedBox(height: 8),
@@ -45,7 +49,7 @@ class InvoiceListWidget extends StatelessWidget {
             },
           );
         }
-        
+
         // Purchase invoices
         if (type == 'purchase' && state is PurchaseInvoicesLoaded) {
           final invoices = state.invoices;
@@ -54,7 +58,11 @@ class InvoiceListWidget extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(sc.LucideIcons.receiptText, size: 64, color: AppColors.textSecondary),
+                  Icon(
+                    sc.LucideIcons.receiptText,
+                    size: 64,
+                    color: AppColors.textSecondary,
+                  ),
                   SizedBox(height: 16),
                   Text('لا يوجد فواتير شراء'),
                   SizedBox(height: 8),
@@ -71,7 +79,7 @@ class InvoiceListWidget extends StatelessWidget {
             },
           );
         }
-        
+
         return const SizedBox.shrink();
       },
     );
@@ -106,10 +114,7 @@ class SalesInvoiceCard extends StatelessWidget {
           children: [
             Text(
               '${invoice.totalAmount.toStringAsFixed(2)} ل.س',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Text(
               invoice.paymentStatus.name,
@@ -157,10 +162,7 @@ class PurchaseInvoiceCard extends StatelessWidget {
           children: [
             Text(
               '${invoice.totalAmount.toStringAsFixed(2)} ل.س',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             Text(
               invoice.paymentStatus.name,

@@ -38,9 +38,9 @@ class InvoiceEmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'جرب فلترة مختلفة أو حاول البحث مرة أخرى.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],

@@ -47,7 +47,9 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
           trailing: [
             sc.IconButton(
               variance: sc.ButtonStyle.ghost(),
-              icon: Icon(_isEditing ? sc.LucideIcons.save : sc.LucideIcons.pencil),
+              icon: Icon(
+                _isEditing ? sc.LucideIcons.save : sc.LucideIcons.pencil,
+              ),
               onPressed: _toggleEditMode,
             ),
           ],
@@ -63,9 +65,9 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
               _isEditing = false;
             });
           } else if (state is InvoiceError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         child: SingleChildScrollView(
@@ -93,10 +95,7 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
         children: [
           Text(
             'ملخص الفاتورة',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),
           _buildSummaryRow('رقم الفاتورة', _getInvoiceNumber()),
@@ -106,7 +105,10 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
             _getCustomerOrSupplierName(),
           ),
           _buildSummaryRow('الحالة', _getStatusName()),
-          _buildSummaryRow('المبلغ الإجمالي', '${_getTotalAmount().toStringAsFixed(2)} ل.س'),
+          _buildSummaryRow(
+            'المبلغ الإجمالي',
+            '${_getTotalAmount().toStringAsFixed(2)} ل.س',
+          ),
           if (_discountAmount > 0)
             _buildSummaryRow(
               'الخصم',
@@ -123,7 +125,12 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isBold = false, bool isDiscount = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    bool isDiscount = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -169,10 +176,7 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
         children: [
           const Text(
             'الإجراءات',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -257,7 +261,10 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
         currentStatus: _getPaymentStatus(),
         onStatusChanged: (newStatus) {
           // Cubit'i kullanarak status güncelle
-          context.read<InvoiceCubit>().updateInvoiceStatus(widget.invoice, newStatus);
+          context.read<InvoiceCubit>().updateInvoiceStatus(
+            widget.invoice,
+            newStatus,
+          );
           Navigator.pop(context);
         },
       ),
@@ -287,7 +294,9 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
           if (widget.type == 'sale') {
             context.read<InvoiceCubit>().deleteSalesInvoice(widget.invoice.id);
           } else {
-            context.read<InvoiceCubit>().deletePurchaseInvoice(widget.invoice.id);
+            context.read<InvoiceCubit>().deletePurchaseInvoice(
+              widget.invoice.id,
+            );
           }
         },
       ),
@@ -296,9 +305,9 @@ class _InvoiceManagementPageState extends State<InvoiceManagementPage> {
 
   void _exportToPdf() {
     // Navigate to PDF export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('سيتم تصدير الفاتورة كـ PDF')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('سيتم تصدير الفاتورة كـ PDF')));
   }
 
   void _updateInvoiceStatus(String newStatus) {

@@ -17,17 +17,13 @@ class InvoiceInfoCardWidget extends StatelessWidget {
     required this.products,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return CustomCard(
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          _buildProductsSection(),
-        ],
+        children: [_buildHeader(), _buildProductsSection()],
       ),
     );
   }
@@ -85,7 +81,6 @@ class InvoiceInfoCardWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         // Table Header
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -195,7 +190,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(unitPrice??0.0)} ${NumberFormatter.getCurrencySymbol()}',
+              '${AppUtils.formatNumber(unitPrice ?? 0.0)} ${NumberFormatter.getCurrencySymbol()}',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeSmall,
@@ -205,7 +200,7 @@ class InvoiceInfoCardWidget extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              '${AppUtils.formatNumber(total??0.0)} ${NumberFormatter.getCurrencySymbol()} ',
+              '${AppUtils.formatNumber(total ?? 0.0)} ${NumberFormatter.getCurrencySymbol()} ',
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: AppFonts.fontSizeSmall,
@@ -218,6 +213,4 @@ class InvoiceInfoCardWidget extends StatelessWidget {
       ),
     );
   }
-
- 
 }
