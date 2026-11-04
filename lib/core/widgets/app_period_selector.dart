@@ -11,7 +11,7 @@ class AppPeriodOption<T> {
 /// Compact segmented control for switching between periods, tabs or views.
 class AppPeriodSelector<T> extends StatelessWidget {
   final List<AppPeriodOption<T>> options;
-  final T selected;
+  final T? selected;
   final ValueChanged<T> onChanged;
   final bool expanded;
 

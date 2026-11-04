@@ -21,7 +21,11 @@ class MenuItem {
   final IconData icon;
   final int index;
 
-  const MenuItem({required this.title, required this.icon, required this.index});
+  const MenuItem({
+    required this.title,
+    required this.icon,
+    required this.index,
+  });
 }
 
 class DashboardPage extends StatefulWidget {
@@ -33,7 +37,8 @@ class DashboardPage extends StatefulWidget {
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserver {
+class _DashboardPageState extends State<DashboardPage>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
   bool _isConnected = true;
   bool _isKeyboardVisible = false;
@@ -108,41 +113,36 @@ class _DashboardPageState extends State<DashboardPage> with WidgetsBindingObserv
       ],
       child: _isKeyboardVisible
           ? _buildContent()
-          : Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: BottomBar(
-                // body: const SizedBox.shrink(),
-                showIcon: false,
-                layout: const BottomBarLayout(
-                  width: double.infinity,
-                  offset: 12,
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
+          : BottomBar(
+              showIcon: false,
+              layout: const BottomBarLayout(
+                width: double.infinity,
+                offset: 12,
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              theme: BottomBarThemeData(
+                barDecoration: BoxDecoration(
+                  color: colors.card,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: colors.border),
                 ),
-                theme: BottomBarThemeData(
-                  barDecoration: BoxDecoration(
-                    color: colors.card,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: colors.border),
-                  ),
-                ),
-                body: IndexedStack(index: _selectedIndex, children: [for (final item in _menuItems) _buildContent()]),
-                child: SizedBox(
-                  height: 64,
-                  child: BottomBarItems(
-                    children: [
-                      for (final item in _menuItems)
-                        BottomBarItem(
-                          icon: Icon(item.icon, size: 20),
-                          label: Text(item.title),
-                          selected: item.index == _selectedIndex,
-                          selectedColor: colors.primary,
-                          color: colors.mutedForeground,
-                          onTap: () => setState(() => _selectedIndex = item.index),
-                        ),
-                    ],
-                  ),
+              ),
+              body: _buildContent(),
+              child: SizedBox(
+                height: 64,
+                child: BottomBarItems(
+                  children: [
+                    for (final item in _menuItems)
+                      BottomBarItem(
+                        icon: Icon(item.icon, size: 20),
+                        label: Text(item.title),
+                        selected: item.index == _selectedIndex,
+                        selectedColor: colors.primary,
+                        color: colors.mutedForeground,
+                        onTap: () =>
+                            setState(() => _selectedIndex = item.index),
+                      ),
+                  ],
                 ),
               ),
             ),
