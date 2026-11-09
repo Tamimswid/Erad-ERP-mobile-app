@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/notifications/data_change_notifier.dart';
@@ -23,6 +24,7 @@ class StockReviewCubit extends Cubit<StockReviewState> {
 
   String _searchQuery = '';
   String? _selectedCategoryId;
+  DateTimeRange? _dateRange;
   int _offset = 0;
   int _requestId = 0;
   bool _hasMore = true;
@@ -44,6 +46,8 @@ class StockReviewCubit extends Cubit<StockReviewState> {
   }
 
   String? get selectedCategoryId => _selectedCategoryId;
+
+  DateTimeRange? get dateRange => _dateRange;
 
   List<StockCategory> get categories => List.unmodifiable(_categories);
 
@@ -71,6 +75,11 @@ class StockReviewCubit extends Cubit<StockReviewState> {
     await _loadFirstPage(showLoading: false);
   }
 
+  Future<void> setDateRange(DateTimeRange? range) async {
+    _dateRange = range;
+    await _loadFirstPage(showLoading: false);
+  }
+
   Future<void> reload() => _loadFirstPage();
 
   Future<void> loadMore() async {
@@ -85,6 +94,8 @@ class StockReviewCubit extends Cubit<StockReviewState> {
       limit: pageSize,
       search: _searchQuery.isEmpty ? null : _searchQuery,
       categoryId: _selectedCategoryId,
+      startDate: _dateRange?.start,
+      endDate: _dateRange?.end,
     );
     if (isClosed || requestId != _requestId) return;
 
@@ -119,6 +130,8 @@ class StockReviewCubit extends Cubit<StockReviewState> {
       limit: pageSize,
       search: _searchQuery.isEmpty ? null : _searchQuery,
       categoryId: _selectedCategoryId,
+      startDate: _dateRange?.start,
+      endDate: _dateRange?.end,
     );
     if (isClosed || requestId != _requestId) return;
 

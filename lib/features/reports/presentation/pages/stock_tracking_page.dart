@@ -4,7 +4,7 @@ import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/services/pdf_invoice_service.dart';
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/core/widgets/app_pagination_list.dart';
-import 'package:erad/core/widgets/date_filter_sheet.dart';
+import 'package:erad/core/widgets/date_range_filter_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import 'package:printing/printing.dart';
@@ -21,7 +21,6 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
   static const int _pageSize = 10;
 
   final _supabase = Supabase.instance.client;
-  final Map<String, List<String>> _categoryProductIdsCache = {};
 
   List<Map<String, dynamic>> _categories = [];
   List<Map<String, dynamic>> _products = [];
@@ -37,9 +36,6 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
   bool _isLoadingMore = false;
 
   DateTimeRange? _customDateRange;
-  bool _isCustomDateRange = false;
-  String? _selectedYear;
-  List<String> _availableYears = [];
 
   @override
   void initState() {
@@ -71,26 +67,14 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
     if (!mounted) return;
     setState(() {
       _categories = List<Map<String, dynamic>>.from(response);
-      _availableYears = [DateTime.now().year.toString()];
     });
   }
 
-  Future<List<String>> _categoryProductIds(String categoryId) async {
-    final cached = _categoryProductIdsCache[categoryId];
-    if (cached != null) return cached;
-
-    final userId = await UserService.getUserId();
-    if (userId == null) return [];
-
-    final response = await _supabase
-        .from('products')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('category_id', categoryId);
-
-    final ids = response.map((row) => row['id'] as String).toList();
-    _categoryProductIdsCache[categoryId] = ids;
-    return ids;
+  String? _dateParam(DateTime? date) {
+    if (date == null) return null;
+    return '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 
   Future<void> _loadProducts({bool reset = false}) async {
@@ -109,37 +93,22 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
     }
 
     try {
-      final userId = await UserService.getUserId();
-      if (userId == null) return;
+      final response = await _supabase.rpc(
+        'get_stock_review_page',
+        params: {
+          'p_start_date': _dateParam(_customDateRange?.start),
+          'p_end_date': _dateParam(_customDateRange?.end),
+          'p_search': null,
+          'p_category_id': _selectedCategoryId,
+          'p_product_ids': null,
+          'p_offset': _offset,
+          'p_limit': _pageSize,
+        },
+      );
 
-      var query = _supabase
-          .from('dashboard_product_stock')
-          .select()
-          .eq('user_id', userId);
-
-      if (_selectedCategoryId != null) {
-        final productIds = await _categoryProductIds(_selectedCategoryId!);
-        if (!mounted || requestId != _productsRequestId) return;
-        if (productIds.isEmpty) {
-          setState(() {
-            _products = [];
-            _hasMore = false;
-            _isLoadingMore = false;
-            _isLoadingProducts = false;
-          });
-          return;
-        }
-        query = query.inFilter('product_id', productIds);
-      }
-
-      final response = await query
-          .order('product_display_name', ascending: true)
-          .order('product_id', ascending: true)
-          .range(_offset, _offset + _pageSize);
-
-      final rows = List<Map<String, dynamic>>.from(response);
+      final rows = (response as List).cast<Map<String, dynamic>>();
       final hasMore = rows.length > _pageSize;
-      final pageItems = hasMore ? rows.sublist(0, _pageSize) : rows;
+      final pageItems = rows.take(_pageSize).toList();
 
       if (!mounted || requestId != _productsRequestId) return;
       setState(() {
@@ -189,15 +158,11 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
   }
 
   String _dateRangeLabel() {
-    if (_isCustomDateRange && _customDateRange != null) {
-      final start = _customDateRange!.start;
-      final end = _customDateRange!.end;
-      return 'من ${start.day}/${start.month}/${start.year} إلى ${end.day}/${end.month}/${end.year}';
-    }
-    if (_selectedYear != null) {
-      return 'السنة: $_selectedYear';
-    }
-    return '';
+    final range = _customDateRange;
+    if (range == null) return '';
+    final start = range.start;
+    final end = range.end;
+    return 'من ${start.day}/${start.month}/${start.year} إلى ${end.day}/${end.month}/${end.year}';
   }
 
   Future<void> _generatePdf() async {
@@ -218,14 +183,21 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
       }
 
       var selectedProducts = <Map<String, dynamic>>[];
-      if (userId != null) {
-        final response = await _supabase
-            .from('dashboard_product_stock')
-            .select()
-            .eq('user_id', userId)
-            .inFilter('product_id', _selectedProductIds.toList())
-            .order('product_display_name', ascending: true);
-        selectedProducts = List<Map<String, dynamic>>.from(response);
+      final selectedIds = _selectedProductIds.toList();
+      if (selectedIds.isNotEmpty) {
+        final response = await _supabase.rpc(
+          'get_stock_review_page',
+          params: {
+            'p_start_date': _dateParam(_customDateRange?.start),
+            'p_end_date': _dateParam(_customDateRange?.end),
+            'p_search': null,
+            'p_category_id': null,
+            'p_product_ids': selectedIds,
+            'p_offset': 0,
+            'p_limit': selectedIds.length,
+          },
+        );
+        selectedProducts = (response as List).cast<Map<String, dynamic>>();
       }
 
       final pdfService = PdfInvoiceService();
@@ -252,64 +224,19 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
   }
 
   Future<void> _showDateFilter() async {
-    final now = DateTime.now();
-    final years = _availableYears.isEmpty
-        ? [now.year.toString()]
-        : _availableYears;
-
-    await DateFilterSheet.show(
-      context: context,
-      selectedYear: _selectedYear,
-      availableYears: years,
-      customDateRange: _customDateRange,
-      isCustomDateRange: _isCustomDateRange,
-      onYearSelected: (year) {
-        setState(() {
-          _selectedYear = year;
-          _isCustomDateRange = false;
-          _customDateRange = null;
-        });
-      },
-      onDateRangeSelected: (range) {
-        setState(() {
-          _customDateRange = range;
-          _isCustomDateRange = true;
-          _selectedYear = null;
-        });
-      },
-      onClearFilter: () {
-        setState(() {
-          _selectedYear = null;
-          _customDateRange = null;
-          _isCustomDateRange = false;
-        });
-      },
-      onDateRangePickerTap: () async {
-        final picked = await showDateRangePicker(
-          context: context,
-          firstDate: DateTime(2020),
-          lastDate: DateTime.now().add(const Duration(days: 365)),
-          initialDateRange: _customDateRange,
-          locale: const Locale('ar'),
-        );
-        if (picked != null && mounted) {
-          Navigator.pop(context);
-          setState(() {
-            _customDateRange = picked;
-            _isCustomDateRange = true;
-            _selectedYear = null;
-          });
-        }
-      },
+    final result = await AppDateRangeSheet.show(
+      context,
+      initialRange: _customDateRange,
+      title: 'تصفية حسب التاريخ',
     );
+    if (result == null || !mounted) return;
+
+    setState(() => _customDateRange = result.range);
+    await _loadProducts(reset: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasFilter =
-        _selectedYear != null ||
-        (_isCustomDateRange && _customDateRange != null);
-
     return sc.Scaffold(
       headers: [
         sc.AppBar(
@@ -336,26 +263,10 @@ class _StockTrackingPageState extends State<StockTrackingPage> {
                   icon: const Icon(sc.LucideIcons.fileDown),
                   onPressed: _generatePdf,
                 ),
-              Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(sc.LucideIcons.calendar),
-                    onPressed: _showDateFilter,
-                  ),
-                  if (hasFilter)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
+              AppDateRangeFilterButton(
+                compact: true,
+                range: _customDateRange,
+                onPressed: _showDateFilter,
               ),
             ],
           ],

@@ -10,9 +10,7 @@ class TakrirlerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return sc.Scaffold(
-      headers: [
-        sc.AppBar(title: const Text('التقارير')),
-      ],
+      headers: [sc.AppBar(title: const Text('التقارير'))],
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingMd),
         child: GridView(
@@ -49,9 +47,7 @@ class TakrirlerPage extends StatelessWidget {
               title: 'تتبع المخزون',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const StockTrackingPage(),
-                ),
+                MaterialPageRoute(builder: (_) => const StockTrackingPage()),
               ),
             ),
           ],

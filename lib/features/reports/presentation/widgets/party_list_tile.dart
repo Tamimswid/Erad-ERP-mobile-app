@@ -24,7 +24,10 @@ class PartyListTile extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             leading: CircleAvatar(
               backgroundColor: AppColors.muted,
               child: Text(

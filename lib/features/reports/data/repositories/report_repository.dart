@@ -7,11 +7,15 @@ import '../datasources/report_remote_datasource.dart';
 
 abstract class ReportRepository {
   Future<Either<Failure, List<SalesInvoice>>> getSalesInvoicesByCustomer(
-    String customerId,
-  );
+    String customerId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<Either<Failure, List<PurchaseInvoice>>> getPurchaseInvoicesBySupplier(
-    String supplierId,
-  );
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<Either<Failure, PagedResult<SalesInvoice>>> getSalesInvoicesPage({
     required String customerId,
     required int offset,
@@ -42,11 +46,15 @@ class ReportRepositoryImpl implements ReportRepository {
 
   @override
   Future<Either<Failure, List<SalesInvoice>>> getSalesInvoicesByCustomer(
-    String customerId,
-  ) async {
+    String customerId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       final invoices = await _remoteDataSource.getSalesInvoicesByCustomer(
         customerId,
+        startDate: startDate,
+        endDate: endDate,
       );
       return Right(invoices);
     } catch (e) {
@@ -56,11 +64,15 @@ class ReportRepositoryImpl implements ReportRepository {
 
   @override
   Future<Either<Failure, List<PurchaseInvoice>>> getPurchaseInvoicesBySupplier(
-    String supplierId,
-  ) async {
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       final invoices = await _remoteDataSource.getPurchaseInvoicesBySupplier(
         supplierId,
+        startDate: startDate,
+        endDate: endDate,
       );
       return Right(invoices);
     } catch (e) {

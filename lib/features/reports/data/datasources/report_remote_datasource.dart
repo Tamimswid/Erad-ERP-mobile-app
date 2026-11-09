@@ -8,10 +8,16 @@ import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract class ReportRemoteDataSource {
-  Future<List<SalesInvoice>> getSalesInvoicesByCustomer(String customerId);
+  Future<List<SalesInvoice>> getSalesInvoicesByCustomer(
+    String customerId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<List<PurchaseInvoice>> getPurchaseInvoicesBySupplier(
-    String supplierId,
-  );
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<PagedResult<SalesInvoice>> getSalesInvoicesPage({
     required String customerId,
     required int offset,
@@ -39,19 +45,29 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
 
   @override
   Future<List<SalesInvoice>> getSalesInvoicesByCustomer(
-    String customerId,
-  ) async {
+    String customerId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final response = await _supabaseClient
+      var query = _supabaseClient
           .from('sales_invoices')
           .select('*, customers!inner(name), sales_invoice_items(*)')
           .eq('user_id', userId)
           .eq('customer_id', customerId)
-          .isFilter('deleted_at', null)
-          .order('invoice_date', ascending: false);
+          .isFilter('deleted_at', null);
+
+      final range = _resolveDateRange(null, startDate, endDate);
+      if (range != null) {
+        query = query
+            .gte('invoice_date', range.$1.toIso8601String())
+            .lte('invoice_date', range.$2.toIso8601String());
+      }
+
+      final response = await query.order('invoice_date', ascending: false);
 
       return response.map((json) => _mapJsonToSalesInvoice(json)).toList();
     } catch (e) {
@@ -62,19 +78,29 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
 
   @override
   Future<List<PurchaseInvoice>> getPurchaseInvoicesBySupplier(
-    String supplierId,
-  ) async {
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final response = await _supabaseClient
+      var query = _supabaseClient
           .from('purchase_invoices')
           .select('*, suppliers!inner(name), purchase_invoice_items(*)')
           .eq('user_id', userId)
           .eq('supplier_id', supplierId)
-          .isFilter('deleted_at', null)
-          .order('invoice_date', ascending: false);
+          .isFilter('deleted_at', null);
+
+      final range = _resolveDateRange(null, startDate, endDate);
+      if (range != null) {
+        query = query
+            .gte('invoice_date', range.$1.toIso8601String())
+            .lte('invoice_date', range.$2.toIso8601String());
+      }
+
+      final response = await query.order('invoice_date', ascending: false);
 
       return response.map((json) => _mapJsonToPurchaseInvoice(json)).toList();
     } catch (e) {

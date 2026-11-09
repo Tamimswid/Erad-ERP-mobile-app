@@ -122,12 +122,23 @@ class PartyInvoiceCubit extends Cubit<PartyInvoiceState> {
   Future<Either<Failure, List<dynamic>>> getInvoicesForPdf() async {
     if (_partyId.isEmpty) return const Right(<dynamic>[]);
 
+    final startDate = _isCustomDateRange ? _customDateRange?.start : null;
+    final endDate = _isCustomDateRange ? _customDateRange?.end : null;
+
     if (_isSupplier) {
-      final result = await _repository.getPurchaseInvoicesBySupplier(_partyId);
+      final result = await _repository.getPurchaseInvoicesBySupplier(
+        _partyId,
+        startDate: startDate,
+        endDate: endDate,
+      );
       return result.map((invoices) => invoices.where(_matchesFilter).toList());
     }
 
-    final result = await _repository.getSalesInvoicesByCustomer(_partyId);
+    final result = await _repository.getSalesInvoicesByCustomer(
+      _partyId,
+      startDate: startDate,
+      endDate: endDate,
+    );
     return result.map((invoices) => invoices.where(_matchesFilter).toList());
   }
 

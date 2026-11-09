@@ -1,6 +1,12 @@
 import 'package:equatable/equatable.dart';
 
-enum StockMovementType { sale, purchase, adjustment, returnSale, returnPurchase }
+enum StockMovementType {
+  sale,
+  purchase,
+  adjustment,
+  returnSale,
+  returnPurchase,
+}
 
 class StockMovement extends Equatable {
   final String id;
@@ -72,17 +78,17 @@ class StockMovement extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        productId,
-        movementType,
-        referenceId,
-        referenceType,
-        quantityChange,
-        previousStock,
-        newStock,
-        unitPrice,
-        notes,
-        createdAt,
-      ];
+    id,
+    userId,
+    productId,
+    movementType,
+    referenceId,
+    referenceType,
+    quantityChange,
+    previousStock,
+    newStock,
+    unitPrice,
+    notes,
+    createdAt,
+  ];
 }

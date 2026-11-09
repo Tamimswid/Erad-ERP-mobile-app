@@ -11,15 +11,15 @@ class PartyInvoiceEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(sc.LucideIcons.receiptText,
-              size: 64, color: AppColors.textSecondary),
+          Icon(
+            sc.LucideIcons.receiptText,
+            size: 64,
+            color: AppColors.textSecondary,
+          ),
           const SizedBox(height: 16),
           Text(
             'لا توجد فواتير',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 16,
-            ),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
           ),
         ],
       ),

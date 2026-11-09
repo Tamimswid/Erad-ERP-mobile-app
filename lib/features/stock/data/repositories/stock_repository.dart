@@ -18,6 +18,8 @@ class StockRepository {
     int limit = 10,
     String? search,
     String? categoryId,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     if (!await _networkInfo.isConnected) {
       return Left(NetworkFailure.noConnection());
@@ -28,6 +30,8 @@ class StockRepository {
         limit: limit,
         search: search,
         categoryId: categoryId,
+        startDate: startDate,
+        endDate: endDate,
       );
       return Right(page);
     } on Failure catch (failure) {

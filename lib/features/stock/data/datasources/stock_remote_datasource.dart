@@ -12,6 +12,8 @@ abstract class StockRemoteDataSource {
     int limit = 10,
     String? search,
     String? categoryId,
+    DateTime? startDate,
+    DateTime? endDate,
   });
 
   Future<List<StockCategory>> getCategories();
@@ -28,6 +30,8 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
     int limit = 10,
     String? search,
     String? categoryId,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     try {
       final userId = await UserService.getUserId();
@@ -35,35 +39,26 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
         throw Exception('User not logged in');
       }
 
-      var query = _client
-          .from('dashboard_product_stock')
-          .select()
-          .eq('user_id', userId);
+      final response = await _client.rpc(
+        'get_stock_review_page',
+        params: {
+          'p_start_date': _dateParam(startDate),
+          'p_end_date': _dateParam(endDate),
+          'p_search': search,
+          'p_category_id': categoryId,
+          'p_product_ids': null,
+          'p_offset': offset,
+          'p_limit': limit,
+        },
+      );
 
-      if (categoryId != null) {
-        final productIds = await _getProductIdsByCategory(userId, categoryId);
-        if (productIds.isEmpty) {
-          return const PagedResult(items: <StockReviewItem>[], hasMore: false);
-        }
-        query = query.inFilter('product_id', productIds);
-      }
-
-      final term = search?.trim() ?? '';
-      if (term.isNotEmpty) {
-        query = query.ilike('product_display_name', '%$term%');
-      }
-
-      final response = await query
-          .order('product_display_name', ascending: true)
-          .order('product_id', ascending: true)
-          .range(offset, offset + limit);
-
-      final items = response
-          .map((row) => StockReviewItem.fromMap(row))
-          .toList();
-      final hasMore = items.length > limit;
+      final rows = (response as List).cast<Map<String, dynamic>>();
+      final hasMore = rows.length > limit;
       return PagedResult(
-        items: hasMore ? items.sublist(0, limit) : items,
+        items: rows
+            .take(limit)
+            .map((row) => StockReviewItem.fromMap(row))
+            .toList(),
         hasMore: hasMore,
       );
     } catch (e) {
@@ -92,17 +87,10 @@ class StockRemoteDataSourceImpl implements StockRemoteDataSource {
     }
   }
 
-  Future<List<String>> _getProductIdsByCategory(
-    String userId,
-    String categoryId,
-  ) async {
-    final response = await _client
-        .from('products')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('category_id', categoryId)
-        .eq('is_active', true);
-
-    return response.map((row) => row['id'] as String).toList();
+  String? _dateParam(DateTime? date) {
+    if (date == null) return null;
+    return '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
   }
 }

@@ -2,6 +2,7 @@ import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart';
 import 'package:erad/core/widgets/app_pagination_list.dart';
 import 'package:erad/core/widgets/app_stat_tile.dart';
+import 'package:erad/core/widgets/date_range_filter_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
@@ -72,45 +73,70 @@ class _StockReviewPageState extends State<StockReviewPage> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: TextField(
-        controller: _searchController,
-        onChanged: (value) {
-          cubit.updateSearch(value);
-          setState(() {});
-        },
-        textInputAction: TextInputAction.search,
-        style: TextStyle(fontSize: 14, color: scheme.foreground),
-        decoration: InputDecoration(
-          hintText: 'ابحث باسم المنتج',
-          hintStyle: TextStyle(fontSize: 13, color: scheme.mutedForeground),
-          prefixIcon: Icon(
-            sc.LucideIcons.search,
-            size: 18,
-            color: scheme.mutedForeground,
-          ),
-          suffixIcon: _searchController.text.isEmpty
-              ? null
-              : IconButton(
-                  onPressed: () {
-                    _searchController.clear();
-                    cubit.updateSearch('');
-                    setState(() {});
-                  },
-                  icon: Icon(
-                    sc.LucideIcons.x,
-                    size: 16,
-                    color: scheme.mutedForeground,
-                  ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                cubit.updateSearch(value);
+                setState(() {});
+              },
+              textInputAction: TextInputAction.search,
+              style: TextStyle(fontSize: 14, color: scheme.foreground),
+              decoration: InputDecoration(
+                hintText: 'ابحث باسم المنتج',
+                hintStyle: TextStyle(
+                  fontSize: 13,
+                  color: scheme.mutedForeground,
                 ),
-          filled: true,
-          fillColor: scheme.card,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 12,
+                prefixIcon: Icon(
+                  sc.LucideIcons.search,
+                  size: 18,
+                  color: scheme.mutedForeground,
+                ),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: () {
+                          _searchController.clear();
+                          cubit.updateSearch('');
+                          setState(() {});
+                        },
+                        icon: Icon(
+                          sc.LucideIcons.x,
+                          size: 16,
+                          color: scheme.mutedForeground,
+                        ),
+                      ),
+                filled: true,
+                fillColor: scheme.card,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          AppDateRangeFilterButton(
+            compact: true,
+            range: cubit.dateRange,
+            onPressed: () => _openDateFilter(cubit),
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _openDateFilter(StockReviewCubit cubit) async {
+    final result = await AppDateRangeSheet.show(
+      context,
+      initialRange: cubit.dateRange,
+      title: 'تصفية حسب التاريخ',
+    );
+    if (result == null || !mounted) return;
+    await cubit.setDateRange(result.range);
   }
 
   Widget _buildCategoryChips(StockReviewCubit cubit) {

@@ -10,7 +10,7 @@ import '../../../../core/di/services_locator.dart';
 import '../../../../core/services/pdf_invoice_service.dart';
 import '../../../../core/services/user_service.dart';
 import '../../../../core/widgets/app_pagination_list.dart';
-import '../../../../core/widgets/date_filter_sheet.dart';
+import '../../../../core/widgets/date_range_filter_sheet.dart';
 import '../../../../core/widgets/invoice_card_widget.dart';
 import '../bloc/party_invoice_cubit.dart';
 
@@ -59,31 +59,20 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
 
   Future<void> _showDateFilter() async {
     final cubit = context.read<PartyInvoiceCubit>();
-    final years = cubit.availableYears;
 
-    await DateFilterSheet.show(
-      context: context,
-      selectedYear: cubit.selectedYear,
-      availableYears: years,
-      customDateRange: cubit.customDateRange,
-      isCustomDateRange: cubit.isCustomDateRange,
-      onYearSelected: (year) => cubit.setYear(year),
-      onDateRangeSelected: (range) => cubit.setCustomDateRange(range),
-      onClearFilter: () => cubit.clearFilter(),
-      onDateRangePickerTap: () async {
-        final picked = await showDateRangePicker(
-          context: context,
-          firstDate: DateTime(2020),
-          lastDate: DateTime.now().add(const Duration(days: 365)),
-          initialDateRange: cubit.customDateRange,
-          locale: const Locale('ar'),
-        );
-        if (picked != null && mounted) {
-          Navigator.pop(context);
-          cubit.setCustomDateRange(picked);
-        }
-      },
+    final result = await AppDateRangeSheet.show(
+      context,
+      initialRange: cubit.customDateRange,
+      title: 'تصفية حسب التاريخ',
     );
+    if (result == null || !mounted) return;
+
+    final range = result.range;
+    if (range == null) {
+      await cubit.clearFilter();
+    } else {
+      await cubit.setCustomDateRange(range);
+    }
   }
 
   Future<void> _generatePdf() async {
@@ -147,9 +136,6 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
     final cubit = context.watch<PartyInvoiceCubit>();
     final state = cubit.state;
     final type = widget.isSupplier ? 'purchase' : 'sale';
-    final hasFilter =
-        cubit.selectedYear != null ||
-        (cubit.isCustomDateRange && cubit.customDateRange != null);
 
     return sc.Scaffold(
       headers: [
@@ -179,28 +165,10 @@ class _DetailPageBodyState extends State<_DetailPageBody> {
                     ? _generatePdf
                     : null,
               ),
-              Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(sc.LucideIcons.calendar),
-                    onPressed: _showDateFilter,
-                  ),
-                  if (hasFilter)
-                    const Positioned(
-                      right: 8,
-                      top: 8,
-                      child: SizedBox(
-                        width: 8,
-                        height: 8,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+              AppDateRangeFilterButton(
+                compact: true,
+                range: cubit.customDateRange,
+                onPressed: _showDateFilter,
               ),
             ],
           ],
