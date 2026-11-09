@@ -25,6 +25,8 @@ class PurchaseInvoice extends Equatable {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final String? supplierName;
+  final String? supplierCityId;
+  final String? supplierCityName;
   final List<InvoiceItem> items;
 
   const PurchaseInvoice({
@@ -41,14 +43,16 @@ class PurchaseInvoice extends Equatable {
     required this.totalAmount,
     this.paidAmount = 0.0,
     this.remainingAmount = 0.0,
-   required this.paymentStatus,
-   required this.status,
+    required this.paymentStatus,
+    required this.status,
     this.notes,
     this.isFinalized = false,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
     this.supplierName,
+    this.supplierCityId,
+    this.supplierCityName,
     this.items = const [],
   });
 
@@ -66,7 +70,7 @@ class PurchaseInvoice extends Equatable {
     double? totalAmount,
     double? paidAmount,
     double? remainingAmount,
-    InvoiceStatus? status ,
+    InvoiceStatus? status,
     PaymentStatus? paymentStatus,
     String? notes,
     bool? isFinalized,
@@ -74,6 +78,8 @@ class PurchaseInvoice extends Equatable {
     DateTime? updatedAt,
     DateTime? deletedAt,
     String? supplierName,
+    String? supplierCityId,
+    String? supplierCityName,
     List<InvoiceItem>? items,
   }) {
     return PurchaseInvoice(
@@ -97,8 +103,10 @@ class PurchaseInvoice extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       supplierName: supplierName ?? this.supplierName,
+      supplierCityId: supplierCityId ?? this.supplierCityId,
+      supplierCityName: supplierCityName ?? this.supplierCityName,
       items: items ?? this.items,
-       status: status ?? this.status,
+      status: status ?? this.status,
     );
   }
 
@@ -124,6 +132,8 @@ class PurchaseInvoice extends Equatable {
       'updated_at': updatedAt.toIso8601String(),
       'deleted_at': deletedAt?.toIso8601String(),
       'supplier_name': supplierName,
+      'supplier_city_id': supplierCityId,
+      'supplier_city_name': supplierCityName,
       'items': items.map((InvoiceItem item) => item.toJson()).toList(),
     };
   }
@@ -134,8 +144,12 @@ class PurchaseInvoice extends Equatable {
       userId: json['user_id'] ?? '',
       invoiceNumber: json['invoice_number'] ?? '',
       supplierId: json['supplier_id'],
-      invoiceDate: json['invoice_date'] != null ? DateTime.parse(json['invoice_date']) : DateTime.now(),
-      dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
+      invoiceDate: json['invoice_date'] != null
+          ? DateTime.parse(json['invoice_date'])
+          : DateTime.now(),
+      dueDate: json['due_date'] != null
+          ? DateTime.parse(json['due_date'])
+          : null,
       subtotal: (json['subtotal'] ?? 0).toDouble(),
       discountAmount: (json['discount_amount'] ?? 0).toDouble(),
       taxAmount: (json['tax_amount'] ?? 0).toDouble(),
@@ -153,11 +167,20 @@ class PurchaseInvoice extends Equatable {
       ),
       notes: json['notes'],
       isFinalized: json['is_finalized'] ?? false,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : DateTime.now(),
-      deletedAt: json['deleted_at'] != null ? DateTime.parse(json['deleted_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'])
+          : null,
       supplierName: json['supplier_name'],
-      items: (json['items'] as List<dynamic>?)
+      supplierCityId: json['supplier_city_id'],
+      supplierCityName: json['supplier_city_name'],
+      items:
+          (json['items'] as List<dynamic>?)
               ?.map((item) => InvoiceItem.fromJson(item))
               .toList() ??
           [],
@@ -166,26 +189,28 @@ class PurchaseInvoice extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        invoiceNumber,
-        supplierId,
-        invoiceDate,
-        dueDate,
-        subtotal,
-        discountAmount,
-        taxAmount,
-        shippingCost,
-        totalAmount,
-        paidAmount,
-        remainingAmount,
-        paymentStatus,
-        notes,
-        isFinalized,
-        createdAt,
-        updatedAt,
-        deletedAt,
-        supplierName,
-        items,
-      ];
+    id,
+    userId,
+    invoiceNumber,
+    supplierId,
+    invoiceDate,
+    dueDate,
+    subtotal,
+    discountAmount,
+    taxAmount,
+    shippingCost,
+    totalAmount,
+    paidAmount,
+    remainingAmount,
+    paymentStatus,
+    notes,
+    isFinalized,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    supplierName,
+    supplierCityId,
+    supplierCityName,
+    items,
+  ];
 }

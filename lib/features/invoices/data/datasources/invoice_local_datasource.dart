@@ -4,7 +4,10 @@ import '../models/purchase_invoice.dart';
 
 abstract class InvoiceLocalDataSource {
   Future<void> cacheSalesInvoices(String userId, List<SalesInvoice> invoices);
-  Future<void> cachePurchaseInvoices(String userId, List<PurchaseInvoice> invoices);
+  Future<void> cachePurchaseInvoices(
+    String userId,
+    List<PurchaseInvoice> invoices,
+  );
   Future<List<SalesInvoice>> getCachedSalesInvoices(String userId);
   Future<List<PurchaseInvoice>> getCachedPurchaseInvoices(String userId);
   Future<void> clearCache(String userId);
@@ -16,7 +19,10 @@ class InvoiceLocalDataSourceImpl implements InvoiceLocalDataSource {
   InvoiceLocalDataSourceImpl(this._db);
 
   @override
-  Future<void> cacheSalesInvoices(String userId, List<SalesInvoice> invoices) async {
+  Future<void> cacheSalesInvoices(
+    String userId,
+    List<SalesInvoice> invoices,
+  ) async {
     await _db.clearTable('sales_invoices_cache', userId);
     await _db.upsertJsonList(
       'sales_invoices_cache',
@@ -27,7 +33,10 @@ class InvoiceLocalDataSourceImpl implements InvoiceLocalDataSource {
   }
 
   @override
-  Future<void> cachePurchaseInvoices(String userId, List<PurchaseInvoice> invoices) async {
+  Future<void> cachePurchaseInvoices(
+    String userId,
+    List<PurchaseInvoice> invoices,
+  ) async {
     await _db.clearTable('purchase_invoices_cache', userId);
     await _db.upsertJsonList(
       'purchase_invoices_cache',

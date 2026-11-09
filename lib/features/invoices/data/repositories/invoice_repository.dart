@@ -7,6 +7,7 @@ import '../../../../core/services/user_service.dart';
 import '../../../../core/utils/paged_result.dart';
 import '../models/sales_invoice.dart';
 import '../models/purchase_invoice.dart';
+import '../models/invoice_list_filter.dart';
 import '../datasources/invoice_local_datasource.dart';
 import '../datasources/invoice_remote_datasource.dart';
 
@@ -23,28 +24,43 @@ abstract class InvoiceRepository {
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    String? cityName,
+    List<String> productIds = const [],
   });
   // جلب صفحة من فواتير الشراء
-  Future<Either<Failure, PagedResult<PurchaseInvoice>>> getPurchaseInvoicesPage({
+  Future<Either<Failure, PagedResult<PurchaseInvoice>>>
+  getPurchaseInvoicesPage({
     required int offset,
     int limit = 10,
     String? status,
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    String? cityName,
+    List<String> productIds = const [],
   });
   // جلب فاتورة بيع بالمعرف
   Future<Either<Failure, SalesInvoice>> getSalesInvoiceById(String id);
   // جلب فاتورة شراء بالمعرف
   Future<Either<Failure, PurchaseInvoice>> getPurchaseInvoiceById(String id);
   // إنشاء فاتورة بيع جديدة
-  Future<Either<Failure, SalesInvoice>> createSalesInvoice(SalesInvoice invoice);
+  Future<Either<Failure, SalesInvoice>> createSalesInvoice(
+    SalesInvoice invoice,
+  );
   // إنشاء فاتورة شراء جديدة
-  Future<Either<Failure, PurchaseInvoice>> createPurchaseInvoice(PurchaseInvoice invoice);
+  Future<Either<Failure, PurchaseInvoice>> createPurchaseInvoice(
+    PurchaseInvoice invoice,
+  );
   // تحديث فاتورة بيع
-  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(SalesInvoice invoice);
+  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(
+    SalesInvoice invoice,
+  );
   // تحديث فاتورة شراء
-  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(PurchaseInvoice invoice);
+  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(
+    PurchaseInvoice invoice,
+  );
   // حذف فاتورة بيع
   Future<Either<Failure, void>> deleteSalesInvoice(String id);
   // حذف فاتورة شراء
@@ -54,7 +70,10 @@ abstract class InvoiceRepository {
   // إنهاء فاتورة شراء
   Future<Either<Failure, void>> finalizePurchaseInvoice(String id);
   // تحديث رصيد العميل
-  Future<Either<Failure, void>> updateCustomerBalance(String customerId, double amount);
+  Future<Either<Failure, void>> updateCustomerBalance(
+    String customerId,
+    double amount,
+  );
 }
 
 // تنفيذ مستودع الفواتير - يغلف datasource ويعالج الأخطاء
@@ -63,7 +82,11 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   final InvoiceLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
 
-  InvoiceRepositoryImpl(this.remoteDataSource, this.localDataSource, this.networkInfo);
+  InvoiceRepositoryImpl(
+    this.remoteDataSource,
+    this.localDataSource,
+    this.networkInfo,
+  );
 
   @override
   Future<Either<Failure, List<SalesInvoice>>> getSalesInvoices() async {
@@ -125,6 +148,9 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    String? cityName,
+    List<String> productIds = const [],
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -135,6 +161,8 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
           dateFrom: dateFrom,
           dateTo: dateTo,
           search: search,
+          cityId: cityId,
+          productIds: productIds,
         );
         return Right(result);
       } catch (e) {
@@ -146,29 +174,28 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       final userId = await UserService.getUserId();
       if (userId == null) return Left(ServerFailure('User not found'));
       final cached = await localDataSource.getCachedSalesInvoices(userId);
-      final filtered = cached
-          .where((invoice) {
-            if (status != null &&
-                status != 'all' &&
-                invoice.paymentStatus.name != status) {
-              return false;
-            }
-            if (dateFrom != null && invoice.invoiceDate.isBefore(dateFrom)) {
-              return false;
-            }
-            if (dateTo != null && invoice.invoiceDate.isAfter(dateTo)) {
-              return false;
-            }
-            if (search != null && search.trim().isNotEmpty) {
-              final term = search.toLowerCase();
-              final number = invoice.invoiceNumber.toLowerCase();
-              final party = invoice.customerName?.toLowerCase() ?? '';
-              if (!number.contains(term) && !party.contains(term)) return false;
-            }
-            return true;
-          })
-          .toList()
-        ..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      final listFilter = _toListFilter(
+        status: status,
+        cityId: cityId,
+        cityName: cityName,
+        productIds: productIds,
+      );
+      final filtered = cached.where((invoice) {
+        if (!listFilter.matchesSales(invoice)) return false;
+        if (dateFrom != null && invoice.invoiceDate.isBefore(dateFrom)) {
+          return false;
+        }
+        if (dateTo != null && invoice.invoiceDate.isAfter(dateTo)) {
+          return false;
+        }
+        if (search != null && search.trim().isNotEmpty) {
+          final term = search.toLowerCase();
+          final number = invoice.invoiceNumber.toLowerCase();
+          final party = invoice.customerName?.toLowerCase() ?? '';
+          if (!number.contains(term) && !party.contains(term)) return false;
+        }
+        return true;
+      }).toList()..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
       final page = _slice(filtered, offset, limit);
       return Right(page);
     } catch (_) {
@@ -177,13 +204,17 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, PagedResult<PurchaseInvoice>>> getPurchaseInvoicesPage({
+  Future<Either<Failure, PagedResult<PurchaseInvoice>>>
+  getPurchaseInvoicesPage({
     required int offset,
     int limit = 10,
     String? status,
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    String? cityName,
+    List<String> productIds = const [],
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -194,6 +225,8 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
           dateFrom: dateFrom,
           dateTo: dateTo,
           search: search,
+          cityId: cityId,
+          productIds: productIds,
         );
         return Right(result);
       } catch (e) {
@@ -205,34 +238,49 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
       final userId = await UserService.getUserId();
       if (userId == null) return Left(ServerFailure('User not found'));
       final cached = await localDataSource.getCachedPurchaseInvoices(userId);
-      final filtered = cached
-          .where((invoice) {
-            if (status != null &&
-                status != 'all' &&
-                invoice.paymentStatus.name != status) {
-              return false;
-            }
-            if (dateFrom != null && invoice.invoiceDate.isBefore(dateFrom)) {
-              return false;
-            }
-            if (dateTo != null && invoice.invoiceDate.isAfter(dateTo)) {
-              return false;
-            }
-            if (search != null && search.trim().isNotEmpty) {
-              final term = search.toLowerCase();
-              final number = invoice.invoiceNumber.toLowerCase();
-              final party = invoice.supplierName?.toLowerCase() ?? '';
-              if (!number.contains(term) && !party.contains(term)) return false;
-            }
-            return true;
-          })
-          .toList()
-        ..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
+      final listFilter = _toListFilter(
+        status: status,
+        cityId: cityId,
+        cityName: cityName,
+        productIds: productIds,
+      );
+      final filtered = cached.where((invoice) {
+        if (!listFilter.matchesPurchase(invoice)) return false;
+        if (dateFrom != null && invoice.invoiceDate.isBefore(dateFrom)) {
+          return false;
+        }
+        if (dateTo != null && invoice.invoiceDate.isAfter(dateTo)) {
+          return false;
+        }
+        if (search != null && search.trim().isNotEmpty) {
+          final term = search.toLowerCase();
+          final number = invoice.invoiceNumber.toLowerCase();
+          final party = invoice.supplierName?.toLowerCase() ?? '';
+          if (!number.contains(term) && !party.contains(term)) return false;
+        }
+        return true;
+      }).toList()..sort((a, b) => b.invoiceDate.compareTo(a.invoiceDate));
       final page = _slice(filtered, offset, limit);
       return Right(page);
     } catch (_) {
       return Left(NetworkFailure.noConnection());
     }
+  }
+
+  InvoiceListFilter _toListFilter({
+    String? status,
+    String? cityId,
+    String? cityName,
+    required List<String> productIds,
+  }) {
+    return InvoiceListFilter(
+      paymentStatus: status ?? InvoiceListFilter.allPaymentStatus,
+      cityId: cityId,
+      cityName: cityName,
+      products: productIds
+          .map((id) => InvoiceProductSelection(id: id, name: ''))
+          .toList(growable: false),
+    );
   }
 
   PagedResult<T> _slice<T>(List<T> items, int offset, int limit) {
@@ -255,7 +303,9 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, PurchaseInvoice>> getPurchaseInvoiceById(String id) async {
+  Future<Either<Failure, PurchaseInvoice>> getPurchaseInvoiceById(
+    String id,
+  ) async {
     try {
       final invoice = await remoteDataSource.getPurchaseInvoiceById(id);
       return Right(invoice);
@@ -265,7 +315,9 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, SalesInvoice>> createSalesInvoice(SalesInvoice invoice) async {
+  Future<Either<Failure, SalesInvoice>> createSalesInvoice(
+    SalesInvoice invoice,
+  ) async {
     try {
       final createdInvoice = await remoteDataSource.createSalesInvoice(invoice);
       return Right(createdInvoice);
@@ -275,9 +327,13 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, PurchaseInvoice>> createPurchaseInvoice(PurchaseInvoice invoice) async {
+  Future<Either<Failure, PurchaseInvoice>> createPurchaseInvoice(
+    PurchaseInvoice invoice,
+  ) async {
     try {
-      final createdInvoice = await remoteDataSource.createPurchaseInvoice(invoice);
+      final createdInvoice = await remoteDataSource.createPurchaseInvoice(
+        invoice,
+      );
       return Right(createdInvoice);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -285,7 +341,9 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(SalesInvoice invoice) async {
+  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(
+    SalesInvoice invoice,
+  ) async {
     try {
       final updatedInvoice = await remoteDataSource.updateSalesInvoice(invoice);
       return Right(updatedInvoice);
@@ -295,9 +353,13 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(PurchaseInvoice invoice) async {
+  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(
+    PurchaseInvoice invoice,
+  ) async {
     try {
-      final updatedInvoice = await remoteDataSource.updatePurchaseInvoice(invoice);
+      final updatedInvoice = await remoteDataSource.updatePurchaseInvoice(
+        invoice,
+      );
       return Right(updatedInvoice);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -345,7 +407,10 @@ class InvoiceRepositoryImpl implements InvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateCustomerBalance(String customerId, double amount) async {
+  Future<Either<Failure, void>> updateCustomerBalance(
+    String customerId,
+    double amount,
+  ) async {
     try {
       await remoteDataSource.updateCustomerBalance(customerId, amount);
       return const Right(null);

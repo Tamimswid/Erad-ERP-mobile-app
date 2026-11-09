@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:erad/features/products/data/models/product.dart';
 
-
 class InvoiceItem extends Equatable {
   final String? id;
   final String? productId;
@@ -11,13 +10,12 @@ class InvoiceItem extends Equatable {
   final double? purchasePrice;
   final double? discountAmount;
   final double? totalPrice;
-  final String? unit;  
+  final String? unit;
   final String? measurement;
   final DateTime? createdAt;
-   
 
   const InvoiceItem({
-     this.id,
+    this.id,
     this.productId,
     this.productName,
     this.quantity,
@@ -61,7 +59,7 @@ class InvoiceItem extends Equatable {
   factory InvoiceItem.fromProduct(ProductModel product, int quantity) {
     final unitPrice = product.salePrice;
     final totalPrice = unitPrice * quantity;
-    
+
     return InvoiceItem(
       measurement: product.measurement,
       productId: product.id,
@@ -86,8 +84,8 @@ class InvoiceItem extends Equatable {
       totalPrice: (json['total_price'] as num?)?.toDouble(),
       unit: json['unit'] as String?,
       measurement: json['measurement'] as String?,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at'] as String) 
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
           : null,
     );
   }
@@ -106,23 +104,22 @@ class InvoiceItem extends Equatable {
       'measurement': measurement,
       'created_at': createdAt?.toIso8601String(),
     };
-    
   }
 
   @override
   List<Object?> get props => [
-        id,
-        productId,
-        productName,
-        quantity,
-        unitPrice,
-        purchasePrice,
-        discountAmount,
-        totalPrice,
-        unit,
-        measurement,
-        createdAt,
-      ];
+    id,
+    productId,
+    productName,
+    quantity,
+    unitPrice,
+    purchasePrice,
+    discountAmount,
+    totalPrice,
+    unit,
+    measurement,
+    createdAt,
+  ];
 
-        String get nameWithMeasurementUnit => '$productName $measurement $unit';
+  String get nameWithMeasurementUnit => '$productName $measurement $unit';
 }

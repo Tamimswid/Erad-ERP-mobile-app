@@ -164,6 +164,7 @@ class InvoiceFiltered extends InvoiceState {
   final double totalAmount;
   final bool isLoadingMore;
   final bool hasMore;
+  final InvoiceListFilter filter;
 
   const InvoiceFiltered({
     required this.salesInvoices,
@@ -174,6 +175,7 @@ class InvoiceFiltered extends InvoiceState {
     required this.totalAmount,
     this.isLoadingMore = false,
     this.hasMore = false,
+    this.filter = const InvoiceListFilter(),
   });
 
   @override
@@ -186,5 +188,6 @@ class InvoiceFiltered extends InvoiceState {
     totalAmount,
     isLoadingMore,
     hasMore,
+    filter,
   ];
 }

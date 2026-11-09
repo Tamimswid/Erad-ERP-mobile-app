@@ -27,6 +27,8 @@ class SalesInvoice extends Equatable {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final String? customerName;
+  final String? customerCityId;
+  final String? customerCityName;
   final List<InvoiceItem> items;
   final double totalPurchaseAmount;
   final double profit;
@@ -47,14 +49,16 @@ class SalesInvoice extends Equatable {
     this.paidAmount = 0.0,
     this.remainingAmount = 0.0,
     this.paymentMethod = 'cash',
-   required this.status ,
-   required this.paymentStatus,
+    required this.status,
+    required this.paymentStatus,
     this.notes,
     this.isFinalized = false,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
     this.customerName,
+    this.customerCityId,
+    this.customerCityName,
     this.items = const [],
     this.totalPurchaseAmount = 0.0,
     this.profit = 0.0,
@@ -84,6 +88,8 @@ class SalesInvoice extends Equatable {
     DateTime? updatedAt,
     DateTime? deletedAt,
     String? customerName,
+    String? customerCityId,
+    String? customerCityName,
     List<InvoiceItem>? items,
     double? totalPurchaseAmount,
     double? profit,
@@ -112,6 +118,8 @@ class SalesInvoice extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       customerName: customerName ?? this.customerName,
+      customerCityId: customerCityId ?? this.customerCityId,
+      customerCityName: customerCityName ?? this.customerCityName,
       items: items ?? this.items,
       totalPurchaseAmount: totalPurchaseAmount ?? this.totalPurchaseAmount,
       profit: profit ?? this.profit,
@@ -141,6 +149,8 @@ class SalesInvoice extends Equatable {
       'updated_at': updatedAt.toIso8601String(),
       'deleted_at': deletedAt?.toIso8601String(),
       'customer_name': customerName,
+      'customer_city_id': customerCityId,
+      'customer_city_name': customerCityName,
       'total_purchase_amount': totalPurchaseAmount.toDouble(),
       'profit': profit.toDouble(),
       'items': items.map((InvoiceItem item) => item.toJson()).toList(),
@@ -153,8 +163,12 @@ class SalesInvoice extends Equatable {
       userId: json['user_id'] ?? '',
       invoiceNumber: json['invoice_number'] ?? '',
       customerId: json['customer_id'],
-      invoiceDate: json['invoice_date'] != null ? DateTime.parse(json['invoice_date']) : DateTime.now(),
-      dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
+      invoiceDate: json['invoice_date'] != null
+          ? DateTime.parse(json['invoice_date'])
+          : DateTime.now(),
+      dueDate: json['due_date'] != null
+          ? DateTime.parse(json['due_date'])
+          : null,
       subtotal: (json['subtotal'] ?? 0).toDouble(),
       discountAmount: (json['discount_amount'] ?? 0).toDouble(),
       taxAmount: (json['tax_amount'] ?? 0).toDouble(),
@@ -174,13 +188,22 @@ class SalesInvoice extends Equatable {
       ),
       notes: json['notes'],
       isFinalized: json['is_finalized'] ?? false,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : DateTime.now(),
-      deletedAt: json['deleted_at'] != null ? DateTime.parse(json['deleted_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'])
+          : null,
       customerName: json['customer_name'],
+      customerCityId: json['customer_city_id'],
+      customerCityName: json['customer_city_name'],
       totalPurchaseAmount: (json['total_purchase_amount'] ?? 0).toDouble(),
       profit: (json['profit'] ?? 0).toDouble(),
-      items: (json['items'] as List<dynamic>?)
+      items:
+          (json['items'] as List<dynamic>?)
               ?.map((item) => InvoiceItem.fromJson(item))
               .toList() ??
           [],
@@ -189,32 +212,34 @@ class SalesInvoice extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        invoiceNumber,
-        customerId,
-        invoiceDate,
-        dueDate,
-        subtotal,
-        discountAmount,
-        taxAmount,
-        taxPercentage,
-        shippingCost,
-        totalAmount,
-        paidAmount,
-        remainingAmount,
-        paymentMethod,
-        paymentStatus,
-        notes,
-        isFinalized,
-        createdAt,
-        updatedAt,
-        deletedAt,
-        customerName,
-        items,
-        totalPurchaseAmount,
-        profit,
-      ];
+    id,
+    userId,
+    invoiceNumber,
+    customerId,
+    invoiceDate,
+    dueDate,
+    subtotal,
+    discountAmount,
+    taxAmount,
+    taxPercentage,
+    shippingCost,
+    totalAmount,
+    paidAmount,
+    remainingAmount,
+    paymentMethod,
+    paymentStatus,
+    notes,
+    isFinalized,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    customerName,
+    customerCityId,
+    customerCityName,
+    items,
+    totalPurchaseAmount,
+    profit,
+  ];
 }
 
 // class SalesInvoiceItem extends Equatable {

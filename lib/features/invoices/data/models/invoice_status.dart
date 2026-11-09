@@ -8,9 +8,12 @@ enum InvoiceStatus {
 
   String get getArabicName {
     switch (this) {
-      case InvoiceStatus.draft: return 'مسودة';
-      case InvoiceStatus.completed: return 'مكتملة';
-      case InvoiceStatus.cancelled: return 'ملغاة';
+      case InvoiceStatus.draft:
+        return 'مسودة';
+      case InvoiceStatus.completed:
+        return 'مكتملة';
+      case InvoiceStatus.cancelled:
+        return 'ملغاة';
     }
   }
 

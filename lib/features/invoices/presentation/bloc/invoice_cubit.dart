@@ -1,8 +1,12 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
+import 'package:erad/core/errors/failures.dart';
 import 'package:erad/core/notifications/data_change_notifier.dart';
 import 'package:erad/core/services/user_service.dart';
+import 'package:erad/core/utils/paged_result.dart';
+import 'package:erad/features/invoices/data/models/invoice_list_filter.dart';
 import 'package:erad/features/invoices/data/models/invoice_status.dart';
 import 'package:erad/features/invoices/data/models/sales_invoice.dart';
 import 'package:erad/features/invoices/data/models/purchase_invoice.dart';
@@ -28,10 +32,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   // New filtering state
   String _selectedType = 'sale';
-  String _selectedStatus = 'all';
+  InvoiceListFilter _listFilter = const InvoiceListFilter();
   String _searchQuery = '';
-  DateTime? _dateFrom;
-  DateTime? _dateTo;
 
   // Invoice creation state
   String _invoiceType = 'sale';
@@ -50,10 +52,8 @@ class InvoiceCubit extends Cubit<InvoiceState> {
 
   // Getters for accessing filter state
   String get selectedType => _selectedType;
-  String get selectedStatus => _selectedStatus;
+  InvoiceListFilter get listFilter => _listFilter;
   String get searchQuery => _searchQuery;
-  DateTime? get dateFrom => _dateFrom;
-  DateTime? get dateTo => _dateTo;
 
   // Getters for invoice creation state
   String get invoiceType => _invoiceType;
@@ -83,45 +83,9 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     _isLoadingMore = false;
     if (showLoading && !isClosed) emit(const InvoiceLoading());
 
-    if (_selectedType == 'purchase') {
-      final result = await _repository.getPurchaseInvoicesPage(
-        offset: 0,
-        limit: pageSize,
-        status: _selectedStatus,
-        dateFrom: _dateFrom,
-        dateTo: _dateTo,
-        search: _searchQuery,
-      );
-      if (isClosed || requestId != _requestId) return;
-      result.fold(
-        (failure) {
-          _offset = previousOffset;
-          _hasMore = previousHasMore;
-          emit(InvoiceError(failure.message));
-          if (_hasLoaded) _emitFiltered();
-        },
-        (page) {
-          _pagedInvoices
-            ..clear()
-            ..addAll(page.items);
-          _offset = page.items.length;
-          _hasMore = page.hasMore;
-          _hasLoaded = true;
-          _emitFiltered();
-        },
-      );
-      return;
-    }
-
-    final result = await _repository.getSalesInvoicesPage(
-      offset: 0,
-      limit: pageSize,
-      status: _selectedStatus,
-      dateFrom: _dateFrom,
-      dateTo: _dateTo,
-      search: _searchQuery,
-    );
+    final result = await _loadPage(0);
     if (isClosed || requestId != _requestId) return;
+
     result.fold(
       (failure) {
         _offset = previousOffset;
@@ -147,23 +111,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     _emitFiltered();
 
     final requestId = _requestId;
-    final result = _selectedType == 'purchase'
-        ? await _repository.getPurchaseInvoicesPage(
-            offset: _offset,
-            limit: pageSize,
-            status: _selectedStatus,
-            dateFrom: _dateFrom,
-            dateTo: _dateTo,
-            search: _searchQuery,
-          )
-        : await _repository.getSalesInvoicesPage(
-            offset: _offset,
-            limit: pageSize,
-            status: _selectedStatus,
-            dateFrom: _dateFrom,
-            dateTo: _dateTo,
-            search: _searchQuery,
-          );
+    final result = await _loadPage(_offset);
 
     if (isClosed || requestId != _requestId) return;
     _isLoadingMore = false;
@@ -178,6 +126,42 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         _hasMore = page.hasMore;
         _emitFiltered();
       },
+    );
+  }
+
+  /// يوجه الطلب حسب نوع الفاتورة المختار ويمرر كل فلاتر القائمة.
+  Future<Either<Failure, PagedResult<dynamic>>> _loadPage(int offset) {
+    final status = _listFilter.paymentStatus;
+    final cityId = _listFilter.cityId;
+    final cityName = _listFilter.cityName;
+    final productIds = _listFilter.productIds.toList(growable: false);
+    final dateFrom = _listFilter.dateFrom;
+    final dateTo = _listFilter.dateTo;
+
+    if (_selectedType == 'purchase') {
+      return _repository.getPurchaseInvoicesPage(
+        offset: offset,
+        limit: pageSize,
+        status: status,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        search: _searchQuery,
+        cityId: cityId,
+        cityName: cityName,
+        productIds: productIds,
+      );
+    }
+
+    return _repository.getSalesInvoicesPage(
+      offset: offset,
+      limit: pageSize,
+      status: status,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      search: _searchQuery,
+      cityId: cityId,
+      cityName: cityName,
+      productIds: productIds,
     );
   }
 
@@ -222,6 +206,7 @@ class InvoiceCubit extends Cubit<InvoiceState> {
         totalAmount: totalAmount,
         isLoadingMore: _isLoadingMore,
         hasMore: _hasMore,
+        filter: _listFilter,
       ),
     );
   }
@@ -451,9 +436,15 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     loadFirstPage();
   }
 
-  void setStatusFilter(String status) {
-    if (_selectedStatus == status) return;
-    _selectedStatus = status;
+  void applyListFilter(InvoiceListFilter filter) {
+    if (_listFilter == filter) return;
+    _listFilter = filter;
+    loadFirstPage();
+  }
+
+  void clearListFilter() {
+    if (_listFilter.isEmpty) return;
+    _listFilter = const InvoiceListFilter();
     loadFirstPage();
   }
 
@@ -464,18 +455,10 @@ class InvoiceCubit extends Cubit<InvoiceState> {
     _searchDebounce = Timer(const Duration(milliseconds: 300), loadFirstPage);
   }
 
-  void setDateRange(DateTime? from, DateTime? to) {
-    _dateFrom = from;
-    _dateTo = to;
-    loadFirstPage();
-  }
-
   void clearFilters() {
     _selectedType = 'sale';
-    _selectedStatus = 'all';
+    _listFilter = const InvoiceListFilter();
     _searchQuery = '';
-    _dateFrom = null;
-    _dateTo = null;
     loadFirstPage();
   }
 

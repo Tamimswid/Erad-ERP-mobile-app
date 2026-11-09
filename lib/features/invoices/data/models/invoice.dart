@@ -2,7 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:erad/features/invoices/data/models/invoice_item.dart';
 
 enum InvoiceType { sale, purchase }
-enum InvoiceStatus { draft, sent, paid, overdue, cancelled,pending }
+
+enum InvoiceStatus { draft, sent, paid, overdue, cancelled, pending }
 
 class Invoice extends Equatable {
   final String id;
@@ -144,9 +145,14 @@ class Invoice extends Equatable {
       ),
       customerId: json['customer_id'] ?? '',
       supplierId: json['supplier_id'],
-      issueDate: json['issue_date'] != null ? DateTime.parse(json['issue_date']) : DateTime.now(),
-      dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
-      items: (json['items'] as List<dynamic>?)
+      issueDate: json['issue_date'] != null
+          ? DateTime.parse(json['issue_date'])
+          : DateTime.now(),
+      dueDate: json['due_date'] != null
+          ? DateTime.parse(json['due_date'])
+          : null,
+      items:
+          (json['items'] as List<dynamic>?)
               ?.map((item) => InvoiceItem.fromJson(item))
               .toList() ??
           [],
@@ -159,8 +165,12 @@ class Invoice extends Equatable {
       remainingAmount: json['remaining_amount']?.toDouble(),
       notes: json['notes'],
       terms: json['terms'],
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : DateTime.now(),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
       customerName: json['customer_name'],
       supplierName: json['supplier_name'],
     );
@@ -168,28 +178,27 @@ class Invoice extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        invoiceNumber,
-        type,
-        status,
-        customerId,
-        supplierId,
-        issueDate,
-        dueDate,
-        items,
-        subtotal,
-        taxRate,
-        taxAmount,
-        discountAmount,
-        totalAmount,
-        paidAmount,
-        remainingAmount,
-        notes,
-        terms,
-        createdAt,
-        updatedAt,
-        customerName,
-        supplierName,
-      ];
+    id,
+    invoiceNumber,
+    type,
+    status,
+    customerId,
+    supplierId,
+    issueDate,
+    dueDate,
+    items,
+    subtotal,
+    taxRate,
+    taxAmount,
+    discountAmount,
+    totalAmount,
+    paidAmount,
+    remainingAmount,
+    notes,
+    terms,
+    createdAt,
+    updatedAt,
+    customerName,
+    supplierName,
+  ];
 }
-

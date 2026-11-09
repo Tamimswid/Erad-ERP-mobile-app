@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
+
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/notifications/data_change_notifier.dart';
 import '../../../../core/widgets/app_pagination_list.dart';
-import '../../../../core/widgets/date_filter_sheet.dart';
+import '../../data/models/invoice_list_filter.dart';
 import '../bloc/invoice_cubit.dart';
 import '../widgets/invoice_card_widget.dart';
 import '../widgets/invoice_empty_state_widget.dart';
-import 'invoice_detail_page.dart';
+import '../widgets/invoice_filter_button.dart';
+import '../widgets/invoice_filter_sheet.dart';
 import 'create_invoice_page.dart';
+import 'invoice_detail_page.dart';
 
 class InvoicesPage extends StatefulWidget {
   final bool isLocal;
@@ -59,135 +62,26 @@ class _InvoicesPageState extends State<InvoicesPage> {
     });
   }
 
-  void _showDateFilter(BuildContext context) {
-    final cubit = context.read<InvoiceCubit>();
-    final availableYears = _getAvailableYears();
-    final hasDateRange = cubit.dateFrom != null && cubit.dateTo != null;
-
-    DateFilterSheet.show(
-      context: context,
-      selectedYear: null,
-      availableYears: availableYears,
-      customDateRange: hasDateRange
-          ? DateTimeRange(start: cubit.dateFrom!, end: cubit.dateTo!)
-          : null,
-      isCustomDateRange: hasDateRange,
-      onYearSelected: (year) {
-        final start = DateTime(int.parse(year), 1, 1);
-        final end = DateTime(int.parse(year), 12, 31);
-        cubit.setDateRange(start, end);
-      },
-      onDateRangeSelected: (range) {
-        cubit.setDateRange(range.start, range.end);
-      },
-      onClearFilter: () {
-        cubit.setDateRange(null, null);
-      },
-      onDateRangePickerTap: () async {
-        final initial = hasDateRange
-            ? DateTimeRange(start: cubit.dateFrom!, end: cubit.dateTo!)
-            : DateTimeRange(
-                start: DateTime.now().subtract(const Duration(days: 30)),
-                end: DateTime.now(),
-              );
-        final picked = await showDateRangePicker(
-          context: context,
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2030),
-          initialDateRange: initial,
-          builder: (context, child) => child!,
-        );
-        if (picked != null && context.mounted) {
-          cubit.setDateRange(picked.start, picked.end);
-          Navigator.pop(context);
-        }
-      },
-    );
-  }
-
-  List<String> _getAvailableYears() {
-    final currentYear = DateTime.now().year;
-    return List.generate(5, (i) => (currentYear - i).toString());
-  }
-
   @override
   Widget build(BuildContext context) {
-    final cubit = context.read<InvoiceCubit>();
-    final hasDateFilter = cubit.dateFrom != null && cubit.dateTo != null;
-    final dateLabel = hasDateFilter
-        ? '${cubit.dateFrom!.day}/${cubit.dateFrom!.month} - ${cubit.dateTo!.day}/${cubit.dateTo!.month}'
-        : 'السنة';
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('الفواتير'),
-        centerTitle: true,
-        actions: [
-          GestureDetector(
-            onTap: () => _showDateFilter(context),
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    sc.LucideIcons.calendar,
-                    size: 16,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    dateLabel,
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(
-                    sc.LucideIcons.chevronDown,
-                    size: 14,
-                    color: AppColors.primary,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+      appBar: AppBar(title: const Text('الفواتير'), centerTitle: true),
       floatingActionButton: widget.isLocal
           ? null
-          : FloatingActionButton.extended(
-              label: const Text(
-                'إضافة فاتورة جديدة',
-                style: TextStyle(color: AppColors.onPrimary),
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 70),
+              child: FloatingActionButton.extended(
+                label: const Text('إضافة فاتورة جديدة', style: TextStyle(color: AppColors.onPrimary)),
+                backgroundColor: AppColors.primary,
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateInvoicePage()));
+                },
               ),
-              backgroundColor: AppColors.primary,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreateInvoicePage(),
-                  ),
-                );
-              },
             ),
       body: BlocConsumer<InvoiceCubit, InvoiceState>(
         listener: (context, state) {
           if (state is InvoiceError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
@@ -200,32 +94,23 @@ class _InvoicesPageState extends State<InvoicesPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    sc.LucideIcons.circleAlert,
-                    size: 64,
-                    color: AppColors.textSecondary,
-                  ),
+                  Icon(sc.LucideIcons.circleAlert, size: 64, color: AppColors.textSecondary),
                   const SizedBox(height: 16),
                   Text(
                     'حدث خطأ',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     state.message,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   sc.Button(
                     alignment: Alignment.center,
                     style: sc.ButtonStyle.primary(),
-                    onPressed: () =>
-                        context.read<InvoiceCubit>().getAllInvoices(),
+                    onPressed: () => context.read<InvoiceCubit>().getAllInvoices(),
                     child: const Text('حاول ثانية'),
                   ),
                 ],
@@ -246,7 +131,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildSearchField(),
+                        _buildSearchRow(state.filter),
                         const SizedBox(height: 12),
                         _buildFilterSection(),
                         const SizedBox(height: 12),
@@ -264,10 +149,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                     onLoadMore: context.read<InvoiceCubit>().loadMore,
                     itemBuilder: (context, index) {
                       final invoice = allInvoices[index];
-                      final type =
-                          invoice.runtimeType.toString().contains('Sales')
-                          ? 'sale'
-                          : 'purchase';
+                      final type = invoice.runtimeType.toString().contains('Sales') ? 'sale' : 'purchase';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: InvoiceCardWidget(
@@ -277,10 +159,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => InvoiceDetailPage(
-                                  invoiceId: invoice.id,
-                                  type: type,
-                                ),
+                                builder: (context) => InvoiceDetailPage(invoiceId: invoice.id, type: type),
                               ),
                             );
                           },
@@ -295,6 +174,25 @@ class _InvoicesPageState extends State<InvoicesPage> {
           return const Center(child: CircularProgressIndicator());
         },
       ),
+    );
+  }
+
+  Future<void> _showFilterSheet(BuildContext context) async {
+    final cubit = context.read<InvoiceCubit>();
+    final filter = await InvoiceFilterSheet.show(context, initialFilter: cubit.listFilter);
+    // الورقة قد تفقد صفحة الفواتير أثناء الكتابة (فتح لوحة المفاتيح يعيد بناء
+    // الشجرة)، لكن الكيوبت يبقى حياً لذا نطبّق الفلتر عليه مباشرة.
+    if (filter == null || cubit.isClosed) return;
+    cubit.applyListFilter(filter);
+  }
+
+  Widget _buildSearchRow(InvoiceListFilter filter) {
+    return Row(
+      children: [
+        Expanded(child: _buildSearchField()),
+        const SizedBox(width: 10),
+        InvoiceFilterButton(activeCount: filter.activeCount, onTap: () => _showFilterSheet(context)),
+      ],
     );
   }
 
@@ -317,10 +215,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: AppColors.primary),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 10,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         filled: true,
         fillColor: AppColors.surface,
       ),
@@ -329,53 +224,22 @@ class _InvoicesPageState extends State<InvoicesPage> {
   }
 
   Widget _buildFilterSection() {
-    return sc.Card(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 6),
-            child: Text(
-              'النوع',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: 6),
+          child: Text(
+            'النوع',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
           ),
-          _buildChipRow(
-            items: [
-              // _ChipData('الكل', 'all'),
-              _ChipData('بيع', 'sale'),
-              _ChipData('شراء', 'purchase'),
-            ],
-            selected: context.read<InvoiceCubit>().selectedType,
-            onTap: (v) => context.read<InvoiceCubit>().setTypeFilter(v),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 6),
-            child: Text(
-              'حالة الدفع',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          _buildChipRow(
-            items: [
-              _ChipData('الكل', 'all'),
-              _ChipData('دين', 'debt'),
-              _ChipData('نقدي', 'cash'),
-            ],
-            selected: context.read<InvoiceCubit>().selectedStatus,
-            onTap: (v) => context.read<InvoiceCubit>().setStatusFilter(v),
-          ),
-        ],
-      ),
+        ),
+        _buildChipRow(
+          items: const [_ChipData('بيع', 'sale'), _ChipData('شراء', 'purchase')],
+          selected: context.read<InvoiceCubit>().selectedType,
+          onTap: (v) => context.read<InvoiceCubit>().setTypeFilter(v),
+        ),
+      ],
     );
   }
 
@@ -385,10 +249,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
     required ValueChanged<String> onTap,
   }) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.divider,
-        borderRadius: BorderRadius.circular(10),
-      ),
+      decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(10)),
       padding: const EdgeInsets.all(3),
       child: Row(
         children: items.map((item) {
@@ -411,9 +272,7 @@ class _InvoicesPageState extends State<InvoicesPage> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: isSelected
-                          ? AppColors.onPrimary
-                          : AppColors.textSecondary,
+                      color: isSelected ? AppColors.onPrimary : AppColors.textSecondary,
                     ),
                   ),
                 ),

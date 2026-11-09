@@ -44,7 +44,7 @@ class Invoice {
     this.paidAmount = 0.0,
     this.remainingAmount = 0.0,
     this.paymentMethod = 'cash',
-   required this.paymentStatus  ,
+    required this.paymentStatus,
     this.notes,
     this.isFinalized = false,
     required this.createdAt,
@@ -144,8 +144,12 @@ class Invoice {
       invoiceNumber: json['invoice_number'] ?? '',
       customerId: json['customer_id'],
       supplierId: json['supplier_id'],
-      invoiceDate: json['invoice_date'] != null ? DateTime.parse(json['invoice_date']) : DateTime.now(),
-      dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
+      invoiceDate: json['invoice_date'] != null
+          ? DateTime.parse(json['invoice_date'])
+          : DateTime.now(),
+      dueDate: json['due_date'] != null
+          ? DateTime.parse(json['due_date'])
+          : null,
       subtotal: (json['subtotal'] ?? 0).toDouble(),
       discountAmount: (json['discount_amount'] ?? 0).toDouble(),
       taxAmount: (json['tax_amount'] ?? 0).toDouble(),
@@ -155,16 +159,26 @@ class Invoice {
       paidAmount: (json['paid_amount'] ?? 0).toDouble(),
       remainingAmount: (json['remaining_amount'] ?? 0).toDouble(),
       paymentMethod: json['payment_method'] ?? 'cash',
-      paymentStatus: PaymentStatus.fromString(json['payment_status'] ?? 'pending'),
+      paymentStatus: PaymentStatus.fromString(
+        json['payment_status'] ?? 'pending',
+      ),
       notes: json['notes'],
       isFinalized: json['is_finalized'] ?? false,
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : DateTime.now(),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : DateTime.now(),
-      deletedAt: json['deleted_at'] != null ? DateTime.parse(json['deleted_at']) : null,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.now(),
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'])
+          : null,
       customerName: json['customer_name'],
-      items: (json['items'] as List<dynamic>?)
-          ?.map((item) => InvoiceItem.fromJson(item))
-          .toList() ?? [],
+      items:
+          (json['items'] as List<dynamic>?)
+              ?.map((item) => InvoiceItem.fromJson(item))
+              .toList() ??
+          [],
     );
   }
 }

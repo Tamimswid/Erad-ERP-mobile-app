@@ -20,6 +20,8 @@ abstract class InvoiceRemoteDataSource {
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    List<String> productIds = const [],
   });
   // جلب صفحة من فواتير الشراء
   Future<PagedResult<PurchaseInvoice>> getPurchaseInvoicesPage({
@@ -29,6 +31,8 @@ abstract class InvoiceRemoteDataSource {
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    List<String> productIds = const [],
   });
   // جلب فاتورة بيع بالمعرف
   Future<SalesInvoice> getSalesInvoiceById(String id);
@@ -68,7 +72,9 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
       // جلب فواتير البيع مع بيانات العناصر
       final response = await _supabaseClient
           .from('sales_invoices')
-          .select('*, customers!inner(name), sales_invoice_items(*)')
+          .select(
+            '*, customers!inner(name, city_id, cities(name)), sales_invoice_items(*)',
+          )
           .eq('user_id', userId)
           .isFilter('deleted_at', null)
           .eq('customers.is_active', true)
@@ -92,7 +98,9 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
       // جلب فواتير الشراء مع بيانات العناصر
       final response = await _supabaseClient
           .from('purchase_invoices')
-          .select('*, suppliers(name), purchase_invoice_items(*)')
+          .select(
+            '*, suppliers(name, city_id, cities(name)), purchase_invoice_items(*)',
+          )
           .eq('user_id', userId)
           .isFilter('deleted_at', null)
           .order('created_at', ascending: false);
@@ -119,18 +127,34 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    List<String> productIds = const [],
   }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) throw Exception('User not logged in');
 
+      final hasCity = cityId != null && cityId.isNotEmpty;
+      final hasProducts = productIds.isNotEmpty;
+      final itemsEmbed = hasProducts
+          ? 'sales_invoice_items!inner(*)'
+          : 'sales_invoice_items(*)';
+
       var query = _supabaseClient
           .from('sales_invoices')
-          .select('*, customers!inner(name), sales_invoice_items(*)')
+          .select(
+            '*, customers!inner(name, city_id, cities(name)), $itemsEmbed',
+          )
           .eq('user_id', userId)
           .isFilter('deleted_at', null)
           .eq('customers.is_active', true);
 
+      if (hasCity) {
+        query = query.eq('customers.city_id', cityId);
+      }
+      if (hasProducts) {
+        query = query.inFilter('sales_invoice_items.product_id', productIds);
+      }
       if (status != null && status != 'all') {
         query = query.eq('payment_status', status);
       }
@@ -172,17 +196,34 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     DateTime? dateFrom,
     DateTime? dateTo,
     String? search,
+    String? cityId,
+    List<String> productIds = const [],
   }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) throw Exception('User not logged in');
 
+      final hasCity = cityId != null && cityId.isNotEmpty;
+      final hasProducts = productIds.isNotEmpty;
+      final suppliersEmbed = hasCity
+          ? 'suppliers!inner(name, city_id, cities(name))'
+          : 'suppliers(name, city_id, cities(name))';
+      final itemsEmbed = hasProducts
+          ? 'purchase_invoice_items!inner(*)'
+          : 'purchase_invoice_items(*)';
+
       var query = _supabaseClient
           .from('purchase_invoices')
-          .select('*, suppliers(name), purchase_invoice_items(*)')
+          .select('*, $suppliersEmbed, $itemsEmbed')
           .eq('user_id', userId)
           .isFilter('deleted_at', null);
 
+      if (hasCity) {
+        query = query.eq('suppliers.city_id', cityId);
+      }
+      if (hasProducts) {
+        query = query.inFilter('purchase_invoice_items.product_id', productIds);
+      }
       if (status != null && status != 'all') {
         query = query.eq('payment_status', status);
       }
@@ -221,7 +262,9 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     try {
       final response = await _supabaseClient
           .from('sales_invoices')
-          .select('*, customers(name), sales_invoice_items(*)')
+          .select(
+            '*, customers(name, city_id, cities(name)), sales_invoice_items(*)',
+          )
           .eq('id', id)
           .single();
 
@@ -236,7 +279,9 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     try {
       final response = await _supabaseClient
           .from('purchase_invoices')
-          .select('*, suppliers(name), purchase_invoice_items(*)')
+          .select(
+            '*, suppliers(name, city_id, cities(name)), purchase_invoice_items(*)',
+          )
           .eq('id', id)
           .single();
 
@@ -425,7 +470,7 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   Future<void> deleteSalesInvoice(String id) async {
     try {
       final oldInvoice = await getSalesInvoiceById(id);
-      
+
       // Stock şimdilik donduruldu
       // if (oldInvoice.status == InvoiceStatus.completed) {
       //   await _stockService.reverseInvoiceStock(
@@ -449,7 +494,7 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   Future<void> deletePurchaseInvoice(String id) async {
     try {
       final oldInvoice = await getPurchaseInvoiceById(id);
-      
+
       // Stock şimdilik donduruldu
       // if (oldInvoice.status == InvoiceStatus.completed) {
       //   await _stockService.reverseInvoiceStock(
@@ -512,9 +557,12 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   SalesInvoice _mapJsonToSalesInvoice(Map<String, dynamic> json) {
     final invoiceJson = Map<String, dynamic>.from(json);
 
-    // استخراج اسم العميل
-    if (json['customers'] != null) {
-      invoiceJson['customer_name'] = json['customers']['name'];
+    // استخراج بيانات العميل ومدينته
+    final customer = json['customers'];
+    if (customer is Map) {
+      invoiceJson['customer_name'] = customer['name'];
+      invoiceJson['customer_city_id'] = customer['city_id'];
+      invoiceJson['customer_city_name'] = _cityNameOf(customer);
     }
 
     // استخراج عناصر الفاتورة
@@ -532,9 +580,12 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
   PurchaseInvoice _mapJsonToPurchaseInvoice(Map<String, dynamic> json) {
     final invoiceJson = Map<String, dynamic>.from(json);
 
-    // استخراج اسم المورد
-    if (json['suppliers'] != null) {
-      invoiceJson['supplier_name'] = json['suppliers']['name'];
+    // استخراج بيانات المورد ومدينته
+    final supplier = json['suppliers'];
+    if (supplier is Map) {
+      invoiceJson['supplier_name'] = supplier['name'];
+      invoiceJson['supplier_city_id'] = supplier['city_id'];
+      invoiceJson['supplier_city_name'] = _cityNameOf(supplier);
     }
 
     // استخراج عناصر الفاتورة
@@ -546,5 +597,11 @@ class InvoiceRemoteDataSourceImpl implements InvoiceRemoteDataSource {
     invoiceJson.remove('purchase_invoice_items');
 
     return PurchaseInvoice.fromJson(invoiceJson);
+  }
+
+  String? _cityNameOf(Map<dynamic, dynamic> party) {
+    final cities = party['cities'];
+    if (cities is Map) return cities['name'] as String?;
+    return null;
   }
 }

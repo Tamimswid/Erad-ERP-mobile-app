@@ -8,10 +8,22 @@ import '../datasources/edit_invoice_datasource.dart';
 abstract class EditInvoiceRepository {
   Future<Either<Failure, SalesInvoice>> getSalesInvoiceForEdit(String id);
   Future<Either<Failure, PurchaseInvoice>> getPurchaseInvoiceForEdit(String id);
-  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(SalesInvoice invoice, List<InvoiceItem> newItems);
-  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(PurchaseInvoice invoice, List<InvoiceItem> newItems);
-  Future<Either<Failure, void>> updateCustomerBalance(String customerId, double amount);
-  Future<Either<Failure, void>> updateSupplierBalance(String supplierId, double amount);
+  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(
+    SalesInvoice invoice,
+    List<InvoiceItem> newItems,
+  );
+  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(
+    PurchaseInvoice invoice,
+    List<InvoiceItem> newItems,
+  );
+  Future<Either<Failure, void>> updateCustomerBalance(
+    String customerId,
+    double amount,
+  );
+  Future<Either<Failure, void>> updateSupplierBalance(
+    String supplierId,
+    double amount,
+  );
 }
 
 class EditInvoiceRepositoryImpl implements EditInvoiceRepository {
@@ -20,7 +32,9 @@ class EditInvoiceRepositoryImpl implements EditInvoiceRepository {
   EditInvoiceRepositoryImpl(this.dataSource);
 
   @override
-  Future<Either<Failure, SalesInvoice>> getSalesInvoiceForEdit(String id) async {
+  Future<Either<Failure, SalesInvoice>> getSalesInvoiceForEdit(
+    String id,
+  ) async {
     try {
       final invoice = await dataSource.getSalesInvoiceForEdit(id);
       return Right(invoice);
@@ -30,7 +44,9 @@ class EditInvoiceRepositoryImpl implements EditInvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, PurchaseInvoice>> getPurchaseInvoiceForEdit(String id) async {
+  Future<Either<Failure, PurchaseInvoice>> getPurchaseInvoiceForEdit(
+    String id,
+  ) async {
     try {
       final invoice = await dataSource.getPurchaseInvoiceForEdit(id);
       return Right(invoice);
@@ -40,9 +56,15 @@ class EditInvoiceRepositoryImpl implements EditInvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(SalesInvoice invoice, List<InvoiceItem> newItems) async {
+  Future<Either<Failure, SalesInvoice>> updateSalesInvoice(
+    SalesInvoice invoice,
+    List<InvoiceItem> newItems,
+  ) async {
     try {
-      final updatedInvoice = await dataSource.updateSalesInvoice(invoice, newItems);
+      final updatedInvoice = await dataSource.updateSalesInvoice(
+        invoice,
+        newItems,
+      );
       return Right(updatedInvoice);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -50,9 +72,15 @@ class EditInvoiceRepositoryImpl implements EditInvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(PurchaseInvoice invoice, List<InvoiceItem> newItems) async {
+  Future<Either<Failure, PurchaseInvoice>> updatePurchaseInvoice(
+    PurchaseInvoice invoice,
+    List<InvoiceItem> newItems,
+  ) async {
     try {
-      final updatedInvoice = await dataSource.updatePurchaseInvoice(invoice, newItems);
+      final updatedInvoice = await dataSource.updatePurchaseInvoice(
+        invoice,
+        newItems,
+      );
       return Right(updatedInvoice);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -60,7 +88,10 @@ class EditInvoiceRepositoryImpl implements EditInvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateCustomerBalance(String customerId, double amount) async {
+  Future<Either<Failure, void>> updateCustomerBalance(
+    String customerId,
+    double amount,
+  ) async {
     try {
       await dataSource.updateCustomerBalance(customerId, amount);
       return const Right(null);
@@ -70,7 +101,10 @@ class EditInvoiceRepositoryImpl implements EditInvoiceRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateSupplierBalance(String supplierId, double amount) async {
+  Future<Either<Failure, void>> updateSupplierBalance(
+    String supplierId,
+    double amount,
+  ) async {
     try {
       await dataSource.updateSupplierBalance(supplierId, amount);
       return const Right(null);
