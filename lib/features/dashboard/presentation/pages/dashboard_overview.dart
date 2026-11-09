@@ -62,7 +62,7 @@ class _DashboardOverviewView extends StatelessWidget {
                 const SizedBox(height: 20),
                 const HomeQuickActions(),
                 const SizedBox(height: 16),
-                const HomeChartsCard(),
+                HomeChartsCard(state: state),
               ],
             ),
           );

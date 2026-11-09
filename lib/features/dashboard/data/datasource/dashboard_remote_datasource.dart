@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/dashboard_daily_summary.dart';
 import '../models/dashboard_financials.dart';
 import '../models/dashboard_product_stock.dart';
 import '../../../../core/errors/failures.dart';
@@ -10,6 +11,10 @@ abstract class DashboardRemoteDataSource {
     required String endDate,
   });
   Future<List<DashboardProductStockModel>> getProductStock();
+  Future<List<DashboardDailySummaryModel>> getDailySummary({
+    required String startDate,
+    required String endDate,
+  });
 }
 
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
@@ -26,11 +31,14 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
       final userId = await UserService.getUserId();
       if (userId == null) throw Exception('User not logged in');
 
-      final response = await client.rpc('get_dashboard_financials', params: {
-        'p_user_id': userId,
-        'p_start_date': startDate,
-        'p_end_date': endDate,
-      });
+      final response = await client.rpc(
+        'get_dashboard_financials',
+        params: {
+          'p_user_id': userId,
+          'p_start_date': startDate,
+          'p_end_date': endDate,
+        },
+      );
 
       if (response == null) {
         return DashboardFinancialsModel(userId: userId);
@@ -57,6 +65,31 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
 
       return response
           .map((item) => DashboardProductStockModel.fromMap(item))
+          .toList();
+    } catch (e) {
+      throw exceptionToFailure(e);
+    }
+  }
+
+  @override
+  Future<List<DashboardDailySummaryModel>> getDailySummary({
+    required String startDate,
+    required String endDate,
+  }) async {
+    try {
+      final userId = await UserService.getUserId();
+      if (userId == null) throw Exception('User not logged in');
+
+      final response = await client
+          .from('view_home_daily_summary')
+          .select()
+          .eq('user_id', userId)
+          .gte('day', startDate)
+          .lte('day', endDate)
+          .order('day');
+
+      return response
+          .map((item) => DashboardDailySummaryModel.fromMap(item))
           .toList();
     } catch (e) {
       throw exceptionToFailure(e);

@@ -112,50 +112,53 @@ class _DashboardPageState extends State<DashboardPage>
         BlocProvider(create: (context) => sl.sl<CustomerCubit>(), lazy: true),
         BlocProvider(create: (context) => sl.sl<SupplierCubit>(), lazy: true),
       ],
-      child: _isKeyboardVisible
-          ? _buildContent()
-          : BottomBar(
-              showIcon: false,
-              layout: const BottomBarLayout(
-                width: double.infinity,
-                offset: 12,
-                borderRadius: BorderRadius.all(Radius.circular(20)),
-              ),
-              theme: BottomBarThemeData(
-                barDecoration: BoxDecoration(
-                  color: colors.card,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colors.border),
-                ),
-              ),
-              body: MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  padding: MediaQuery.paddingOf(context).copyWith(
-                    bottom:
-                        MediaQuery.paddingOf(context).bottom +
-                        AppConstants.bottomBarClearance,
-                  ),
-                ),
-                child: _buildContent(),
-              ),
-              child: SizedBox(
-                height: 64,
-                child: BottomBarItems(
-                  children: [
-                    for (final item in _menuItems)
-                      BottomBarItem(
-                        icon: Icon(item.icon, size: 20),
-                        label: Text(item.title),
-                        selected: item.index == _selectedIndex,
-                        selectedColor: colors.primary,
-                        color: colors.mutedForeground,
-                        onTap: () =>
-                            setState(() => _selectedIndex = item.index),
-                      ),
-                  ],
-                ),
-              ),
+      // Lower panel is hidden (not rebuilt away) while the keyboard is open so
+      // the tab content keeps its state; otherwise a filter sheet awaiting a
+      // result loses the page it was opened from.
+      child: BottomBar(
+        showIcon: false,
+        layout: const BottomBarLayout(
+          width: double.infinity,
+          offset: 12,
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
+        theme: BottomBarThemeData(
+          barDecoration: BoxDecoration(
+            color: colors.card,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: colors.border),
+          ),
+        ),
+        body: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            padding: MediaQuery.paddingOf(context).copyWith(
+              bottom:
+                  MediaQuery.paddingOf(context).bottom +
+                  AppConstants.bottomBarClearance,
             ),
+          ),
+          child: _buildContent(),
+        ),
+        child: Offstage(
+          offstage: _isKeyboardVisible,
+          child: SizedBox(
+            height: 64,
+            child: BottomBarItems(
+              children: [
+                for (final item in _menuItems)
+                  BottomBarItem(
+                    icon: Icon(item.icon, size: 20),
+                    label: Text(item.title),
+                    selected: item.index == _selectedIndex,
+                    selectedColor: colors.primary,
+                    color: colors.mutedForeground,
+                    onTap: () => setState(() => _selectedIndex = item.index),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 

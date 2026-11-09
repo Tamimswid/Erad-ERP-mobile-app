@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../../core/errors/failures.dart';
+import '../../data/models/dashboard_daily_summary.dart';
 import '../../data/models/dashboard_financials.dart';
 import '../../data/models/dashboard_period.dart';
 import '../../data/models/dashboard_product_stock.dart';
@@ -111,6 +112,10 @@ class DashboardCubit extends Cubit<DashboardState> {
           endDate: endDate,
         ),
         _dashboardRepository.getProductStock(),
+        _dashboardRepository.getDailySummary(
+          startDate: startDate,
+          endDate: endDate,
+        ),
       ]);
       if (isClosed || requestId != _requestId) return;
 
@@ -118,6 +123,8 @@ class DashboardCubit extends Cubit<DashboardState> {
           results[0] as Either<Failure, DashboardFinancialsModel>;
       final stockResult =
           results[1] as Either<Failure, List<DashboardProductStockModel>>;
+      final dailySummaryResult =
+          results[2] as Either<Failure, List<DashboardDailySummaryModel>>;
 
       DashboardFinancialsModel? financials;
       Failure? financialsFailure;
@@ -132,6 +139,16 @@ class DashboardCubit extends Cubit<DashboardState> {
         (failure) => stockFailure = failure,
         (data) => productStock = data,
       );
+
+      List<DashboardDailySummaryModel>? dailySummary;
+      dailySummaryResult.fold((_) {}, (data) => dailySummary = data);
+
+      final isSamePeriod =
+          previous != null &&
+          previous.period == period &&
+          previous.selectedYear == nextYear &&
+          previous.selectedMonth == nextMonth &&
+          previous.customDateRange == nextRange;
 
       if (financials == null && productStock == null && previous == null) {
         emit(
@@ -154,6 +171,11 @@ class DashboardCubit extends Cubit<DashboardState> {
               productStock ??
               previous?.productStock ??
               const <DashboardProductStockModel>[],
+          dailySummary:
+              dailySummary ??
+              (isSamePeriod
+                  ? previous.dailySummary
+                  : const <DashboardDailySummaryModel>[]),
           period: period,
           selectedYear: nextYear,
           selectedMonth: nextMonth,

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/network/network_info.dart';
 import '../../../../core/services/user_service.dart';
+import '../models/dashboard_daily_summary.dart';
 import '../models/dashboard_financials.dart';
 import '../models/dashboard_product_stock.dart';
 import '../datasource/dashboard_remote_datasource.dart';
@@ -12,7 +13,11 @@ class DashboardRepository {
   final DashboardLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
 
-  DashboardRepository(this.remoteDataSource, this.localDataSource, this.networkInfo);
+  DashboardRepository(
+    this.remoteDataSource,
+    this.localDataSource,
+    this.networkInfo,
+  );
 
   Future<Either<Failure, DashboardFinancialsModel>> getFinancials({
     required String startDate,
@@ -47,7 +52,8 @@ class DashboardRepository {
     }
   }
 
-  Future<Either<Failure, List<DashboardProductStockModel>>> getProductStock() async {
+  Future<Either<Failure, List<DashboardProductStockModel>>>
+  getProductStock() async {
     if (await networkInfo.isConnected) {
       try {
         final stock = await remoteDataSource.getProductStock();
@@ -71,6 +77,27 @@ class DashboardRepository {
       } catch (_) {
         return Left(NetworkFailure.noConnection());
       }
+    }
+  }
+
+  Future<Either<Failure, List<DashboardDailySummaryModel>>> getDailySummary({
+    required String startDate,
+    required String endDate,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return Left(NetworkFailure.noConnection());
+    }
+
+    try {
+      final summary = await remoteDataSource.getDailySummary(
+        startDate: startDate,
+        endDate: endDate,
+      );
+      return Right(summary);
+    } on Failure catch (failure) {
+      return Left(failure);
+    } catch (e) {
+      return Left(exceptionToFailure(e));
     }
   }
 }

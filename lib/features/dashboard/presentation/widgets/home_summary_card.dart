@@ -2,6 +2,7 @@ import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/core/widgets/app_period_selector.dart';
 import 'package:erad/core/widgets/app_section_header.dart';
 import 'package:erad/core/widgets/app_stat_tile.dart';
+import 'package:erad/core/widgets/date_range_filter_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -30,14 +31,19 @@ class HomeSummaryCard extends StatelessWidget {
   }
 
   Future<void> _pickCustomRange(BuildContext context) async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030, 12, 31),
-      initialDateRange: state.customDateRange,
+    final result = await AppDateRangeSheet.show(
+      context,
+      initialRange: state.customDateRange,
+      title: 'تصفية حسب التاريخ',
     );
-    if (picked != null && context.mounted) {
-      context.read<DashboardCubit>().setCustomDateRange(picked);
+    if (result == null || !context.mounted) return;
+
+    final cubit = context.read<DashboardCubit>();
+    final range = result.range;
+    if (range == null) {
+      cubit.clearCustomDateRange();
+    } else {
+      cubit.setCustomDateRange(range);
     }
   }
 

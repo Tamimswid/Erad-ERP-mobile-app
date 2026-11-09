@@ -18,6 +18,7 @@ class DashboardLoading extends DashboardState {
 class DashboardLoaded extends DashboardState {
   final DashboardFinancialsModel financials;
   final List<DashboardProductStockModel> productStock;
+  final List<DashboardDailySummaryModel> dailySummary;
   final DashboardPeriod period;
   final String selectedYear;
   final DateTime selectedMonth;
@@ -26,6 +27,7 @@ class DashboardLoaded extends DashboardState {
   const DashboardLoaded({
     required this.financials,
     this.productStock = const [],
+    this.dailySummary = const [],
     this.period = DashboardPeriod.year,
     required this.selectedYear,
     required this.selectedMonth,
@@ -47,6 +49,7 @@ class DashboardLoaded extends DashboardState {
   DashboardLoaded copyWith({
     DashboardFinancialsModel? financials,
     List<DashboardProductStockModel>? productStock,
+    List<DashboardDailySummaryModel>? dailySummary,
     DashboardPeriod? period,
     String? selectedYear,
     DateTime? selectedMonth,
@@ -55,6 +58,7 @@ class DashboardLoaded extends DashboardState {
     return DashboardLoaded(
       financials: financials ?? this.financials,
       productStock: productStock ?? this.productStock,
+      dailySummary: dailySummary ?? this.dailySummary,
       period: period ?? this.period,
       selectedYear: selectedYear ?? this.selectedYear,
       selectedMonth: selectedMonth ?? this.selectedMonth,
@@ -64,13 +68,14 @@ class DashboardLoaded extends DashboardState {
 
   @override
   List<Object?> get props => [
-        financials,
-        productStock,
-        period,
-        selectedYear,
-        selectedMonth,
-        customDateRange,
-      ];
+    financials,
+    productStock,
+    dailySummary,
+    period,
+    selectedYear,
+    selectedMonth,
+    customDateRange,
+  ];
 }
 
 class DashboardError extends DashboardState {
