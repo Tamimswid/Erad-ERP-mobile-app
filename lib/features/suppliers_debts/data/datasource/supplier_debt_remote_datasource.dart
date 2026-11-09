@@ -150,20 +150,29 @@ class SupplierDebtRemoteDataSource {
   }
 
   Future<List<Map<String, dynamic>>> getSupplierInvoices(
-    String supplierId,
-  ) async {
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
 
-      final response = await supabaseClient
+      var query = supabaseClient
           .from('purchase_invoices')
           .select('*')
           .eq('user_id', userId)
-          .eq('supplier_id', supplierId)
-          .order('invoice_date', ascending: false);
+          .eq('supplier_id', supplierId);
+      if (startDate != null) {
+        query = query.gte('invoice_date', _startOfDay(startDate));
+      }
+      if (endDate != null) {
+        query = query.lte('invoice_date', _endOfDay(endDate));
+      }
+
+      final response = await query.order('invoice_date', ascending: false);
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
@@ -175,6 +184,8 @@ class SupplierDebtRemoteDataSource {
     String supplierId, {
     required int offset,
     int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     try {
       final userId = await UserService.getUserId();
@@ -182,12 +193,20 @@ class SupplierDebtRemoteDataSource {
         throw const AuthFailure('User not authenticated');
       }
 
-      final response = await supabaseClient
+      var query = supabaseClient
           .from('purchase_invoices')
           .select('*')
           .eq('user_id', userId)
           .eq('supplier_id', supplierId)
-          .eq('payment_status', 'debt')
+          .eq('payment_status', 'debt');
+      if (startDate != null) {
+        query = query.gte('invoice_date', _startOfDay(startDate));
+      }
+      if (endDate != null) {
+        query = query.lte('invoice_date', _endOfDay(endDate));
+      }
+
+      final response = await query
           .order('invoice_date', ascending: false)
           .order('id', ascending: true)
           .range(offset, offset + limit);
@@ -207,6 +226,8 @@ class SupplierDebtRemoteDataSource {
     String supplierId, {
     required int offset,
     int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     try {
       final userId = await UserService.getUserId();
@@ -214,11 +235,19 @@ class SupplierDebtRemoteDataSource {
         throw const AuthFailure('User not authenticated');
       }
 
-      final response = await supabaseClient
+      var query = supabaseClient
           .from('payments')
           .select('*')
           .eq('user_id', userId)
-          .eq('supplier_id', supplierId)
+          .eq('supplier_id', supplierId);
+      if (startDate != null) {
+        query = query.gte('payment_date', _startOfDay(startDate));
+      }
+      if (endDate != null) {
+        query = query.lte('payment_date', _endOfDay(endDate));
+      }
+
+      final response = await query
           .order('payment_date', ascending: false)
           .order('id', ascending: true)
           .range(offset, offset + limit);
@@ -280,20 +309,29 @@ class SupplierDebtRemoteDataSource {
   }
 
   Future<List<Map<String, dynamic>>> getSupplierPayments(
-    String supplierId,
-  ) async {
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       final userId = await UserService.getUserId();
       if (userId == null) {
         throw const AuthFailure('User not authenticated');
       }
 
-      final response = await supabaseClient
+      var query = supabaseClient
           .from('payments')
           .select('*')
           .eq('user_id', userId)
-          .eq('supplier_id', supplierId)
-          .order('payment_date', ascending: false);
+          .eq('supplier_id', supplierId);
+      if (startDate != null) {
+        query = query.gte('payment_date', _startOfDay(startDate));
+      }
+      if (endDate != null) {
+        query = query.lte('payment_date', _endOfDay(endDate));
+      }
+
+      final response = await query.order('payment_date', ascending: false);
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
@@ -326,5 +364,21 @@ class SupplierDebtRemoteDataSource {
       log(e.toString());
       throw exceptionToFailure(e);
     }
+  }
+
+  String _startOfDay(DateTime date) {
+    return DateTime(date.year, date.month, date.day).toIso8601String();
+  }
+
+  String _endOfDay(DateTime date) {
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      23,
+      59,
+      59,
+      999,
+    ).toIso8601String();
   }
 }

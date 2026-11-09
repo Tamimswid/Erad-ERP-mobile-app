@@ -275,18 +275,26 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getCustomerInvoices(
-    String customerId,
-  ) async {
+    String customerId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final invoices = await remoteDataSource.getCustomerInvoices(customerId);
-        final userId = await UserService.getUserId();
-        if (userId != null) {
-          await localDataSource.cacheCustomerInvoices(
-            userId,
-            customerId,
-            invoices,
-          );
+        final invoices = await remoteDataSource.getCustomerInvoices(
+          customerId,
+          startDate: startDate,
+          endDate: endDate,
+        );
+        if (startDate == null && endDate == null) {
+          final userId = await UserService.getUserId();
+          if (userId != null) {
+            await localDataSource.cacheCustomerInvoices(
+              userId,
+              customerId,
+              invoices,
+            );
+          }
         }
         return Right(invoices);
       } catch (e) {
@@ -310,18 +318,26 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getCustomerPayments(
-    String customerId,
-  ) async {
+    String customerId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final payments = await remoteDataSource.getCustomerPayments(customerId);
-        final userId = await UserService.getUserId();
-        if (userId != null) {
-          await localDataSource.cacheCustomerPayments(
-            userId,
-            customerId,
-            payments,
-          );
+        final payments = await remoteDataSource.getCustomerPayments(
+          customerId,
+          startDate: startDate,
+          endDate: endDate,
+        );
+        if (startDate == null && endDate == null) {
+          final userId = await UserService.getUserId();
+          if (userId != null) {
+            await localDataSource.cacheCustomerPayments(
+              userId,
+              customerId,
+              payments,
+            );
+          }
         }
         return Right(payments);
       } catch (e) {
@@ -349,6 +365,8 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
     String customerId, {
     required int offset,
     int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -356,6 +374,8 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
           customerId,
           offset: offset,
           limit: limit,
+          startDate: startDate,
+          endDate: endDate,
         );
         return Right(page);
       } catch (e) {
@@ -371,6 +391,8 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
     String customerId, {
     required int offset,
     int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -378,6 +400,8 @@ class CustomerDebtRepositoryImpl implements CustomerDebtRepository {
           customerId,
           offset: offset,
           limit: limit,
+          startDate: startDate,
+          endDate: endDate,
         );
         return Right(page);
       } catch (e) {

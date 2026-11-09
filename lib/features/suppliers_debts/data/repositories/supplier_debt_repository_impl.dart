@@ -116,11 +116,17 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierInvoices(
-    String supplierId,
-  ) async {
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final invoices = await remoteDataSource.getSupplierInvoices(supplierId);
+        final invoices = await remoteDataSource.getSupplierInvoices(
+          supplierId,
+          startDate: startDate,
+          endDate: endDate,
+        );
         return Right(invoices);
       } on Failure catch (failure) {
         return Left(failure);
@@ -134,11 +140,17 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
 
   @override
   Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierPayments(
-    String supplierId,
-  ) async {
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     if (await networkInfo.isConnected) {
       try {
-        final payments = await remoteDataSource.getSupplierPayments(supplierId);
+        final payments = await remoteDataSource.getSupplierPayments(
+          supplierId,
+          startDate: startDate,
+          endDate: endDate,
+        );
         return Right(payments);
       } on Failure catch (failure) {
         return Left(failure);
@@ -156,6 +168,8 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
     String supplierId, {
     required int offset,
     int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -163,6 +177,8 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
           supplierId,
           offset: offset,
           limit: limit,
+          startDate: startDate,
+          endDate: endDate,
         );
         return Right(page);
       } catch (e) {
@@ -178,6 +194,8 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
     String supplierId, {
     required int offset,
     int limit = 10,
+    DateTime? startDate,
+    DateTime? endDate,
   }) async {
     if (await networkInfo.isConnected) {
       try {
@@ -185,6 +203,8 @@ class SupplierDebtRepositoryImpl implements SupplierDebtRepository {
           supplierId,
           offset: offset,
           limit: limit,
+          startDate: startDate,
+          endDate: endDate,
         );
         return Right(page);
       } catch (e) {

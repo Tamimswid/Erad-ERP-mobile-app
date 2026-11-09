@@ -22,15 +22,31 @@ abstract class SupplierDebtRepository {
   );
   Future<Either<Failure, SupplierDebtModel>> getSupplierDebt(String supplierId);
   Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierInvoices(
-    String supplierId,
-  );
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<Either<Failure, List<Map<String, dynamic>>>> getSupplierPayments(
-    String supplierId,
-  );
+    String supplierId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<Either<Failure, PagedResult<Map<String, dynamic>>>>
-  getSupplierInvoicesPage(String supplierId, {required int offset, int limit});
+  getSupplierInvoicesPage(
+    String supplierId, {
+    required int offset,
+    int limit,
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<Either<Failure, PagedResult<Map<String, dynamic>>>>
-  getSupplierPaymentsPage(String supplierId, {required int offset, int limit});
+  getSupplierPaymentsPage(
+    String supplierId, {
+    required int offset,
+    int limit,
+    DateTime? startDate,
+    DateTime? endDate,
+  });
   Future<Either<Failure, double>> getSupplierInvoiceTotal(String supplierId);
   Future<Either<Failure, double>> getSupplierPaymentTotal(String supplierId);
   Future<Either<Failure, void>> deletePayment(

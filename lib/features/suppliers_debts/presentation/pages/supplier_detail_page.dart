@@ -7,6 +7,9 @@ import 'package:erad/core/services/pdf_invoice_service.dart';
 import 'package:erad/core/services/user_service.dart';
 import 'package:erad/core/widgets/app_pagination_list.dart';
 import 'package:erad/core/widgets/app_period_selector.dart';
+import 'package:erad/core/widgets/date_range_filter_sheet.dart';
+import 'package:erad/features/comparison_points/data/models/comparison_point_model.dart';
+import 'package:erad/features/comparison_points/presentation/widgets/comparison_points_tab.dart';
 import 'package:erad/features/debts/presentation/debts_types.dart';
 import 'package:erad/features/debts/presentation/widgets/debt_detail_header.dart';
 import 'package:erad/features/debts/presentation/widgets/debts_summary_card.dart';
@@ -43,6 +46,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
 
   List<Map<String, dynamic>> _invoices = [];
   List<Map<String, dynamic>> _payments = [];
+  DateTimeRange? _dateRange;
   double _totalInvoices = 0;
   double _totalPaid = 0;
   bool _isLoading = true;
@@ -112,6 +116,8 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
       widget.supplier.id,
       offset: offset,
       limit: _pageSize,
+      startDate: _dateRange?.start,
+      endDate: _dateRange?.end,
     );
     if (!mounted) return;
 
@@ -141,6 +147,8 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
       widget.supplier.id,
       offset: offset,
       limit: _pageSize,
+      startDate: _dateRange?.start,
+      endDate: _dateRange?.end,
     );
     if (!mounted) return;
 
@@ -160,14 +168,47 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
     );
   }
 
+  Future<void> _openDateFilter() async {
+    final result = await AppDateRangeSheet.show(
+      context,
+      initialRange: _dateRange,
+      title: 'تصفية حسب التاريخ',
+    );
+    if (result == null || !mounted) return;
+
+    setState(() {
+      _dateRange = result.range;
+      _invoices = [];
+      _payments = [];
+      _invoiceOffset = 0;
+      _hasMoreInvoices = true;
+      _paymentOffset = 0;
+      _hasMorePayments = true;
+    });
+    await Future.wait([_loadInvoices(reset: true), _loadPayments(reset: true)]);
+  }
+
+  String? get _dateRangeLabel {
+    final range = _dateRange;
+    if (range == null) return null;
+    String format(DateTime date) =>
+        '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/${date.year}';
+    return 'من ${format(range.start)} إلى ${format(range.end)}';
+  }
+
   Future<void> _generateDebtPdf() async {
     setState(() => _isGeneratingPdf = true);
     try {
       final invoicesResult = await _repository.getSupplierInvoices(
         widget.supplier.id,
+        startDate: _dateRange?.start,
+        endDate: _dateRange?.end,
       );
       final paymentsResult = await _repository.getSupplierPayments(
         widget.supplier.id,
+        startDate: _dateRange?.start,
+        endDate: _dateRange?.end,
       );
       final invoices = invoicesResult.getOrElse(() => <Map<String, dynamic>>[]);
       final payments = paymentsResult.getOrElse(() => <Map<String, dynamic>>[]);
@@ -190,7 +231,7 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
       final pdf = await pdfService.generateDebtPdf(
         companyName: companyName,
         partyName: widget.supplier.name,
-        dateRangeLabel: '',
+        dateRangeLabel: _dateRangeLabel ?? '',
         invoices: invoices,
         payments: payments,
         isSupplier: true,
@@ -402,6 +443,20 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
               ),
             ),
             const SizedBox(height: 12),
+            if (_tab != DebtDetailTab.comparison) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: AppDateRangeFilterButton(
+                    range: _dateRange,
+                    onPressed: _openDateFilter,
+                    fallbackLabel: 'تصفية حسب التاريخ',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: AppPeriodSelector<DebtDetailTab>(
@@ -417,6 +472,10 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
                     label:
                         'المدفوعات (${_payments.length}${_hasMorePayments ? '+' : ''})',
                   ),
+                  const AppPeriodOption(
+                    value: DebtDetailTab.comparison,
+                    label: 'المطابقة',
+                  ),
                 ],
                 selected: _tab,
                 onChanged: (tab) => setState(() => _tab = tab),
@@ -424,9 +483,16 @@ class _SupplierDetailPageState extends State<SupplierDetailPage> {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: _tab == DebtDetailTab.invoices
-                  ? _buildInvoicesTab()
-                  : _buildPaymentsTab(),
+              child: switch (_tab) {
+                DebtDetailTab.invoices => _buildInvoicesTab(),
+                DebtDetailTab.payments => _buildPaymentsTab(),
+                DebtDetailTab.comparison => ComparisonPointsTab(
+                  partyType: ComparisonPartyType.supplier,
+                  partyId: widget.supplier.id,
+                  partyName: widget.supplier.name,
+                  isLocal: widget.isLocal,
+                ),
+              },
             ),
           ],
         ),
