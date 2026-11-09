@@ -5,14 +5,22 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../database/app_database.dart';
+import '../datasources/database_backup_config.dart';
+import '../datasources/database_backup_remote_datasource.dart';
 import '../network/network_info.dart';
 import '../notifications/data_change_notifier.dart';
+import '../services/database_backup_service.dart';
 import '../utils/app_utils.dart';
 import '../services/user_service.dart';
 import '../../features/auth/data/datasource/auth_remote_datasource.dart';
 import '../../features/auth/data/datasource/auth_local_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository.dart';
 import '../../features/auth/presentation/bloc/auth_cubit.dart';
+import '../../features/cities/data/datasource/city_remote_datasource.dart';
+import '../../features/cities/data/repositories/city_repository.dart';
+import '../../features/comparison_points/data/datasource/comparison_point_remote_datasource.dart';
+import '../../features/comparison_points/data/repositories/comparison_point_repository.dart';
+import '../../features/comparison_points/data/repositories/comparison_point_repository_impl.dart';
 import '../../features/customers/data/datasource/customer_remote_datasource.dart';
 import '../../features/customers/data/repositories/customer_repository.dart';
 import '../../features/customers/presentation/bloc/customer_cubit.dart';
@@ -82,6 +90,22 @@ Future<void> initServicesLocator() async {
   final db = await AppDatabase.create();
   sl.registerSingleton<AppDatabase>(db);
 
+  // Database backup
+  sl.registerLazySingleton<DatabaseBackupConfig>(
+    () => const DatabaseBackupConfig(),
+  );
+  sl.registerLazySingleton<DatabaseBackupRemoteDataSource>(
+    () => DatabaseBackupRemoteDataSourceImpl(sl(), config: sl()),
+  );
+  sl.registerLazySingleton<DatabaseBackupService>(
+    () => DatabaseBackupService(
+      remoteDataSource: sl(),
+      config: sl(),
+      preferences: sl(),
+      supabaseClient: sl(),
+    ),
+  );
+
   // Local datasources
   sl.registerLazySingleton<InvoiceLocalDataSource>(
     () => InvoiceLocalDataSourceImpl(sl()),
@@ -139,6 +163,13 @@ Future<void> initServicesLocator() async {
   sl.registerFactory(() => InvoiceCubit(sl(), sl()));
   sl.registerFactory(() => EditInvoiceCubit(sl(), sl()));
 
+  // Cities
+  sl.registerLazySingleton<CityRemoteDataSource>(
+    () => CityRemoteDataSourceImpl(sl()),
+  );
+
+  sl.registerLazySingleton<CityRepository>(() => CityRepository(sl(), sl()));
+
   // Customers
   sl.registerLazySingleton<CustomerRemoteDataSource>(
     () => CustomerRemoteDataSourceImpl(sl()),
@@ -188,6 +219,15 @@ Future<void> initServicesLocator() async {
 
   sl.registerFactory(
     () => SupplierDebtCubit(repository: sl(), dataChanges: sl()),
+  );
+
+  // Debt comparison points
+  sl.registerLazySingleton<ComparisonPointRemoteDataSource>(
+    () => ComparisonPointRemoteDataSource(sl()),
+  );
+
+  sl.registerLazySingleton<ComparisonPointRepository>(
+    () => ComparisonPointRepositoryImpl(sl(), sl()),
   );
 
   // Expenses

@@ -1,3 +1,4 @@
+import 'package:erad/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 
@@ -5,9 +6,9 @@ abstract final class AppShadcnTheme {
   static const String fontFamily = 'Tajawal';
 
   // Warm neutral light palette.
-  static const sc.ColorScheme colors = sc.ColorScheme(
+  static sc.ColorScheme colors = sc.ColorScheme(
     brightness: Brightness.light,
-    background: Color(0xFFF6F5F3),
+    background: AppColors.background,
     foreground: Color(0xFF1C1917),
     card: Color(0xFFFFFFFF),
     cardForeground: Color(0xFF1C1917),
@@ -42,9 +43,7 @@ abstract final class AppShadcnTheme {
       radius: radius,
       scaling: 1,
       density: sc.Density.defaultDensity,
-      typography: typography.copyWith(
-        sans: () => const TextStyle(fontFamily: fontFamily),
-      ),
+      typography: typography.copyWith(sans: () => const TextStyle(fontFamily: fontFamily)),
     );
   }
 
@@ -112,9 +111,7 @@ abstract final class AppShadcnTheme {
       labelSmall: text(12, FontWeight.w400, colors.mutedForeground),
     );
 
-    final buttonShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-    );
+    final buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
     final fieldBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(color: colors.border),
@@ -189,9 +186,7 @@ abstract final class AppShadcnTheme {
           textStyle: text(14, FontWeight.w500),
         ),
       ),
-      iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(foregroundColor: colors.foreground),
-      ),
+      iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(foregroundColor: colors.foreground)),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colors.primary,
         foregroundColor: colors.primaryForeground,
@@ -205,22 +200,13 @@ abstract final class AppShadcnTheme {
         filled: true,
         fillColor: colors.muted,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         border: fieldBorder,
         enabledBorder: fieldBorder,
         disabledBorder: fieldBorder,
-        focusedBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: colors.ring),
-        ),
-        errorBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: colors.destructive),
-        ),
-        focusedErrorBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: colors.destructive),
-        ),
+        focusedBorder: fieldBorder.copyWith(borderSide: BorderSide(color: colors.ring)),
+        errorBorder: fieldBorder.copyWith(borderSide: BorderSide(color: colors.destructive)),
+        focusedErrorBorder: fieldBorder.copyWith(borderSide: BorderSide(color: colors.destructive)),
         labelStyle: text(14, FontWeight.w400, colors.mutedForeground),
         floatingLabelStyle: text(14, FontWeight.w500, colors.foreground),
         hintStyle: text(14, FontWeight.w400, colors.mutedForeground),
@@ -233,11 +219,7 @@ abstract final class AppShadcnTheme {
         selectedColor: colors.primary,
         disabledColor: colors.muted,
         labelStyle: text(13, FontWeight.w500, colors.mutedForeground),
-        secondaryLabelStyle: text(
-          13,
-          FontWeight.w600,
-          colors.primaryForeground,
-        ),
+        secondaryLabelStyle: text(13, FontWeight.w600, colors.primaryForeground),
         side: BorderSide.none,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -261,9 +243,7 @@ abstract final class AppShadcnTheme {
         modalElevation: 0,
         dragHandleColor: colors.border,
         showDragHandle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: colors.foreground,
@@ -273,11 +253,7 @@ abstract final class AppShadcnTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      dividerTheme: DividerThemeData(
-        color: colors.border,
-        thickness: 1,
-        space: 1,
-      ),
+      dividerTheme: DividerThemeData(color: colors.border, thickness: 1, space: 1),
       listTileTheme: ListTileThemeData(
         iconColor: colors.foreground,
         textColor: colors.foreground,
@@ -291,26 +267,18 @@ abstract final class AppShadcnTheme {
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.primaryForeground
-              : colors.card,
+          (states) => states.contains(WidgetState.selected) ? colors.primaryForeground : colors.card,
         ),
         trackColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.primary
-              : colors.muted,
+          (states) => states.contains(WidgetState.selected) ? colors.primary : colors.muted,
         ),
         trackOutlineColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.primary
-              : colors.border,
+          (states) => states.contains(WidgetState.selected) ? colors.primary : colors.border,
         ),
       ),
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.primary
-              : Colors.transparent,
+          (states) => states.contains(WidgetState.selected) ? colors.primary : Colors.transparent,
         ),
         checkColor: WidgetStatePropertyAll(colors.primaryForeground),
         side: BorderSide(color: colors.border),
@@ -318,9 +286,7 @@ abstract final class AppShadcnTheme {
       ),
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? colors.primary
-              : colors.mutedForeground,
+          (states) => states.contains(WidgetState.selected) ? colors.primary : colors.mutedForeground,
         ),
       ),
       sliderTheme: SliderThemeData(
@@ -335,10 +301,7 @@ abstract final class AppShadcnTheme {
         selectionHandleColor: colors.primary,
       ),
       tooltipTheme: TooltipThemeData(
-        decoration: BoxDecoration(
-          color: colors.foreground,
-          borderRadius: BorderRadius.circular(10),
-        ),
+        decoration: BoxDecoration(color: colors.foreground, borderRadius: BorderRadius.circular(10)),
         textStyle: text(12, FontWeight.w400, colors.primaryForeground),
       ),
       popupMenuTheme: PopupMenuThemeData(

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:erad/core/constants/app_constants.dart';
 import 'package:erad/core/di/services_locator.dart' as sl;
 import 'package:erad/core/localization/arabic_shadcn_localizations.dart';
+import 'package:erad/core/services/database_backup_service.dart';
 import 'package:erad/core/theme/shadcn_theme.dart';
 import 'package:erad/core/utils/number_formatter.dart';
 import 'package:erad/features/auth/presentation/bloc/auth_cubit.dart';
@@ -138,8 +141,21 @@ class ERADApp extends StatelessWidget {
   }
 }
 
-class MainWrapper extends StatelessWidget {
+class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
+
+  @override
+  State<MainWrapper> createState() => _MainWrapperState();
+}
+
+class _MainWrapperState extends State<MainWrapper> {
+  bool _backupRequested = false;
+
+  void _requestDailyBackup() {
+    if (_backupRequested) return;
+    _backupRequested = true;
+    unawaited(sl.sl<DatabaseBackupService>().runDailyBackupIfNeeded());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +168,9 @@ class MainWrapper extends StatelessWidget {
         }
 
         if (authState is Authenticated) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _requestDailyBackup(),
+          );
           return const DashboardPage();
         }
 
