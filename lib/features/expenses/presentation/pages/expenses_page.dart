@@ -6,7 +6,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/di/services_locator.dart' as sl;
 import '../../../../core/widgets/app_pagination_list.dart';
-import '../../../../core/widgets/date_filter_sheet.dart';
+import '../../../../core/widgets/date_range_filter_sheet.dart';
 import '../bloc/expense_cubit.dart';
 import '../widgets/expense_categories_dialog.dart';
 import '../widgets/expense_filters_widget.dart';
@@ -170,14 +170,6 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
             child: _ExpensesDateFilter(
               selectedYear: widget.selectedYear,
               customDateRange: widget.customDateRange,
-              onYearSelected: (year) {
-                widget.onYearChanged(year);
-                final yearInt = int.tryParse(year) ?? DateTime.now().year;
-                context.read<ExpenseCubit>().filterByDateRange(
-                  DateTime(yearInt, 1, 1),
-                  DateTime(yearInt, 12, 31),
-                );
-              },
               onDateRangeSelected: (range) {
                 widget.onCustomDateRangeChanged(range);
                 context.read<ExpenseCubit>().filterByDateRange(
@@ -459,102 +451,39 @@ class _ExpensesPageBodyState extends State<_ExpensesPageBody> {
 class _ExpensesDateFilter extends StatelessWidget {
   final String? selectedYear;
   final DateTimeRange? customDateRange;
-  final ValueChanged<String> onYearSelected;
   final ValueChanged<DateTimeRange> onDateRangeSelected;
   final VoidCallback onClearFilter;
 
   const _ExpensesDateFilter({
     required this.selectedYear,
     required this.customDateRange,
-    required this.onYearSelected,
     required this.onDateRangeSelected,
     required this.onClearFilter,
   });
 
   @override
   Widget build(BuildContext context) {
-    final label = customDateRange != null
-        ? '${customDateRange!.start.day}/${customDateRange!.start.month} - ${customDateRange!.end.day}/${customDateRange!.end.month}'
-        : (selectedYear ?? DateTime.now().year.toString());
-
-    return GestureDetector(
-      onTap: () => _showSheet(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: AppColors.muted,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(sc.LucideIcons.calendar, size: 16, color: AppColors.text),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                color: AppColors.text,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return AppDateRangeFilterButton(
+      range: customDateRange,
+      onPressed: () => _showSheet(context),
+      fallbackLabel: selectedYear ?? DateTime.now().year.toString(),
+      compact: true,
     );
   }
 
-  void _showSheet(BuildContext context) {
-    final now = DateTime.now();
-    final availableYears = [
-      now.year.toString(),
-      (now.year - 1).toString(),
-      (now.year - 2).toString(),
-    ];
-
-    DateFilterSheet.show(
-      context: context,
-      selectedYear: selectedYear,
-      availableYears: availableYears,
-      customDateRange: customDateRange,
-      isCustomDateRange: customDateRange != null,
-      onYearSelected: onYearSelected,
-      onDateRangeSelected: onDateRangeSelected,
-      onClearFilter: onClearFilter,
-      onDateRangePickerTap: () => _pickDateRange(context),
+  Future<void> _showSheet(BuildContext context) async {
+    final result = await AppDateRangeSheet.show(
+      context,
+      initialRange: customDateRange,
+      title: 'تصفية حسب التاريخ',
     );
-  }
+    if (result == null || !context.mounted) return;
 
-  Future<void> _pickDateRange(BuildContext context) async {
-    final initial =
-        customDateRange ??
-        DateTimeRange(
-          start: DateTime.now().subtract(const Duration(days: 30)),
-          end: DateTime.now(),
-        );
-
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      initialDateRange: initial,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            appBarTheme: const AppBarTheme(
-              backgroundColor: AppColors.background,
-              foregroundColor: AppColors.text,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && context.mounted) {
-      onDateRangeSelected(picked);
-      Navigator.pop(context);
+    final range = result.range;
+    if (range == null) {
+      onClearFilter();
+    } else {
+      onDateRangeSelected(range);
     }
   }
 }
