@@ -85,6 +85,7 @@ class CustomerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cityLabel = customer.cityName ?? customer.city;
     return sc.Card(
       padding: const EdgeInsets.all(16),
       clipBehavior: Clip.antiAlias,
@@ -159,7 +160,7 @@ class CustomerCard extends StatelessWidget {
               ),
             ],
           ),
-          if (customer.city != null || customer.address != null) ...[
+          if (cityLabel != null || customer.address != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -170,7 +171,7 @@ class CustomerCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (customer.city != null)
+                  if (cityLabel != null)
                     Row(
                       children: [
                         Icon(
@@ -180,12 +181,12 @@ class CustomerCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          customer.city!,
+                          cityLabel,
                           style: TextStyle(fontSize: 14, color: AppColors.text),
                         ),
                       ],
                     ),
-                  if (customer.city != null && customer.address != null)
+                  if (cityLabel != null && customer.address != null)
                     const SizedBox(height: 4),
                   if (customer.address != null)
                     Row(

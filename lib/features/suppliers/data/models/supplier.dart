@@ -6,6 +6,8 @@ class SupplierModel extends Equatable {
   final String name;
   final String? phone;
   final String? city;
+  final String? cityId;
+  final String? cityName;
   final double currentBalance;
   final double totalPurchases;
   final bool isActive;
@@ -18,6 +20,8 @@ class SupplierModel extends Equatable {
     required this.name,
     this.phone,
     this.city,
+    this.cityId,
+    this.cityName,
     required this.currentBalance,
     required this.totalPurchases,
     required this.isActive,
@@ -31,6 +35,8 @@ class SupplierModel extends Equatable {
     String? name,
     String? phone,
     String? city,
+    String? cityId,
+    String? cityName,
     double? currentBalance,
     double? totalPurchases,
     bool? isActive,
@@ -43,6 +49,8 @@ class SupplierModel extends Equatable {
       name: name ?? this.name,
       phone: phone ?? this.phone,
       city: city ?? this.city,
+      cityId: cityId ?? this.cityId,
+      cityName: cityName ?? this.cityName,
       currentBalance: currentBalance ?? this.currentBalance,
       totalPurchases: totalPurchases ?? this.totalPurchases,
       isActive: isActive ?? this.isActive,
@@ -57,6 +65,7 @@ class SupplierModel extends Equatable {
       'name': name,
       'phone': phone,
       'city': city,
+      'city_id': cityId,
       'current_balance': currentBalance,
       'total_purchases': totalPurchases,
       'is_active': isActive,
@@ -72,6 +81,8 @@ class SupplierModel extends Equatable {
       name: map['name'] ?? '',
       phone: map['phone'],
       city: map['city'],
+      cityId: map['city_id'],
+      cityName: _cityNameOf(map),
       currentBalance: (map['current_balance'] is String
           ? double.tryParse(map['current_balance']) ?? 0.0
           : (map['current_balance'] as num?)?.toDouble() ?? 0.0),
@@ -91,10 +102,21 @@ class SupplierModel extends Equatable {
     name,
     phone,
     city,
+    cityId,
+    cityName,
     currentBalance,
     totalPurchases,
     isActive,
     createdAt,
     updatedAt,
   ];
+
+  /// اسم المدينة القادم من join جدول `cities` أو من نموذج مختصر.
+  static String? _cityNameOf(Map<String, dynamic> map) {
+    final cities = map['cities'];
+    if (cities is Map && cities['name'] != null) {
+      return cities['name'] as String;
+    }
+    return map['city_name'] as String?;
+  }
 }

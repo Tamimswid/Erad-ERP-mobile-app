@@ -33,7 +33,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
 
       final response = await client
           .from('suppliers')
-          .select()
+          .select('*, cities(name)')
           .eq('user_id', userId)
           .eq('is_active', true)
           .order('created_at', ascending: false);
@@ -60,7 +60,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
 
       var query = client
           .from('suppliers')
-          .select()
+          .select('*, cities(name)')
           .eq('user_id', userId)
           .eq('is_active', true);
 
@@ -94,7 +94,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
     try {
       final response = await client
           .from('suppliers')
-          .select()
+          .select('*, cities(name)')
           .eq('id', id)
           .single();
 
@@ -110,7 +110,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
       final response = await client
           .from('suppliers')
           .insert(supplier.toMap())
-          .select()
+          .select('*, cities(name)')
           .single();
 
       return SupplierModel.fromMap(response);
@@ -126,7 +126,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
           .from('suppliers')
           .update(supplier.toMap())
           .eq('id', supplier.id)
-          .select()
+          .select('*, cities(name)')
           .single();
 
       return SupplierModel.fromMap(response);
@@ -168,7 +168,7 @@ class SupplierRemoteDataSourceImpl implements SupplierRemoteDataSource {
       final userId = await UserService.getUserId();
       final response = await client
           .from('suppliers')
-          .select()
+          .select('*, cities(name)')
           .eq('user_id', userId!)
           .or('name.ilike.%$query%,phone.ilike.%$query%,city.ilike.%$query%')
           .order('created_at', ascending: false);

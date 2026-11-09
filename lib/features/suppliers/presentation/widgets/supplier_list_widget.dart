@@ -85,6 +85,7 @@ class SupplierCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cityLabel = supplier.cityName ?? supplier.city;
     return sc.Card(
       padding: const EdgeInsets.all(16),
       clipBehavior: Clip.antiAlias,
@@ -157,7 +158,7 @@ class SupplierCard extends StatelessWidget {
               ),
             ],
           ),
-          if (supplier.city != null) ...[
+          if (cityLabel != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -168,7 +169,7 @@ class SupplierCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (supplier.city != null)
+                  if (cityLabel != null)
                     Row(
                       children: [
                         Icon(
@@ -178,7 +179,7 @@ class SupplierCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          supplier.city!,
+                          cityLabel,
                           style: TextStyle(fontSize: 14, color: AppColors.text),
                         ),
                       ],

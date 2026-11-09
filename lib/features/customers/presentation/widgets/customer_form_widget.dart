@@ -1,4 +1,6 @@
 import 'package:erad/core/services/user_service.dart';
+import 'package:erad/features/cities/data/models/city.dart';
+import 'package:erad/features/cities/presentation/widgets/city_picker_field.dart';
 import 'package:erad/features/customers/data/models/customer.dart';
 import 'package:flutter/material.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart' as sc;
@@ -8,6 +10,7 @@ class CustomerFormWidget extends StatefulWidget {
   final CustomerModel? customerModel;
   final Function(CustomerModel customerModel) onTap;
   final CustomerCubit? cubit;
+
   const CustomerFormWidget({
     super.key,
     this.customerModel,
@@ -21,68 +24,71 @@ class CustomerFormWidget extends StatefulWidget {
 
 class _CustomerFormWidgetState extends State<CustomerFormWidget> {
   final _formKey = GlobalKey<FormState>();
-  final _codeController = TextEditingController();
   final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _creditLimitController = TextEditingController();
+  CityModel? _selectedCity;
 
   @override
   void initState() {
     super.initState();
-    if (widget.customerModel != null) {
-      _codeController.text = widget.customerModel!.code;
-      _nameController.text = widget.customerModel!.name;
-      _phoneController.text = widget.customerModel!.phone ?? '';
-      _addressController.text = widget.customerModel!.address ?? '';
-      _cityController.text = widget.customerModel!.city ?? '';
-      _creditLimitController.text = widget.customerModel!.creditLimit
-          .toString();
+    final customer = widget.customerModel;
+    if (customer != null) {
+      _nameController.text = customer.name;
+      _selectedCity = _initialCity(customer);
     }
+  }
+
+  /// يستخدم المدينة المرتبطة بـ `city_id`، أو النص القديم للتوافق مع
+  /// السجلات التي أُنشئت قبل جدول المدن.
+  CityModel? _initialCity(CustomerModel customer) {
+    final legacyCity = customer.city?.trim();
+    if (customer.cityId == null && (legacyCity == null || legacyCity.isEmpty)) {
+      return null;
+    }
+    return CityModel(
+      id: customer.cityId ?? '',
+      name: customer.cityName ?? legacyCity ?? '',
+    );
   }
 
   @override
   void dispose() {
-    _codeController.dispose();
     _nameController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    _cityController.dispose();
-    _creditLimitController.dispose();
     super.dispose();
   }
 
-  void _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      final now = DateTime.now();
-      final customer = CustomerModel(
-        id: widget.customerModel?.id ?? '',
-        userId:
-            widget.customerModel?.userId ?? await UserService.getUserId() ?? '',
-        code: _codeController.text,
-        name: _nameController.text,
-        phone: _phoneController.text.isEmpty ? null : _phoneController.text,
-        address: _addressController.text.isEmpty
-            ? null
-            : _addressController.text,
-        city: _cityController.text.isEmpty ? null : _cityController.text,
-        creditLimit: double.tryParse(_creditLimitController.text) ?? 0,
-        currentBalance: widget.customerModel?.currentBalance ?? 0,
-        totalPurchases: widget.customerModel?.totalPurchases ?? 0,
-        isActive: widget.customerModel?.isActive ?? true,
-        createdAt: widget.customerModel?.createdAt ?? now,
-        updatedAt: now,
-        deletedAt: widget.customerModel?.deletedAt,
-      );
-      if (widget.cubit != null) {
-        widget.cubit!.createCustomer(customer);
-        if (context.mounted) {
-          Navigator.pop(context);
-        }
-      } else {
-        widget.onTap(customer);
-      }
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final now = DateTime.now();
+    final existing = widget.customerModel;
+    final selectedCityId = _selectedCity?.id;
+    final cityId = selectedCityId == null || selectedCityId.isEmpty
+        ? null
+        : selectedCityId;
+    final customer = CustomerModel(
+      id: existing?.id ?? '',
+      userId: existing?.userId ?? await UserService.getUserId() ?? '',
+      code: existing?.code ?? '',
+      name: _nameController.text.trim(),
+      phone: existing?.phone,
+      address: existing?.address,
+      city: existing?.city,
+      cityId: cityId,
+      cityName: _selectedCity?.name,
+      creditLimit: existing?.creditLimit ?? 0,
+      currentBalance: existing?.currentBalance ?? 0,
+      totalPurchases: existing?.totalPurchases ?? 0,
+      isActive: existing?.isActive ?? true,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+      deletedAt: existing?.deletedAt,
+    );
+
+    if (widget.cubit != null) {
+      widget.cubit!.createCustomer(customer);
+      if (mounted) Navigator.pop(context);
+    } else {
+      widget.onTap(customer);
     }
   }
 
@@ -90,84 +96,38 @@ class _CustomerFormWidgetState extends State<CustomerFormWidget> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 16,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'اسم العميل *',
-                prefixIcon: Icon(sc.LucideIcons.user),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'اسم العميل مطلوب';
-                }
-                return null;
-              },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 16,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              labelText: 'اسم العميل *',
+              prefixIcon: Icon(sc.LucideIcons.user),
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'رقم الهاتف',
-                      prefixIcon: Icon(sc.LucideIcons.phone),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _cityController,
-                    decoration: const InputDecoration(
-                      labelText: 'المدينة',
-                      prefixIcon: Icon(sc.LucideIcons.building2),
-                    ),
-                  ),
-                ),
-              ],
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'اسم العميل مطلوب';
+              }
+              return null;
+            },
+          ),
+          CityPickerField(
+            value: _selectedCity,
+            onChanged: (city) => setState(() => _selectedCity = city),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: sc.Button(
+              alignment: Alignment.center,
+              style: sc.ButtonStyle.primary(),
+              onPressed: _submitForm,
+              child: Text(widget.customerModel == null ? 'إضافة' : 'تحديث'),
             ),
-            TextFormField(
-              controller: _addressController,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'العنوان',
-                prefixIcon: Icon(sc.LucideIcons.mapPin),
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: sc.Button(
-                    alignment: Alignment.center,
-                    style: sc.ButtonStyle.primary(),
-                    onPressed: _submitForm,
-                    child: Text(
-                      widget.customerModel == null ? 'إضافة' : 'تحديث',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: sc.Button(
-                    alignment: Alignment.center,
-                    style: sc.ButtonStyle.outline(),
-                    onPressed: () {
-                      _formKey.currentState?.reset();
-                    },
-                    child: const Text('مسح'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

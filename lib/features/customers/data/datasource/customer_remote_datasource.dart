@@ -42,7 +42,7 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
       // جلب جميع العملاء مرتبة حسب تاريخ الإنشاء
       final response = await client
           .from('customers')
-          .select()
+          .select('*, cities(name)')
           .eq('user_id', userId)
           .order('created_at', ascending: false);
 
@@ -66,7 +66,10 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
         throw Exception('User not logged in');
       }
 
-      var query = client.from('customers').select().eq('user_id', userId);
+      var query = client
+          .from('customers')
+          .select('*, cities(name)')
+          .eq('user_id', userId);
 
       final term = search?.trim() ?? '';
       if (term.isNotEmpty) {
@@ -98,7 +101,7 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
     try {
       final response = await client
           .from('customers')
-          .select()
+          .select('*, cities(name)')
           .eq('id', id)
           .single();
 
@@ -115,7 +118,7 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
       final response = await client
           .from('customers')
           .insert(customer.toMap())
-          .select()
+          .select('*, cities(name)')
           .single();
       return CustomerModel.fromMap(response);
     } catch (e) {
@@ -131,7 +134,7 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
           .from('customers')
           .update(customer.toMap())
           .eq('id', customer.id)
-          .select()
+          .select('*, cities(name)')
           .single();
 
       return CustomerModel.fromMap(response);
@@ -175,7 +178,7 @@ class CustomerRemoteDataSourceImpl implements CustomerRemoteDataSource {
       // البحث في الاسم والهاتف والمدينة والعنوان
       final response = await client
           .from('customers')
-          .select()
+          .select('*, cities(name)')
           .or(
             'name.ilike.%$query%,phone.ilike.%$query%,city.ilike.%$query%,address.ilike.%$query%',
           )
